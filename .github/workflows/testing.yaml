@@ -1,0 +1,39 @@
+name: Testing
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+jobs:
+  testing:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Poetry and add to path on Windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        (Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -
+        echo "${HOME}/.poetry/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    - name: Install Poetry and add to path on Mac and Linux
+      if: matrix.os != 'windows-latest'
+      run: |
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+        echo "${HOME}/.poetry/bin" >> $GITHUB_PATH
+    - name: Install Dependencies
+      run: |
+        poetry install
+    - name: Test with pytest
+      run: |
+        poetry run pytest

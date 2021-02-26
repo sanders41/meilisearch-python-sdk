@@ -1,0 +1,30 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+    - id: check-toml
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.7.0
+    hooks:
+    - id: isort
+      additional_dependencies: [toml]
+  - repo: https://github.com/python/black
+    rev: 20.8b1
+    hooks:
+    - id: black
+      language_version: python3.8
+      args: [--line-length=100]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.812
+    hooks:
+    - id: mypy
+      files: async_search_client/
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: '3.8.4'
+    hooks:
+    - id: flake8
+      additional_dependencies: [flake8-print]
+      args: [--max-line-length=100, --ignore=E231]
