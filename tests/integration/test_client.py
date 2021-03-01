@@ -16,7 +16,7 @@ async def wait_for_dump_creation(test_client, dump_uid, timeout_in_ms=10000, int
         dump = await test_client.get_dump_status(dump_uid)
         if dump.status != "in_progress":
             return None
-        sleep(interval_in_ms / 1000)
+        await sleep(interval_in_ms / 1000)
         time_delta = datetime.now() - start_time
         elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
     raise TimeoutError
