@@ -27,4 +27,4 @@ repos:
     hooks:
     - id: flake8
       additional_dependencies: [flake8-print]
-      args: [--max-line-length=100, --ignore=E231]
+      args: ["--max-line-length=100", "--ignore=E231,E501"]

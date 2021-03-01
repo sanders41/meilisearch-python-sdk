@@ -34,6 +34,8 @@ jobs:
     - name: Install Dependencies
       run: |
         poetry install
+    - name: MeiliSearch (latest version) setup with Docker
+      run: docker run -d -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --no-analytics=true --master-key=masterKey
     - name: Test with pytest
       run: |
         poetry run pytest
