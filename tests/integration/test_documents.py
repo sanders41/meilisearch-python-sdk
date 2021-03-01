@@ -80,20 +80,6 @@ async def test_update_documents(index_with_documents, small_movies):
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.skip(
-    message="This test is failing and I am not sure why. The issue is in https://github.com/meilisearch/meilisearch-python/issues/224"
-)
-@pytest.mark.asyncio
-async def test_update_documents_with_primary_key(test_client, small_movies):
-    primary_key = "title"
-    index = test_client.index("movies")
-    update = await index.update_documents(small_movies, primary_key=primary_key)
-    await index.wait_for_pending_update(update.update_id)
-    response = await index.get_documents()
-    assert response[0]["title"] != "Some title"
-    assert await index.get_primary_key() == primary_key
-
-
 @pytest.mark.asyncio
 async def test_delete_document(index_with_documents):
     index = await index_with_documents()

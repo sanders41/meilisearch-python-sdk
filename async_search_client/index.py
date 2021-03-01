@@ -179,13 +179,8 @@ class Index:
         response = await self._http_requests.post(url, documents)
         return UpdateId(**response.json())
 
-    async def update_documents(
-        self, documents: list[dict], primary_key: Optional[str] = None
-    ) -> UpdateId:
+    async def update_documents(self, documents: list[dict]) -> UpdateId:
         url = url = build_url(Paths.INDEXES, self.uid, Paths.DOCUMENTS)
-        if primary_key:
-            formatted_primary_key = urlencode({"primaryKey": primary_key})
-            url = f"{url}?{formatted_primary_key}"
 
         response = await self._http_requests.put(url, documents)
         return UpdateId(**response.json())
