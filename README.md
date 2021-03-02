@@ -2,6 +2,8 @@
 
 [![Tests Status](https://github.com/sanders41/async-search-client/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/async-search-client/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
 [![Lint Status](https://github.com/sanders41/async-search-client/workflows/Linting/badge.svg?branch=main&event=push)](https://github.com/sanders41/async-search-client/actions?query=workflow%3ALinting+branch%3Amain+event%3Apush)
+[![Coverage](https://codecov.io/github/sanders41/async-search-client/coverage.svg?branch=main)](https://codecov.io/gh/sanders41/async-search-client)
+[![PyPI version](https://badge.fury.io/py/async-search-client.svg)](https://badge.fury.io/py/async-search-client)
 
 Async Serach Client is a Python async client for the [MeiliSearch](https://github.com/meilisearch/MeiliSearch) API. MeiliSearch also has an official [Python client](https://github.com/meilisearch/meilisearch-python).
 
