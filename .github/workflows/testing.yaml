@@ -31,4 +31,8 @@ jobs:
       run: docker run -d -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --no-analytics=true --master-key=masterKey
     - name: Test with pytest
       run: |
-        poetry run pytest
+        poetry run pytest --cov=async_search_client --cov-report=xml
+    - name: Upload coverage
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
