@@ -27,22 +27,26 @@ def meilisearch_docker():
     already. If not start a meilisearch docker container for testing.
     """
 
-    PORT = 7700
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        if s.connect_ex(("localhost", PORT)) != 0:
-            client = docker.from_env()
-            container = client.containers.run(
-                image="getmeili/meilisearch:latest",
-                command="./meilisearch --master-key=masterKey --no-analytics=true",
-                ports={"7700": 7700},
-                tty=True,
-                remove=True,
-                detach=True,
-            )
-            yield container
-            container.stop()
-        else:
-            yield
+    start_container = False
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_check:
+        port = 7700
+        if socket_check.connect_ex(("localhost", port)) != 0:
+            start_container = True
+
+    if start_container:
+        client = docker.from_env()
+        container = client.containers.run(
+            image="getmeili/meilisearch:latest",
+            command="./meilisearch --master-key=masterKey --no-analytics=true",
+            ports={"7700": 7700},
+            tty=True,
+            remove=True,
+            detach=True,
+        )
+        yield container
+        container.stop()
+    else:
+        yield
 
 
 @pytest.fixture(scope="session", autouse=True)
