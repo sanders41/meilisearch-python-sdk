@@ -1,10 +1,21 @@
 [tool.poetry]
 name = "async-search-client"
 version = "0.1.0"
-description = "A Python async client for MeiliSearch"
+description = "A Python async client for the MeiliSearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/sanders41/async-search-client"
+homepage = "https://github.com/sanders41/async-search-client"
+documentation = "https://github.com/sanders41/async-search-client"
+keywords = ["meilisearch", "async"]
+classifiers=[
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
