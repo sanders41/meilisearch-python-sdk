@@ -181,6 +181,15 @@ You can view the current coverage level in the codecov badge on the
 [main github page](https://github.com/sanders41/async-search-client). You can run tests and see the
 code coverage by running.
 
+Before running the tests start a Docker container running MeiliSearch.
+
+```sh
+docker pull getmeili/meilisearch:latest
+docker run -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --master-key=masterKey --no-analytics=true
+```
+
+Now with the container running run the test suite
+
 ```sh
 pytest
 ```
