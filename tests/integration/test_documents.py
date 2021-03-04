@@ -19,13 +19,10 @@ async def test_add_documents(empty_index, small_movies):
     assert update.status == "processed"
 
 
-@pytest.mark.skip(
-    message="This test is failing. There are ongoing discussions with the MeiliSearch team on how to handle this"
-)
 @pytest.mark.asyncio
-async def test_add_documents_with_primary_key(empty_index, small_movies):
-    primary_key = "title"
-    index = await empty_index()
+async def test_add_documents_with_primary_key(test_client, small_movies):
+    primary_key = "release_date"
+    index = test_client.index("movies")
     response = await index.add_documents(small_movies, primary_key=primary_key)
     update = await index.wait_for_pending_update(response.update_id)
     assert await index.get_primary_key() == primary_key
@@ -80,12 +77,9 @@ async def test_update_documents(index_with_documents, small_movies):
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.skip(
-    message="This test is failing. There are ongoing discussions with the MeiliSearch team on how to handle this"
-)
 @pytest.mark.asyncio
 async def test_update_documents_with_primary_key(test_client, small_movies):
-    primary_key = "title"
+    primary_key = "release_date"
     index = test_client.index("movies")
     update = await index.update_documents(small_movies, primary_key=primary_key)
     await index.wait_for_pending_update(update.update_id)
