@@ -13,8 +13,10 @@ from async_search_client.paths import Paths, build_url
 
 
 class Client:
-    def __init__(self, url: str, api_key: str = None) -> None:
-        self._http_client = AsyncClient(base_url=url, headers=self._set_headers(api_key))
+    def __init__(self, url: str, api_key: str = None, timeout: int = 5) -> None:
+        self._http_client = AsyncClient(
+            base_url=url, timeout=timeout, headers=self._set_headers(api_key)
+        )
         self._http_requests = HttpRequests(self._http_client)
 
     async def __aenter__(self) -> Client:

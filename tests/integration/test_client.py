@@ -188,6 +188,5 @@ async def test_bad_master_key(base_url, master_key):
 @pytest.mark.asyncio
 async def test_communication_error(master_key):
     with pytest.raises(MeiliSearchCommunicationError):
-        async with Client("http://wrongurl:1234", master_key) as client:
-            client._http_client.timeout = 1
+        async with Client("http://wrongurl:1234", master_key, 1) as client:
             await client.create_index("some_index")
