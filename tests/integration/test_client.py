@@ -2,7 +2,7 @@ from asyncio import sleep
 from datetime import datetime
 
 import pytest
-from httpx import AsyncClient, ConnectError, Response
+from httpx import AsyncClient, ConnectError, RemoteProtocolError, Response
 
 from async_search_client.client import Client
 from async_search_client.errors import MeiliSearchApiError, MeiliSearchCommunicationError
@@ -190,3 +190,13 @@ async def test_communication_error(master_key):
     with pytest.raises(MeiliSearchCommunicationError):
         async with Client("http://wrongurl:1234", master_key, 1) as client:
             await client.create_index("some_index")
+
+
+@pytest.mark.asyncio
+async def test_remote_protocol_error(test_client, monkeypatch):
+    def mock_error(*args, **kwargs):
+        raise RemoteProtocolError("error", request=args[0])
+
+    monkeypatch.setattr(AsyncClient, "post", mock_error)
+    with pytest.raises(MeiliSearchCommunicationError):
+        await test_client.create_index("some_index")
