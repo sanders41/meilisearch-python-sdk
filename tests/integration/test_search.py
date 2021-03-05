@@ -137,6 +137,58 @@ async def test_custom_search_params_with_multiple_facet_filters(index_with_docum
 
 
 @pytest.mark.asyncio
+async def test_custom_search_facet_filters_with_space(test_client):
+    dataset = [
+        {
+            "id": 123,
+            "title": "Pride and Prejudice",
+            "comment": "A great book",
+            "genre": "romance",
+        },
+        {
+            "id": 456,
+            "title": "Le Petit Prince",
+            "comment": "A french book about a prince that walks on little cute planets",
+            "genre": "adventure",
+        },
+        {
+            "id": 2,
+            "title": "Le Rouge et le Noir",
+            "comment": "Another french book",
+            "genre": "romance",
+        },
+        {
+            "id": 1,
+            "title": "Alice In Wonderland",
+            "comment": "A weird book",
+            "genre": "adventure",
+        },
+        {
+            "id": 1344,
+            "title": "The Hobbit",
+            "comment": "An awesome book",
+            "genre": "sci fi",
+        },
+        {
+            "id": 4,
+            "title": "Harry Potter and the Half-Blood Prince",
+            "comment": "The best book",
+            "genre": "fantasy",
+        },
+        {"id": 42, "title": "The Hitchhiker's Guide to the Galaxy", "genre": "fantasy"},
+    ]
+
+    index = test_client.index("books")
+    update = await index.add_documents(dataset)
+    await index.wait_for_pending_update(update.update_id)
+    update = await index.update_attributes_for_faceting(["genre"])
+    await index.wait_for_pending_update(update.update_id)
+    response = await index.search("h", facet_filters=["genre:sci fi"])
+    assert len(response.hits) == 1
+    assert response.hits[0]["title"] == "The Hobbit"
+
+
+@pytest.mark.asyncio
 async def test_custom_search_params_with_many_params(index_with_documents):
     index = await index_with_documents()
     update = await index.update_attributes_for_faceting(["genre"])
