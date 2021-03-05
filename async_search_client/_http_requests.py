@@ -1,6 +1,13 @@
 from typing import Any, Callable, Optional
 
-from httpx import AsyncClient, ConnectError, ConnectTimeout, HTTPError, Response
+from httpx import (
+    AsyncClient,
+    ConnectError,
+    ConnectTimeout,
+    HTTPError,
+    RemoteProtocolError,
+    Response,
+)
 
 from async_search_client.errors import MeiliSearchApiError, MeiliSearchCommunicationError
 
@@ -24,6 +31,8 @@ class HttpRequests:
             response.raise_for_status()
             return response
 
+        except RemoteProtocolError as err:
+            raise MeiliSearchCommunicationError(str(err)) from err
         except ConnectError as err:
             raise MeiliSearchCommunicationError(str(err)) from err
         except ConnectTimeout as err:
