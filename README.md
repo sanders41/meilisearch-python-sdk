@@ -38,6 +38,53 @@ For the most part this client mirrors the functionality of the official client a
 
 3. The async client uses [Pydantic](https://pydantic-docs.helpmanual.io/) to serialize/deserialize the JSON from MeiliSearch into python objects wherever possible, and in the process converts the camelCaseNames from JSON into more Pythonic snake_case_names. The official client uses dictionaries to store the return values in most cases.
 
+In some instances it is not possible to return the data as an object, becase the structure will be dependant on your particular dataset. In these instances you can either work with the data in the dictionary that is returned, or because you will know the structure you can generate your own Classes.
+
+As an example, if you want to get a movie from the [small movies example](https://github.com/sanders41/async-search-client/blob/main/datasets/small_movies.json) you could put the results into an object with the following
+
+```py
+from datetime import datetime
+from typing import Optional
+
+from async_search_client import Client
+from async_search_client.models import BaseConfig
+
+
+# Inheriting from BaseConfig will allow your class to automatically convert variables returned from
+# the server in camelCase into snake_case. It will aslo make it a Pydantic Model.
+class Movie(BaseConfig):
+    id: int
+    title: str
+    poster: str
+    overview: str
+    release_date: datetime
+    genre: Optional[str]
+
+
+async with Client("http://127.0.0.1:7700", "masterKey") as client:
+    index = client.index("movies")
+    movie_dict = await index.get_document(287947)
+    movie = Movie(**movie_dict)
+```
+
+And then the movie variable would contain the movie object with the following information
+
+```py
+Movie(
+    id = 287947,
+    title = "Shazam!",
+    poster = "https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg",
+    overview = "A boy is given the ability to become an adult superhero in times of need with a single magic word.",
+    release_date = datetime.datetime(2019, 3, 23, 0, 0, tzinfo=datetime.timezone.utc),
+    genre = "action",
+)
+```
+
+By inheriting from BaseConfig, or any of the other [provided models](https://github.com/sanders41/async-search-client/tree/main/async_search_client/models)
+you will be inheriting Pydantic models and therefore have access to the funcitonality Pydantic provides
+such as [validators](https://pydantic-docs.helpmanual.io/usage/validators/) and [Fields](https://pydantic-docs.helpmanual.io/usage/model_config/#alias-precedence). Pydantic will also automatically deserialized the data into the correct data type
+base on the type hint provided.
+
 ## Installation
 
 Using a virtual environmnet is recommended for installing this package. Once the virtual environment is created and activated install the package with:

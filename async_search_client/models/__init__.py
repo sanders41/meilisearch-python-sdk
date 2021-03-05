@@ -1,3 +1,4 @@
+from async_search_client.models.base_config import BaseConfig  # noqa: F401
 from async_search_client.models.client import ClientStats, Keys  # noqa: F401
 from async_search_client.models.dump import DumpInfo  # noqa: F401
 from async_search_client.models.index import IndexInfo, IndexStats  # noqa: F401
