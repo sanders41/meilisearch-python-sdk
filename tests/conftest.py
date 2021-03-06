@@ -1,5 +1,6 @@
 import asyncio
 import json
+from pathlib import Path
 
 import pytest
 
@@ -16,6 +17,9 @@ INDEX_FIXTURE = [
     {"uid": INDEX_UID},
     {"uid": INDEX_UID2, "primary_key": "book_id"},
 ]
+
+ROOT_PATH = Path().absolute()
+SMALL_MOVIES_PATH = ROOT_PATH / "datasets" / "small_movies.json"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -91,8 +95,14 @@ def small_movies():
     """
     Runs once per session. Provides the content of small_movies.json.
     """
-    with open("./datasets/small_movies.json", "r") as movie_file:
+
+    with open(SMALL_MOVIES_PATH, "r") as movie_file:
         yield json.loads(movie_file.read())
+
+
+@pytest.fixture(scope="session")
+def small_movies_path():
+    return SMALL_MOVIES_PATH
 
 
 @pytest.mark.asyncio

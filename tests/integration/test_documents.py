@@ -1,6 +1,6 @@
 import pytest
 
-from async_search_client.errors import MeiliSearchApiError
+from async_search_client.errors import MeiliSearchApiError, MeiliSearchError
 
 
 @pytest.mark.asyncio
@@ -27,6 +27,43 @@ async def test_add_documents_with_primary_key(test_client, small_movies):
     update = await index.wait_for_pending_update(response.update_id)
     assert await index.get_primary_key() == primary_key
     assert update.status == "processed"
+
+
+@pytest.mark.asyncio
+async def test_add_documents_from_file(test_client, small_movies_path):
+    index = test_client.index("movies")
+    response = await index.add_documents_from_file(small_movies_path)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == "id"
+    assert update.status == "processed"
+
+
+@pytest.mark.asyncio
+async def test_add_documents_from_file_string_path(test_client, small_movies_path):
+    string_path = str(small_movies_path)
+    index = test_client.index("movies")
+    response = await index.add_documents_from_file(string_path)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == "id"
+    assert update.status == "processed"
+
+
+@pytest.mark.asyncio
+async def test_add_documents_from_file_with_primary_key(test_client, small_movies_path):
+    primary_key = "release_date"
+    index = test_client.index("movies")
+    response = await index.add_documents_from_file(small_movies_path, primary_key=primary_key)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == primary_key
+    assert update.status == "processed"
+
+
+@pytest.mark.asyncio
+async def test_add_documents_from_file_invalid_extension(test_client):
+    index = test_client.index("movies")
+
+    with pytest.raises(MeiliSearchError):
+        await index.add_documents_from_file("test.csv")
 
 
 @pytest.mark.asyncio
@@ -83,9 +120,59 @@ async def test_update_documents_with_primary_key(test_client, small_movies):
     index = test_client.index("movies")
     update = await index.update_documents(small_movies, primary_key=primary_key)
     await index.wait_for_pending_update(update.update_id)
+    assert await index.get_primary_key() == primary_key
+
+
+@pytest.mark.asyncio
+async def test_update_documents_from_file(test_client, small_movies, small_movies_path):
+    small_movies[0]["title"] = "Some title"
+    index = test_client.index("movies")
+    response = await index.add_documents(small_movies)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    assert response[0]["title"] == "Some title"
+    update = await index.update_documents_from_file(small_movies_path)
+    update = await index.wait_for_pending_update(update.update_id)
+    assert update.status == "processed"
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
+
+
+@pytest.mark.asyncio
+async def test_update_documents_from_file_string_path(test_client, small_movies, small_movies_path):
+    string_path = str(small_movies_path)
+    small_movies[0]["title"] = "Some title"
+    index = test_client.index("movies")
+    response = await index.add_documents(small_movies)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    assert response[0]["title"] == "Some title"
+    update = await index.update_documents_from_file(string_path)
+    update = await index.wait_for_pending_update(update.update_id)
+    assert update.status == "processed"
+    response = await index.get_documents()
+    assert response[0]["title"] != "Some title"
+
+
+@pytest.mark.asyncio
+async def test_update_documents_from_file_with_primary_key(
+    test_client, small_movies, small_movies_path
+):
+    primary_key = "release_date"
+    index = test_client.index("movies")
+    update = await index.update_documents_from_file(small_movies_path, primary_key=primary_key)
+    await index.wait_for_pending_update(update.update_id)
     assert await index.get_primary_key() == primary_key
+
+
+@pytest.mark.asyncio
+async def test_update_documents_from_file_invalid_extension(test_client):
+    index = test_client.index("movies")
+
+    with pytest.raises(MeiliSearchError):
+        await index.update_documents_from_file("test.csv")
 
 
 @pytest.mark.asyncio
