@@ -193,6 +193,28 @@ SearchResults(
 )
 ```
 
+### The following methods are unique to this client and are not currently available in the official client, or in the MeiliSearch documentation
+
+* add_documents_from_file:
+
+  Add documents to an index from a json file. The file must have a .json extension. The file path
+  can be passed either as a string or as a Path object.
+
+  ```py
+  index = test_client.index("movies")
+  response = await index.add_documents_from_file("/path/to/file.json")
+  ```
+
+* update_documents_from_file:
+
+  Update documents in an index from a json file. The file must have a .json extension. The file path
+  can be passed either as a string or as a Path object.
+
+  ```py
+  index = test_client.index("movies")
+  response = await index.update_documents_from_file("/path/to/file.json")
+  ```
+
 ## Learn More
 
 For more see the [API Reference](https://docs.meilisearch.com/reference/api/) in the MeiliSearch documentation. Keep in mind you will need to await the examples shown in the documentation, and that you will be getting python objects instead of JSON for you results.

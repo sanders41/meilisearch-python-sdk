@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import json
 from asyncio import sleep
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Optional, Union
 from urllib.parse import urlencode
 
+import aiofiles
 from httpx import AsyncClient
 
 from async_search_client._http_requests import HttpRequests
-from async_search_client.errors import MeiliSearchTimeoutError
+from async_search_client.errors import MeiliSearchError, MeiliSearchTimeoutError
 from async_search_client.models import (
     IndexStats,
     MeiliSearchSettings,
@@ -179,6 +182,24 @@ class Index:
         response = await self._http_requests.post(url, documents)
         return UpdateId(**response.json())
 
+    async def add_documents_from_file(
+        self, file_path: Union[Path, str], primary_key: Optional[str] = None
+    ) -> UpdateId:
+        """
+        Add documents to the index from a json file.
+        """
+
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+
+        self._validate_json_path(file_path)
+
+        async with aiofiles.open(file_path, mode="r") as f:
+            data = await f.read()
+            documents = json.loads(data)
+
+        return await self.add_documents(documents, primary_key=primary_key)
+
     async def update_documents(
         self, documents: list[dict], primary_key: Optional[str] = None
     ) -> UpdateId:
@@ -189,6 +210,24 @@ class Index:
 
         response = await self._http_requests.put(url, documents)
         return UpdateId(**response.json())
+
+    async def update_documents_from_file(
+        self, file_path: Union[Path, str], primary_key: Optional[str] = None
+    ) -> UpdateId:
+        """
+        Update documents to the index from a json file.
+        """
+
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+
+        self._validate_json_path(file_path)
+
+        async with aiofiles.open(file_path, mode="r") as f:
+            data = await f.read()
+            documents = json.loads(data)
+
+        return await self.update_documents(documents, primary_key=primary_key)
 
     async def delete_document(self, document_id: str) -> UpdateId:
         url = build_url(Paths.INDEXES, self.uid, f"{Paths.DOCUMENTS.value}/{document_id}")
@@ -387,3 +426,7 @@ class Index:
 
     def _settings_url_for(self, sub_route: Paths) -> str:
         return build_url(Paths.INDEXES, self.uid, f"{Paths.SETTINGS.value}/{sub_route.value}")
+
+    def _validate_json_path(self, file_path: Path) -> None:
+        if file_path.suffix != ".json":
+            raise MeiliSearchError("File must be a json file")
