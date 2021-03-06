@@ -64,8 +64,8 @@ class Index:
             payload = {"primaryKey": primary_key, "uid": uid}
 
         url = build_url(Paths.INDEXES)
-        resonse = await HttpRequests(http_client).post(url, payload)
-        index_dict = resonse.json()
+        response = await HttpRequests(http_client).post(url, payload)
+        index_dict = response.json()
         return cls(http_client, index_dict["uid"], index_dict["primaryKey"])
 
     async def get_all_update_status(self) -> Optional[list[UpdateStatus]]:
