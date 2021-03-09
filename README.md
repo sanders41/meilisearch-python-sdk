@@ -7,7 +7,7 @@
 
 Async Serach Client is a Python async client for the [MeiliSearch](https://github.com/meilisearch/MeiliSearch) API. MeiliSearch also has an official [Python client](https://github.com/meilisearch/meilisearch-python).
 
-Which of the two clients to use comes down to your particular use case. The purpose for this async client is to allow for non-blocking calls when you are working in async frameworks such as [FastAPI](https://fastapi.tiangolo.com/), or if your own code base you are working in is async. If this does not match your use case then the official client will be a better choice.
+Which of the two clients to use comes down to your particular use case. The purpose for this async client is to allow for non-blocking calls when working in async frameworks such as [FastAPI](https://fastapi.tiangolo.com/), or if your own code base you are working in is async. If this does not match your use case then the official client will be a better choice.
 
 For the most part this client mirrors the functionality of the official client and the same [documenation](https://docs.meilisearch.com/reference/) will apply. There are are few exceptions to this to be aware of:
 
@@ -24,7 +24,7 @@ For the most part this client mirrors the functionality of the official client a
         ...
     ```
 
-2. Because this client is async you need to await the calls. For example adding documents in the official verison would be:
+2. Because this client is async you need to await the calls. For example adding documents with the official verison of the client would be:
 
     ```py
     index.add_documents(documents)
@@ -36,9 +36,11 @@ For the most part this client mirrors the functionality of the official client a
     await index.add_documents(documents)
     ```
 
-3. The async client uses [Pydantic](https://pydantic-docs.helpmanual.io/) to serialize/deserialize the JSON from MeiliSearch into python objects wherever possible, and in the process converts the camelCaseNames from JSON into more Pythonic snake_case_names. The official client uses dictionaries to store the return values in most cases.
+3. The async client uses [Pydantic](https://pydantic-docs.helpmanual.io/) to serialize/deserialize the JSON from MeiliSearch into python objects wherever possible, and in the process converts the camelCaseNames from JSON into more Pythonic snake_case_names. The official client instead uses dictionaries to store the return values in most cases.
 
-In some instances it is not possible to return the data as an object, becase the structure will be dependant on your particular dataset. In these instances you can either work with the data in the dictionary that is returned, or because you will know the structure you can generate your own Classes.
+In some instances it is not possible to return the data as an object, becase the structure will be dependant on your particular dataset and can't
+be known ahead of time. In these instances you can either work with the data in the dictionary that is returned, or because you will know the
+structure you can generate your own Classes.
 
 As an example, if you want to get a movie from the [small movies example](https://github.com/sanders41/async-search-client/blob/main/datasets/small_movies.json) you could put the results into an object with the following
 
@@ -50,8 +52,9 @@ from async_search_client import Client
 from async_search_client.models import BaseConfig
 
 
-# Inheriting from BaseConfig will allow your class to automatically convert variables returned from
-# the server in camelCase into snake_case. It will aslo make it a Pydantic Model.
+# Inheriting from BaseConfig will allow your class to automatically convert
+# variables returned from the server in camelCase into snake_case. It will
+# aslo make it a Pydantic Model.
 class Movie(BaseConfig):
     id: int
     title: str
@@ -83,7 +86,7 @@ Movie(
 By inheriting from BaseConfig, or any of the other [provided models](https://github.com/sanders41/async-search-client/tree/main/async_search_client/models)
 you will be inheriting Pydantic models and therefore have access to the funcitonality Pydantic provides
 such as [validators](https://pydantic-docs.helpmanual.io/usage/validators/) and [Fields](https://pydantic-docs.helpmanual.io/usage/model_config/#alias-precedence). Pydantic will also automatically deserialized the data into the correct data type
-base on the type hint provided.
+based on the type hint provided.
 
 ## Installation
 
@@ -95,7 +98,8 @@ pip install async-search-client
 
 ## Run MeiliSearch
 
-There are several ways to [run MeiliSearch](https://docs.meilisearch.com/reference/features/installation.html#download-and-launch). Pick the one that works best for your use case and then start the server.
+There are several ways to [run MeiliSearch](https://docs.meilisearch.com/reference/features/installation.html#download-and-launch).
+Pick the one that works best for your use case and then start the server.
 
 As as example to use Docker:
 
@@ -124,7 +128,9 @@ async with Client('http://127.0.0.1:7700', 'masterKey') as client:
     await index.add_documents(documents)
 ```
 
-The server will return a update id that can be used to [get the status](https://docs.meilisearch.com/reference/api/updates.html#get-an-update-status) of the updates. To do this you would save the result response from adding the documets to a variable, this will be a UpdateId object, and use it to check the status of the updates.
+The server will return a update id that can be used to [get the status](https://docs.meilisearch.com/reference/api/updates.html#get-an-update-status)
+of the updates. To do this you would save the result response from adding the documets to a variable,
+this will be a UpdateId object, and use it to check the status of the updates.
 
 ```py
 update = await index.add_documents(documents)
