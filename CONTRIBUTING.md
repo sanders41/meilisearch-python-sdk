@@ -229,7 +229,7 @@ poetry run tox
 
 Running tox before submitting a pull request can save your time because these tests will be run by Continuious Integraion when a pull request is submitted and will need to pass there before being accepted.
 
-## Commiting your code
+## Committing your code
 
 Once you have made changes to the code on your branch you can see which files have changed by running:
 
