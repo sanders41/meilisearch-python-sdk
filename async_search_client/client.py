@@ -3,7 +3,7 @@ from __future__ import annotations
 from types import TracebackType
 from typing import Optional, Type
 
-from httpx import AsyncClient
+from httpx import AsyncClient, Response
 
 from async_search_client._http_requests import HttpRequests
 from async_search_client.errors import MeiliSearchApiError
@@ -70,12 +70,12 @@ class Client:
         response = await self._http_requests.get(build_url(Paths.STATS))
         return ClientStats(**response.json())
 
-    async def health(self) -> int:
+    async def health(self) -> Response:
         """
         Get health of the MeiliSearch server
         """
         response = await self._http_requests.get(build_url(Paths.HEALTH))
-        return response.status_code
+        return response
 
     async def get_keys(self) -> Keys:
         response = await self._http_requests.get(build_url(Paths.KEYS))
