@@ -221,6 +221,10 @@ SearchResults(
   response = await index.update_documents_from_file("/path/to/file.json")
   ```
 
+## Compatibility with MeiliSearch
+
+This package only guarantees the compatibility with [version v0.20.0 of MeiliSearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.20.0).
+
 ## Learn More
 
 For more see the [API Reference](https://docs.meilisearch.com/reference/api/) in the MeiliSearch documentation. Keep in mind you will need to await the examples shown in the documentation, and that you will be getting python objects instead of JSON for you results.
