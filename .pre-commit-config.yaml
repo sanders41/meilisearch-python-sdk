@@ -6,12 +6,12 @@ repos:
     - id: check-yaml
     - id: end-of-file-fixer
     - id: trailing-whitespace
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.7.0
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.8.0
     hooks:
     - id: isort
       additional_dependencies: [toml]
-  - repo: https://github.com/python/black
+  - repo: https://github.com/psf/black
     rev: 20.8b1
     hooks:
     - id: black
@@ -22,8 +22,8 @@ repos:
     hooks:
     - id: mypy
       files: async_search_client/
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: '3.8.4'
+  - repo: https://github.com/PyCQA/flake8
+    rev: 3.9.0
     hooks:
     - id: flake8
       additional_dependencies: [flake8-print]
