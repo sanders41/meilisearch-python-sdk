@@ -47,7 +47,7 @@ Note: This project uses Poetry to manage dependencies. If you do not already hav
 
 Once you have cloned your fork of the repository you can create a virtual environment. When using Poetry the step is optional.
 If you create a virtual environment Poetry will use the environment you have activated, or Poetry will create
-and use it's own if you don't create one. If you want to create your own, once you are in the split-schedule directory create and activate
+and use it's own if you don't create one. If you want to create your own, once you are in the async-search-client directory create and activate
 the virtual environment. This step is slightly different for Mac/Linux and Windows.
 
 Mac/Linux
@@ -128,7 +128,7 @@ poetry run isort async_search_client tests
 poetry run black async_search_client tests
 
 # Run flake8
-poetry run flake8 async_search_client test
+poetry run flake8 async_search_client tests
 
 # Run mypy
 poetry run mypy async_search_client
