@@ -1,6 +1,7 @@
 # Async Search Client
 
 [![Tests Status](https://github.com/sanders41/async-search-client/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/async-search-client/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/async-search-client/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/async-search-client/main)
 [![Coverage](https://codecov.io/github/sanders41/async-search-client/coverage.svg?branch=main)](https://codecov.io/gh/sanders41/async-search-client)
 [![PyPI version](https://badge.fury.io/py/async-search-client.svg)](https://badge.fury.io/py/async-search-client)
 
