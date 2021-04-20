@@ -8,6 +8,37 @@ on:
     branches:
     - main
 jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install Poetry and add to path
+      run: |
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+        echo "${HOME}/.poetry/bin" >> $GITHUB_PATH
+    - name: Install Dependencies
+      run: |
+        poetry install
+    - name: Isort check
+      run: |
+        poetry run isort async_search_client tests --check-only
+    - name: Black check
+      run: |
+        poetry run black async_search_client tests --check
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        poetry run flake8 async_search_client tests --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        poetry run flake8 async_search_client tests --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+    - name: mypy check
+      run: |
+        poetry run mypy async_search_client
+
   testing:
     strategy:
       fail-fast: false
