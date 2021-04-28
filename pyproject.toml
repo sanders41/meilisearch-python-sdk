@@ -24,7 +24,7 @@ pydantic = "^1.8"
 aiofiles = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
-black = "^21.4b0"
+black = "^21.4b1"
 flake8 = "^3.9.1"
 isort = "^5.8.0"
 mypy = "^0.812"
