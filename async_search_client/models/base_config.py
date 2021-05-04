@@ -1,6 +1,5 @@
+from camel_converter import to_camel
 from pydantic import BaseModel
-
-from async_search_client.utils.camel import to_camel
 
 
 class BaseConfig(BaseModel):
