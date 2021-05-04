@@ -2,7 +2,7 @@ from asyncio import sleep
 from datetime import datetime
 
 import pytest
-from httpx import AsyncClient, ConnectError, RemoteProtocolError, Response
+from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError, Response
 
 from async_search_client.client import Client
 from async_search_client.errors import MeiliSearchApiError, MeiliSearchCommunicationError
@@ -90,10 +90,14 @@ async def test_get_or_create_index(test_client, uid, primary_key):
 
 @pytest.mark.asyncio
 async def test_get_or_create_index_communication_error(test_client, monkeypatch):
-    async def mock_response(*args, **kwargs):
+    async def mock_get_response(*args, **kwargs):
         raise ConnectError("test", request="GET")
 
-    monkeypatch.setattr(AsyncClient, "get", mock_response)
+    async def mock_post_response(*args, **kwargs):
+        raise ConnectError("test", request="POST")
+
+    monkeypatch.setattr(AsyncClient, "get", mock_get_response)
+    monkeypatch.setattr(AsyncClient, "post", mock_post_response)
     with pytest.raises(MeiliSearchCommunicationError):
         await test_client.get_or_create_index("test")
 
@@ -197,6 +201,16 @@ async def test_communication_error(master_key):
 async def test_remote_protocol_error(test_client, monkeypatch):
     def mock_error(*args, **kwargs):
         raise RemoteProtocolError("error", request=args[0])
+
+    monkeypatch.setattr(AsyncClient, "post", mock_error)
+    with pytest.raises(MeiliSearchCommunicationError):
+        await test_client.create_index("some_index")
+
+
+@pytest.mark.asyncio
+async def test_connection_timeout(test_client, monkeypatch):
+    def mock_error(*args, **kwargs):
+        raise ConnectTimeout("error")
 
     monkeypatch.setattr(AsyncClient, "post", mock_error)
     with pytest.raises(MeiliSearchCommunicationError):
