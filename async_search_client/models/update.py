@@ -1,16 +1,15 @@
 from datetime import datetime
 from typing import Dict, Optional
 
+from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
 
-from async_search_client.models.base_config import BaseConfig
 
-
-class UpdateId(BaseConfig):
+class UpdateId(CamelBase):
     update_id: int
 
 
-class UpdateStatus(BaseConfig):
+class UpdateStatus(CamelBase):
     status: str
     update_id: int
     update_type: Dict = Field(..., alias="type")

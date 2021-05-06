@@ -1,9 +1,9 @@
 from typing import Dict, List, Optional
 
-from async_search_client.models.base_config import BaseConfig
+from camel_converter.pydantic_base import CamelBase
 
 
-class SearchResults(BaseConfig):
+class SearchResults(CamelBase):
     hits: List[Dict]
     offset: int
     limit: int

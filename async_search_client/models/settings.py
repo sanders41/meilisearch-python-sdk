@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional
 
-from async_search_client.models.base_config import BaseConfig
+from camel_converter.pydantic_base import CamelBase
 
 
-class MeiliSearchSettings(BaseConfig):
+class MeiliSearchSettings(CamelBase):
     synonyms: Optional[Dict[str, Any]] = None
     stop_words: Optional[List[str]] = None
     ranking_rules: Optional[List[str]] = None

@@ -1,6 +1,6 @@
-from async_search_client.models.base_config import BaseConfig
+from camel_converter.pydantic_base import CamelBase
 
 
-class DumpInfo(BaseConfig):
+class DumpInfo(CamelBase):
     uid: str
     status: str

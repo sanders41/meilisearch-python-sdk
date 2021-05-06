@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from async_search_client.models.base_config import BaseConfig
+from camel_converter.pydantic_base import CamelBase
 
 
-class Version(BaseConfig):
+class Version(CamelBase):
     commit_sha: str
     build_date: datetime
     pkg_version: str

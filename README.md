@@ -49,13 +49,13 @@ from datetime import datetime
 from typing import Optional
 
 from async_search_client import Client
-from async_search_client.models import BaseConfig
+from async_search_client.models import CamelBase
 
 
-# Inheriting from BaseConfig will allow your class to automatically convert
+# Inheriting from CamelBase will allow your class to automatically convert
 # variables returned from the server in camelCase into snake_case. It will
 # aslo make it a Pydantic Model.
-class Movie(BaseConfig):
+class Movie(CamelBase):
     id: int
     title: str
     poster: str
@@ -83,7 +83,7 @@ Movie(
 )
 ```
 
-By inheriting from BaseConfig, or any of the other [provided models](https://github.com/sanders41/async-search-client/tree/main/async_search_client/models)
+By inheriting from CamelBase, or any of the other [provided models](https://github.com/sanders41/async-search-client/tree/main/async_search_client/models)
 you will be inheriting Pydantic models and therefore have access to the funcitonality Pydantic provides
 such as [validators](https://pydantic-docs.helpmanual.io/usage/validators/) and [Fields](https://pydantic-docs.helpmanual.io/usage/model_config/#alias-precedence). Pydantic will also automatically deserialized the data into the correct data type
 based on the type hint provided.
