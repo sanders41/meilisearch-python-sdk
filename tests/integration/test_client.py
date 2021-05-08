@@ -123,10 +123,9 @@ async def test_get_all_stats(test_client, index_uid, index_uid2):
 
 @pytest.mark.asyncio
 async def test_health(test_client):
-    response = await test_client.health()
+    health = await test_client.health()
 
-    assert response.status_code == 200
-    assert response.json()["status"] == "available"
+    assert health.status == "available"
 
 
 @pytest.mark.asyncio
