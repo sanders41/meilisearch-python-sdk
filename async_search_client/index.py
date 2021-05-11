@@ -276,8 +276,10 @@ class Index:
 
         return response.json()
 
-    async def update_ranking_rules(self, body: MeiliSearchSettings) -> UpdateId:
-        respose = await self._http_requests.post(self._settings_url_for(Paths.RANKING_RULES), body)
+    async def update_ranking_rules(self, ranking_rules: list[str]) -> UpdateId:
+        respose = await self._http_requests.post(
+            self._settings_url_for(Paths.RANKING_RULES), ranking_rules
+        )
 
         return UpdateId(**respose.json())
 
