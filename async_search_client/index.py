@@ -4,7 +4,7 @@ import json
 from asyncio import sleep
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 from urllib.parse import urlencode
 
 import aiofiles
@@ -138,7 +138,7 @@ class Index:
         offset: int = 0,
         limit: int = 20,
         filters: Optional[str] = None,
-        facet_filters: Optional[Union[str, list[str]]] = None,
+        facet_filters: Optional[list[str | list[str]]] = None,
         facets_distribution: Optional[list[str]] = None,
         attributes_to_retrieve: list[str] = ["*"],
         attributes_to_crop: Optional[list[str]] = None,
@@ -200,7 +200,7 @@ class Index:
         return UpdateId(**response.json())
 
     async def add_documents_from_file(
-        self, file_path: Union[Path, str], primary_key: Optional[str] = None
+        self, file_path: Path | str, primary_key: Optional[str] = None
     ) -> UpdateId:
         """
         Add documents to the index from a json file.
@@ -229,7 +229,7 @@ class Index:
         return UpdateId(**response.json())
 
     async def update_documents_from_file(
-        self, file_path: Union[Path, str], primary_key: Optional[str] = None
+        self, file_path: Path | str, primary_key: Optional[str] = None
     ) -> UpdateId:
         """
         Update documents to the index from a json file.
