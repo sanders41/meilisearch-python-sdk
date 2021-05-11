@@ -8,7 +8,7 @@ from httpx import AsyncClient
 from async_search_client._http_requests import HttpRequests
 from async_search_client.errors import MeiliSearchApiError
 from async_search_client.index import Index
-from async_search_client.models import ClientStats, DumpInfo, Health, IndexInfo, Keys, Version
+from async_search_client.models import ClientStats, DumpInfo, Health, Keys, Version
 from async_search_client.paths import Paths, build_url
 
 
@@ -39,13 +39,22 @@ class Client:
     async def create_index(self, uid: str, primary_key: Optional[str] = None) -> Index:
         return await Index.create(self._http_client, uid, primary_key)
 
-    async def get_indexes(self) -> Optional[list[IndexInfo]]:
+    async def get_indexes(self) -> Optional[list[Index]]:
         response = await self._http_requests.get(build_url(Paths.INDEXES))
 
         if not response.json():
             return None
 
-        return [IndexInfo(**x) for x in response.json()]
+        return [
+            Index(
+                http_client=self._http_client,
+                uid=x["uid"],
+                primary_key=x["primaryKey"],
+                created_at=x["createdAt"],
+                updated_at=x["updatedAt"],
+            )
+            for x in response.json()
+        ]
 
     async def get_index(self, uid: str) -> Index:
         return await Index(self._http_client, uid).fetch_info()

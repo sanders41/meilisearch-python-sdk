@@ -23,11 +23,26 @@ from async_search_client.paths import Paths, build_url
 
 
 class Index:
-    def __init__(self, http_client: AsyncClient, uid: str, primary_key: Optional[str] = None):
+    def __init__(
+        self,
+        http_client: AsyncClient,
+        uid: str,
+        primary_key: Optional[str] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+    ):
         self.http_client = http_client
         self.uid = uid
         self.primary_key = primary_key
+        self.created_at: Optional[datetime] = self._iso_to_date_time(created_at)
+        self.updated_at: Optional[datetime] = self._iso_to_date_time(updated_at)
         self._http_requests = HttpRequests(http_client)
+
+    def __str__(self) -> str:
+        return f"uid={self.uid}, primary_key={self.primary_key}, created_at={self.created_at}, updated_at={self.updated_at}"
+
+    def __repr__(self) -> str:
+        return f"uid={self.uid}, primary_key={self.primary_key}, created_at={self.created_at}, updated_at={self.updated_at}"
 
     async def delete(self) -> int:
         url = build_url(Paths.INDEXES, self.uid)
@@ -51,6 +66,8 @@ class Index:
         response = await self._http_requests.get(url)
         index_dict = response.json()
         self.primary_key = index_dict["primaryKey"]
+        self.created_at = self._iso_to_date_time(index_dict["createdAt"])
+        self.updated_at = self._iso_to_date_time(index_dict["updatedAt"])
         return self
 
     async def get_primary_key(self) -> Optional[str]:
@@ -425,6 +442,20 @@ class Index:
         )
 
         return UpdateId(**response.json())
+
+    def _iso_to_date_time(self, iso_date: Optional[datetime | str]) -> Optional[datetime]:
+        """
+        The nanoseconds from MeiliSearch are too long for python to convert so this strips off the
+        last digits to shorten it.
+        """
+
+        if not iso_date:
+            return None
+
+        if isinstance(iso_date, datetime):
+            return iso_date
+
+        return datetime.strptime(f"{iso_date[:-4]}Z", "%Y-%m-%dT%H:%M:%S.%fZ")
 
     def _settings_url_for(self, sub_route: Paths) -> str:
         return build_url(Paths.INDEXES, self.uid, f"{Paths.SETTINGS.value}/{sub_route.value}")

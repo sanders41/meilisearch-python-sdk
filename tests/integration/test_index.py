@@ -1,6 +1,9 @@
+from datetime import datetime
+
 import pytest
 
 from async_search_client.errors import MeiliSearchApiError, MeiliSearchTimeoutError
+from async_search_client.index import Index
 from async_search_client.models import MeiliSearchSettings
 
 
@@ -401,3 +404,40 @@ async def test_reset_attributes_for_faceting(empty_index, attributes_for_facetin
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_attributes_for_faceting()
     assert response is None
+
+
+@pytest.mark.parametrize(
+    "iso_date, expected",
+    [
+        ("2021-05-11T03:12:22.563960100Z", datetime(2021, 5, 11, 3, 12, 22, 563960)),
+        (datetime(2021, 5, 11, 3, 12, 22, 563960), datetime(2021, 5, 11, 3, 12, 22, 563960)),
+        (None, None),
+    ],
+)
+def test_iso_to_date_time(iso_date, expected, test_client):
+    index = Index(test_client, "test")
+    converted = index._iso_to_date_time(iso_date)
+
+    assert converted == expected
+
+
+@pytest.mark.asyncio
+async def test_str(empty_index):
+    index = await empty_index()
+    got = index.__str__()
+
+    assert "uid" in got
+    assert "primary_key" in got
+    assert "created_at" in got
+    assert "updated_at" in got
+
+
+@pytest.mark.asyncio
+async def test_repr(empty_index):
+    index = await empty_index()
+    got = index.__repr__()
+
+    assert "uid" in got
+    assert "primary_key" in got
+    assert "created_at" in got
+    assert "updated_at" in got

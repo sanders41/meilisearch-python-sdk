@@ -60,6 +60,9 @@ async def test_get_index(test_client, index_uid):
     response = await test_client.get_index(index_uid)
 
     assert response.uid == index_uid
+    assert response.primary_key is None
+    assert isinstance(response.created_at, datetime)
+    assert isinstance(response.updated_at, datetime)
 
 
 @pytest.mark.asyncio
