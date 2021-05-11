@@ -28,8 +28,8 @@ class Index:
         http_client: AsyncClient,
         uid: str,
         primary_key: Optional[str] = None,
-        created_at: Optional[datetime] = None,
-        updated_at: Optional[datetime] = None,
+        created_at: Optional[str | datetime] = None,
+        updated_at: Optional[str | datetime] = None,
     ):
         self.http_client = http_client
         self.uid = uid
@@ -86,7 +86,13 @@ class Index:
         url = build_url(Paths.INDEXES)
         response = await HttpRequests(http_client).post(url, payload)
         index_dict = response.json()
-        return cls(http_client, index_dict["uid"], index_dict["primaryKey"])
+        return cls(
+            http_client=http_client,
+            uid=index_dict["uid"],
+            primary_key=index_dict["primaryKey"],
+            created_at=index_dict["createdAt"],
+            updated_at=index_dict["updatedAt"],
+        )
 
     async def get_all_update_status(self) -> Optional[list[UpdateStatus]]:
         url = build_url(Paths.INDEXES, self.uid, Paths.UPDATES)
@@ -448,13 +454,11 @@ class Index:
         The nanoseconds from MeiliSearch are too long for python to convert so this strips off the
         last digits to shorten it.
         """
-
         if not iso_date:
             return None
 
         if isinstance(iso_date, datetime):
             return iso_date
-
         return datetime.strptime(f"{iso_date[:-4]}Z", "%Y-%m-%dT%H:%M:%S.%fZ")
 
     def _settings_url_for(self, sub_route: Paths) -> str:
