@@ -26,7 +26,7 @@ async def wait_for_dump_creation(test_client, dump_uid, timeout_in_ms=10000, int
 @pytest.mark.parametrize("primary_key", ["pk_test", None])
 async def test_create_index(test_client, primary_key):
     uid = "test"
-    index = await test_client.create_index(uid, primary_key)
+    index = await test_client.create_index(uid=uid, primary_key=primary_key)
 
     assert index.uid == uid
 
@@ -34,6 +34,9 @@ async def test_create_index(test_client, primary_key):
         assert index.primary_key == primary_key
     else:
         assert index.primary_key is None
+
+    assert isinstance(index.created_at, datetime)
+    assert isinstance(index.updated_at, datetime)
 
 
 @pytest.mark.asyncio
