@@ -64,6 +64,6 @@ jobs:
       run: |
         poetry run pytest --cov=async_search_client --cov-report=xml
     - name: Upload coverage
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.5.0
       with:
         fail_ci_if_error: true
