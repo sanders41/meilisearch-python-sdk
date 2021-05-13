@@ -36,7 +36,7 @@ For the most part this client mirrors the functionality of the official client a
     await index.add_documents(documents)
     ```
 
-3. The async client uses [Pydantic](https://pydantic-docs.helpmanual.io/) to serialize/deserialize the JSON from MeiliSearch into python objects wherever possible, and in the process converts the camelCaseNames from JSON into more Pythonic snake_case_names. The official client instead uses dictionaries to store the return values in most cases.
+3. The async client uses [Pydantic](https://pydantic-docs.helpmanual.io/) to serialize/deserialize the JSON from MeiliSearch into Python objects wherever possible, and in the process converts the camelCaseNames from JSON into more Pythonic snake_case_names. The official client instead uses dictionaries to store the return values in most cases.
 
 In some instances it is not possible to return the data as an object, becase the structure will be dependant on your particular dataset and can't
 be known ahead of time. In these instances you can either work with the data in the dictionary that is returned, or because you will know the
@@ -54,7 +54,7 @@ from async_search_client.models import CamelBase
 
 # Inheriting from CamelBase will allow your class to automatically convert
 # variables returned from the server in camelCase into snake_case. It will
-# aslo make it a Pydantic Model.
+# also make it a Pydantic Model.
 class Movie(CamelBase):
     id: int
     title: str
