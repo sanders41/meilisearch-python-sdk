@@ -6,7 +6,7 @@ from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError
 
 from async_search_client.client import Client
 from async_search_client.errors import MeiliSearchApiError, MeiliSearchCommunicationError
-from async_search_client.models import DumpInfo, Version
+from async_search_client.models import DumpInfo, IndexInfo, Version
 
 
 async def wait_for_dump_creation(test_client, dump_uid, timeout_in_ms=10000, interval_in_ms=500):
@@ -125,6 +125,40 @@ async def test_get_all_stats(test_client, index_uid, index_uid2):
 
     assert index_uid in response.indexes
     assert index_uid2 in response.indexes
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("indexes_sample")
+async def test_get_raw_index(test_client, index_uid):
+    response = await test_client.get_raw_index(index_uid)
+
+    assert response.uid == index_uid
+    assert isinstance(response, IndexInfo)
+
+
+@pytest.mark.asyncio
+async def test_get_raw_index_none(test_client):
+    response = await test_client.get_raw_index("test")
+
+    assert response is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("indexes_sample")
+async def test_get_raw_indexes(test_client, index_uid, index_uid2):
+    response = await test_client.get_raw_indexes()
+    response_uids = [x.uid for x in response]
+
+    assert index_uid in response_uids
+    assert index_uid2 in response_uids
+    assert len(response) == 2
+
+
+@pytest.mark.asyncio
+async def test_get_raw_indexes_none(test_client):
+    response = await test_client.get_raw_indexes()
+
+    assert response is None
 
 
 @pytest.mark.asyncio
