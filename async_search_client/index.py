@@ -449,21 +449,31 @@ class Index:
 
         return UpdateId(**response.json())
 
-    def _iso_to_date_time(self, iso_date: Optional[datetime | str]) -> Optional[datetime]:
+    @staticmethod
+    def _iso_to_date_time(iso_date: Optional[datetime | str]) -> Optional[datetime]:
         """
-        The nanoseconds from MeiliSearch are too long for python to convert so this strips off the
-        last digits to shorten it.
+        The microseconds from MeiliSearch are sometimes too long for python to convert so this
+        strips off the last digits to shorten it when that happens.
         """
+
         if not iso_date:
             return None
 
         if isinstance(iso_date, datetime):
             return iso_date
-        return datetime.strptime(f"{iso_date[:-4]}Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+
+        try:
+            return datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        except ValueError:
+            split = iso_date.split(".")
+            reduce = len(split[1]) - 6
+            reduced = f"{split[0]}.{split[1][:-reduce]}Z"
+            return datetime.strptime(reduced, "%Y-%m-%dT%H:%M:%S.%fZ")
 
     def _settings_url_for(self, sub_route: Paths) -> str:
         return build_url(Paths.INDEXES, self.uid, f"{Paths.SETTINGS.value}/{sub_route.value}")
 
-    def _validate_json_path(self, file_path: Path) -> None:
+    @staticmethod
+    def _validate_json_path(file_path: Path) -> None:
         if file_path.suffix != ".json":
             raise MeiliSearchError("File must be a json file")
