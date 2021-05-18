@@ -1,3 +1,5 @@
+from math import ceil
+
 import pytest
 
 from async_search_client.errors import MeiliSearchApiError, MeiliSearchError
@@ -11,50 +13,62 @@ async def test_get_documents_default(empty_index):
 
 
 @pytest.mark.asyncio
-async def test_add_documents(empty_index, small_movies):
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+async def test_add_documents(primary_key, expected_primary_key, empty_index, small_movies):
     index = await empty_index()
-    response = await index.add_documents(small_movies)
+    response = await index.add_documents(small_movies, primary_key)
     update = await index.wait_for_pending_update(response.update_id)
-    assert await index.get_primary_key() == "id"
+    assert await index.get_primary_key() == expected_primary_key
     assert update.status == "processed"
 
 
 @pytest.mark.asyncio
-async def test_add_documents_with_primary_key(test_client, small_movies):
-    primary_key = "release_date"
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+async def test_add_documents_in_batches(
+    batch_size, primary_key, expected_primary_key, empty_index, small_movies
+):
+    index = await empty_index()
+    response = await index.add_documents_in_batches(small_movies, batch_size, primary_key)
+    assert ceil(len(small_movies) / batch_size) == len(response)
+
+    for r in response:
+        update = await index.wait_for_pending_update(r.update_id)
+        assert update.status == "processed"
+
+    assert await index.get_primary_key() == expected_primary_key
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+async def test_add_documents_from_file(
+    primary_key, expected_primary_key, test_client, small_movies_path
+):
     index = test_client.index("movies")
-    response = await index.add_documents(small_movies, primary_key=primary_key)
+    response = await index.add_documents_from_file(small_movies_path, primary_key)
     update = await index.wait_for_pending_update(response.update_id)
-    assert await index.get_primary_key() == primary_key
+    assert await index.get_primary_key() == expected_primary_key
     assert update.status == "processed"
 
 
 @pytest.mark.asyncio
-async def test_add_documents_from_file(test_client, small_movies_path):
-    index = test_client.index("movies")
-    response = await index.add_documents_from_file(small_movies_path)
-    update = await index.wait_for_pending_update(response.update_id)
-    assert await index.get_primary_key() == "id"
-    assert update.status == "processed"
-
-
-@pytest.mark.asyncio
-async def test_add_documents_from_file_string_path(test_client, small_movies_path):
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+async def test_add_documents_from_file_string_path(
+    primary_key, expected_primary_key, test_client, small_movies_path
+):
     string_path = str(small_movies_path)
     index = test_client.index("movies")
-    response = await index.add_documents_from_file(string_path)
+    response = await index.add_documents_from_file(string_path, primary_key)
     update = await index.wait_for_pending_update(response.update_id)
-    assert await index.get_primary_key() == "id"
-    assert update.status == "processed"
-
-
-@pytest.mark.asyncio
-async def test_add_documents_from_file_with_primary_key(test_client, small_movies_path):
-    primary_key = "release_date"
-    index = test_client.index("movies")
-    response = await index.add_documents_from_file(small_movies_path, primary_key=primary_key)
-    update = await index.wait_for_pending_update(response.update_id)
-    assert await index.get_primary_key() == primary_key
+    assert await index.get_primary_key() == expected_primary_key
     assert update.status == "processed"
 
 
@@ -64,6 +78,55 @@ async def test_add_documents_from_file_invalid_extension(test_client):
 
     with pytest.raises(MeiliSearchError):
         await index.add_documents_from_file("test.csv")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+async def test_add_documents_from_file_in_batches(
+    batch_size, primary_key, expected_primary_key, test_client, small_movies_path, small_movies
+):
+    index = test_client.index("movies")
+    response = await index.add_documents_from_file_in_batches(
+        small_movies_path, batch_size, primary_key
+    )
+    assert ceil(len(small_movies) / batch_size) == len(response)
+
+    for r in response:
+        update = await index.wait_for_pending_update(r.update_id)
+        assert update.status == "processed"
+
+    assert await index.get_primary_key() == expected_primary_key
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+async def test_add_documents_from_file_string_path_in_batches(
+    batch_size, primary_key, expected_primary_key, test_client, small_movies_path, small_movies
+):
+    string_path = str(small_movies_path)
+    index = test_client.index("movies")
+    response = await index.add_documents_from_file_in_batches(string_path, batch_size, primary_key)
+    assert ceil(len(small_movies) / batch_size) == len(response)
+
+    for r in response:
+        update = await index.wait_for_pending_update(r.update_id)
+        assert update.status == "processed"
+
+    assert await index.get_primary_key() == expected_primary_key
+
+
+@pytest.mark.asyncio
+async def test_add_documents_from_file_in_batches_invalid_extension(test_client):
+    index = test_client.index("movies")
+
+    with pytest.raises(MeiliSearchError):
+        await index.add_documents_from_file_in_batches("test.csv")
 
 
 @pytest.mark.asyncio
