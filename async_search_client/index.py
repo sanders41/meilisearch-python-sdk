@@ -4,7 +4,7 @@ import json
 from asyncio import sleep
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Generator, Optional
 from urllib.parse import urlencode
 
 import aiofiles
@@ -205,6 +205,26 @@ class Index:
         response = await self._http_requests.post(url, documents)
         return UpdateId(**response.json())
 
+    async def add_documents_in_batches(
+        self, documents: list[dict], batch_size: int = 1000, primary_key: Optional[str] = None
+    ) -> list[UpdateId]:
+        """
+        Splits documents into batches to reduce RAM usage with indexing.
+        """
+
+        def batch(documents: list[dict], batch_size: int) -> Generator[list[dict], None, None]:
+            total_len = len(documents)
+            for i in range(0, total_len, batch_size):
+                yield documents[i : i + batch_size]
+
+        update_ids: list[UpdateId] = []
+
+        for document_batch in batch(documents, batch_size):
+            update_id = await self.add_documents(document_batch, primary_key)
+            update_ids.append(update_id)
+
+        return update_ids
+
     async def add_documents_from_file(
         self, file_path: Path | str, primary_key: Optional[str] = None
     ) -> UpdateId:
@@ -222,6 +242,26 @@ class Index:
             documents = json.loads(data)
 
         return await self.add_documents(documents, primary_key=primary_key)
+
+    async def add_documents_from_file_in_batches(
+        self, file_path: Path | str, batch_size: int = 1000, primary_key: Optional[str] = None
+    ) -> list[UpdateId]:
+        """
+        Add documents to the index from a json file in batches to reduce RAM usage.
+        """
+
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+
+        self._validate_json_path(file_path)
+
+        async with aiofiles.open(file_path, mode="r") as f:
+            data = await f.read()
+            documents = json.loads(data)
+
+        return await self.add_documents_in_batches(
+            documents, batch_size=batch_size, primary_key=primary_key
+        )
 
     async def update_documents(
         self, documents: list[dict], primary_key: Optional[str] = None
