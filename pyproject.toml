@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "async-search-client"
-version = "0.7.0"
+version = "0.7.1"
 description = "A Python async client for the MeiliSearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
@@ -23,7 +23,7 @@ python = "^3.7"
 httpx = ">=0.17,<0.19"
 pydantic = "^1.8"
 aiofiles = "^0.7.0"
-camel-converter = ">=0.2,<1.1"
+camel-converter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.4b2"
