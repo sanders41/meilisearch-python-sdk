@@ -187,6 +187,44 @@ async def test_update_documents_with_primary_key(test_client, small_movies):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+async def test_update_documents_in_batches(batch_size, index_with_documents, small_movies):
+    index = await index_with_documents()
+    response = await index.get_documents()
+    response[0]["title"] = "Some title"
+    update = await index.update_documents([response[0]])
+    await index.wait_for_pending_update(update.update_id)
+
+    response = await index.get_documents()
+    assert response[0]["title"] == "Some title"
+    updates = await index.update_documents_in_batches(small_movies, batch_size)
+    assert ceil(len(small_movies) / batch_size) == len(updates)
+
+    for update in updates:
+        await index.wait_for_pending_update(update.update_id)
+
+    response = await index.get_documents()
+    assert response[0]["title"] != "Some title"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+async def test_update_documents_in_batches_with_primary_key(batch_size, test_client, small_movies):
+    primary_key = "release_date"
+    index = test_client.index("movies")
+    updates = await index.update_documents_in_batches(
+        small_movies, batch_size, primary_key=primary_key
+    )
+    assert ceil(len(small_movies) / batch_size) == len(updates)
+
+    for update in updates:
+        update_status = await index.wait_for_pending_update(update.update_id)
+        assert update_status.status == "processed"
+
+    assert await index.get_primary_key() == primary_key
+
+
+@pytest.mark.asyncio
 async def test_update_documents_from_file(test_client, small_movies, small_movies_path):
     small_movies[0]["title"] = "Some title"
     index = test_client.index("movies")
@@ -220,9 +258,7 @@ async def test_update_documents_from_file_string_path(test_client, small_movies,
 
 
 @pytest.mark.asyncio
-async def test_update_documents_from_file_with_primary_key(
-    test_client, small_movies, small_movies_path
-):
+async def test_update_documents_from_file_with_primary_key(test_client, small_movies_path):
     primary_key = "release_date"
     index = test_client.index("movies")
     update = await index.update_documents_from_file(small_movies_path, primary_key=primary_key)
@@ -236,6 +272,61 @@ async def test_update_documents_from_file_invalid_extension(test_client):
 
     with pytest.raises(MeiliSearchError):
         await index.update_documents_from_file("test.csv")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+async def test_update_documents_from_file_in_batches(
+    batch_size, test_client, small_movies_path, small_movies
+):
+    small_movies[0]["title"] = "Some title"
+    index = test_client.index("movies")
+    response = await index.add_documents(small_movies)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    assert response[0]["title"] == "Some title"
+    updates = await index.update_documents_from_file_in_batches(small_movies_path, batch_size)
+    assert ceil(len(small_movies) / batch_size) == len(updates)
+
+    for update in updates:
+        update_status = await index.wait_for_pending_update(update.update_id)
+        assert update_status.status == "processed"
+
+    response = await index.get_documents()
+    assert response[0]["title"] != "Some title"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+async def test_update_documents_from_file_string_path_in_batches(
+    batch_size, test_client, small_movies_path, small_movies
+):
+    string_path = str(small_movies_path)
+    small_movies[0]["title"] = "Some title"
+    index = test_client.index("movies")
+    response = await index.add_documents(small_movies)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    assert response[0]["title"] == "Some title"
+    updates = await index.update_documents_from_file_in_batches(string_path, batch_size)
+    assert ceil(len(small_movies) / batch_size) == len(updates)
+
+    for update in updates:
+        update_status = await index.wait_for_pending_update(update.update_id)
+        assert update_status.status == "processed"
+
+    response = await index.get_documents()
+    assert response[0]["title"] != "Some title"
+
+
+@pytest.mark.asyncio
+async def test_update_documents_from_file_in_batches_invalid_extension(test_client):
+    index = test_client.index("movies")
+
+    with pytest.raises(MeiliSearchError):
+        await index.update_documents_from_file_in_batches("test.csv")
 
 
 @pytest.mark.asyncio

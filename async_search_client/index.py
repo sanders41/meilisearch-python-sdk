@@ -212,14 +212,9 @@ class Index:
         Splits documents into batches to reduce RAM usage with indexing.
         """
 
-        def batch(documents: list[dict], batch_size: int) -> Generator[list[dict], None, None]:
-            total_len = len(documents)
-            for i in range(0, total_len, batch_size):
-                yield documents[i : i + batch_size]
-
         update_ids: list[UpdateId] = []
 
-        for document_batch in batch(documents, batch_size):
+        for document_batch in self._batch(documents, batch_size):
             update_id = await self.add_documents(document_batch, primary_key)
             update_ids.append(update_id)
 
@@ -274,11 +269,26 @@ class Index:
         response = await self._http_requests.put(url, documents)
         return UpdateId(**response.json())
 
+    async def update_documents_in_batches(
+        self, documents: list[dict], batch_size: int = 1000, primary_key: Optional[str] = None
+    ) -> list[UpdateId]:
+        """
+        Splits documents into batches to reduce RAM usage with indexing.
+        """
+
+        update_ids: list[UpdateId] = []
+
+        for document_batch in self._batch(documents, batch_size):
+            update_id = await self.update_documents(document_batch, primary_key)
+            update_ids.append(update_id)
+
+        return update_ids
+
     async def update_documents_from_file(
         self, file_path: Path | str, primary_key: Optional[str] = None
     ) -> UpdateId:
         """
-        Update documents to the index from a json file.
+        Update documents in the index from a json file.
         """
 
         if isinstance(file_path, str):
@@ -291,6 +301,26 @@ class Index:
             documents = json.loads(data)
 
         return await self.update_documents(documents, primary_key=primary_key)
+
+    async def update_documents_from_file_in_batches(
+        self, file_path: Path | str, batch_size: int = 1000, primary_key: Optional[str] = None
+    ) -> list[UpdateId]:
+        """
+        Update documents in the index from a json file in batches to reduce RAM usage.
+        """
+
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+
+        self._validate_json_path(file_path)
+
+        async with aiofiles.open(file_path, mode="r") as f:
+            data = await f.read()
+            documents = json.loads(data)
+
+        return await self.update_documents_in_batches(
+            documents, batch_size=batch_size, primary_key=primary_key
+        )
 
     async def delete_document(self, document_id: str) -> UpdateId:
         url = build_url(Paths.INDEXES, self.uid, f"{Paths.DOCUMENTS.value}/{document_id}")
@@ -512,6 +542,12 @@ class Index:
 
     def _settings_url_for(self, sub_route: Paths) -> str:
         return build_url(Paths.INDEXES, self.uid, f"{Paths.SETTINGS.value}/{sub_route.value}")
+
+    @staticmethod
+    def _batch(documents: list[dict], batch_size: int) -> Generator[list[dict], None, None]:
+        total_len = len(documents)
+        for i in range(0, total_len, batch_size):
+            yield documents[i : i + batch_size]
 
     @staticmethod
     def _validate_json_path(file_path: Path) -> None:
