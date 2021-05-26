@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import json
-from asyncio import sleep
+from asyncio import get_running_loop, sleep
 from datetime import datetime
+from functools import partial
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any, AsyncGenerator, Optional
 from urllib.parse import urlencode
 
 import aiofiles
@@ -45,7 +46,10 @@ class Index:
         return f"uid={self.uid}, primary_key={self.primary_key}, created_at={self.created_at}, updated_at={self.updated_at}"
 
     async def delete(self) -> int:
-        url = build_url(Paths.INDEXES, self.uid)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid)
+        )
         response = await self._http_requests.delete(url)
         return response.status_code
 
@@ -56,18 +60,30 @@ class Index:
         payload = {}
         if primary_key is not None:
             payload["primaryKey"] = primary_key
-        url = build_url(Paths.INDEXES, self.uid)
+
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid)
+        )
         response = await self._http_requests.put(url, payload)
         self.primary_key = response.json()["primaryKey"]
         return self
 
     async def fetch_info(self) -> Index:
-        url = build_url(Paths.INDEXES, self.uid)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid)
+        )
         response = await self._http_requests.get(url)
         index_dict = response.json()
         self.primary_key = index_dict["primaryKey"]
-        self.created_at = self._iso_to_date_time(index_dict["createdAt"])
-        self.updated_at = self._iso_to_date_time(index_dict["updatedAt"])
+        loop = get_running_loop()
+        self.created_at = await loop.run_in_executor(
+            None, partial(self._iso_to_date_time, index_dict["createdAt"])
+        )
+        self.updated_at = await loop.run_in_executor(
+            None, partial(self._iso_to_date_time, index_dict["updatedAt"])
+        )
         return self
 
     async def get_primary_key(self) -> Optional[str]:
@@ -83,7 +99,8 @@ class Index:
         else:
             payload = {"primaryKey": primary_key, "uid": uid}
 
-        url = build_url(Paths.INDEXES)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(None, partial(build_url, section=Paths.INDEXES))
         response = await HttpRequests(http_client).post(url, payload)
         index_dict = response.json()
         return cls(
@@ -95,7 +112,10 @@ class Index:
         )
 
     async def get_all_update_status(self) -> Optional[list[UpdateStatus]]:
-        url = build_url(Paths.INDEXES, self.uid, Paths.UPDATES)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.UPDATES)
+        )
         response = await self._http_requests.get(url)
 
         if not response.json():
@@ -104,7 +124,16 @@ class Index:
         return [UpdateStatus(**x) for x in response.json()]
 
     async def get_update_status(self, update_id: int) -> UpdateStatus:
-        url = build_url(Paths.INDEXES, self.uid, f"{Paths.UPDATES.value}/{update_id}")
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None,
+            partial(
+                build_url,
+                section=Paths.INDEXES,
+                uid=self.uid,
+                post_uid=f"{Paths.UPDATES.value}/{update_id}",
+            ),
+        )
         response = await self._http_requests.get(url)
 
         return UpdateStatus(**response.json())
@@ -133,7 +162,10 @@ class Index:
         )
 
     async def get_stats(self) -> IndexStats:
-        url = build_url(Paths.INDEXES, self.uid, Paths.STATS)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.STATS)
+        )
         response = await self._http_requests.get(url)
 
         return IndexStats(**response.json())
@@ -165,13 +197,25 @@ class Index:
             "attributesToHighlight": attributes_to_highlight,
             "matches": matches,
         }
-        url = url = build_url(Paths.INDEXES, self.uid, Paths.SEARCH)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.SEARCH)
+        )
         response = await self._http_requests.post(url, body=body)
 
         return SearchResults(**response.json())
 
     async def get_document(self, document_id: str) -> dict:
-        url = url = build_url(Paths.INDEXES, self.uid, f"{Paths.DOCUMENTS.value}/{document_id}")
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None,
+            partial(
+                build_url,
+                section=Paths.INDEXES,
+                uid=self.uid,
+                post_uid=f"{Paths.DOCUMENTS.value}/{document_id}",
+            ),
+        )
         response = await self._http_requests.get(url)
         return response.json()
 
@@ -186,7 +230,16 @@ class Index:
         if attributes_to_retrieve:
             parameters["attributesToRetrieve"] = attributes_to_retrieve
 
-        url = build_url(Paths.INDEXES, self.uid, f"{Paths.DOCUMENTS.value}?{urlencode(parameters)}")
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None,
+            partial(
+                build_url,
+                section=Paths.INDEXES,
+                uid=self.uid,
+                post_uid=f"{Paths.DOCUMENTS.value}?{urlencode(parameters)}",
+            ),
+        )
         response = await self._http_requests.get(url)
 
         if not response.json():
@@ -197,7 +250,10 @@ class Index:
     async def add_documents(
         self, documents: list[dict], primary_key: Optional[str] = None
     ) -> UpdateId:
-        url = build_url(Paths.INDEXES, self.uid, Paths.DOCUMENTS)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.DOCUMENTS)
+        )
         if primary_key:
             formatted_primary_key = urlencode({"primaryKey": primary_key})
             url = f"{url}?{formatted_primary_key}"
@@ -214,7 +270,7 @@ class Index:
 
         update_ids: list[UpdateId] = []
 
-        for document_batch in self._batch(documents, batch_size):
+        async for document_batch in self._batch(documents, batch_size):
             update_id = await self.add_documents(document_batch, primary_key)
             update_ids.append(update_id)
 
@@ -230,7 +286,8 @@ class Index:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
-        self._validate_json_path(file_path)
+        loop = get_running_loop()
+        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
 
         async with aiofiles.open(file_path, mode="r") as f:
             data = await f.read()
@@ -248,7 +305,8 @@ class Index:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
-        self._validate_json_path(file_path)
+        loop = get_running_loop()
+        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
 
         async with aiofiles.open(file_path, mode="r") as f:
             data = await f.read()
@@ -261,7 +319,10 @@ class Index:
     async def update_documents(
         self, documents: list[dict], primary_key: Optional[str] = None
     ) -> UpdateId:
-        url = url = build_url(Paths.INDEXES, self.uid, Paths.DOCUMENTS)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.DOCUMENTS)
+        )
         if primary_key:
             formatted_primary_key = urlencode({"primaryKey": primary_key})
             url = f"{url}?{formatted_primary_key}"
@@ -278,7 +339,7 @@ class Index:
 
         update_ids: list[UpdateId] = []
 
-        for document_batch in self._batch(documents, batch_size):
+        async for document_batch in self._batch(documents, batch_size):
             update_id = await self.update_documents(document_batch, primary_key)
             update_ids.append(update_id)
 
@@ -294,7 +355,8 @@ class Index:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
-        self._validate_json_path(file_path)
+        loop = get_running_loop()
+        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
 
         async with aiofiles.open(file_path, mode="r") as f:
             data = await f.read()
@@ -312,7 +374,8 @@ class Index:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
-        self._validate_json_path(file_path)
+        loop = get_running_loop()
+        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
 
         async with aiofiles.open(file_path, mode="r") as f:
             data = await f.read()
@@ -323,19 +386,40 @@ class Index:
         )
 
     async def delete_document(self, document_id: str) -> UpdateId:
-        url = build_url(Paths.INDEXES, self.uid, f"{Paths.DOCUMENTS.value}/{document_id}")
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None,
+            partial(
+                build_url,
+                section=Paths.INDEXES,
+                uid=self.uid,
+                post_uid=f"{Paths.DOCUMENTS.value}/{document_id}",
+            ),
+        )
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
 
     async def delete_documents(self, ids: list[str]) -> UpdateId:
-        url = build_url(Paths.INDEXES, self.uid, f"{Paths.DOCUMENTS.value}/delete-batch")
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None,
+            partial(
+                build_url,
+                section=Paths.INDEXES,
+                uid=self.uid,
+                post_uid=f"{Paths.DOCUMENTS.value}/delete-batch",
+            ),
+        )
         response = await self._http_requests.post(url, ids)
 
         return UpdateId(**response.json())
 
     async def delete_all_documents(self) -> UpdateId:
-        url = build_url(Paths.INDEXES, self.uid, Paths.DOCUMENTS)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.DOCUMENTS)
+        )
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -343,7 +427,10 @@ class Index:
     # GENERAL SETTINGS ROUTES
 
     async def get_settings(self) -> MeiliSearchSettings:
-        url = build_url(Paths.INDEXES, self.uid, Paths.SETTINGS)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.SETTINGS)
+        )
         response = await self._http_requests.get(url)
 
         return MeiliSearchSettings(**response.json())
@@ -351,13 +438,19 @@ class Index:
     async def update_settings(self, body: MeiliSearchSettings) -> UpdateId:
         body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}
 
-        url = build_url(Paths.INDEXES, self.uid, Paths.SETTINGS)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.SETTINGS)
+        )
         response = await self._http_requests.post(url, body_dict)
 
         return UpdateId(**response.json())
 
     async def reset_settings(self) -> UpdateId:
-        url = build_url(Paths.INDEXES, self.uid, Paths.SETTINGS)
+        loop = get_running_loop()
+        url = await loop.run_in_executor(
+            None, partial(build_url, section=Paths.INDEXES, uid=self.uid, post_uid=Paths.SETTINGS)
+        )
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -365,28 +458,28 @@ class Index:
     # RANKING RULES SUB-ROUTES
 
     async def get_ranking_rules(self) -> list[str]:
-        response = await self._http_requests.get(self._settings_url_for(Paths.RANKING_RULES))
+        url = await self._settings_url_for(Paths.RANKING_RULES)
+        response = await self._http_requests.get(url)
 
         return response.json()
 
     async def update_ranking_rules(self, ranking_rules: list[str]) -> UpdateId:
-        respose = await self._http_requests.post(
-            self._settings_url_for(Paths.RANKING_RULES), ranking_rules
-        )
+        url = await self._settings_url_for(Paths.RANKING_RULES)
+        respose = await self._http_requests.post(url, ranking_rules)
 
         return UpdateId(**respose.json())
 
     async def reset_ranking_rules(self) -> UpdateId:
-        response = await self._http_requests.delete(
-            self._settings_url_for(Paths.RANKING_RULES),
-        )
+        url = await self._settings_url_for(Paths.RANKING_RULES)
+        response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
 
     # DISTINCT ATTRIBUTE SUB-ROUTES
 
     async def get_distinct_attribute(self) -> Optional[str]:
-        response = await self._http_requests.get(self._settings_url_for(Paths.DISTINCT_ATTRIBUTE))
+        url = await self._settings_url_for(Paths.DISTINCT_ATTRIBUTE)
+        response = await self._http_requests.get(url)
 
         if not response.json():
             None
@@ -394,65 +487,60 @@ class Index:
         return response.json()
 
     async def update_distinct_attribute(self, body: str) -> UpdateId:
-        response = await self._http_requests.post(
-            self._settings_url_for(Paths.DISTINCT_ATTRIBUTE), body
-        )
+        url = await self._settings_url_for(Paths.DISTINCT_ATTRIBUTE)
+        response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
 
     async def reset_distinct_attribute(self) -> UpdateId:
-        response = await self._http_requests.delete(
-            self._settings_url_for(Paths.DISTINCT_ATTRIBUTE),
-        )
+        url = await self._settings_url_for(Paths.DISTINCT_ATTRIBUTE)
+        response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
 
     # SEARCHABLE ATTRIBUTES SUB-ROUTES
 
     async def get_searchable_attributes(self) -> list[str]:
-        response = await self._http_requests.get(
-            self._settings_url_for(Paths.SEARCHABLE_ATTRIBUTES)
-        )
+        url = await self._settings_url_for(Paths.SEARCHABLE_ATTRIBUTES)
+        response = await self._http_requests.get(url)
         return response.json()
 
     async def update_searchable_attributes(self, body: list[str]) -> UpdateId:
-        response = await self._http_requests.post(
-            self._settings_url_for(Paths.SEARCHABLE_ATTRIBUTES), body
-        )
+        url = await self._settings_url_for(Paths.SEARCHABLE_ATTRIBUTES)
+        response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
 
     async def reset_searchable_attributes(self) -> UpdateId:
-        response = await self._http_requests.delete(
-            self._settings_url_for(Paths.SEARCHABLE_ATTRIBUTES),
-        )
+        url = await self._settings_url_for(Paths.SEARCHABLE_ATTRIBUTES)
+        response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
 
     # DISPLAYED ATTRIBUTES SUB-ROUTES
 
     async def get_displayed_attributes(self) -> list[str]:
-        response = await self._http_requests.get(self._settings_url_for(Paths.DISPLAYED_ATTRIBUTES))
+        url = await self._settings_url_for(Paths.DISPLAYED_ATTRIBUTES)
+        response = await self._http_requests.get(url)
         return response.json()
 
     async def update_displayed_attributes(self, body: list[str]) -> UpdateId:
-        response = await self._http_requests.post(
-            self._settings_url_for(Paths.DISPLAYED_ATTRIBUTES), body
-        )
+        url = await self._settings_url_for(Paths.DISPLAYED_ATTRIBUTES)
+        response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
 
     async def reset_displayed_attributes(self) -> UpdateId:
-        response = await self._http_requests.delete(
-            self._settings_url_for(Paths.DISPLAYED_ATTRIBUTES),
-        )
+        url = await self._settings_url_for(Paths.DISPLAYED_ATTRIBUTES)
+        response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
 
     # STOP WORDS SUB-ROUTES
 
     async def get_stop_words(self) -> Optional[list[str]]:
-        response = await self._http_requests.get(self._settings_url_for(Paths.STOP_WORDS))
+        url = await self._settings_url_for(Paths.STOP_WORDS)
+        response = await self._http_requests.get(url)
 
         if not response.json():
             return None
@@ -460,21 +548,22 @@ class Index:
         return response.json()
 
     async def update_stop_words(self, body: list[str]) -> UpdateId:
-        response = await self._http_requests.post(self._settings_url_for(Paths.STOP_WORDS), body)
+        url = await self._settings_url_for(Paths.STOP_WORDS)
+        response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
 
     async def reset_stop_words(self) -> UpdateId:
-        response = await self._http_requests.delete(
-            self._settings_url_for(Paths.STOP_WORDS),
-        )
+        url = await self._settings_url_for(Paths.STOP_WORDS)
+        response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
 
     # SYNONYMS SUB-ROUTES
 
     async def get_synonyms(self) -> Optional[dict[str, list[str]]]:
-        response = await self._http_requests.get(self._settings_url_for(Paths.SYNONYMS))
+        url = await self._settings_url_for(Paths.SYNONYMS)
+        response = await self._http_requests.get(url)
 
         if not response.json():
             return None
@@ -482,23 +571,22 @@ class Index:
         return response.json()
 
     async def update_synonyms(self, body: dict[str, list[str]]) -> UpdateId:
-        response = await self._http_requests.post(self._settings_url_for(Paths.SYNONYMS), body)
+        url = await self._settings_url_for(Paths.SYNONYMS)
+        response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
 
     async def reset_synonyms(self) -> UpdateId:
-        response = await self._http_requests.delete(
-            self._settings_url_for(Paths.SYNONYMS),
-        )
+        url = await self._settings_url_for(Paths.SYNONYMS)
+        response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
 
     # ATTRIBUTES FOR FACETING SUB-ROUTES
 
     async def get_attributes_for_faceting(self) -> Optional[list[str]]:
-        response = await self._http_requests.get(
-            self._settings_url_for(Paths.ATTRIBUTES_FOR_FACETING)
-        )
+        url = await self._settings_url_for(Paths.ATTRIBUTES_FOR_FACETING)
+        response = await self._http_requests.get(url)
 
         if not response.json():
             return None
@@ -506,16 +594,14 @@ class Index:
         return response.json()
 
     async def update_attributes_for_faceting(self, body: list[str]) -> UpdateId:
-        response = await self._http_requests.post(
-            self._settings_url_for(Paths.ATTRIBUTES_FOR_FACETING), body
-        )
+        url = await self._settings_url_for(Paths.ATTRIBUTES_FOR_FACETING)
+        response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
 
     async def reset_attributes_for_faceting(self) -> UpdateId:
-        response = await self._http_requests.delete(
-            self._settings_url_for(Paths.ATTRIBUTES_FOR_FACETING),
-        )
+        url = await self._settings_url_for(Paths.ATTRIBUTES_FOR_FACETING)
+        response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
 
@@ -540,11 +626,20 @@ class Index:
             reduced = f"{split[0]}.{split[1][:-reduce]}Z"
             return datetime.strptime(reduced, "%Y-%m-%dT%H:%M:%S.%fZ")
 
-    def _settings_url_for(self, sub_route: Paths) -> str:
-        return build_url(Paths.INDEXES, self.uid, f"{Paths.SETTINGS.value}/{sub_route.value}")
+    async def _settings_url_for(self, sub_route: Paths) -> str:
+        loop = get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            partial(
+                build_url,
+                section=Paths.INDEXES,
+                uid=self.uid,
+                post_uid=f"{Paths.SETTINGS.value}/{sub_route.value}",
+            ),
+        )
 
     @staticmethod
-    def _batch(documents: list[dict], batch_size: int) -> Generator[list[dict], None, None]:
+    async def _batch(documents: list[dict], batch_size: int) -> AsyncGenerator[list[dict], None]:
         total_len = len(documents)
         for i in range(0, total_len, batch_size):
             yield documents[i : i + batch_size]
