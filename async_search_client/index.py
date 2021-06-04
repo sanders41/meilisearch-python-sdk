@@ -12,7 +12,11 @@ import aiofiles
 from httpx import AsyncClient
 
 from async_search_client._http_requests import HttpRequests
-from async_search_client.errors import MeiliSearchError, MeiliSearchTimeoutError
+from async_search_client.errors import (
+    MeiliSearchApiError,
+    MeiliSearchError,
+    MeiliSearchTimeoutError,
+)
 from async_search_client.models import (
     IndexStats,
     MeiliSearchSettings,
@@ -52,6 +56,18 @@ class Index:
         )
         response = await self._http_requests.delete(url)
         return response.status_code
+
+    async def delete_if_exists(self) -> bool:
+        """
+        Deletes the index if it already exists
+        """
+        try:
+            await self.delete()
+            return True
+        except MeiliSearchApiError as error:
+            if error.error_code != "index_not_found":
+                raise error
+            return False
 
     async def update(self, primary_key: str = None) -> Index:
         """

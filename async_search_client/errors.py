@@ -21,8 +21,8 @@ class MeiliSearchApiError(MeiliSearchError):
         self.message = ""
         self.error_link = ""
         if response.text:
-            self.message = f" Error code: {response.json().get('message') or ''}."
-            self.error_code = f" Error message: {response.json().get('errorCode') or ''}"
+            self.message = f" Error message: {response.json().get('message') or ''}."
+            self.error_code = f"{response.json().get('errorCode') or ''}"
             self.error_link = f" Error documentation: {response.json().get('errorLink') or ''}"
         else:
             self.message = error

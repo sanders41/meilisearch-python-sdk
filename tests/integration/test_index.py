@@ -1,7 +1,9 @@
 from datetime import datetime
 
 import pytest
+from httpx import Response
 
+from async_search_client._http_requests import HttpRequests
 from async_search_client.errors import MeiliSearchApiError, MeiliSearchTimeoutError
 from async_search_client.index import Index
 from async_search_client.models import MeiliSearchSettings
@@ -441,3 +443,63 @@ async def test_repr(empty_index):
     assert "primary_key" in got
     assert "created_at" in got
     assert "updated_at" in got
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("indexes_sample")
+async def test_delete_if_exists(test_client, index_uid):
+    assert await test_client.get_index(uid=index_uid)
+    deleted = await test_client.index(index_uid).delete_if_exists()
+    assert deleted is True
+    with pytest.raises(MeiliSearchApiError):
+        await test_client.get_index(uid=index_uid)
+
+
+@pytest.mark.asyncio
+async def test_delete_if_exists_no_delete(test_client):
+    with pytest.raises(MeiliSearchApiError):
+        await test_client.get_index(uid="none")
+
+    deleted = await test_client.index("none").delete_if_exists()
+    assert deleted is False
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("indexes_sample")
+async def test_delete_if_exists_error(test_client, index_uid, monkeypatch):
+    async def mock_response(*args, **kwargs):
+        raise MeiliSearchApiError("test", Response(status_code=404))
+
+    monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
+    with pytest.raises(MeiliSearchApiError):
+        await test_client.index(index_uid).delete_if_exists()
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("indexes_sample")
+async def test_delete_index_if_exists(test_client, index_uid):
+    assert await test_client.get_index(uid=index_uid)
+    deleted = await test_client.delete_index_if_exists(index_uid)
+    assert deleted is True
+    with pytest.raises(MeiliSearchApiError):
+        await test_client.get_index(uid=index_uid)
+
+
+@pytest.mark.asyncio
+async def test_delete_index_if_exists_no_delete(test_client):
+    with pytest.raises(MeiliSearchApiError):
+        await test_client.get_index(uid="none")
+
+    deleted = await test_client.delete_index_if_exists("none")
+    assert deleted is False
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("indexes_sample")
+async def test_delete_index_if_exists_error(test_client, index_uid, monkeypatch):
+    async def mock_response(*args, **kwargs):
+        raise MeiliSearchApiError("test", Response(status_code=404))
+
+    monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
+    with pytest.raises(MeiliSearchApiError):
+        await test_client.delete_index_if_exists(index_uid)

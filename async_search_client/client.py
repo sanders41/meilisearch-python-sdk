@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from asyncio import get_running_loop
+from functools import partial
 from types import TracebackType
 from typing import Optional, Type
 
@@ -42,6 +44,19 @@ class Client:
 
     async def create_index(self, uid: str, primary_key: Optional[str] = None) -> Index:
         return await Index.create(self._http_client, uid, primary_key)
+
+    async def delete_index_if_exists(self, uid: str) -> bool:
+        try:
+            loop = get_running_loop()
+            url = await loop.run_in_executor(
+                None, partial(build_url, section=Paths.INDEXES, uid=uid)
+            )
+            await self._http_requests.delete(url)
+            return True
+        except MeiliSearchApiError as error:
+            if error.error_code != "index_not_found":
+                raise error
+            return False
 
     async def get_indexes(self) -> Optional[list[Index]]:
         response = await self._http_requests.get(build_url(Paths.INDEXES))
