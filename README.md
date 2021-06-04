@@ -38,7 +38,7 @@ For the most part this client mirrors the functionality of the official client a
 
 3. The async client uses [Pydantic](https://pydantic-docs.helpmanual.io/) to serialize/deserialize the JSON from MeiliSearch into Python objects wherever possible, and in the process converts the camelCaseNames from JSON into more Pythonic snake_case_names. The official client instead uses dictionaries to store the return values in most cases.
 
-In some instances it is not possible to return the data as an object, becase the structure will be dependant on your particular dataset and can't
+In some instances it is not possible to return the data as an object because the structure will be dependant on your particular dataset and can't
 be known ahead of time. In these instances you can either work with the data in the dictionary that is returned, or because you will know the
 structure you can generate your own Classes.
 
@@ -61,7 +61,7 @@ class Movie(CamelBase):
     poster: str
     overview: str
     release_date: datetime
-    genre: Optional[str]
+    genre: Optional[str] = None
 
 
 async with Client("http://127.0.0.1:7700", "masterKey") as client:
@@ -128,7 +128,7 @@ async with Client('http://127.0.0.1:7700', 'masterKey') as client:
     await index.add_documents(documents)
 ```
 
-The server will return a update id that can be used to [get the status](https://docs.meilisearch.com/reference/api/updates.html#get-an-update-status)
+The server will return an update id that can be used to [get the status](https://docs.meilisearch.com/reference/api/updates.html#get-an-update-status)
 of the updates. To do this you would save the result response from adding the documets to a variable,
 this will be a UpdateId object, and use it to check the status of the updates.
 
@@ -154,7 +154,7 @@ async with Client('http://127.0.0.1:7700', 'masterKey') as client:
         ...
     ]
 
-    await index.add_documents_in_batches(documents, batch_size=20)
+    await index.add_documents_in_batches(documents, batch_size=100)
 ```
 
 The server will return a list of update ids that can be used to [get the status](https://docs.meilisearch.com/reference/api/updates.html#get-an-update-status)
