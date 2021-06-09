@@ -21,6 +21,7 @@ repos:
     rev: v0.901
     hooks:
     - id: mypy
+      additional_dependencies: [types-aiofiles]
       files: async_search_client/
   - repo: https://github.com/PyCQA/flake8
     rev: 3.9.2
