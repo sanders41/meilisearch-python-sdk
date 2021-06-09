@@ -70,3 +70,6 @@ src_paths = ["async_search_client", "tests"]
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "--cov=async_search_client"
+
+[tool.mypy]
+disallow_untyped_defs = true
