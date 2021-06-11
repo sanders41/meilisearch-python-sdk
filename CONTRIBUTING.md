@@ -45,32 +45,7 @@ This creates the directory async-search-client and connects your repository to t
 
 Note: This project uses Poetry to manage dependencies. If you do not already have Poetry installed you will need to install it with the instuctions [here](https://python-poetry.org/docs/#installation)
 
-Once you have cloned your fork of the repository you can create a virtual environment. When using Poetry the step is optional.
-If you create a virtual environment Poetry will use the environment you have activated, or Poetry will create
-and use it's own if you don't create one. If you want to create your own, once you are in the async-search-client directory create and activate
-the virtual environment. This step is slightly different for Mac/Linux and Windows.
-
-Mac/Linux
-
-```sh
-# Create the environment
-python3 -m venv venv
-
-# Activate the environment
-. venv/bin/activate
-```
-
-Windows
-
-```powershell
-# Create the environment
-python -m venv venv
-
-#Activate the environment. Use activate.bat for cmd.exe
-venv\Scripts\Activate.ps1
-```
-
-Next the requirements need to be installed.
+First the requirements need to be installed.
 
 ```sh
 poetry install
@@ -103,22 +78,6 @@ async-search-client uses [isort](https://pycqa.github.io/isort/),
 [Flake8](https://flake8.pycqa.org/en/latest/), [Black](https://github.com/psf/black), and [mypy](https://mypy.readthedocs.io/en/stable/) to ensure consistant code formmating.
 
 You can run linting on your code at any time with:
-
-```sh
-# Run isort
-isort async_search_client tests
-
-# Run black
-black async_search_client tests
-
-# Run flake8
-flake8 async_search_client test
-
-# Run mypy
-mypy async_search_client
-```
-
-* Note if you did not create your own virtual environment and are using the Poetry environment instead you will need to append `poetry run ...` to each command.
 
 ```sh
 # Run isort
@@ -191,22 +150,10 @@ docker run -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --master-key=m
 Now with the container running run the test suite
 
 ```sh
-pytest
-```
-
-Or if you are using Poetry's virtual environment
-
-```sh
 poetry run pytest
 ```
 
 If you want to see which lines are missing code coverage run the test with:
-
-```sh
-pytest --cov-report term-missing
-```
-
-or
 
 ```sh
 poetry run pytest --cov-report term-missing
@@ -216,12 +163,6 @@ In additon to mainting the coverage percentage please ensure that all
 tests are passing before submitting a pull request.
 
 tox can be used to run both linting, and run the tests in all versions of Python async-search-client supports. Note that you will need to have all the verions of Python installed for this to work.
-
-```sh
-tox
-```
-
-or
 
 ```sh
 poetry run tox
