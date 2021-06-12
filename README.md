@@ -4,7 +4,7 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/async-search-client/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/async-search-client/main)
 [![Coverage](https://codecov.io/github/sanders41/async-search-client/coverage.svg?branch=main)](https://codecov.io/gh/sanders41/async-search-client)
 [![PyPI version](https://badge.fury.io/py/async-search-client.svg)](https://badge.fury.io/py/async-search-client)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/async-search-client?color=5cc141)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/async-search-client?color=5cc141)](https://github.com/sanders41/async-search-client)
 
 Async Search Client is a Python async client for the [MeiliSearch](https://github.com/meilisearch/MeiliSearch) API. MeiliSearch also has an official [Python client](https://github.com/meilisearch/meilisearch-python).
 
