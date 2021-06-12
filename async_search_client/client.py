@@ -33,9 +33,10 @@ class Client:
         await self.aclose()
 
     async def aclose(self) -> None:
+        """Closes the client. This only needs to be used if the client was not created with a
+        context manager
         """
-        Closes the client. This only needs to be used if the client was not created with a context manager.
-        """
+
         await self._http_client.aclose()
 
     async def create_dump(self) -> DumpInfo:
@@ -79,10 +80,10 @@ class Client:
         return await Index(self._http_client, uid).fetch_info()
 
     def index(self, uid: str) -> Index:
-        """
-        Create a local reference to an index identified by UID, without doing an HTTP call.
+        """Create a local reference to an index identified by UID, without doing an HTTP call.
         Because no network call is made this method is not awaitable.
         """
+
         return Index(self._http_client, uid=uid)
 
     async def get_all_stats(self) -> ClientStats:
@@ -124,16 +125,14 @@ class Client:
         return [IndexInfo(**x) for x in response.json()]
 
     async def get_version(self) -> Version:
-        """
-        Get version MeiliSearch that is running
-        """
+        """Get version MeiliSearch that is running"""
+
         response = await self._http_requests.get(build_url(Paths.VERSION))
         return Version(**response.json())
 
     async def health(self) -> Health:
-        """
-        Get health of the MeiliSearch server
-        """
+        """Get health of the MeiliSearch server"""
+
         response = await self._http_requests.get(build_url(Paths.HEALTH))
         return Health(**response.json())
 

@@ -58,9 +58,8 @@ class Index:
         return response.status_code
 
     async def delete_if_exists(self) -> bool:
-        """
-        Deletes the index if it already exists
-        """
+        """Deletes the index if it already exists"""
+
         try:
             await self.delete()
             return True
@@ -70,9 +69,8 @@ class Index:
             return False
 
     async def update(self, primary_key: str = None) -> Index:
-        """
-        Update the index primary-key.
-        """
+        """Update the index primary-key"""
+
         payload = {}
         if primary_key is not None:
             payload["primaryKey"] = primary_key
@@ -157,13 +155,13 @@ class Index:
     async def wait_for_pending_update(
         self, update_id: int, timeout_in_ms: int = 5000, interval_in_ms: int = 50
     ) -> UpdateStatus:
-        """
-        Wait until MeiliSearch processes an update, and get its status.
+        """Wait until MeiliSearch processes an update, and get its status.
 
         update_id: identifier of the update to retrieve
         timeout_in_ms (optional): time the method should wait before raising a MeiliSearchTimeoutError
         interval_in_ms (optional): time interval the method should wait (sleep) between requests
         """
+
         start_time = datetime.now()
         elapsed_time = 0.0
         while elapsed_time < timeout_in_ms:
@@ -280,9 +278,7 @@ class Index:
     async def add_documents_in_batches(
         self, documents: list[dict], batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
-        """
-        Splits documents into batches to reduce RAM usage with indexing.
-        """
+        """Splits documents into batches to reduce RAM usage with indexing"""
 
         update_ids: list[UpdateId] = []
 
@@ -295,9 +291,7 @@ class Index:
     async def add_documents_from_file(
         self, file_path: Path | str, primary_key: Optional[str] = None
     ) -> UpdateId:
-        """
-        Add documents to the index from a json file.
-        """
+        """Add documents to the index from a json file"""
 
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -314,9 +308,7 @@ class Index:
     async def add_documents_from_file_in_batches(
         self, file_path: Path | str, batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
-        """
-        Add documents to the index from a json file in batches to reduce RAM usage.
-        """
+        """Add documents to the index from a json file in batches to reduce RAM usage"""
 
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -349,9 +341,7 @@ class Index:
     async def update_documents_in_batches(
         self, documents: list[dict], batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
-        """
-        Splits documents into batches to reduce RAM usage with indexing.
-        """
+        """Splits documents into batches to reduce RAM usage with indexing"""
 
         update_ids: list[UpdateId] = []
 
@@ -364,9 +354,7 @@ class Index:
     async def update_documents_from_file(
         self, file_path: Path | str, primary_key: Optional[str] = None
     ) -> UpdateId:
-        """
-        Update documents in the index from a json file.
-        """
+        """Update documents in the index from a json file"""
 
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -383,9 +371,7 @@ class Index:
     async def update_documents_from_file_in_batches(
         self, file_path: Path | str, batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
-        """
-        Update documents in the index from a json file in batches to reduce RAM usage.
-        """
+        """Update documents in the index from a json file in batches to reduce RAM usage"""
 
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -623,8 +609,7 @@ class Index:
 
     @staticmethod
     def _iso_to_date_time(iso_date: Optional[datetime | str]) -> Optional[datetime]:
-        """
-        The microseconds from MeiliSearch are sometimes too long for python to convert so this
+        """The microseconds from MeiliSearch are sometimes too long for python to convert so this
         strips off the last digits to shorten it when that happens.
         """
 
