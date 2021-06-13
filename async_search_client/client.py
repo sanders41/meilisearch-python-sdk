@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from asyncio import get_running_loop
-from functools import partial
 from types import TracebackType
 from typing import Optional, Type
 
@@ -11,7 +9,6 @@ from async_search_client._http_requests import HttpRequests
 from async_search_client.errors import MeiliSearchApiError
 from async_search_client.index import Index
 from async_search_client.models import ClientStats, DumpInfo, Health, IndexInfo, Keys, Version
-from async_search_client.paths import Paths, build_url
 
 
 class Client:
@@ -40,7 +37,7 @@ class Client:
         await self._http_client.aclose()
 
     async def create_dump(self) -> DumpInfo:
-        response = await self._http_requests.post(build_url(Paths.DUMPS))
+        response = await self._http_requests.post("dumps")
         return DumpInfo(**response.json())
 
     async def create_index(self, uid: str, primary_key: Optional[str] = None) -> Index:
@@ -48,10 +45,7 @@ class Client:
 
     async def delete_index_if_exists(self, uid: str) -> bool:
         try:
-            loop = get_running_loop()
-            url = await loop.run_in_executor(
-                None, partial(build_url, section=Paths.INDEXES, uid=uid)
-            )
+            url = f"indexes/{uid}"
             await self._http_requests.delete(url)
             return True
         except MeiliSearchApiError as error:
@@ -60,7 +54,7 @@ class Client:
             return False
 
     async def get_indexes(self) -> Optional[list[Index]]:
-        response = await self._http_requests.get(build_url(Paths.INDEXES))
+        response = await self._http_requests.get("indexes")
 
         if not response.json():
             return None
@@ -87,11 +81,11 @@ class Client:
         return Index(self._http_client, uid=uid)
 
     async def get_all_stats(self) -> ClientStats:
-        response = await self._http_requests.get(build_url(Paths.STATS))
+        response = await self._http_requests.get("stats")
         return ClientStats(**response.json())
 
     async def get_dump_status(self, uid: str) -> DumpInfo:
-        url = build_url(Paths.DUMPS, uid, "status")
+        url = f"dumps/{uid}/status"
         response = await self._http_requests.get(url)
         return DumpInfo(**response.json())
 
@@ -105,11 +99,11 @@ class Client:
         return index_instance
 
     async def get_keys(self) -> Keys:
-        response = await self._http_requests.get(build_url(Paths.KEYS))
+        response = await self._http_requests.get("keys")
         return Keys(**response.json())
 
     async def get_raw_index(self, uid: str) -> Optional[IndexInfo]:
-        response = await self._http_client.get(build_url(Paths.INDEXES, uid))
+        response = await self._http_client.get(f"indexes/{uid}")
 
         if response.status_code == 404:
             return None
@@ -117,7 +111,7 @@ class Client:
         return IndexInfo(**response.json())
 
     async def get_raw_indexes(self) -> Optional[list[IndexInfo]]:
-        response = await self._http_requests.get(build_url(Paths.INDEXES))
+        response = await self._http_requests.get("indexes")
 
         if not response.json():
             return None
@@ -127,13 +121,13 @@ class Client:
     async def get_version(self) -> Version:
         """Get version MeiliSearch that is running"""
 
-        response = await self._http_requests.get(build_url(Paths.VERSION))
+        response = await self._http_requests.get("version")
         return Version(**response.json())
 
     async def health(self) -> Health:
         """Get health of the MeiliSearch server"""
 
-        response = await self._http_requests.get(build_url(Paths.HEALTH))
+        response = await self._http_requests.get("health")
         return Health(**response.json())
 
     def _set_headers(self, api_key: str = None) -> dict[str, str]:
