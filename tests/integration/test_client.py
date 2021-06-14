@@ -5,7 +5,11 @@ import pytest
 from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError, Response
 
 from async_search_client.client import Client
-from async_search_client.errors import MeiliSearchApiError, MeiliSearchCommunicationError
+from async_search_client.errors import (
+    MeiliSearchApiError,
+    MeiliSearchCommunicationError,
+    MeiliSearchTimeoutError,
+)
 from async_search_client.models import DumpInfo, IndexInfo, Version
 
 
@@ -231,7 +235,7 @@ async def test_bad_master_key(base_url, master_key):
 
 @pytest.mark.asyncio
 async def test_communication_error(master_key):
-    with pytest.raises(MeiliSearchCommunicationError):
+    with pytest.raises(MeiliSearchTimeoutError):
         async with Client("http://wrongurl:1234", master_key, 1) as client:
             await client.create_index("some_index")
 
@@ -252,5 +256,5 @@ async def test_connection_timeout(test_client, monkeypatch):
         raise ConnectTimeout("error")
 
     monkeypatch.setattr(AsyncClient, "post", mock_error)
-    with pytest.raises(MeiliSearchCommunicationError):
+    with pytest.raises(MeiliSearchTimeoutError):
         await test_client.create_index("some_index")

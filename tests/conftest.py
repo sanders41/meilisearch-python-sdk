@@ -40,9 +40,9 @@ async def test_client():
 @pytest.fixture(autouse=True)
 async def clear_indexes(test_client):
     """Auto-clears the indexes after each test function run.
+
     Makes all the test functions independent.
     """
-
     yield
     indexes = await test_client.get_indexes()
     if indexes:
@@ -92,8 +92,10 @@ async def indexes_sample(test_client):
 
 @pytest.fixture(scope="session")
 def small_movies():
-    """Runs once per session. Provides the content of small_movies.json"""
+    """Runs once per session.
 
+    Provides the content of small_movies.json
+    """
     with open(SMALL_MOVIES_PATH, "r") as movie_file:
         yield json.loads(movie_file.read())
 
