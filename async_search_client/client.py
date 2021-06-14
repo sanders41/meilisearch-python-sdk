@@ -56,7 +56,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         response = await self._http_requests.post("dumps")
         return DumpInfo(**response.json())
@@ -74,7 +73,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         return await Index.create(self._http_client, uid, primary_key)
 
@@ -90,7 +88,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         try:
             url = f"indexes/{uid}"
@@ -110,7 +107,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         response = await self._http_requests.get("indexes")
 
@@ -140,7 +136,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         return await Index(self._http_client, uid).fetch_info()
 
@@ -158,7 +153,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         return Index(self._http_client, uid=uid)
 
@@ -172,7 +166,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         response = await self._http_requests.get("stats")
         return ClientStats(**response.json())
@@ -190,7 +183,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"dumps/{uid}/status"
         response = await self._http_requests.get(url)
@@ -229,7 +221,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         response = await self._http_requests.get("keys")
         return Keys(**response.json())
@@ -246,7 +237,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         response = await self._http_client.get(f"indexes/{uid}")
 
@@ -266,7 +256,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         response = await self._http_requests.get("indexes")
 
@@ -284,7 +273,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         response = await self._http_requests.get("version")
         return Version(**response.json())
@@ -298,7 +286,6 @@ class Client:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         response = await self._http_requests.get("health")
         return Health(**response.json())

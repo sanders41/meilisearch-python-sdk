@@ -71,7 +71,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}"
         response = await self._http_requests.delete(url)
@@ -86,7 +85,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         try:
             await self.delete()
@@ -108,7 +106,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         payload = {}
         if primary_key is not None:
@@ -128,7 +125,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}"
         response = await self._http_requests.get(url)
@@ -152,7 +148,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         info = await self.fetch_info()
         return info.primary_key
@@ -175,7 +170,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         if not primary_key:
             payload = {"uid": uid}
@@ -202,7 +196,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/updates"
         response = await self._http_requests.get(url)
@@ -224,7 +217,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/updates/{update_id}"
         response = await self._http_requests.get(url)
@@ -272,7 +264,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/stats"
         response = await self._http_requests.get(url)
@@ -317,7 +308,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         body = {
             "q": query,
@@ -349,7 +339,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/documents/{document_id}"
         response = await self._http_requests.get(url)
@@ -372,7 +361,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         parameters: dict[str, Any] = {
             "offset": offset,
@@ -406,7 +394,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/documents"
         if primary_key:
@@ -434,7 +421,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         update_ids: list[UpdateId] = []
 
@@ -460,7 +446,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -492,7 +477,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -524,7 +508,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/documents"
         if primary_key:
@@ -552,7 +535,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         update_ids: list[UpdateId] = []
 
@@ -578,7 +560,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -610,7 +591,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         if isinstance(file_path, str):
             file_path = Path(file_path)
@@ -638,7 +618,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/documents/{document_id}"
         response = await self._http_requests.delete(url)
@@ -657,7 +636,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/documents/delete-batch"
         response = await self._http_requests.post(url, ids)
@@ -673,7 +651,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/documents"
         response = await self._http_requests.delete(url)
@@ -691,7 +668,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings"
         response = await self._http_requests.get(url)
@@ -710,7 +686,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}
 
@@ -728,7 +703,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings"
         response = await self._http_requests.delete(url)
@@ -746,7 +720,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/ranking-rules"
         response = await self._http_requests.get(url)
@@ -765,7 +738,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/ranking-rules"
         respose = await self._http_requests.post(url, ranking_rules)
@@ -781,7 +753,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/ranking-rules"
         response = await self._http_requests.delete(url)
@@ -800,7 +771,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/distinct-attribute"
         response = await self._http_requests.get(url)
@@ -822,7 +792,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/distinct-attribute"
         response = await self._http_requests.post(url, body)
@@ -838,7 +807,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/distinct-attribute"
         response = await self._http_requests.delete(url)
@@ -856,7 +824,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/searchable-attributes"
         response = await self._http_requests.get(url)
@@ -874,7 +841,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/searchable-attributes"
         response = await self._http_requests.post(url, body)
@@ -893,7 +859,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/searchable-attributes"
         response = await self._http_requests.delete(url)
@@ -911,7 +876,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/displayed-attributes"
         response = await self._http_requests.get(url)
@@ -929,7 +893,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/displayed-attributes"
         response = await self._http_requests.post(url, body)
@@ -945,7 +908,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/displayed-attributes"
         response = await self._http_requests.delete(url)
@@ -963,7 +925,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/stop-words"
         response = await self._http_requests.get(url)
@@ -985,7 +946,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/stop-words"
         response = await self._http_requests.post(url, body)
@@ -1001,7 +961,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/stop-words"
         response = await self._http_requests.delete(url)
@@ -1019,7 +978,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/synonyms"
         response = await self._http_requests.get(url)
@@ -1041,7 +999,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/synonyms"
         response = await self._http_requests.post(url, body)
@@ -1057,7 +1014,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/synonyms"
         response = await self._http_requests.delete(url)
@@ -1075,7 +1031,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/attributes-for-faceting"
         response = await self._http_requests.get(url)
@@ -1097,7 +1052,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/attributes-for-faceting"
         response = await self._http_requests.post(url, body)
@@ -1113,7 +1067,6 @@ class Index:
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
         """
         url = f"indexes/{self.uid}/settings/attributes-for-faceting"
         response = await self._http_requests.delete(url)
