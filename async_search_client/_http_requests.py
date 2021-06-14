@@ -12,7 +12,7 @@ from httpx import (
 from async_search_client.errors import MeiliSearchApiError, MeiliSearchCommunicationError
 
 
-class HttpRequests:
+class _HttpRequests:
     def __init__(self, http_client: AsyncClient) -> None:
         self.http_client = http_client
 

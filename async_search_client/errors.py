@@ -2,7 +2,7 @@ from httpx import Response
 
 
 class MeiliSearchError(Exception):
-    """Generic class for MeiliSearch error handling"""
+    """Generic class for MeiliSearch error handling."""
 
     def __init__(self, message: str) -> None:
         self.message = message
@@ -13,7 +13,7 @@ class MeiliSearchError(Exception):
 
 
 class MeiliSearchApiError(MeiliSearchError):
-    """Error sent by MeiliSearch API"""
+    """Error sent by MeiliSearch API."""
 
     def __init__(self, error: str, response: Response) -> None:
         self.status_code = response.status_code
@@ -33,14 +33,14 @@ class MeiliSearchApiError(MeiliSearchError):
 
 
 class MeiliSearchCommunicationError(MeiliSearchError):
-    """Error when connecting to MeiliSearch"""
+    """Error when connecting to MeiliSearch."""
 
     def __str__(self) -> str:
         return f"MeiliSearchCommunicationError, {self.message}"
 
 
 class MeiliSearchTimeoutError(MeiliSearchError):
-    """Error when MeiliSearch operation takes longer than expected"""
+    """Error when MeiliSearch operation takes longer than expected."""
 
     def __str__(self) -> str:
         return f"MeiliSearchTimeoutError, {self.message}"
