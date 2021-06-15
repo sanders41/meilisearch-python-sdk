@@ -80,7 +80,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "camel-converter"
-version = "1.0.1"
+version = "1.0.2"
 description = "Converts a string from snake case to camel case or camel case to snake case"
 category = "main"
 optional = false
@@ -652,8 +652,8 @@ black = [
     {file = "black-21.6b0.tar.gz", hash = "sha256:dc132348a88d103016726fe360cb9ede02cecf99b76e3660ce6c596be132ce04"},
 ]
 camel-converter = [
-    {file = "camel-converter-1.0.1.tar.gz", hash = "sha256:152b64f66c942f5d7d73d8d7264621aaa257a2750faa16e305d43c3b453c8661"},
-    {file = "camel_converter-1.0.1-py3-none-any.whl", hash = "sha256:724b585e27e3a34419ae2c12880a124f27b9979b261db6c2f69d2d4e0c0edfee"},
+    {file = "camel-converter-1.0.2.tar.gz", hash = "sha256:57db9d5056403b1bdd29e1e1360c3012768ca4db5baac342079ca17ea79b0d8e"},
+    {file = "camel_converter-1.0.2-py3-none-any.whl", hash = "sha256:14dd256d2a2529a694764589213405c9c610dca20e8b577684459c0a2ab5c354"},
 ]
 certifi = [
     {file = "certifi-2021.5.30-py2.py3-none-any.whl", hash = "sha256:50b1e4f8446b06f41be7dd6338db18e0990601dce795c2b1686458aa7e8fa7d8"},
