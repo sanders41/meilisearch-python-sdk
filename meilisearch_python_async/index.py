@@ -11,13 +11,13 @@ from urllib.parse import urlencode
 import aiofiles
 from httpx import AsyncClient
 
-from async_search_client._http_requests import _HttpRequests
-from async_search_client.errors import (
+from meilisearch_python_async._http_requests import _HttpRequests
+from meilisearch_python_async.errors import (
     MeiliSearchApiError,
     MeiliSearchError,
     MeiliSearchTimeoutError,
 )
-from async_search_client.models import (
+from meilisearch_python_async.models import (
     IndexStats,
     MeiliSearchSettings,
     SearchResults,

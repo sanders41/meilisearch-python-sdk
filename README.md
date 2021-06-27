@@ -1,12 +1,15 @@
-# Async Search Client
+# Meilisearch Python Async
 
-[![Tests Status](https://github.com/sanders41/async-search-client/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/async-search-client/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/async-search-client/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/async-search-client/main)
-[![Coverage](https://codecov.io/github/sanders41/async-search-client/coverage.svg?branch=main)](https://codecov.io/gh/sanders41/async-search-client)
-[![PyPI version](https://badge.fury.io/py/async-search-client.svg)](https://badge.fury.io/py/async-search-client)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/async-search-client?color=5cc141)](https://github.com/sanders41/async-search-client)
+[![Tests Status](https://github.com/sanders41/meilisearch-python-async/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/meilisearch-python-async/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/meilisearch-python-async/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/meilisearch-python-async/main)
+[![Coverage](https://codecov.io/github/sanders41/meilisearch-python-async/coverage.svg?branch=main)](https://codecov.io/gh/sanders41/meilisearch-python-async)
+[![PyPI version](https://badge.fury.io/py/meilisearch-python-async.svg)](https://badge.fury.io/py/meilisearch-python-async)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/meilisearch-python-async?color=5cc141)](https://github.com/sanders41/meilisearch-python-async)
 
-Async Search Client is a Python async client for the [MeiliSearch](https://github.com/meilisearch/MeiliSearch) API. MeiliSearch also has an official [Python client](https://github.com/meilisearch/meilisearch-python).
+💡MeiliSearch Python Async was originally named [Async Search Client](https://github.com/sanders41/async-search-client)
+and was renamed to make the purpose more clear. All of the functionality remains the same and development continues from where Async Search Client left off.
+
+Meilisearch Python Async is a Python async client for the [MeiliSearch](https://github.com/meilisearch/MeiliSearch) API. MeiliSearch also has an official [Python client](https://github.com/meilisearch/meilisearch-python).
 
 Which of the two clients to use comes down to your particular use case. The purpose for this async client is to allow for non-blocking calls when working in async frameworks such as [FastAPI](https://fastapi.tiangolo.com/), or if your own code base you are working in is async. If this does not match your use case then the official client will be a better choice.
 
@@ -41,16 +44,16 @@ For the most part this client mirrors the functionality of the official client a
 
 In some instances it is not possible to return the data as an object because the structure will be dependant on your particular dataset and can't
 be known ahead of time. In these instances you can either work with the data in the dictionary that is returned, or because you will know the
-structure you can generate your own Classes.
+structure you can generate your own Pydantic models.
 
-As an example, if you want to get a movie from the [small movies example](https://github.com/sanders41/async-search-client/blob/main/datasets/small_movies.json) you could put the results into an object with the following
+As an example, if you want to get a movie from the [small movies example](https://github.com/sanders41/meilisearch-python-async/blob/main/datasets/small_movies.json) you could put the results into an object with the following
 
 ```py
 from datetime import datetime
 from typing import Optional
 
-from async_search_client import Client
-from async_search_client.models import CamelBase
+from meilisearch_python_async import Client
+from meilisearch_python_async.models import CamelBase
 
 
 # Inheriting from CamelBase will allow your class to automatically convert
@@ -84,17 +87,16 @@ Movie(
 )
 ```
 
-By inheriting from CamelBase, or any of the other [provided models](https://github.com/sanders41/async-search-client/tree/main/async_search_client/models)
+By inheriting from CamelBase, or any of the other [provided models](https://github.com/sanders41/meilisearch-python-async/tree/main/meilisearch_python_async/models)
 you will be inheriting Pydantic models and therefore have access to the funcitonality Pydantic provides
-such as [validators](https://pydantic-docs.helpmanual.io/usage/validators/) and [Fields](https://pydantic-docs.helpmanual.io/usage/model_config/#alias-precedence). Pydantic will also automatically deserialized the data into the correct data type
-based on the type hint provided.
+such as [validators](https://pydantic-docs.helpmanual.io/usage/validators/) and [Fields](https://pydantic-docs.helpmanual.io/usage/model_config/#alias-precedence). Pydantic will also automatically deserialized the data into the correct data type based on the type hint provided.
 
 ## Installation
 
 Using a virtual environmnet is recommended for installing this package. Once the virtual environment is created and activated install the package with:
 
 ```sh
-pip install async-search-client
+pip install meilisearch-python-async
 ```
 
 ## Run MeiliSearch
@@ -116,7 +118,7 @@ docker run -it --rm -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --mas
 * Note: `client.index("books") creates an instance of an Index object but does not make a network call to send the data yet so it does not need to be awaited.
 
 ```py
-from async_search_client import Client
+from meilisearch_python_async import Client
 
 async with Client('http://127.0.0.1:7700', 'masterKey') as client:
     index = client.index("books")
@@ -144,7 +146,7 @@ Splitting documents into batches can be useful with large dataset because it red
 during indexing.
 
 ```py
-from async_search_client import Client
+from meilisearch_python_async import Client
 
 async with Client('http://127.0.0.1:7700', 'masterKey') as client:
     index = client.index("books")

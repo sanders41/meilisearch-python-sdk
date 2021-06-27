@@ -2,7 +2,7 @@ from math import ceil
 
 import pytest
 
-from async_search_client.errors import MeiliSearchApiError, MeiliSearchError
+from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchError
 
 
 @pytest.mark.asyncio

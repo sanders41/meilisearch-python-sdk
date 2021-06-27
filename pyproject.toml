@@ -1,14 +1,14 @@
 [tool.poetry]
-name = "async-search-client"
-version = "0.8.1"
+name = "meilisearch-python-async"
+version = "0.9.0"
 description = "A Python async client for the MeiliSearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/sanders41/async-search-client"
-homepage = "https://github.com/sanders41/async-search-client"
-documentation = "https://github.com/sanders41/async-search-client"
-keywords = ["meilisearch", "async"]
+repository = "https://github.com/sanders41/meilisearch-python-async"
+homepage = "https://github.com/sanders41/meilisearch-python-async"
+documentation = "https://github.com/sanders41/meilisearch-python-async"
+keywords = ["meilisearch", "async", "python"]
 classifiers=[
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
@@ -16,7 +16,7 @@ classifiers=[
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
-include = ["async_search_client/py.typed"]
+include = ["meilisearch_python_async/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -66,11 +66,11 @@ exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 100
-src_paths = ["async_search_client", "tests"]
+src_paths = ["meilisearch_python_async", "tests"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--cov=async_search_client"
+addopts = "--cov=meilisearch_python_async"
 
 [tool.mypy]
 disallow_untyped_defs = true

@@ -1,6 +1,6 @@
 from httpx import Response
 
-from async_search_client.errors import (
+from meilisearch_python_async.errors import (
     MeiliSearchApiError,
     MeiliSearchCommunicationError,
     MeiliSearchError,

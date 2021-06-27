@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from async_search_client.client import Client
+from meilisearch_python_async.client import Client
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"

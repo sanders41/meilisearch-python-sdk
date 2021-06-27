@@ -9,7 +9,7 @@ from httpx import (
     Response,
 )
 
-from async_search_client.errors import MeiliSearchApiError, MeiliSearchCommunicationError
+from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchCommunicationError
 
 
 class _HttpRequests:

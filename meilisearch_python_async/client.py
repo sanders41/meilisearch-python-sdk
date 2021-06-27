@@ -5,10 +5,10 @@ from typing import Optional, Type
 
 from httpx import AsyncClient
 
-from async_search_client._http_requests import _HttpRequests
-from async_search_client.errors import MeiliSearchApiError
-from async_search_client.index import Index
-from async_search_client.models import ClientStats, DumpInfo, Health, IndexInfo, Keys, Version
+from meilisearch_python_async._http_requests import _HttpRequests
+from meilisearch_python_async.errors import MeiliSearchApiError
+from meilisearch_python_async.index import Index
+from meilisearch_python_async.models import ClientStats, DumpInfo, Health, IndexInfo, Keys, Version
 
 
 class Client:

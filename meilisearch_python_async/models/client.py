@@ -3,7 +3,7 @@ from typing import Dict, Optional
 
 from camel_converter.pydantic_base import CamelBase
 
-from async_search_client.models.index import IndexStats
+from meilisearch_python_async.models.index import IndexStats
 
 
 class ClientStats(CamelBase):

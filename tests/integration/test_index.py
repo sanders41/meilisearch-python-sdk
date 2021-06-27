@@ -3,10 +3,10 @@ from datetime import datetime
 import pytest
 from httpx import Response
 
-from async_search_client._http_requests import _HttpRequests
-from async_search_client.errors import MeiliSearchApiError, MeiliSearchTimeoutError
-from async_search_client.index import Index
-from async_search_client.models import MeiliSearchSettings
+from meilisearch_python_async._http_requests import _HttpRequests
+from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchTimeoutError
+from meilisearch_python_async.index import Index
+from meilisearch_python_async.models import MeiliSearchSettings
 
 
 @pytest.fixture

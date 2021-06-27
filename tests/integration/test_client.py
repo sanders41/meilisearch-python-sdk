@@ -4,9 +4,9 @@ from datetime import datetime
 import pytest
 from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError, Response
 
-from async_search_client.client import Client
-from async_search_client.errors import MeiliSearchApiError, MeiliSearchCommunicationError
-from async_search_client.models import DumpInfo, IndexInfo, Version
+from meilisearch_python_async.client import Client
+from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchCommunicationError
+from meilisearch_python_async.models import DumpInfo, IndexInfo, Version
 
 
 async def wait_for_dump_creation(test_client, dump_uid, timeout_in_ms=10000, interval_in_ms=500):

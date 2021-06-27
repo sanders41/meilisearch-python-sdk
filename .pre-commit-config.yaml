@@ -22,7 +22,7 @@ repos:
     hooks:
     - id: mypy
       additional_dependencies: [types-aiofiles]
-      files: async_search_client/
+      files: meilisearch_python_async/
   - repo: https://github.com/PyCQA/flake8
     rev: 3.9.2
     hooks:
