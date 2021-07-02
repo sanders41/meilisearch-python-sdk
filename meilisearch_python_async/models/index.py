@@ -17,4 +17,4 @@ class IndexInfo(IndexBase):
 class IndexStats(CamelBase):
     number_of_documents: int
     is_indexing: bool
-    fields_distribution: Dict[str, int]
+    field_distribution: Dict[str, int]
