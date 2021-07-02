@@ -18,7 +18,7 @@ def new_settings():
 
 @pytest.fixture
 def default_ranking_rules():
-    return ["typo", "words", "proximity", "attribute", "wordsPosition", "exactness"]
+    return ["words", "typo", "proximity", "attribute", "exactness"]
 
 
 @pytest.fixture
@@ -57,7 +57,7 @@ def new_synonyms():
 
 
 @pytest.fixture
-def attributes_for_faceting():
+def filterable_attributes():
     return ["title", "release_date"]
 
 
@@ -385,32 +385,32 @@ async def test_reset_synonyms(empty_index, new_synonyms):
 
 
 @pytest.mark.asyncio
-async def test_get_attributes_for_faceting(empty_index):
+async def test_get_filterable_attributes(empty_index):
     index = await empty_index()
-    response = await index.get_attributes_for_faceting()
+    response = await index.get_filterable_attributes()
     assert response is None
 
 
 @pytest.mark.asyncio
-async def test_update_attributes_for_faceting(empty_index, attributes_for_faceting):
+async def test_update_filterable_attributes(empty_index, filterable_attributes):
     index = await empty_index()
-    response = await index.update_attributes_for_faceting(attributes_for_faceting)
+    response = await index.update_filterable_attributes(filterable_attributes)
     await index.wait_for_pending_update(response.update_id)
-    response = await index.get_attributes_for_faceting()
-    assert sorted(response) == sorted(attributes_for_faceting)
+    response = await index.get_filterable_attributes()
+    assert sorted(response) == sorted(filterable_attributes)
 
 
 @pytest.mark.asyncio
-async def test_reset_attributes_for_faceting(empty_index, attributes_for_faceting):
+async def test_reset_filterable_attributes(empty_index, filterable_attributes):
     index = await empty_index()
-    response = await index.update_attributes_for_faceting(attributes_for_faceting)
+    response = await index.update_filterable_attributes(filterable_attributes)
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
-    response = await index.get_attributes_for_faceting()
-    assert sorted(response) == sorted(attributes_for_faceting)
-    response = await index.reset_attributes_for_faceting()
+    response = await index.get_filterable_attributes()
+    assert sorted(response) == sorted(filterable_attributes)
+    response = await index.reset_filterable_attributes()
     await index.wait_for_pending_update(response.update_id)
-    response = await index.get_attributes_for_faceting()
+    response = await index.get_filterable_attributes()
     assert response is None
 
 
