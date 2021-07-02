@@ -102,7 +102,9 @@ async def test_get_all_update_status_default(empty_index):
 async def test_get_all_update_status(empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies)
+    await index.wait_for_pending_update(response.update_id)
     response = await index.add_documents(small_movies)
+    await index.wait_for_pending_update(response.update_id)
     response = await index.get_all_update_status()
     assert len(response) == 2
 
