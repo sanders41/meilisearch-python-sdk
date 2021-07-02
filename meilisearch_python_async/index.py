@@ -277,8 +277,7 @@ class Index:
         query: str,
         offset: int = 0,
         limit: int = 20,
-        filters: Optional[str] = None,
-        facet_filters: Optional[list[str | list[str]]] = None,
+        filter: Optional[str | list[str | list[str]]] = None,
         facets_distribution: Optional[list[str]] = None,
         attributes_to_retrieve: list[str] = ["*"],
         attributes_to_crop: Optional[list[str]] = None,
@@ -292,8 +291,7 @@ class Index:
             query: String containing the word(s) to search
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returned. Defaults to 20.
-            filters: Filter queries by an attribute value. Defaults to None.
-            facet_filters: Facet names and values to filter on. Defaults to None.
+            filter: Filter queries by an attribute value. Defaults to None.
             facets_distribution: Facets for which to retrieve the matching count. Defaults to None.
             attributes_to_retrieve: Attributes to display in the returned documents.
                 Defaults to ["*"].
@@ -315,8 +313,7 @@ class Index:
             "q": query,
             "offset": offset,
             "limit": limit,
-            "filters": filters,
-            "facetFilters": facet_filters,
+            "filter": filter,
             "facetsDistribution": facets_distribution,
             "attributesToRetrieve": attributes_to_retrieve,
             "attributesToCrop": attributes_to_crop,
@@ -1108,17 +1105,17 @@ class Index:
 
         return UpdateId(**response.json())
 
-    async def get_attributes_for_faceting(self) -> Optional[list[str]]:
-        """Get attributes for faceting of the index.
+    async def get_filterable_attributes(self) -> Optional[list[str]]:
+        """Get filterable attributes of the index.
 
         Returns:
-            List containing the attributes for faceting of the index.
+            List containing the filterable attributes of the index.
 
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"indexes/{self.uid}/settings/attributes-for-faceting"
+        url = f"indexes/{self.uid}/settings/filterable-attributes"
         response = await self._http_requests.get(url)
 
         if not response.json():
@@ -1126,11 +1123,11 @@ class Index:
 
         return response.json()
 
-    async def update_attributes_for_faceting(self, body: list[str]) -> UpdateId:
-        """Update attributes for faceting of the index.
+    async def update_filterable_attributes(self, body: list[str]) -> UpdateId:
+        """Update filterable attributes of the index.
 
         Args:
-            body: List containing the attributes for faceting.
+            body: List containing the filterable attributes of the index.
 
         Returns:
             Update id to track the action.
@@ -1139,13 +1136,13 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"indexes/{self.uid}/settings/attributes-for-faceting"
+        url = f"indexes/{self.uid}/settings/filterable-attributes"
         response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
 
-    async def reset_attributes_for_faceting(self) -> UpdateId:
-        """Reset attributes for faceting of the index to default values.
+    async def reset_filterable_attributes(self) -> UpdateId:
+        """Reset filterable attributes of the index to default values.
 
         Returns:
             Update id to track the action.
@@ -1154,7 +1151,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"indexes/{self.uid}/settings/attributes-for-faceting"
+        url = f"indexes/{self.uid}/settings/filterable-attributes"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
