@@ -119,10 +119,14 @@ async def test_wait_for_pending_update(empty_index, small_movies):
 
 @pytest.mark.asyncio
 async def test_wait_for_pending_update_time_out(empty_index, small_movies):
+    index = await empty_index()
     with pytest.raises(MeiliSearchTimeoutError):
-        index = await empty_index()
         response = await index.add_documents(small_movies)
         await index.wait_for_pending_update(response.update_id, timeout_in_ms=1, interval_in_ms=1)
+
+    await index.wait_for_pending_update(
+        response.update_id
+    )  # Make sure the indexing finishes so subsequent tests don't have issues.
 
 
 @pytest.mark.asyncio
