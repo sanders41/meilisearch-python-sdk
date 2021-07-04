@@ -1,4 +1,4 @@
-# Meilisearch Python Async
+# MeiliSearch Python Async
 
 [![Tests Status](https://github.com/sanders41/meilisearch-python-async/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/meilisearch-python-async/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/meilisearch-python-async/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/meilisearch-python-async/main)
