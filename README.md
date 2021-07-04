@@ -258,6 +258,13 @@ SearchResults(
 
 This package only guarantees the compatibility with [version v0.20.0 of MeiliSearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.20.0).
 
+## MeiliSearch v0.21.0
+
+If you would like to try out v0.21.0 release candidate of MeiliSearch the `meilisearch-v0.21.0`
+branch contains updates to work with this version. It is not recommend to use the MeiliSearch
+release candidate, and therefore the `meilisearch-v-.21.0` branch of this package, in production.
+Bug reports for this branch are welcome and appreciated.
+
 ## Learn More
 
 For more see the [API Reference](https://docs.meilisearch.com/reference/api/) in the MeiliSearch documentation. Keep in mind you will need to await the examples shown in the documentation, and that you will be getting python objects instead of JSON for you results.
