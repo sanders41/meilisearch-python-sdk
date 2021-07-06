@@ -93,7 +93,7 @@ async def test_custom_search_params_with_string_list(index_with_documents):
     assert "title" in response.hits[0]
     assert "overview" in response.hits[0]
     assert "release_date" not in response.hits[0]
-    assert "title" in response.hits[0]["_formatted"]
+    assert "<em>" in response.hits[0]["_formatted"]["title"]
     assert "<em>" not in response.hits[0]["_formatted"]["overview"]
 
 
