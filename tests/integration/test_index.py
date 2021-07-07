@@ -58,7 +58,7 @@ def new_synonyms():
 
 @pytest.fixture
 def filterable_attributes():
-    return ["title", "release_date"]
+    return ["release_date", "title"]
 
 
 @pytest.mark.asyncio
@@ -303,7 +303,7 @@ async def test_update_displayed_attributes(empty_index, displayed_attributes):
     response = await index.update_displayed_attributes(displayed_attributes)
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_displayed_attributes()
-    assert sorted(response) == sorted(displayed_attributes)
+    assert response == displayed_attributes
 
 
 @pytest.mark.asyncio
@@ -313,7 +313,7 @@ async def test_reset_displayed_attributes(empty_index, displayed_attributes):
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
     response = await index.get_displayed_attributes()
-    assert sorted(response) == sorted(displayed_attributes)
+    assert response == displayed_attributes
     response = await index.reset_displayed_attributes()
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_displayed_attributes()
@@ -397,7 +397,7 @@ async def test_update_filterable_attributes(empty_index, filterable_attributes):
     response = await index.update_filterable_attributes(filterable_attributes)
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_filterable_attributes()
-    assert sorted(response) == sorted(filterable_attributes)
+    assert sorted(response) == filterable_attributes
 
 
 @pytest.mark.asyncio
@@ -407,7 +407,7 @@ async def test_reset_filterable_attributes(empty_index, filterable_attributes):
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
     response = await index.get_filterable_attributes()
-    assert sorted(response) == sorted(filterable_attributes)
+    assert sorted(response) == filterable_attributes
     response = await index.reset_filterable_attributes()
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_filterable_attributes()
