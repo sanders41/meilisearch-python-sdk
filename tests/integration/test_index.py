@@ -137,7 +137,7 @@ async def test_get_stats(empty_index, small_movies):
 async def test_get_settings_default(empty_index, default_ranking_rules):
     index = await empty_index()
     response = await index.get_settings()
-    assert sorted(response.ranking_rules) == sorted(default_ranking_rules)
+    assert response.ranking_rules == default_ranking_rules
     assert response.distinct_attribute is None
     assert response.searchable_attributes == ["*"]
     assert response.displayed_attributes == ["*"]
@@ -152,9 +152,9 @@ async def test_update_settings(empty_index, new_settings):
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
     response = await index.get_settings()
-    assert sorted(response.ranking_rules) == sorted(new_settings.ranking_rules)
+    assert response.ranking_rules == new_settings.ranking_rules
     assert response.distinct_attribute is None
-    assert sorted(response.searchable_attributes) == sorted(new_settings.searchable_attributes)
+    assert response.searchable_attributes == new_settings.searchable_attributes
     assert response.displayed_attributes == ["*"]
     assert response.stop_words == []
     assert response.synonyms == {}
@@ -167,9 +167,9 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
     response = await index.get_settings()
-    assert sorted(response.ranking_rules) == sorted(new_settings.ranking_rules)
+    assert response.ranking_rules == new_settings.ranking_rules
     assert response.distinct_attribute is None
-    assert sorted(response.searchable_attributes) == sorted(new_settings.searchable_attributes)
+    assert response.searchable_attributes == new_settings.searchable_attributes
     assert response.displayed_attributes == ["*"]
     assert response.stop_words == []
     assert response.synonyms == {}
@@ -177,7 +177,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
     response = await index.get_settings()
-    assert sorted(response.ranking_rules) == sorted(default_ranking_rules)
+    assert response.ranking_rules == default_ranking_rules
     assert response.distinct_attribute is None
     assert response.displayed_attributes == ["*"]
     assert response.searchable_attributes == ["*"]
@@ -189,7 +189,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
 async def test_get_ranking_rules_default(empty_index, default_ranking_rules):
     index = await empty_index()
     response = await index.get_ranking_rules()
-    assert sorted(response) == sorted(default_ranking_rules)
+    assert response == default_ranking_rules
 
 
 @pytest.mark.asyncio
@@ -198,7 +198,7 @@ async def test_update_ranking_rules(empty_index, new_ranking_rules):
     response = await index.update_ranking_rules(new_ranking_rules)
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_ranking_rules()
-    assert sorted(response) == sorted(new_ranking_rules)
+    assert response == new_ranking_rules
 
 
 @pytest.mark.asyncio
@@ -207,11 +207,11 @@ async def test_reset_ranking_rules(empty_index, new_ranking_rules, default_ranki
     response = await index.update_ranking_rules(new_ranking_rules)
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_ranking_rules()
-    assert sorted(response) == sorted(new_ranking_rules)
+    assert response == new_ranking_rules
     response = await index.reset_ranking_rules()
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_ranking_rules()
-    assert sorted(response) == sorted(default_ranking_rules)
+    assert response == default_ranking_rules
 
 
 @pytest.mark.asyncio
@@ -263,7 +263,7 @@ async def test_update_searchable_attributes(empty_index, new_searchable_attribut
     response = await index.update_searchable_attributes(new_searchable_attributes)
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_searchable_attributes()
-    assert sorted(response) == sorted(new_searchable_attributes)
+    assert response == new_searchable_attributes
 
 
 @pytest.mark.asyncio
@@ -273,7 +273,7 @@ async def test_reset_searchable_attributes(empty_index, new_searchable_attribute
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
     response = await index.get_searchable_attributes()
-    assert sorted(response) == sorted(new_searchable_attributes)
+    assert response == new_searchable_attributes
     response = await index.reset_searchable_attributes()
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_searchable_attributes()
@@ -328,7 +328,7 @@ async def test_update_stop_words(empty_index, new_stop_words):
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
     response = await index.get_stop_words()
-    assert sorted(response) == sorted(new_stop_words)
+    assert response == new_stop_words
 
 
 @pytest.mark.asyncio
@@ -338,7 +338,7 @@ async def test_reset_stop_words(empty_index, new_stop_words):
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
     response = await index.get_stop_words()
-    assert sorted(response) == sorted(new_stop_words)
+    assert response == new_stop_words
     response = await index.reset_stop_words()
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
