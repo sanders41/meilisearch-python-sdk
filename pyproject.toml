@@ -28,7 +28,7 @@ camel-converter = "^1.0.0"
 [tool.poetry.dev-dependencies]
 black = "^21.6b0"
 flake8 = "^3.9.2"
-isort = "^5.9.1"
+isort = "^5.9.2"
 mypy = "^0.910"
 pre-commit = "^2.12.1"
 pytest = "^6.2.3"
