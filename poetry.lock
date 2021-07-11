@@ -578,7 +578,7 @@ python-versions = "*"
 
 [[package]]
 name = "types-aiofiles"
-version = "0.1.6"
+version = "0.1.7"
 description = "Typing stubs for aiofiles"
 category = "dev"
 optional = false
@@ -626,7 +626,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "1d7c81b7b083d86f97b87cee1f2f075b44deededaf6a0ca3a0ec9f745c73a463"
+content-hash = "b7627ada63bc5fc63b880b0f60c85f22056162d9ce9ab93d5ac9db66428cd616"
 
 [metadata.files]
 aiofiles = [
@@ -1015,8 +1015,8 @@ typed-ast = [
     {file = "typed_ast-1.4.3.tar.gz", hash = "sha256:fb1bbeac803adea29cedd70781399c99138358c26d05fcbd23c13016b7f5ec65"},
 ]
 types-aiofiles = [
-    {file = "types-aiofiles-0.1.6.tar.gz", hash = "sha256:a118bfe79c7f3a5042a845d2ef3a14d5bac0f52a205dbc2adc5cbe14596a87f6"},
-    {file = "types_aiofiles-0.1.6-py3-none-any.whl", hash = "sha256:bdd78f483083f57f79a92b055229042d60ce889486b0bbe4971314cdf6a43526"},
+    {file = "types-aiofiles-0.1.7.tar.gz", hash = "sha256:e5364aed6bcc784e62cbed396b712290cbac349b3f7d41fde6f0681eff9b38d2"},
+    {file = "types_aiofiles-0.1.7-py3-none-any.whl", hash = "sha256:227c0bab8cd956b9f2002127d5e97628a555b0939628cc960127c26d9fde7805"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.0-py2-none-any.whl", hash = "sha256:0ac0f89795dd19de6b97debb0c6af1c70987fd80a2d62d1958f7e56fcc31b497"},
