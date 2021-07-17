@@ -1,8 +1,27 @@
+import json
 from math import ceil
 
 import pytest
 
-from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchError
+from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchError, PayloadTooLarge
+
+
+def generate_test_movies(num_movies=50):
+    movies = []
+    # Each moves is ~ 174 bytes
+    for i in range(num_movies):
+        movie = {
+            "id": i,
+            "title": "test",
+            "poster": "test",
+            "overview": "test",
+            "release_date": 1551830399,
+            "pk_test": i + 1,
+            "genre": "test",
+        }
+        movies.append(movie)
+
+    return movies
 
 
 @pytest.mark.asyncio
@@ -22,6 +41,52 @@ async def test_add_documents(primary_key, expected_primary_key, empty_index, sma
     update = await index.wait_for_pending_update(response.update_id)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "processed"
+
+
+@pytest.fixture
+def add_document():
+    return {
+        "id": "1",
+        "title": f"{'a' * 999999}",
+        "poster": f"{'a' * 999999}",
+        "overview": f"{'a' * 999999}",
+        "release_date": 1551830399,
+        "genre": f"{'a' * 999999}",
+    }
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload, expected_batches", [(None, 1), (3500, 2), (2500, 3)])
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
+)
+async def test_add_documents_auto_batch(
+    empty_index, max_payload, expected_batches, primary_key, expected_primary_key
+):
+    movies = generate_test_movies()
+
+    index = await empty_index()
+    if max_payload:
+        response = await index.add_documents_auto_batch(
+            movies, max_payload_size=max_payload, primary_key=primary_key
+        )
+    else:
+        response = await index.add_documents_auto_batch(movies, primary_key=primary_key)
+
+    assert len(response) == expected_batches
+
+    for r in response:
+        update = await index.wait_for_pending_update(r.update_id)
+        assert update.status == "processed"
+
+    assert await index.get_primary_key() == expected_primary_key
+
+
+@pytest.mark.asyncio
+async def test_add_documents_auto_batch_payload_size_error(empty_index, small_movies):
+    with pytest.raises(PayloadTooLarge):
+        index = await empty_index()
+        await index.add_documents_auto_batch(small_movies, 1)
 
 
 @pytest.mark.asyncio
@@ -78,6 +143,74 @@ async def test_add_documents_from_file_invalid_extension(test_client):
 
     with pytest.raises(MeiliSearchError):
         await index.add_documents_from_file("test.csv")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload, expected_batches", [(None, 1), (3500, 2), (2500, 3)])
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
+)
+async def test_add_documents_from_file_auto_batch(
+    max_payload, expected_batches, primary_key, expected_primary_key, test_client, tmp_path
+):
+    movies = generate_test_movies()
+    test_file = tmp_path / "test.json"
+
+    with open(test_file, "w") as f:
+        json.dump(movies, f)
+
+    index = test_client.index("movies")
+
+    if max_payload:
+        response = await index.add_documents_from_file_auto_batch(
+            test_file, max_payload_size=max_payload, primary_key=primary_key
+        )
+    else:
+        response = await index.add_documents_from_file_auto_batch(
+            test_file, primary_key=primary_key
+        )
+
+    assert len(response) == expected_batches
+
+    for r in response:
+        update = await index.wait_for_pending_update(r.update_id)
+        assert update.status == "processed"
+
+    assert await index.get_primary_key() == expected_primary_key
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload, expected_batches", [(None, 1), (3500, 2), (2500, 3)])
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
+)
+async def test_add_documents_from_file_string_path_auto_batch(
+    max_payload, expected_batches, primary_key, expected_primary_key, test_client, tmp_path
+):
+    movies = generate_test_movies()
+    test_file = tmp_path / "test.json"
+
+    with open(test_file, "w") as f:
+        json.dump(movies, f)
+
+    index = test_client.index("movies")
+
+    if max_payload:
+        response = await index.add_documents_from_file_auto_batch(
+            str(test_file), max_payload_size=max_payload, primary_key=primary_key
+        )
+    else:
+        response = await index.add_documents_from_file_auto_batch(
+            str(test_file), primary_key=primary_key
+        )
+
+    assert len(response) == expected_batches
+
+    for r in response:
+        update = await index.wait_for_pending_update(r.update_id)
+        assert update.status == "processed"
+
+    assert await index.get_primary_key() == expected_primary_key
 
 
 @pytest.mark.asyncio
@@ -187,6 +320,63 @@ async def test_update_documents_with_primary_key(test_client, small_movies):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload, expected_batches", [(None, 1), (3500, 2), (2500, 3)])
+async def test_update_documents_auto_batch(max_payload, expected_batches, test_client):
+    documents = generate_test_movies()
+
+    index = test_client.index("movies")
+    response = await index.add_documents(documents)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert update.status == "processed"
+
+    response = await index.get_documents(limit=len(documents))
+    assert response[0]["title"] != "Some title"
+
+    response[0]["title"] = "Some title"
+
+    if max_payload:
+        updates = await index.update_documents_auto_batch(response, max_payload_size=max_payload)
+    else:
+        updates = await index.update_documents_auto_batch(response)
+
+    assert len(updates) == expected_batches
+
+    for update in updates:
+        await index.wait_for_pending_update(update.update_id)
+
+    response = await index.get_documents()
+    assert response[0]["title"] == "Some title"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload, expected_batches", [(None, 1), (3500, 2), (2500, 3)])
+async def test_update_documents_auto_batch_primary_key(test_client, max_payload, expected_batches):
+    documents = generate_test_movies()
+    primary_key = "release_date"
+    index = test_client.index("movies")
+    if max_payload:
+        updates = await index.update_documents_auto_batch(
+            documents, max_payload_size=max_payload, primary_key=primary_key
+        )
+    else:
+        updates = await index.update_documents_auto_batch(documents, primary_key=primary_key)
+    assert len(updates) == expected_batches
+
+    for update in updates:
+        update_status = await index.wait_for_pending_update(update.update_id)
+        assert update_status.status == "processed"
+
+    assert await index.get_primary_key() == primary_key
+
+
+@pytest.mark.asyncio
+async def test_update_documents_auto_batch_payload_size_error(empty_index, small_movies):
+    with pytest.raises(PayloadTooLarge):
+        index = await empty_index()
+        await index.update_documents_auto_batch(small_movies, 1)
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 async def test_update_documents_in_batches(batch_size, index_with_documents, small_movies):
     index = await index_with_documents()
@@ -272,6 +462,80 @@ async def test_update_documents_from_file_invalid_extension(test_client):
 
     with pytest.raises(MeiliSearchError):
         await index.update_documents_from_file("test.csv")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload, expected_batches", [(None, 1), (3500, 2), (2500, 3)])
+async def test_update_documents_from_file_auto_batch(
+    max_payload, expected_batches, test_client, tmp_path
+):
+    documents = generate_test_movies()
+
+    index = test_client.index("movies")
+    response = await index.add_documents(documents)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert update.status == "processed"
+
+    response = await index.get_documents(limit=len(documents))
+    assert response[0]["title"] != "Some title"
+
+    response[0]["title"] = "Some title"
+
+    test_file = tmp_path / "test.json"
+    with open(test_file, "w") as f:
+        json.dump(response, f)
+
+    if max_payload:
+        updates = await index.update_documents_from_file_auto_batch(
+            test_file, max_payload_size=max_payload
+        )
+    else:
+        updates = await index.update_documents_from_file_auto_batch(test_file)
+
+    assert len(updates) == expected_batches
+
+    for update in updates:
+        await index.wait_for_pending_update(update.update_id)
+
+    response = await index.get_documents()
+    assert response[0]["title"] == "Some title"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload, expected_batches", [(None, 1), (3500, 2), (2500, 3)])
+async def test_update_documents_from_file_string_path_auto_batch(
+    max_payload, expected_batches, test_client, tmp_path
+):
+    documents = generate_test_movies()
+
+    index = test_client.index("movies")
+    response = await index.add_documents(documents)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert update.status == "processed"
+
+    response = await index.get_documents(limit=len(documents))
+    assert response[0]["title"] != "Some title"
+
+    response[0]["title"] = "Some title"
+
+    test_file = tmp_path / "test.json"
+    with open(test_file, "w") as f:
+        json.dump(response, f)
+
+    if max_payload:
+        updates = await index.update_documents_from_file_auto_batch(
+            str(test_file), max_payload_size=max_payload
+        )
+    else:
+        updates = await index.update_documents_from_file_auto_batch(str(test_file))
+
+    assert len(updates) == expected_batches
+
+    for update in updates:
+        await index.wait_for_pending_update(update.update_id)
+
+    response = await index.get_documents()
+    assert response[0]["title"] == "Some title"
 
 
 @pytest.mark.asyncio

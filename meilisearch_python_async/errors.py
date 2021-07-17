@@ -44,3 +44,9 @@ class MeiliSearchTimeoutError(MeiliSearchError):
 
     def __str__(self) -> str:
         return f"MeiliSearchTimeoutError, {self.message}"
+
+
+class PayloadTooLarge(Exception):
+    """Error when the payload is larger than the allowed payload size"""
+
+    pass

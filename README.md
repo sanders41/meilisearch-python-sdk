@@ -254,6 +254,46 @@ SearchResults(
   response = await index.update_documents_from_file("/path/to/file.json")
   ```
 
+* add_documents_auto_batch:
+
+  Automatically split document into batches when adding documents. The auto batcher puts as may
+  documents as possible into the batch while fitting under the maximum payload size (default is 100MB)
+
+  ```py
+  index = test_client.index("movies")
+  response = await index.add_documents_auto_batch(documents)
+  ```
+
+* add_documents_from_file_auto_batch:
+
+  Automatically split document into batches when adding documents from a file. The auto batcher puts
+  as may documents as possible into the batch while fitting under the maximum payload size (default is 100MB)
+
+  ```py
+  index = test_client.index("movies")
+  response = await index.add_documents_from_file_auto_batch("/path/to/file.json")
+  ```
+
+* update_documents_auto_batch:
+
+  Automatically split document into batches when updating documents. The auto batcher puts as may
+  documents as possible into the batch while fitting under the maximum payload size (default is 100MB)
+
+  ```py
+  index = test_client.index("movies")
+  response = await index.update_documents_auto_batch(documents)
+  ```
+
+* update_documents_from_file_auto_batch:
+
+  Automatically split document into batches when updating documents from a file. The auto batcher
+  puts as may documents as possible into the batch while fitting under the maximum payload size (default is 100MB)
+
+  ```py
+  index = test_client.index("movies")
+  response = await index.update_documents_from_file_auto_batch("/path/to/file.json")
+  ```
+
 ## Compatibility with MeiliSearch
 
 This package only guarantees the compatibility with [version v0.20.0 of MeiliSearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.20.0).

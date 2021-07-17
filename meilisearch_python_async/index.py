@@ -5,6 +5,7 @@ from asyncio import get_running_loop, sleep
 from datetime import datetime
 from functools import partial
 from pathlib import Path
+from sys import getsizeof
 from typing import Any, AsyncGenerator, Optional
 from urllib.parse import urlencode
 
@@ -16,6 +17,7 @@ from meilisearch_python_async.errors import (
     MeiliSearchApiError,
     MeiliSearchError,
     MeiliSearchTimeoutError,
+    PayloadTooLarge,
 )
 from meilisearch_python_async.models import (
     IndexStats,
@@ -403,6 +405,37 @@ class Index:
         response = await self._http_requests.post(url, documents)
         return UpdateId(**response.json())
 
+    async def add_documents_auto_batch(
+        self,
+        documents: list[dict],
+        max_payload_size: int = 104857600,
+        primary_key: Optional[str] = None,
+    ) -> list[UpdateId]:
+        """Automatically splits the documents into batches when adding.
+
+        Each batch tries to fill the max_payload_size
+
+        Args:
+            documents: List of documents.
+            max_payload_size: The maximum payload size in bytes. Defaults to 104857600 (100MB).
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+            PayloadTooLarge: If the largest document is larget than the max_payload_size
+        """
+        update_ids = []
+        async for batch in self._generate_auto_batches(documents, max_payload_size):
+            update_id = await self.add_documents(batch, primary_key)
+            update_ids.append(update_id)
+
+        return update_ids
+
     async def add_documents_in_batches(
         self, documents: list[dict], batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
@@ -447,17 +480,43 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-
-        loop = get_running_loop()
-        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
-
-        async with aiofiles.open(file_path, mode="r") as f:
-            data = await f.read()
-            documents = json.loads(data)
+        documents = await self._load_documents_from_file(file_path)
 
         return await self.add_documents(documents, primary_key=primary_key)
+
+    async def add_documents_from_file_auto_batch(
+        self,
+        file_path: Path | str,
+        max_payload_size: int = 104857600,
+        primary_key: Optional[str] = None,
+    ) -> list[UpdateId]:
+        """Automatically splits the documents into batches when adding from a json file.
+
+        Each batch tries to fill the max_payload_size
+
+        Args:
+            file_path: Path to the json file.
+            max_payload_size: The maximum payload size in bytes. Defaults to 104857600 (100MB).
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            MeiliSearchError: If the file path is not valid.
+            MeiliSearchCommunicationError: If there was an error communicating with the server.
+            MeiliSearchApiError: If the MeiliSearch API returned an error.
+            PayloadTooLarge: If the largest document is larget than the max_payload_size
+        """
+        documents = await self._load_documents_from_file(file_path)
+
+        update_ids = []
+        async for batch in self._generate_auto_batches(documents, max_payload_size):
+            update_id = await self.add_documents(batch, primary_key)
+            update_ids.append(update_id)
+
+        return update_ids
 
     async def add_documents_from_file_in_batches(
         self, file_path: Path | str, batch_size: int = 1000, primary_key: Optional[str] = None
@@ -475,18 +534,11 @@ class Index:
             List of update ids to track the action.
 
         Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeiliSearchError: If the file path is not valid
+            MeiliSearchCommunicationError: If there was an error communicating with the server.
+            MeiliSearchApiError: If the MeiliSearch API returned an error.
         """
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-
-        loop = get_running_loop()
-        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
-
-        async with aiofiles.open(file_path, mode="r") as f:
-            data = await f.read()
-            documents = json.loads(data)
+        documents = await self._load_documents_from_file(file_path)
 
         return await self.add_documents_in_batches(
             documents, batch_size=batch_size, primary_key=primary_key
@@ -506,8 +558,8 @@ class Index:
             Update id to track the action.
 
         Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeiliSearchCommunicationError: If there was an error communicating with the server.
+            MeiliSearchApiError: If the MeiliSearch API returned an error.
         """
         url = f"indexes/{self.uid}/documents"
         if primary_key:
@@ -517,10 +569,43 @@ class Index:
         response = await self._http_requests.put(url, documents)
         return UpdateId(**response.json())
 
+    async def update_documents_auto_batch(
+        self,
+        documents: list[dict],
+        max_payload_size: int = 104857600,
+        primary_key: Optional[str] = None,
+    ) -> list[UpdateId]:
+        """Automatically splits the documents into batches when updating.
+
+        Each batch tries to fill the max_payload_size
+
+        Args:
+            documents: List of documents.
+            max_payload_size: The maximum payload size in bytes. Defaults to 104857600 (100MB).
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+            PayloadTooLarge: If the largest document is larget than the max_payload_size
+        """
+        update_ids = []
+        async for batch in self._generate_auto_batches(documents, max_payload_size):
+            update_id = await self.update_documents(batch, primary_key)
+            update_ids.append(update_id)
+
+        return update_ids
+
     async def update_documents_in_batches(
         self, documents: list[dict], batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
         """Update documents in batches to reduce RAM usage with indexing.
+
+        Each batch tries to fill the max_payload_size
 
         Args:
             documents: List of documents.
@@ -561,17 +646,42 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-
-        loop = get_running_loop()
-        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
-
-        async with aiofiles.open(file_path, mode="r") as f:
-            data = await f.read()
-            documents = json.loads(data)
+        documents = await self._load_documents_from_file(file_path)
 
         return await self.update_documents(documents, primary_key=primary_key)
+
+    async def update_documents_from_file_auto_batch(
+        self,
+        file_path: Path | str,
+        max_payload_size: int = 104857600,
+        primary_key: Optional[str] = None,
+    ) -> list[UpdateId]:
+        """Automatically splits the documents into batches when updating from a json file.
+
+        Each batch tries to fill the max_payload_size
+
+        Args:
+            file_path: Path to the json file.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        documents = await self._load_documents_from_file(file_path)
+
+        update_ids = []
+        async for batch in self._generate_auto_batches(documents, max_payload_size):
+            update_id = await self.update_documents(batch, primary_key)
+            update_ids.append(update_id)
+
+        return update_ids
 
     async def update_documents_from_file_in_batches(
         self, file_path: Path | str, batch_size: int = 1000, primary_key: Optional[str] = None
@@ -592,15 +702,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-
-        loop = get_running_loop()
-        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
-
-        async with aiofiles.open(file_path, mode="r") as f:
-            data = await f.read()
-            documents = json.loads(data)
+        documents = await self._load_documents_from_file(file_path)
 
         return await self.update_documents_in_batches(
             documents, batch_size=batch_size, primary_key=primary_key
@@ -615,7 +717,7 @@ class Index:
         Returns:
             Update id to track the action.
 
-        Raises:
+        Rases:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
@@ -656,8 +758,6 @@ class Index:
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
-
-    # GENERAL SETTINGS ROUTES
 
     async def get_settings(self) -> MeiliSearchSettings:
         """Get settings of the index.
@@ -709,8 +809,6 @@ class Index:
 
         return UpdateId(**response.json())
 
-    # RANKING RULES SUB-ROUTES
-
     async def get_ranking_rules(self) -> list[str]:
         """Get ranking rules of the index.
 
@@ -758,8 +856,6 @@ class Index:
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
-
-    # DISTINCT ATTRIBUTE SUB-ROUTES
 
     async def get_distinct_attribute(self) -> Optional[str]:
         """Get distinct attribute of the index.
@@ -813,8 +909,6 @@ class Index:
 
         return UpdateId(**response.json())
 
-    # SEARCHABLE ATTRIBUTES SUB-ROUTES
-
     async def get_searchable_attributes(self) -> list[str]:
         """Get searchable attributes of the index.
 
@@ -865,8 +959,6 @@ class Index:
 
         return UpdateId(**response.json())
 
-    # DISPLAYED ATTRIBUTES SUB-ROUTES
-
     async def get_displayed_attributes(self) -> list[str]:
         """Get displayed attributes of the index.
 
@@ -913,8 +1005,6 @@ class Index:
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
-
-    # STOP WORDS SUB-ROUTES
 
     async def get_stop_words(self) -> Optional[list[str]]:
         """Get stop words of the index.
@@ -967,8 +1057,6 @@ class Index:
 
         return UpdateId(**response.json())
 
-    # SYNONYMS SUB-ROUTES
-
     async def get_synonyms(self) -> Optional[dict[str, list[str]]]:
         """Get synonyms of the index.
 
@@ -1019,8 +1107,6 @@ class Index:
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
-
-    # ATTRIBUTES FOR FACETING SUB-ROUTES
 
     async def get_attributes_for_faceting(self) -> Optional[list[str]]:
         """Get attributes for faceting of the index.
@@ -1074,6 +1160,37 @@ class Index:
         return UpdateId(**response.json())
 
     @staticmethod
+    async def _batch(documents: list[dict], batch_size: int) -> AsyncGenerator[list[dict], None]:
+        total_len = len(documents)
+        for i in range(0, total_len, batch_size):
+            yield documents[i : i + batch_size]
+
+    @staticmethod
+    async def _generate_auto_batches(
+        documents: list[dict[str, Any]], max_payload_size: int
+    ) -> AsyncGenerator[list[dict], None]:
+        batch = []
+        loop = get_running_loop()
+
+        for doc in documents:
+            doc_json_str = loop.run_in_executor(None, partial(json.dumps, doc))
+            doc_size = await loop.run_in_executor(None, partial(getsizeof, doc_json_str))
+            if doc_size > max_payload_size:
+                raise PayloadTooLarge(
+                    f"Payload size {doc_size} is greater than the maximum payload size of {max_payload_size}"
+                )
+            batch.append(doc)
+            batch_json_str = await loop.run_in_executor(None, partial(json.dumps, batch))
+            batch_size = await loop.run_in_executor(None, partial(getsizeof, batch_json_str))
+            if batch_size >= max_payload_size:
+                batch.pop()
+                yield batch
+                batch.clear()
+                batch.append(doc)
+        if batch:
+            yield batch
+
+    @staticmethod
     def _iso_to_date_time(iso_date: Optional[datetime | str]) -> Optional[datetime]:
         """Handle conversion of iso string to datetime.
 
@@ -1094,11 +1211,16 @@ class Index:
             reduced = f"{split[0]}.{split[1][:-reduce]}Z"
             return datetime.strptime(reduced, "%Y-%m-%dT%H:%M:%S.%fZ")
 
-    @staticmethod
-    async def _batch(documents: list[dict], batch_size: int) -> AsyncGenerator[list[dict], None]:
-        total_len = len(documents)
-        for i in range(0, total_len, batch_size):
-            yield documents[i : i + batch_size]
+    async def _load_documents_from_file(self, file_path: Path | str) -> list[dict]:
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+
+        loop = get_running_loop()
+        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
+
+        async with aiofiles.open(file_path, mode="r") as f:
+            data = await f.read()
+            return await loop.run_in_executor(None, partial(json.loads, data))
 
     @staticmethod
     def _validate_json_path(file_path: Path) -> None:
