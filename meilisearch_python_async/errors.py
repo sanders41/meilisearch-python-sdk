@@ -47,6 +47,6 @@ class MeiliSearchTimeoutError(MeiliSearchError):
 
 
 class PayloadTooLarge(Exception):
-    """Error when the payload is larger than the allowed payload size"""
+    """Error when the payload is larger than the allowed payload size."""
 
     pass
