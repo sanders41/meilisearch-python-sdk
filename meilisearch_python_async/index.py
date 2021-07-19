@@ -1169,26 +1169,32 @@ class Index:
     async def _generate_auto_batches(
         documents: list[dict[str, Any]], max_payload_size: int
     ) -> AsyncGenerator[list[dict], None]:
-        batch = []
         loop = get_running_loop()
 
-        for doc in documents:
-            doc_json_str = loop.run_in_executor(None, partial(json.dumps, doc))
-            doc_size = await loop.run_in_executor(None, partial(getsizeof, doc_json_str))
-            if doc_size > max_payload_size:
-                raise PayloadTooLarge(
-                    f"Payload size {doc_size} is greater than the maximum payload size of {max_payload_size}"
-                )
-            batch.append(doc)
-            batch_json_str = await loop.run_in_executor(None, partial(json.dumps, batch))
-            batch_size = await loop.run_in_executor(None, partial(getsizeof, batch_json_str))
-            if batch_size >= max_payload_size:
-                batch.pop()
-                yield batch
-                batch.clear()
+        # Check the size of all documents together if it is below the max size yield it all at onece
+        doc_json_str = await loop.run_in_executor(None, partial(json.dumps, documents))
+        doc_size = await loop.run_in_executor(None, partial(getsizeof, doc_json_str))
+        if doc_size < max_payload_size:
+            yield documents
+        else:
+            batch = []
+            for doc in documents:
+                doc_json_str = await loop.run_in_executor(None, partial(json.dumps, doc))
+                doc_size = await loop.run_in_executor(None, partial(getsizeof, doc_json_str))
+                if doc_size > max_payload_size:
+                    raise PayloadTooLarge(
+                        f"Payload size {doc_size} is greater than the maximum payload size of {max_payload_size}"
+                    )
                 batch.append(doc)
-        if batch:
-            yield batch
+                batch_json_str = await loop.run_in_executor(None, partial(json.dumps, batch))
+                batch_size = await loop.run_in_executor(None, partial(getsizeof, batch_json_str))
+                if batch_size >= max_payload_size:
+                    batch.pop()
+                    yield batch
+                    batch.clear()
+                    batch.append(doc)
+            if batch:
+                yield batch
 
     @staticmethod
     def _iso_to_date_time(iso_date: Optional[datetime | str]) -> Optional[datetime]:
