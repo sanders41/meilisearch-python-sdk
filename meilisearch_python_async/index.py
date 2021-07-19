@@ -1178,6 +1178,7 @@ class Index:
             yield documents
         else:
             batch = []
+            batch_size = 0
             for doc in documents:
                 doc_json_str = await loop.run_in_executor(None, partial(json.dumps, doc))
                 doc_size = await loop.run_in_executor(None, partial(getsizeof, doc_json_str))
@@ -1185,14 +1186,14 @@ class Index:
                     raise PayloadTooLarge(
                         f"Payload size {doc_size} is greater than the maximum payload size of {max_payload_size}"
                     )
+                batch_size += doc_size
                 batch.append(doc)
-                batch_json_str = await loop.run_in_executor(None, partial(json.dumps, batch))
-                batch_size = await loop.run_in_executor(None, partial(getsizeof, batch_json_str))
                 if batch_size >= max_payload_size:
                     batch.pop()
                     yield batch
                     batch.clear()
                     batch.append(doc)
+                    batch_size = doc_size
             if batch:
                 yield batch
 
