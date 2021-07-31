@@ -880,7 +880,7 @@ class Index:
         """Update distinct attribute of the index.
 
         Args:
-            body (str): [description]
+            body: Distinct attribute.
 
         Returns:
             Update id to track the action.
