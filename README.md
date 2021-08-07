@@ -6,9 +6,6 @@
 [![PyPI version](https://badge.fury.io/py/meilisearch-python-async.svg)](https://badge.fury.io/py/meilisearch-python-async)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/meilisearch-python-async?color=5cc141)](https://github.com/sanders41/meilisearch-python-async)
 
-💡MeiliSearch Python Async was originally named [Async Search Client](https://github.com/sanders41/async-search-client)
-and was renamed to make the purpose more clear. All of the functionality remains the same and development continues from where Async Search Client left off.
-
 Meilisearch Python Async is a Python async client for the [MeiliSearch](https://github.com/meilisearch/MeiliSearch) API. MeiliSearch also has an official [Python client](https://github.com/meilisearch/meilisearch-python).
 
 Which of the two clients to use comes down to your particular use case. The purpose for this async client is to allow for non-blocking calls when working in async frameworks such as [FastAPI](https://fastapi.tiangolo.com/), or if your own code base you are working in is async. If this does not match your use case then the official client will be a better choice.
