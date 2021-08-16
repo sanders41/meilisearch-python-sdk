@@ -54,8 +54,8 @@ class Index:
         """
         self.uid = uid
         self.primary_key = primary_key
-        self.created_at: Optional[datetime] = self._iso_to_date_time(created_at)
-        self.updated_at: Optional[datetime] = self._iso_to_date_time(updated_at)
+        self.created_at: Optional[datetime] = Index._iso_to_date_time(created_at)
+        self.updated_at: Optional[datetime] = Index._iso_to_date_time(updated_at)
         self._http_requests = _HttpRequests(http_client)
 
     def __str__(self) -> str:
@@ -134,10 +134,10 @@ class Index:
         self.primary_key = index_dict["primaryKey"]
         loop = get_running_loop()
         self.created_at = await loop.run_in_executor(
-            None, partial(self._iso_to_date_time, index_dict["createdAt"])
+            None, partial(Index._iso_to_date_time, index_dict["createdAt"])
         )
         self.updated_at = await loop.run_in_executor(
-            None, partial(self._iso_to_date_time, index_dict["updatedAt"])
+            None, partial(Index._iso_to_date_time, index_dict["updatedAt"])
         )
         return self
 
@@ -430,7 +430,7 @@ class Index:
             PayloadTooLarge: If the largest document is larget than the max_payload_size
         """
         update_ids = []
-        async for batch in self._generate_auto_batches(documents, max_payload_size):
+        async for batch in Index._generate_auto_batches(documents, max_payload_size):
             update_id = await self.add_documents(batch, primary_key)
             update_ids.append(update_id)
 
@@ -457,7 +457,7 @@ class Index:
         """
         update_ids: list[UpdateId] = []
 
-        async for document_batch in self._batch(documents, batch_size):
+        async for document_batch in Index._batch(documents, batch_size):
             update_id = await self.add_documents(document_batch, primary_key)
             update_ids.append(update_id)
 
@@ -512,7 +512,7 @@ class Index:
         documents = await self._load_documents_from_file(file_path)
 
         update_ids = []
-        async for batch in self._generate_auto_batches(documents, max_payload_size):
+        async for batch in Index._generate_auto_batches(documents, max_payload_size):
             update_id = await self.add_documents(batch, primary_key)
             update_ids.append(update_id)
 
@@ -594,7 +594,7 @@ class Index:
             PayloadTooLarge: If the largest document is larget than the max_payload_size
         """
         update_ids = []
-        async for batch in self._generate_auto_batches(documents, max_payload_size):
+        async for batch in Index._generate_auto_batches(documents, max_payload_size):
             update_id = await self.update_documents(batch, primary_key)
             update_ids.append(update_id)
 
@@ -623,7 +623,7 @@ class Index:
         """
         update_ids: list[UpdateId] = []
 
-        async for document_batch in self._batch(documents, batch_size):
+        async for document_batch in Index._batch(documents, batch_size):
             update_id = await self.update_documents(document_batch, primary_key)
             update_ids.append(update_id)
 
@@ -677,7 +677,7 @@ class Index:
         documents = await self._load_documents_from_file(file_path)
 
         update_ids = []
-        async for batch in self._generate_auto_batches(documents, max_payload_size):
+        async for batch in Index._generate_auto_batches(documents, max_payload_size):
             update_id = await self.update_documents(batch, primary_key)
             update_ids.append(update_id)
 
@@ -1223,7 +1223,7 @@ class Index:
             file_path = Path(file_path)
 
         loop = get_running_loop()
-        await loop.run_in_executor(None, partial(self._validate_json_path, file_path))
+        await loop.run_in_executor(None, partial(Index._validate_json_path, file_path))
 
         async with aiofiles.open(file_path, mode="r") as f:
             data = await f.read()
