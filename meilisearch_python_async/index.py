@@ -275,6 +275,7 @@ class Index:
     async def search(
         self,
         query: str,
+        *,
         offset: int = 0,
         limit: int = 20,
         filter: Optional[str | list[str | list[str]]] = None,
