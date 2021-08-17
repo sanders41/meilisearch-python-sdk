@@ -87,7 +87,7 @@ async def test_add_documents_auto_batch(
 async def test_add_documents_auto_batch_payload_size_error(empty_index, small_movies):
     with pytest.raises(PayloadTooLarge):
         index = await empty_index()
-        await index.add_documents_auto_batch(small_movies, 1)
+        await index.add_documents_auto_batch(small_movies, max_payload_size=1)
 
 
 @pytest.mark.asyncio
@@ -99,7 +99,9 @@ async def test_add_documents_in_batches(
     batch_size, primary_key, expected_primary_key, empty_index, small_movies
 ):
     index = await empty_index()
-    response = await index.add_documents_in_batches(small_movies, batch_size, primary_key)
+    response = await index.add_documents_in_batches(
+        small_movies, batch_size=batch_size, primary_key=primary_key
+    )
     assert ceil(len(small_movies) / batch_size) == len(response)
 
     for r in response:
@@ -226,7 +228,7 @@ async def test_add_documents_from_file_in_batches(
 ):
     index = test_client.index("movies")
     response = await index.add_documents_from_file_in_batches(
-        small_movies_path, batch_size, primary_key
+        small_movies_path, batch_size=batch_size, primary_key=primary_key
     )
     assert ceil(len(small_movies) / batch_size) == len(response)
 
@@ -247,7 +249,9 @@ async def test_add_documents_from_file_string_path_in_batches(
 ):
     string_path = str(small_movies_path)
     index = test_client.index("movies")
-    response = await index.add_documents_from_file_in_batches(string_path, batch_size, primary_key)
+    response = await index.add_documents_from_file_in_batches(
+        string_path, batch_size=batch_size, primary_key=primary_key
+    )
     assert ceil(len(small_movies) / batch_size) == len(response)
 
     for r in response:
@@ -382,7 +386,7 @@ async def test_update_documents_auto_batch_primary_key(test_client, max_payload)
 async def test_update_documents_auto_batch_payload_size_error(empty_index, small_movies):
     with pytest.raises(PayloadTooLarge):
         index = await empty_index()
-        await index.update_documents_auto_batch(small_movies, 1)
+        await index.update_documents_auto_batch(small_movies, max_payload_size=1)
 
 
 @pytest.mark.asyncio
@@ -396,7 +400,7 @@ async def test_update_documents_in_batches(batch_size, index_with_documents, sma
 
     response = await index.get_documents()
     assert response[0]["title"] == "Some title"
-    updates = await index.update_documents_in_batches(small_movies, batch_size)
+    updates = await index.update_documents_in_batches(small_movies, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:
@@ -412,7 +416,7 @@ async def test_update_documents_in_batches_with_primary_key(batch_size, test_cli
     primary_key = "release_date"
     index = test_client.index("movies")
     updates = await index.update_documents_in_batches(
-        small_movies, batch_size, primary_key=primary_key
+        small_movies, batch_size=batch_size, primary_key=primary_key
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
@@ -565,7 +569,9 @@ async def test_update_documents_from_file_in_batches(
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
     assert list(got_title)[0]["title"] == "Some title"
-    updates = await index.update_documents_from_file_in_batches(small_movies_path, batch_size)
+    updates = await index.update_documents_from_file_in_batches(
+        small_movies_path, batch_size=batch_size
+    )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:
@@ -591,7 +597,7 @@ async def test_update_documents_from_file_string_path_in_batches(
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
     assert list(got_title)[0]["title"] == "Some title"
-    updates = await index.update_documents_from_file_in_batches(string_path, batch_size)
+    updates = await index.update_documents_from_file_in_batches(string_path, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:

@@ -406,6 +406,7 @@ class Index:
     async def add_documents_auto_batch(
         self,
         documents: list[dict],
+        *,
         max_payload_size: int = 104857600,
         primary_key: Optional[str] = None,
     ) -> list[UpdateId]:
@@ -435,7 +436,7 @@ class Index:
         return update_ids
 
     async def add_documents_in_batches(
-        self, documents: list[dict], batch_size: int = 1000, primary_key: Optional[str] = None
+        self, documents: list[dict], *, batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
@@ -485,6 +486,7 @@ class Index:
     async def add_documents_from_file_auto_batch(
         self,
         file_path: Path | str,
+        *,
         max_payload_size: int = 104857600,
         primary_key: Optional[str] = None,
     ) -> list[UpdateId]:
@@ -517,7 +519,7 @@ class Index:
         return update_ids
 
     async def add_documents_from_file_in_batches(
-        self, file_path: Path | str, batch_size: int = 1000, primary_key: Optional[str] = None
+        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -570,6 +572,7 @@ class Index:
     async def update_documents_auto_batch(
         self,
         documents: list[dict],
+        *,
         max_payload_size: int = 104857600,
         primary_key: Optional[str] = None,
     ) -> list[UpdateId]:
@@ -599,7 +602,7 @@ class Index:
         return update_ids
 
     async def update_documents_in_batches(
-        self, documents: list[dict], batch_size: int = 1000, primary_key: Optional[str] = None
+        self, documents: list[dict], *, batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
         """Update documents in batches to reduce RAM usage with indexing.
 
@@ -651,6 +654,7 @@ class Index:
     async def update_documents_from_file_auto_batch(
         self,
         file_path: Path | str,
+        *,
         max_payload_size: int = 104857600,
         primary_key: Optional[str] = None,
     ) -> list[UpdateId]:
@@ -682,7 +686,7 @@ class Index:
         return update_ids
 
     async def update_documents_from_file_in_batches(
-        self, file_path: Path | str, batch_size: int = 1000, primary_key: Optional[str] = None
+        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: Optional[str] = None
     ) -> list[UpdateId]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
