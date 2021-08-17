@@ -345,7 +345,7 @@ class Index:
         return response.json()
 
     async def get_documents(
-        self, offset: int = 0, limit: int = 20, attributes_to_retrieve: Optional[str] = None
+        self, *, offset: int = 0, limit: int = 20, attributes_to_retrieve: Optional[str] = None
     ) -> Optional[list[dict]]:
         """Get a batch documents from the index.
 
