@@ -59,10 +59,10 @@ class Index:
         self._http_requests = _HttpRequests(http_client)
 
     def __str__(self) -> str:
-        return f"uid={self.uid}, primary_key={self.primary_key}, created_at={self.created_at}, updated_at={self.updated_at}"
+        return f"{type(self).__name__}(uid={self.uid}, primary_key={self.primary_key}, created_at={self.created_at}, updated_at={self.updated_at})"
 
     def __repr__(self) -> str:
-        return f"uid={self.uid}, primary_key={self.primary_key}, created_at={self.created_at}, updated_at={self.updated_at}"
+        return f"{type(self).__name__}(uid={self.uid!r}, primary_key={self.primary_key!r}, created_at={self.created_at!r}, updated_at={self.updated_at!r})"
 
     async def delete(self) -> int:
         """Deletes the index.
