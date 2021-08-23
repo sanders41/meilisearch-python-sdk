@@ -80,7 +80,6 @@ async def test_custom_search_params_with_simple_string(index_with_documents):
     assert "release_date" not in response.hits[0]["_formatted"]
 
 
-@pytest.mark.xfail(reason="attributes_to_highlight not working")
 @pytest.mark.asyncio
 async def test_custom_search_params_with_string_list(index_with_documents):
     index = await index_with_documents()
@@ -94,8 +93,8 @@ async def test_custom_search_params_with_string_list(index_with_documents):
     assert "title" in response.hits[0]
     assert "overview" in response.hits[0]
     assert "release_date" not in response.hits[0]
-    assert "title" in response.hits[0]["_formatted"]
-    assert "overview" not in response.hits[0]["_formatted"]
+    assert "<em>" in response.hits[0]["_formatted"]["title"]
+    assert "<em>" not in response.hits[0]["_formatted"]["overview"]
 
 
 @pytest.mark.asyncio
@@ -137,7 +136,6 @@ async def test_custom_search_params_with_multiple_facet_filters(index_with_docum
     assert response.exhaustive_facets_count is None
 
 
-@pytest.mark.xfail(reason="filter with space not working")
 @pytest.mark.asyncio
 async def test_custom_search_facet_filters_with_space(test_client):
     dataset = [
@@ -185,7 +183,7 @@ async def test_custom_search_facet_filters_with_space(test_client):
     await index.wait_for_pending_update(update.update_id)
     update = await index.update_filterable_attributes(["genre"])
     await index.wait_for_pending_update(update.update_id)
-    response = await index.search("h", filter=["genre = sci fi"])
+    response = await index.search("h", filter=["genre = 'sci fi'"])
     assert len(response.hits) == 1
     assert response.hits[0]["title"] == "The Hobbit"
 
