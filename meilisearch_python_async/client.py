@@ -21,7 +21,7 @@ class Client:
             url: The url to the MeiliSearch API (ex: http://localhost:7700)
             api_key: The optional API key for MeiliSearch. Defaults to None.
             timeout: The amount of time in seconds that the client will wait for a response before
-                timing out. Defaults to 5.
+                timing out. Defaults to None.
         """
         self._http_client = AsyncClient(
             base_url=url, timeout=timeout, headers=self._set_headers(api_key)
