@@ -93,14 +93,14 @@ async def test_custom_search_params_with_string_list(index_with_documents):
     assert "title" in response.hits[0]
     assert "overview" in response.hits[0]
     assert "release_date" not in response.hits[0]
-    assert "title" in response.hits[0]["_formatted"]
-    assert "overview" not in response.hits[0]["_formatted"]
+    assert "<em>" in response.hits[0]["_formatted"]["title"]
+    assert "<em>" not in response.hits[0]["_formatted"]["overview"]
 
 
 @pytest.mark.asyncio
 async def test_custom_search_params_with_facets_distribution(index_with_documents):
     index = await index_with_documents()
-    update = await index.update_attributes_for_faceting(["genre"])
+    update = await index.update_filterable_attributes(["genre"])
     await index.wait_for_pending_update(update.update_id)
     response = await index.search("world", facets_distribution=["genre"])
     assert len(response.hits) == 12
@@ -115,9 +115,9 @@ async def test_custom_search_params_with_facets_distribution(index_with_document
 @pytest.mark.asyncio
 async def test_custom_search_params_with_facet_filters(index_with_documents):
     index = await index_with_documents()
-    update = await index.update_attributes_for_faceting(["genre"])
+    update = await index.update_filterable_attributes(["genre"])
     await index.wait_for_pending_update(update.update_id)
-    response = await index.search("world", facet_filters=[["genre:action"]])
+    response = await index.search("world", filter=[["genre = action"]])
     assert len(response.hits) == 3
     assert response.facets_distribution is None
     assert response.exhaustive_facets_count is None
@@ -126,10 +126,10 @@ async def test_custom_search_params_with_facet_filters(index_with_documents):
 @pytest.mark.asyncio
 async def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
     index = await index_with_documents()
-    update = await index.update_attributes_for_faceting(["genre"])
+    update = await index.update_filterable_attributes(["genre"])
     await index.wait_for_pending_update(update.update_id)
     response = await index.search(
-        "world", facet_filters=["genre:action", ["genre:action", "genre:action"]]
+        "world", filter=["genre = action", ["genre = action", "genre = action"]]
     )
     assert len(response.hits) == 3
     assert response.facets_distribution is None
@@ -181,9 +181,9 @@ async def test_custom_search_facet_filters_with_space(test_client):
     index = test_client.index("books")
     update = await index.add_documents(dataset)
     await index.wait_for_pending_update(update.update_id)
-    update = await index.update_attributes_for_faceting(["genre"])
+    update = await index.update_filterable_attributes(["genre"])
     await index.wait_for_pending_update(update.update_id)
-    response = await index.search("h", facet_filters=["genre:sci fi"])
+    response = await index.search("h", filter=["genre = 'sci fi'"])
     assert len(response.hits) == 1
     assert response.hits[0]["title"] == "The Hobbit"
 
@@ -191,10 +191,10 @@ async def test_custom_search_facet_filters_with_space(test_client):
 @pytest.mark.asyncio
 async def test_custom_search_params_with_many_params(index_with_documents):
     index = await index_with_documents()
-    update = await index.update_attributes_for_faceting(["genre"])
+    update = await index.update_filterable_attributes(["genre"])
     await index.wait_for_pending_update(update.update_id)
     response = await index.search(
-        "world", facet_filters=[["genre:action"]], attributes_to_retrieve=["title", "poster"]
+        "world", filter=[["genre = action"]], attributes_to_retrieve=["title", "poster"]
     )
     assert len(response.hits) == 3
     assert response.facets_distribution is None
