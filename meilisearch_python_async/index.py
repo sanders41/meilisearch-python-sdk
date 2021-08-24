@@ -6,7 +6,7 @@ from datetime import datetime
 from functools import partial
 from pathlib import Path
 from sys import getsizeof
-from typing import Any, AsyncGenerator, Optional
+from typing import Any, AsyncGenerator
 from urllib.parse import urlencode
 
 import aiofiles
@@ -38,9 +38,9 @@ class Index:
         self,
         http_client: AsyncClient,
         uid: str,
-        primary_key: Optional[str] = None,
-        created_at: Optional[str | datetime] = None,
-        updated_at: Optional[str | datetime] = None,
+        primary_key: str | None = None,
+        created_at: str | datetime | None = None,
+        updated_at: str | datetime | None = None,
     ):
         """Class initializer.
 
@@ -54,8 +54,8 @@ class Index:
         """
         self.uid = uid
         self.primary_key = primary_key
-        self.created_at: Optional[datetime] = Index._iso_to_date_time(created_at)
-        self.updated_at: Optional[datetime] = Index._iso_to_date_time(updated_at)
+        self.created_at: datetime | None = Index._iso_to_date_time(created_at)
+        self.updated_at: datetime | None = Index._iso_to_date_time(updated_at)
         self._http_requests = _HttpRequests(http_client)
 
     def __str__(self) -> str:
@@ -141,7 +141,7 @@ class Index:
         )
         return self
 
-    async def get_primary_key(self) -> Optional[str]:
+    async def get_primary_key(self) -> str | None:
         """Get the primary key.
 
         Returns:
@@ -156,7 +156,7 @@ class Index:
 
     @classmethod
     async def create(
-        cls, http_client: AsyncClient, uid: str, primary_key: Optional[str] = None
+        cls, http_client: AsyncClient, uid: str, primary_key: str | None = None
     ) -> Index:
         """Creates a new index.
 
@@ -189,7 +189,7 @@ class Index:
             updated_at=index_dict["updatedAt"],
         )
 
-    async def get_all_update_status(self) -> Optional[list[UpdateStatus]]:
+    async def get_all_update_status(self) -> list[UpdateStatus] | None:
         """Get all update status.
 
         Returns:
@@ -278,12 +278,12 @@ class Index:
         *,
         offset: int = 0,
         limit: int = 20,
-        filter: Optional[str | list[str | list[str]]] = None,
-        facets_distribution: Optional[list[str]] = None,
+        filter: str | list[str | list[str]] | None = None,
+        facets_distribution: list[str] | None = None,
         attributes_to_retrieve: list[str] = ["*"],
-        attributes_to_crop: Optional[list[str]] = None,
+        attributes_to_crop: list[str] | None = None,
         crop_length: int = 200,
-        attributes_to_highlight: Optional[list[str]] = None,
+        attributes_to_highlight: list[str] | None = None,
         matches: bool = False,
     ) -> SearchResults:
         """Search the index.
@@ -345,8 +345,8 @@ class Index:
         return response.json()
 
     async def get_documents(
-        self, *, offset: int = 0, limit: int = 20, attributes_to_retrieve: Optional[str] = None
-    ) -> Optional[list[dict]]:
+        self, *, offset: int = 0, limit: int = 20, attributes_to_retrieve: str | None = None
+    ) -> list[dict[str, Any]] | None:
         """Get a batch documents from the index.
 
         Args:
@@ -379,7 +379,7 @@ class Index:
         return response.json()
 
     async def add_documents(
-        self, documents: list[dict], primary_key: Optional[str] = None
+        self, documents: list[dict], primary_key: str | None = None
     ) -> UpdateId:
         """Add documents to the index.
 
@@ -408,7 +408,7 @@ class Index:
         documents: list[dict],
         *,
         max_payload_size: int = 104857600,
-        primary_key: Optional[str] = None,
+        primary_key: str | None = None,
     ) -> list[UpdateId]:
         """Automatically splits the documents into batches when adding.
 
@@ -436,7 +436,7 @@ class Index:
         return update_ids
 
     async def add_documents_in_batches(
-        self, documents: list[dict], *, batch_size: int = 1000, primary_key: Optional[str] = None
+        self, documents: list[dict], *, batch_size: int = 1000, primary_key: str | None = None
     ) -> list[UpdateId]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
@@ -463,7 +463,7 @@ class Index:
         return update_ids
 
     async def add_documents_from_file(
-        self, file_path: Path | str, primary_key: Optional[str] = None
+        self, file_path: Path | str, primary_key: str | None = None
     ) -> UpdateId:
         """Add documents to the index from a json file.
 
@@ -488,7 +488,7 @@ class Index:
         file_path: Path | str,
         *,
         max_payload_size: int = 104857600,
-        primary_key: Optional[str] = None,
+        primary_key: str | None = None,
     ) -> list[UpdateId]:
         """Automatically splits the documents into batches when adding from a json file.
 
@@ -519,7 +519,7 @@ class Index:
         return update_ids
 
     async def add_documents_from_file_in_batches(
-        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: Optional[str] = None
+        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
     ) -> list[UpdateId]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -545,7 +545,7 @@ class Index:
         )
 
     async def update_documents(
-        self, documents: list[dict], primary_key: Optional[str] = None
+        self, documents: list[dict], primary_key: str | None = None
     ) -> UpdateId:
         """Update documents in the index.
 
@@ -574,7 +574,7 @@ class Index:
         documents: list[dict],
         *,
         max_payload_size: int = 104857600,
-        primary_key: Optional[str] = None,
+        primary_key: str | None = None,
     ) -> list[UpdateId]:
         """Automatically splits the documents into batches when updating.
 
@@ -602,7 +602,7 @@ class Index:
         return update_ids
 
     async def update_documents_in_batches(
-        self, documents: list[dict], *, batch_size: int = 1000, primary_key: Optional[str] = None
+        self, documents: list[dict], *, batch_size: int = 1000, primary_key: str | None = None
     ) -> list[UpdateId]:
         """Update documents in batches to reduce RAM usage with indexing.
 
@@ -631,7 +631,7 @@ class Index:
         return update_ids
 
     async def update_documents_from_file(
-        self, file_path: Path | str, primary_key: Optional[str] = None
+        self, file_path: Path | str, primary_key: str | None = None
     ) -> UpdateId:
         """Add documents in the index from a json file.
 
@@ -656,7 +656,7 @@ class Index:
         file_path: Path | str,
         *,
         max_payload_size: int = 104857600,
-        primary_key: Optional[str] = None,
+        primary_key: str | None = None,
     ) -> list[UpdateId]:
         """Automatically splits the documents into batches when updating from a json file.
 
@@ -686,7 +686,7 @@ class Index:
         return update_ids
 
     async def update_documents_from_file_in_batches(
-        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: Optional[str] = None
+        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
     ) -> list[UpdateId]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -859,7 +859,7 @@ class Index:
 
         return UpdateId(**response.json())
 
-    async def get_distinct_attribute(self) -> Optional[str]:
+    async def get_distinct_attribute(self) -> str | None:
         """Get distinct attribute of the index.
 
         Returns:
@@ -1008,7 +1008,7 @@ class Index:
 
         return UpdateId(**response.json())
 
-    async def get_stop_words(self) -> Optional[list[str]]:
+    async def get_stop_words(self) -> list[str] | None:
         """Get stop words of the index.
 
         Returns:
@@ -1059,7 +1059,7 @@ class Index:
 
         return UpdateId(**response.json())
 
-    async def get_synonyms(self) -> Optional[dict[str, list[str]]]:
+    async def get_synonyms(self) -> dict[str, list[str]] | None:
         """Get synonyms of the index.
 
         Returns:
@@ -1110,7 +1110,7 @@ class Index:
 
         return UpdateId(**response.json())
 
-    async def get_filterable_attributes(self) -> Optional[list[str]]:
+    async def get_filterable_attributes(self) -> list[str] | None:
         """Get filterable attributes of the index.
 
         Returns:
@@ -1200,7 +1200,7 @@ class Index:
                 yield batch
 
     @staticmethod
-    def _iso_to_date_time(iso_date: Optional[datetime | str]) -> Optional[datetime]:
+    def _iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:
         """Handle conversion of iso string to datetime.
 
         The microseconds from MeiliSearch are sometimes too long for python to convert so this

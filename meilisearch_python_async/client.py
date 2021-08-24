@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Optional, Type
+from typing import Type
 
 from httpx import AsyncClient
 
@@ -33,9 +33,9 @@ class Client:
 
     async def __aexit__(
         self,
-        et: Optional[Type[BaseException]],
-        ev: Optional[Type[BaseException]],
-        traceback: Optional[TracebackType],
+        et: Type[BaseException] | None,
+        ev: Type[BaseException] | None,
+        traceback: TracebackType | None,
     ) -> None:
         await self.aclose()
 
@@ -60,7 +60,7 @@ class Client:
         response = await self._http_requests.post("dumps")
         return DumpInfo(**response.json())
 
-    async def create_index(self, uid: str, primary_key: Optional[str] = None) -> Index:
+    async def create_index(self, uid: str, primary_key: str | None = None) -> Index:
         """Creates a new index.
 
         Args:
@@ -98,7 +98,7 @@ class Client:
                 raise error
             return False
 
-    async def get_indexes(self) -> Optional[list[Index]]:
+    async def get_indexes(self) -> list[Index] | None:
         """Get all indexes.
 
         Returns:
@@ -188,7 +188,7 @@ class Client:
         response = await self._http_requests.get(url)
         return DumpInfo(**response.json())
 
-    async def get_or_create_index(self, uid: str, primary_key: Optional[str] = None) -> Index:
+    async def get_or_create_index(self, uid: str, primary_key: str | None = None) -> Index:
         """Get an index, or create it if it doesn't exist.
 
         Args:
@@ -225,7 +225,7 @@ class Client:
         response = await self._http_requests.get("keys")
         return Keys(**response.json())
 
-    async def get_raw_index(self, uid: str) -> Optional[IndexInfo]:
+    async def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an Index instance.
 
         Args:
@@ -245,7 +245,7 @@ class Client:
 
         return IndexInfo(**response.json())
 
-    async def get_raw_indexes(self) -> Optional[list[IndexInfo]]:
+    async def get_raw_indexes(self) -> list[IndexInfo] | None:
         """Gets all the indexes.
 
         Returns all the index information rather than an Index instance.
