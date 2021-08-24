@@ -1,4 +1,6 @@
-from typing import Any, Callable, Optional
+from __future__ import annotations
+
+from typing import Any, Callable
 
 from httpx import (
     AsyncClient,
@@ -20,7 +22,7 @@ class _HttpRequests:
         self,
         http_method: Callable,
         path: str,
-        body: Optional[Any] = None,
+        body: Any | None = None,
     ) -> Response:
         try:
             response = None
@@ -48,11 +50,11 @@ class _HttpRequests:
     async def get(self, path: str) -> Response:
         return await self._send_request(self.http_client.get, path)
 
-    async def post(self, path: str, body: Optional[Any] = None) -> Response:
+    async def post(self, path: str, body: Any | None = None) -> Response:
         return await self._send_request(self.http_client.post, path, body)
 
-    async def put(self, path: str, body: Optional[Any] = None) -> Response:
+    async def put(self, path: str, body: Any | None = None) -> Response:
         return await self._send_request(self.http_client.put, path, body)
 
-    async def delete(self, path: str, body: Optional[dict] = None) -> Response:
+    async def delete(self, path: str, body: dict | None = None) -> Response:
         return await self._send_request(self.http_client.delete, path, body)
