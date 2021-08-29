@@ -14,7 +14,7 @@ from meilisearch_python_async.models import ClientStats, DumpInfo, Health, Index
 class Client:
     """The client to connect to the MeiliSearchApi."""
 
-    def __init__(self, url: str, api_key: str = None, timeout: int | None = None) -> None:
+    def __init__(self, url: str, api_key: str | None = None, timeout: int | None = None) -> None:
         """Class initializer.
 
         Args:
@@ -290,7 +290,7 @@ class Client:
         response = await self._http_requests.get("health")
         return Health(**response.json())
 
-    def _set_headers(self, api_key: str = None) -> dict[str, str]:
+    def _set_headers(self, api_key: str | None = None) -> dict[str, str]:
         if api_key:
             return {
                 "X-Meili-Api-Key": api_key,

@@ -96,7 +96,7 @@ class Index:
                 raise error
             return False
 
-    async def update(self, primary_key: str = None) -> Index:
+    async def update(self, primary_key: str | None = None) -> Index:
         """Update the index primary key.
 
         Args:
