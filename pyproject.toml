@@ -26,7 +26,7 @@ aiofiles = "^0.7.0"
 camel-converter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
-black = "^21.6b0"
+black = "^21.8b0"
 flake8 = "^3.9.2"
 isort = "^5.9.3"
 mypy = "^0.910"
