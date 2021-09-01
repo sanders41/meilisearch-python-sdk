@@ -479,7 +479,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        documents = await self._load_documents_from_file(file_path)
+        documents = await Index._load_documents_from_file(file_path)
 
         return await self.add_documents(documents, primary_key=primary_key)
 
@@ -509,7 +509,7 @@ class Index:
             MeiliSearchApiError: If the MeiliSearch API returned an error.
             PayloadTooLarge: If the largest document is larget than the max_payload_size
         """
-        documents = await self._load_documents_from_file(file_path)
+        documents = await Index._load_documents_from_file(file_path)
 
         update_ids = []
         async for batch in Index._generate_auto_batches(documents, max_payload_size):
@@ -538,7 +538,7 @@ class Index:
             MeiliSearchCommunicationError: If there was an error communicating with the server.
             MeiliSearchApiError: If the MeiliSearch API returned an error.
         """
-        documents = await self._load_documents_from_file(file_path)
+        documents = await Index._load_documents_from_file(file_path)
 
         return await self.add_documents_in_batches(
             documents, batch_size=batch_size, primary_key=primary_key
@@ -647,7 +647,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        documents = await self._load_documents_from_file(file_path)
+        documents = await Index._load_documents_from_file(file_path)
 
         return await self.update_documents(documents, primary_key=primary_key)
 
@@ -676,7 +676,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        documents = await self._load_documents_from_file(file_path)
+        documents = await Index._load_documents_from_file(file_path)
 
         update_ids = []
         async for batch in Index._generate_auto_batches(documents, max_payload_size):
@@ -704,7 +704,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        documents = await self._load_documents_from_file(file_path)
+        documents = await Index._load_documents_from_file(file_path)
 
         return await self.update_documents_in_batches(
             documents, batch_size=batch_size, primary_key=primary_key
@@ -1220,7 +1220,8 @@ class Index:
             reduced = f"{split[0]}.{split[1][:-reduce]}Z"
             return datetime.strptime(reduced, "%Y-%m-%dT%H:%M:%S.%fZ")
 
-    async def _load_documents_from_file(self, file_path: Path | str) -> list[dict]:
+    @staticmethod
+    async def _load_documents_from_file(file_path: Path | str) -> list[dict]:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
