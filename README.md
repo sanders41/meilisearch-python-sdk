@@ -291,6 +291,25 @@ SearchResults(
   response = await index.update_documents_from_file_auto_batch("/path/to/file.json")
   ```
 
+* status_check decorator:
+
+  ```py
+  from meilisearch import Client
+  from meilisearch_status_check_decorator import status_check
+
+  index = Client("http://localhost:7700", "masterKey").index("test")
+
+  @status_check(index=index)
+  async def bad_insert():
+      await index.add_documents(documents)
+  ```
+
+  If the adding of documents fails something similar to the folling will be printed:
+
+  ```sh
+  FAILED: [UpdateStatus(status='failed', update_id=0, update_type={'name': 'DocumentsAddition'}, enqueued_at=datetime.datetime(2021, 9, 2, 22, 47, 42, 234902, tzinfo=datetime.timezone.utc), duration=0.0, processed_at=datetime.datetime(2021, 9, 2, 22, 47, 42, 236647, tzinfo=datetime.timezone.utc), error=None)]
+  ```
+
 ## Compatibility with MeiliSearch
 
 This package only guarantees the compatibility with [version v0.21.0 of MeiliSearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.21.0).
