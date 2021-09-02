@@ -3,6 +3,7 @@ from math import ceil
 
 import pytest
 
+from meilisearch_python_async.decorators import status_check
 from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchError, PayloadTooLarge
 
 
@@ -24,6 +25,18 @@ def generate_test_movies(num_movies=50):
     return movies
 
 
+@pytest.fixture
+def add_document():
+    return {
+        "id": "1",
+        "title": f"{'a' * 999999}",
+        "poster": f"{'a' * 999999}",
+        "overview": f"{'a' * 999999}",
+        "release_date": 1551830399,
+        "genre": f"{'a' * 999999}",
+    }
+
+
 @pytest.mark.asyncio
 async def test_get_documents_default(empty_index):
     index = await empty_index()
@@ -43,16 +56,114 @@ async def test_add_documents(primary_key, expected_primary_key, empty_index, sma
     assert update.status == "processed"
 
 
-@pytest.fixture
-def add_document():
-    return {
-        "id": "1",
-        "title": f"{'a' * 999999}",
-        "poster": f"{'a' * 999999}",
-        "overview": f"{'a' * 999999}",
-        "release_date": 1551830399,
-        "genre": f"{'a' * 999999}",
-    }
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "docs, expected_fail, expected_indexed",
+    [
+        (
+            [
+                {
+                    "id": 1,
+                    "name": "test 1",
+                },
+                {
+                    "id": 2,
+                    "name": "test 2",
+                },
+            ],
+            False,
+            2,
+        ),
+        (
+            [
+                {
+                    "name": "test 1",
+                },
+                {
+                    "name": "test 2",
+                },
+            ],
+            True,
+            0,
+        ),
+    ],
+)
+async def test_status_check_decorator(docs, expected_fail, expected_indexed, empty_index, capfd):
+    index = await empty_index()
+
+    @status_check(index=index)
+    async def fn():
+        await index.add_documents(docs)
+
+    await fn()
+    stats = await index.get_stats()
+    assert stats.number_of_documents == expected_indexed
+
+    out, _ = capfd.readouterr()
+
+    fail_text = "status='failed'"
+
+    if expected_fail:
+        assert fail_text in out
+    else:
+        assert fail_text not in out
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "docs, expected_fail, expected_indexed, expected_messages",
+    [
+        (
+            [
+                {
+                    "id": 1,
+                    "name": "test 1",
+                },
+                {
+                    "id": 2,
+                    "name": "test 2",
+                },
+            ],
+            False,
+            2,
+            0,
+        ),
+        (
+            [
+                {
+                    "name": "test 1",
+                },
+                {
+                    "name": "test 2",
+                },
+            ],
+            True,
+            0,
+            2,
+        ),
+    ],
+)
+async def test_status_check_decorator_batch(
+    docs, expected_fail, expected_indexed, expected_messages, empty_index, capfd
+):
+    index = await empty_index()
+
+    @status_check(index=index)
+    async def fn():
+        await index.add_documents_in_batches(docs, batch_size=1)
+
+    await fn()
+    stats = await index.get_stats()
+    assert stats.number_of_documents == expected_indexed
+
+    out, _ = capfd.readouterr()
+
+    fail_text = "status='failed'"
+
+    if expected_fail:
+        assert out.count(fail_text) == expected_messages
+    else:
+        assert fail_text not in out
 
 
 @pytest.mark.asyncio
