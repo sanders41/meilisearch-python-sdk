@@ -73,7 +73,7 @@ jobs:
     - name: MeiliSearch setup
       run: |
         sh .github/scripts/download-latest.sh
-        chmod -x meilisearch
+        chmod +x meilisearch
         ./meilisearch --master-key masterKey --no-analytics true
     - name: Test with pytest
       run: |
