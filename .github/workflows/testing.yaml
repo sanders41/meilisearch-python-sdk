@@ -44,14 +44,22 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.7, 3.8, 3.9, "3.10.0-beta - 3.10.0"]
-    runs-on: ubuntu-latest
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2.3.4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2.2.2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Poetry and add to path
+    - name: Install Poetry and add to path on Windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        (Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py -UseBasicParsing).Content | python -
+        echo "${HOME}\AppData\Roaming\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo ${HOME}\AppData\Roaming\Python\Scripts
+    - name: Install Poetry and add to path on Mac and Linux
+      if: matrix.os != 'windows-latest'
       run: |
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
         echo "${HOME}/.local/bin" >> $GITHUB_PATH
@@ -62,8 +70,10 @@ jobs:
     - name: Install Dependencies
       run: |
         poetry install
-    - name: MeiliSearch (latest version) setup with Docker
-      run: docker run -d -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --no-analytics=true --master-key=masterKey
+    - name: MeiliSearch setup
+      run: |
+        sh .github/scripts/download-latest.sh
+        ./meilisearch --master-key masterKey --no-analytics true
     - name: Test with pytest
       run: |
         poetry run pytest --cov=meilisearch_python_async --cov-report=xml
