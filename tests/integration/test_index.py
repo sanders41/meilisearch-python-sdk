@@ -12,13 +12,15 @@ from meilisearch_python_async.models import MeiliSearchSettings
 @pytest.fixture
 def new_settings():
     return MeiliSearchSettings(
-        ranking_rules=["typo", "words"], searchable_attributes=["title", "overview"]
+        ranking_rules=["typo", "words"],
+        searchable_attributes=["title", "overview"],
+        sortable_attributes=["genre", "title"],
     )
 
 
 @pytest.fixture
 def default_ranking_rules():
-    return ["words", "typo", "proximity", "attribute", "exactness"]
+    return ["words", "typo", "sort", "proximity", "attribute", "exactness"]
 
 
 @pytest.fixture
@@ -59,6 +61,11 @@ def new_synonyms():
 @pytest.fixture
 def filterable_attributes():
     return ["release_date", "title"]
+
+
+@pytest.fixture
+def sortable_attributes():
+    return ["genre", "title"]
 
 
 @pytest.mark.asyncio
@@ -149,6 +156,7 @@ async def test_get_settings_default(empty_index, default_ranking_rules):
     assert response.displayed_attributes == ["*"]
     assert response.stop_words == []
     assert response.synonyms == {}
+    assert response.sortable_attributes == []
 
 
 @pytest.mark.asyncio
@@ -164,6 +172,7 @@ async def test_update_settings(empty_index, new_settings):
     assert response.displayed_attributes == ["*"]
     assert response.stop_words == []
     assert response.synonyms == {}
+    assert response.sortable_attributes == new_settings.sortable_attributes
 
 
 @pytest.mark.asyncio
@@ -179,6 +188,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.displayed_attributes == ["*"]
     assert response.stop_words == []
     assert response.synonyms == {}
+    assert response.sortable_attributes == new_settings.sortable_attributes
     response = await index.reset_settings()
     update = await index.wait_for_pending_update(response.update_id)
     assert update.status == "processed"
@@ -189,6 +199,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.searchable_attributes == ["*"]
     assert response.stop_words == []
     assert response.synonyms == {}
+    assert response.sortable_attributes == []
 
 
 @pytest.mark.asyncio
@@ -411,6 +422,36 @@ async def test_reset_filterable_attributes(empty_index, filterable_attributes):
     response = await index.reset_filterable_attributes()
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_filterable_attributes()
+    assert response is None
+
+
+@pytest.mark.asyncio
+async def test_get_sortable_attributes(empty_index):
+    index = await empty_index()
+    response = await index.get_sortable_attributes()
+    assert response is None
+
+
+@pytest.mark.asyncio
+async def test_update_sortable_attributes(empty_index, sortable_attributes):
+    index = await empty_index()
+    response = await index.update_sortable_attributes(sortable_attributes)
+    await index.wait_for_pending_update(response.update_id)
+    response = await index.get_sortable_attributes()
+    assert sorted(response) == sortable_attributes
+
+
+@pytest.mark.asyncio
+async def test_reset_sortable_attributes(empty_index, sortable_attributes):
+    index = await empty_index()
+    response = await index.update_sortable_attributes(sortable_attributes)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert update.status == "processed"
+    response = await index.get_sortable_attributes()
+    assert response == sortable_attributes
+    response = await index.reset_sortable_attributes()
+    await index.wait_for_pending_update(response.update_id)
+    response = await index.get_sortable_attributes()
     assert response is None
 
 

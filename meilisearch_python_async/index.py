@@ -1504,6 +1504,57 @@ class Index:
 
         return UpdateId(**response.json())
 
+    async def get_sortable_attributes(self) -> list[str] | None:
+        """Get sortable attributes of the Index.
+
+        Args:
+            sortable_attributes: List containing the sortable attributes of the index.
+
+        Returns:
+            List containing the sortable attributes of the Index.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        url = f"indexes/{self.uid}/settings/sortable-attributes"
+        response = await self._http_requests.get(url)
+
+        if not response.json():
+            return None
+
+        return response.json()
+
+    async def update_sortable_attributes(self, sortable_attributes: list[str]) -> UpdateId:
+        """Get sortable attributes of the Index.
+
+        Returns:
+            List containing the sortable attributes of the Index.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        url = f"indexes/{self.uid}/settings/sortable-attributes"
+        response = await self._http_requests.post(url, sortable_attributes)
+
+        return UpdateId(**response.json())
+
+    async def reset_sortable_attributes(self) -> UpdateId:
+        """Reset sortable attributes of the index to default values.
+
+        Returns:
+            Update id to track the action.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        url = f"indexes/{self.uid}/settings/sortable-attributes"
+        response = await self._http_requests.delete(url)
+
+        return UpdateId(**response.json())
+
     @staticmethod
     async def _batch(documents: list[dict], batch_size: int) -> AsyncGenerator[list[dict], None]:
         total_len = len(documents)

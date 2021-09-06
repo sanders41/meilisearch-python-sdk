@@ -11,3 +11,4 @@ class MeiliSearchSettings(CamelBase):
     distinct_attribute: Optional[str] = None
     searchable_attributes: Optional[List[str]] = None
     displayed_attributes: Optional[List[str]] = None
+    sortable_attributes: Optional[List[str]] = None
