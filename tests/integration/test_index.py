@@ -429,7 +429,7 @@ async def test_reset_filterable_attributes(empty_index, filterable_attributes):
 async def test_get_sortable_attributes(empty_index):
     index = await empty_index()
     response = await index.get_sortable_attributes()
-    assert response is None
+    assert response == []
 
 
 @pytest.mark.asyncio
@@ -452,7 +452,7 @@ async def test_reset_sortable_attributes(empty_index, sortable_attributes):
     response = await index.reset_sortable_attributes()
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_sortable_attributes()
-    assert response is None
+    assert response == []
 
 
 @pytest.mark.parametrize(

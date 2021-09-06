@@ -1504,7 +1504,7 @@ class Index:
 
         return UpdateId(**response.json())
 
-    async def get_sortable_attributes(self) -> list[str] | None:
+    async def get_sortable_attributes(self) -> list[str]:
         """Get sortable attributes of the Index.
 
         Args:
@@ -1519,9 +1519,6 @@ class Index:
         """
         url = f"indexes/{self.uid}/settings/sortable-attributes"
         response = await self._http_requests.get(url)
-
-        if not response.json():
-            return None
 
         return response.json()
 
