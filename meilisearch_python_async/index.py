@@ -61,6 +61,7 @@ class Index:
         self._base_url_with_uid = f"{self._base_url}{self.uid}"
         self._documents_url = f"{self._base_url_with_uid}/documents"
         self._stats_url = f"{self._base_url_with_uid}/stats"
+        self._settings_url = f"{self._base_url_with_uid}/settings"
         self._http_requests = _HttpRequests(http_client)
 
     def __str__(self) -> str:
@@ -1117,7 +1118,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings"
+        url = f"{self._settings_url}"
         response = await self._http_requests.get(url)
 
         return MeiliSearchSettings(**response.json())
@@ -1137,7 +1138,7 @@ class Index:
         """
         body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}
 
-        url = f"{self._base_url_with_uid}/settings"
+        url = f"{self._settings_url}"
         response = await self._http_requests.post(url, body_dict)
 
         return UpdateId(**response.json())
@@ -1152,7 +1153,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings"
+        url = f"{self._settings_url}"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -1167,7 +1168,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/ranking-rules"
+        url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.get(url)
 
         return response.json()
@@ -1185,7 +1186,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/ranking-rules"
+        url = f"{self._settings_url}/ranking-rules"
         respose = await self._http_requests.post(url, ranking_rules)
 
         return UpdateId(**respose.json())
@@ -1200,7 +1201,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/ranking-rules"
+        url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -1216,7 +1217,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/distinct-attribute"
+        url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.get(url)
 
         if not response.json():
@@ -1237,7 +1238,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/distinct-attribute"
+        url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
@@ -1252,7 +1253,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/distinct-attribute"
+        url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -1267,7 +1268,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/searchable-attributes"
+        url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.get(url)
         return response.json()
 
@@ -1284,7 +1285,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/searchable-attributes"
+        url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
@@ -1302,7 +1303,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/searchable-attributes"
+        url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -1317,7 +1318,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/displayed-attributes"
+        url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.get(url)
         return response.json()
 
@@ -1334,7 +1335,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/displayed-attributes"
+        url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
@@ -1349,7 +1350,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/displayed-attributes"
+        url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -1364,7 +1365,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/stop-words"
+        url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.get(url)
 
         if not response.json():
@@ -1385,7 +1386,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/stop-words"
+        url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
@@ -1400,7 +1401,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/stop-words"
+        url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -1415,7 +1416,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/synonyms"
+        url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.get(url)
 
         if not response.json():
@@ -1436,7 +1437,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/synonyms"
+        url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
@@ -1451,7 +1452,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/synonyms"
+        url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -1466,7 +1467,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/filterable-attributes"
+        url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.get(url)
 
         if not response.json():
@@ -1487,7 +1488,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/filterable-attributes"
+        url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.post(url, body)
 
         return UpdateId(**response.json())
@@ -1502,7 +1503,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"{self._base_url_with_uid}/settings/filterable-attributes"
+        url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
@@ -1520,7 +1521,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"indexes/{self.uid}/settings/sortable-attributes"
+        url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.get(url)
 
         return response.json()
@@ -1535,7 +1536,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"indexes/{self.uid}/settings/sortable-attributes"
+        url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.post(url, sortable_attributes)
 
         return UpdateId(**response.json())
@@ -1550,7 +1551,7 @@ class Index:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
-        url = f"indexes/{self.uid}/settings/sortable-attributes"
+        url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.delete(url)
 
         return UpdateId(**response.json())
