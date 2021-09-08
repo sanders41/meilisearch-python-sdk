@@ -280,7 +280,7 @@ class Index:
 
     async def search(
         self,
-        query: str,
+        query: str | None = None,
         *,
         offset: int = 0,
         limit: int = 20,

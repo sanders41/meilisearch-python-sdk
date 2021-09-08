@@ -20,7 +20,7 @@ def new_settings():
 
 @pytest.fixture
 def default_ranking_rules():
-    return ["words", "typo", "sort", "proximity", "attribute", "exactness"]
+    return ["words", "typo", "proximity", "attribute", "sort", "exactness"]
 
 
 @pytest.fixture
