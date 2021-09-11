@@ -237,7 +237,7 @@ SearchResults(
   can be passed either as a string or as a Path object.
 
   ```py
-  index = test_client.index("movies")
+  index = client.index("movies")
   response = await index.add_documents_from_file("/path/to/file.json")
   ```
 
@@ -247,7 +247,7 @@ SearchResults(
   can be passed either as a string or as a Path object.
 
   ```py
-  index = test_client.index("movies")
+  index = client.index("movies")
   response = await index.update_documents_from_file("/path/to/file.json")
   ```
 
@@ -257,7 +257,7 @@ SearchResults(
   documents as possible into the batch while fitting under the maximum payload size (default is 100MB)
 
   ```py
-  index = test_client.index("movies")
+  index = client.index("movies")
   response = await index.add_documents_auto_batch(documents)
   ```
 
@@ -267,7 +267,7 @@ SearchResults(
   as may documents as possible into the batch while fitting under the maximum payload size (default is 100MB)
 
   ```py
-  index = test_client.index("movies")
+  index = client.index("movies")
   response = await index.add_documents_from_file_auto_batch("/path/to/file.json")
   ```
 
@@ -277,7 +277,7 @@ SearchResults(
   documents as possible into the batch while fitting under the maximum payload size (default is 100MB)
 
   ```py
-  index = test_client.index("movies")
+  index = client.index("movies")
   response = await index.update_documents_auto_batch(documents)
   ```
 
@@ -287,8 +287,63 @@ SearchResults(
   puts as may documents as possible into the batch while fitting under the maximum payload size (default is 100MB)
 
   ```py
-  index = test_client.index("movies")
+  index = client.index("movies")
   response = await index.update_documents_from_file_auto_batch("/path/to/file.json")
+  ```
+
+* add_documents_from_directory:
+
+  Load all json files from a directory and add the documents to the index.
+
+  ```py
+  index = client.index("movies")
+  response = await index.add_documents_from_directory("/path/to/directory")
+  ```
+
+* add_documents_from_directory_auto_batch
+
+  Loads all json files from a directory and adds the documents to the index. Documents are automatically
+  split into batch as large as possible based on the max payload size.
+
+  ```py
+  index = client.index("movies")
+  resposne = await index.add_documents_from_directory_auto_batch("/path/to/directory")
+  ```
+
+* add_documents_from_directory_in_batches
+
+  Loads all json files from a directory and adds the documents to the index in batches.
+
+  ```py
+  index = client.index("movies")
+  response = await index.add_documents_from_directory_in_batches("/path_to_directory", batch_size=10000)
+  ```
+
+* update_documents_from_directory
+
+  Load all json files from a directory and update the documents.
+
+  ```py
+  index = client.index("movies")
+  response = await index.update_documents_from_directory("/path_to_directory")
+  ```
+
+* update_documents_from_directory_auto_batch
+
+  Load all json files from a directory and update the documents.
+
+  ```py
+  index = client.index("movies")
+  response = await index.update_documents_from_directory_auto_batch("/path_to_directory")
+  ```
+
+* update_documents_from_directory_in_batches
+
+  Load all json files from a directory and update the documents.
+
+  ```py
+  index = client.index("movies")
+  response = await index.update_documents_from_directory_in_batches("/path_to_directory")
   ```
 
 * status_check decorator:

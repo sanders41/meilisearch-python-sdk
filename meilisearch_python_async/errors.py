@@ -1,6 +1,12 @@
 from httpx import Response
 
 
+class InvalidDocumentError(Exception):
+    """Error for documents that are not in a valid format for MeiliSearch."""
+
+    pass
+
+
 class MeiliSearchError(Exception):
     """Generic class for MeiliSearch error handling."""
 

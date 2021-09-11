@@ -4,25 +4,36 @@ from math import ceil
 import pytest
 
 from meilisearch_python_async.decorators import status_check
-from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchError, PayloadTooLarge
+from meilisearch_python_async.errors import (
+    InvalidDocumentError,
+    MeiliSearchApiError,
+    MeiliSearchError,
+    PayloadTooLarge,
+)
+from meilisearch_python_async.index import Index
 
 
-def generate_test_movies(num_movies=50):
+def generate_test_movies(num_movies=50, id_start=0):
     movies = []
     # Each moves is ~ 174 bytes
     for i in range(num_movies):
         movie = {
-            "id": i,
+            "id": i + id_start,
             "title": "test",
             "poster": "test",
             "overview": "test",
             "release_date": 1551830399,
-            "pk_test": i + 1,
+            "pk_test": i + id_start + 1,
             "genre": "test",
         }
         movies.append(movie)
 
     return movies
+
+
+def add_json_file(file_path, num_movies=50, id_start=0):
+    with open(file_path, "w") as f:
+        json.dump(generate_test_movies(num_movies, id_start), f)
 
 
 @pytest.fixture
@@ -223,29 +234,80 @@ async def test_add_documents_in_batches(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
-)
-async def test_add_documents_from_file(
-    primary_key, expected_primary_key, test_client, small_movies_path
-):
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
+async def test_add_documents_from_directory(path_type, combine_documents, test_client, tmp_path):
+    add_json_file(tmp_path / "test1.json", 50, 0)
+    add_json_file(tmp_path / "test2.json", 50, 51)
     index = test_client.index("movies")
-    response = await index.add_documents_from_file(small_movies_path, primary_key)
-    update = await index.wait_for_pending_update(response.update_id)
-    assert await index.get_primary_key() == expected_primary_key
-    assert update.status == "processed"
+    path = str(tmp_path) if path_type == "str" else tmp_path
+    responses = await index.add_documents_from_directory(path, combine_documents=combine_documents)
+    for response in responses:
+        await index.wait_for_pending_update(response.update_id)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload", [None, 3500, 2500])
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
+async def test_add_documents_from_directory_auto_batch(
+    path_type, combine_documents, max_payload, test_client, tmp_path
+):
+    add_json_file(tmp_path / "test1.json", 50, 0)
+    add_json_file(tmp_path / "test2.json", 50, 51)
+    index = test_client.index("movies")
+    path = str(tmp_path) if path_type == "str" else tmp_path
+
+    if max_payload:
+        responses = await index.add_documents_from_directory_auto_batch(
+            path, max_payload_size=max_payload, combine_documents=combine_documents
+        )
+    else:
+        responses = await index.add_documents_from_directory_auto_batch(
+            path, combine_documents=combine_documents
+        )
+
+    for response in responses:
+        await index.wait_for_pending_update(response.update_id)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
+async def test_add_documents_from_directory_in_batchs(
+    path_type, combine_documents, batch_size, test_client, tmp_path
+):
+    add_json_file(tmp_path / "test1.json", 50, 0)
+    add_json_file(tmp_path / "test2.json", 50, 51)
+    index = test_client.index("movies")
+    path = str(tmp_path) if path_type == "str" else tmp_path
+    responses = await index.add_documents_from_directory_in_batches(
+        path, batch_size=batch_size, combine_documents=combine_documents
+    )
+
+    for response in responses:
+        await index.wait_for_pending_update(response.update_id)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
-async def test_add_documents_from_file_string_path(
-    primary_key, expected_primary_key, test_client, small_movies_path
+@pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_add_documents_from_file(
+    path_type, primary_key, expected_primary_key, test_client, small_movies_path
 ):
-    string_path = str(small_movies_path)
     index = test_client.index("movies")
-    response = await index.add_documents_from_file(string_path, primary_key)
+    path = str(small_movies_path) if path_type == "str" else small_movies_path
+    response = await index.add_documents_from_file(path, primary_key)
+
     update = await index.wait_for_pending_update(response.update_id)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "processed"
@@ -264,11 +326,12 @@ async def test_add_documents_from_file_invalid_extension(test_client):
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
 )
+@pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_from_file_auto_batch(
-    max_payload, primary_key, expected_primary_key, test_client, tmp_path
+    path_type, max_payload, primary_key, expected_primary_key, test_client, tmp_path
 ):
     movies = generate_test_movies()
-    test_file = tmp_path / "test.json"
+    test_file = str(tmp_path / "test.json") if path_type == "str" else tmp_path / "test.json"
 
     with open(test_file, "w") as f:
         json.dump(movies, f)
@@ -295,74 +358,26 @@ async def test_add_documents_from_file_auto_batch(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("max_payload", [None, 3500, 2500])
-@pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
-)
-async def test_add_documents_from_file_string_path_auto_batch(
-    max_payload, primary_key, expected_primary_key, test_client, tmp_path
-):
-    movies = generate_test_movies()
-    test_file = tmp_path / "test.json"
-
-    with open(test_file, "w") as f:
-        json.dump(movies, f)
-
-    index = test_client.index("movies")
-
-    if max_payload:
-        response = await index.add_documents_from_file_auto_batch(
-            str(test_file), max_payload_size=max_payload, primary_key=primary_key
-        )
-    else:
-        response = await index.add_documents_from_file_auto_batch(
-            str(test_file), primary_key=primary_key
-        )
-
-    for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
-
-    stats = await index.get_stats()
-
-    assert stats.number_of_documents == len(movies)
-    assert await index.get_primary_key() == expected_primary_key
-
-
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
+@pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_from_file_in_batches(
-    batch_size, primary_key, expected_primary_key, test_client, small_movies_path, small_movies
+    path_type,
+    batch_size,
+    primary_key,
+    expected_primary_key,
+    test_client,
+    small_movies_path,
+    small_movies,
 ):
     index = test_client.index("movies")
+    path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = await index.add_documents_from_file_in_batches(
-        small_movies_path, batch_size=batch_size, primary_key=primary_key
+        path, batch_size=batch_size, primary_key=primary_key
     )
-    assert ceil(len(small_movies) / batch_size) == len(response)
 
-    for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
-
-    assert await index.get_primary_key() == expected_primary_key
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
-@pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
-)
-async def test_add_documents_from_file_string_path_in_batches(
-    batch_size, primary_key, expected_primary_key, test_client, small_movies_path, small_movies
-):
-    string_path = str(small_movies_path)
-    index = test_client.index("movies")
-    response = await index.add_documents_from_file_in_batches(
-        string_path, batch_size=batch_size, primary_key=primary_key
-    )
     assert ceil(len(small_movies) / batch_size) == len(response)
 
     for r in response:
@@ -536,6 +551,71 @@ async def test_update_documents_in_batches_with_primary_key(batch_size, test_cli
         assert update_status.status == "processed"
 
     assert await index.get_primary_key() == primary_key
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
+async def test_update_documents_from_directory(path_type, combine_documents, test_client, tmp_path):
+    add_json_file(tmp_path / "test1.json", 50, 0)
+    add_json_file(tmp_path / "test2.json", 50, 51)
+    index = test_client.index("movies")
+    path = str(tmp_path) if path_type == "str" else tmp_path
+    responses = await index.update_documents_from_directory(
+        path, combine_documents=combine_documents
+    )
+    for response in responses:
+        await index.wait_for_pending_update(response.update_id)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_payload", [None, 3500, 2500])
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
+async def test_update_documents_from_directory_auto_batch(
+    path_type, combine_documents, max_payload, test_client, tmp_path
+):
+    add_json_file(tmp_path / "test1.json", 50, 0)
+    add_json_file(tmp_path / "test2.json", 50, 51)
+    index = test_client.index("movies")
+    path = str(tmp_path) if path_type == "str" else tmp_path
+
+    if max_payload:
+        responses = await index.update_documents_from_directory_auto_batch(
+            path, max_payload_size=max_payload, combine_documents=combine_documents
+        )
+    else:
+        responses = await index.update_documents_from_directory_auto_batch(
+            path, combine_documents=combine_documents
+        )
+
+    for response in responses:
+        await index.wait_for_pending_update(response.update_id)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
+async def test_update_documents_from_directory_in_batchs(
+    path_type, combine_documents, batch_size, test_client, tmp_path
+):
+    add_json_file(tmp_path / "test1.json", 50, 0)
+    add_json_file(tmp_path / "test2.json", 50, 51)
+    index = test_client.index("movies")
+    path = str(tmp_path) if path_type == "str" else tmp_path
+    responses = await index.update_documents_from_directory_in_batches(
+        path, batch_size=batch_size, combine_documents=combine_documents
+    )
+
+    for response in responses:
+        await index.wait_for_pending_update(response.update_id)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
 
 
 @pytest.mark.asyncio
@@ -754,3 +834,26 @@ async def test_delete_all_documents(index_with_documents):
     await index.wait_for_pending_update(response.update_id)
     response = await index.get_documents()
     assert response is None
+
+
+@pytest.mark.asyncio
+async def test_load_documents_from_file_invalid_document(tmp_path):
+    doc = {"id": 1, "name": "test"}
+    file_path = tmp_path / "test.json"
+    with open(file_path, "w") as f:
+        json.dump(doc, f)
+
+    with pytest.raises(InvalidDocumentError):
+        await Index._load_documents_from_file(file_path)
+
+
+def test_combine_documents():
+    docs = [
+        [{"id": 1, "name": "Test 1"}, {"id": 2, "name": "Test 2"}],
+        [{"id": 3, "name": "Test 3"}],
+    ]
+
+    combined = Index._combine_documents(docs)
+
+    assert len(combined) == 3
+    assert [1, 2, 3] == [x["id"] for x in combined]
