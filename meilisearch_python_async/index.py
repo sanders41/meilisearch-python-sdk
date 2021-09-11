@@ -14,6 +14,7 @@ from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import _HttpRequests
 from meilisearch_python_async.errors import (
+    InvalidDocumentError,
     MeiliSearchApiError,
     MeiliSearchError,
     MeiliSearchTimeoutError,
@@ -466,6 +467,173 @@ class Index:
 
         return update_ids
 
+    async def add_documents_from_directory(
+        self,
+        directory_path: Path | str,
+        *,
+        primary_key: str | None = None,
+        combine_documents: bool = True,
+    ) -> list[UpdateId]:
+        """Load all json files from a directory and add the documents to the index.
+
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+
+        Returns:
+            Update id to track the action.
+
+        Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
+
+        if combine_documents:
+            all_documents = []
+            for path in directory.iterdir():
+                if path.suffix == ".json":
+                    documents = await Index._load_documents_from_file(path)
+                    all_documents.append(documents)
+            loop = get_running_loop()
+            combined = await loop.run_in_executor(
+                None, partial(Index._combine_documents, all_documents)
+            )
+
+            response = await self.add_documents(combined, primary_key)
+            return [response]
+
+        responses = []
+
+        for path in directory.iterdir():
+            if path.suffix == ".json":
+                documents = await Index._load_documents_from_file(path)
+                response = await self.add_documents(documents, primary_key)
+                responses.append(response)
+
+        return responses
+
+    async def add_documents_from_directory_auto_batch(
+        self,
+        directory_path: Path | str,
+        *,
+        max_payload_size: int = 104857600,
+        primary_key: str | None = None,
+        combine_documents: bool = True,
+    ) -> list[UpdateId]:
+        """Load all json files from a directory and add the documents to the index.
+
+        Documents are automatically split into batches as large as possible based on the max payload
+        size.
+
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            max_payload_size: The maximum payload size in bytes. Defaults to 104857600.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
+
+        if combine_documents:
+            all_documents = []
+            for path in directory.iterdir():
+                if path.suffix == ".json":
+                    documents = await Index._load_documents_from_file(path)
+                    all_documents.append(documents)
+            loop = get_running_loop()
+            combined = await loop.run_in_executor(
+                None, partial(Index._combine_documents, all_documents)
+            )
+
+            return await self.add_documents_auto_batch(
+                combined, max_payload_size=max_payload_size, primary_key=primary_key
+            )
+
+        responses: list[UpdateId] = []
+
+        for path in directory.iterdir():
+            if path.suffix == ".json":
+                documents = await Index._load_documents_from_file(path)
+                response = await self.add_documents_auto_batch(
+                    documents, max_payload_size=max_payload_size, primary_key=primary_key
+                )
+                responses = [*responses, *response]
+
+        return responses
+
+    async def add_documents_from_directory_in_batches(
+        self,
+        directory_path: Path | str,
+        *,
+        batch_size: int = 1000,
+        primary_key: str | None = None,
+        combine_documents: bool = True,
+    ) -> list[UpdateId]:
+        """Load all json files from a directory and add the documents to the index in batches.
+
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
+
+        if combine_documents:
+            all_documents = []
+            for path in directory.iterdir():
+                if path.suffix == ".json":
+                    documents = await Index._load_documents_from_file(path)
+                    all_documents.append(documents)
+            loop = get_running_loop()
+            combined = await loop.run_in_executor(
+                None, partial(Index._combine_documents, all_documents)
+            )
+
+            return await self.add_documents_in_batches(
+                combined, batch_size=batch_size, primary_key=primary_key
+            )
+
+        responses: list[UpdateId] = []
+
+        for path in directory.iterdir():
+            if path.suffix == ".json":
+                documents = await Index._load_documents_from_file(path)
+                response = await self.add_documents_in_batches(
+                    documents, batch_size=batch_size, primary_key=primary_key
+                )
+                responses = [*responses, *response]
+
+        return responses
+
     async def add_documents_from_file(
         self, file_path: Path | str, primary_key: str | None = None
     ) -> UpdateId:
@@ -473,13 +641,15 @@ class Index:
 
         Args:
             file_path: Path to the json file.
-            primary_key The primary key of the documents. This will be ignored if already set.
+            primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
 
         Returns:
             Update id to track the action.
 
         Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the MeiliSearch API returned an error.
         """
@@ -508,6 +678,7 @@ class Index:
             List of update ids to track the action.
 
         Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
             MeiliSearchError: If the file path is not valid.
             MeiliSearchCommunicationError: If there was an error communicating with the server.
             MeiliSearchApiError: If the MeiliSearch API returned an error.
@@ -538,6 +709,7 @@ class Index:
             List of update ids to track the action.
 
         Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
             MeiliSearchError: If the file path is not valid
             MeiliSearchCommunicationError: If there was an error communicating with the server.
             MeiliSearchApiError: If the MeiliSearch API returned an error.
@@ -633,6 +805,173 @@ class Index:
             update_ids.append(update_id)
 
         return update_ids
+
+    async def update_documents_from_directory(
+        self,
+        directory_path: Path | str,
+        *,
+        primary_key: str | None = None,
+        combine_documents: bool = True,
+    ) -> list[UpdateId]:
+        """Load all json files from a directory and update the documents.
+
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+
+        Returns:
+            Update id to track the action.
+
+        Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
+
+        if combine_documents:
+            all_documents = []
+            for path in directory.iterdir():
+                if path.suffix == ".json":
+                    documents = await Index._load_documents_from_file(path)
+                    all_documents.append(documents)
+            loop = get_running_loop()
+            combined = await loop.run_in_executor(
+                None, partial(Index._combine_documents, all_documents)
+            )
+
+            response = await self.update_documents(combined, primary_key)
+            return [response]
+
+        responses = []
+
+        for path in directory.iterdir():
+            if path.suffix == ".json":
+                documents = await Index._load_documents_from_file(path)
+                response = await self.update_documents(documents, primary_key)
+                responses.append(response)
+
+        return responses
+
+    async def update_documents_from_directory_auto_batch(
+        self,
+        directory_path: Path | str,
+        *,
+        max_payload_size: int = 104857600,
+        primary_key: str | None = None,
+        combine_documents: bool = True,
+    ) -> list[UpdateId]:
+        """Load all json files from a directory and update the documents.
+
+        Documents are automatically split into batches as large as possible based on the max payload
+        size.
+
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            max_payload_size: The maximum payload size in bytes. Defaults to 104857600.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
+
+        if combine_documents:
+            all_documents = []
+            for path in directory.iterdir():
+                if path.suffix == ".json":
+                    documents = await Index._load_documents_from_file(path)
+                    all_documents.append(documents)
+            loop = get_running_loop()
+            combined = await loop.run_in_executor(
+                None, partial(Index._combine_documents, all_documents)
+            )
+
+            return await self.update_documents_auto_batch(
+                combined, max_payload_size=max_payload_size, primary_key=primary_key
+            )
+
+        responses: list[UpdateId] = []
+
+        for path in directory.iterdir():
+            if path.suffix == ".json":
+                documents = await Index._load_documents_from_file(path)
+                response = await self.update_documents_auto_batch(
+                    documents, max_payload_size=max_payload_size, primary_key=primary_key
+                )
+                responses = [*responses, *response]
+
+        return responses
+
+    async def update_documents_from_directory_in_batches(
+        self,
+        directory_path: Path | str,
+        *,
+        batch_size: int = 1000,
+        primary_key: str | None = None,
+        combine_documents: bool = True,
+    ) -> list[UpdateId]:
+        """Load all json files from a directory and update the documents.
+
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+        """
+        directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
+
+        if combine_documents:
+            all_documents = []
+            for path in directory.iterdir():
+                if path.suffix == ".json":
+                    documents = await Index._load_documents_from_file(path)
+                    all_documents.append(documents)
+            loop = get_running_loop()
+            combined = await loop.run_in_executor(
+                None, partial(Index._combine_documents, all_documents)
+            )
+
+            return await self.update_documents_in_batches(
+                combined, batch_size=batch_size, primary_key=primary_key
+            )
+
+        responses: list[UpdateId] = []
+
+        for path in directory.iterdir():
+            if path.suffix == ".json":
+                documents = await Index._load_documents_from_file(path)
+                response = await self.update_documents_in_batches(
+                    documents, batch_size=batch_size, primary_key=primary_key
+                )
+                responses = [*responses, *response]
+
+        return responses
 
     async def update_documents_from_file(
         self, file_path: Path | str, primary_key: str | None = None
@@ -1172,6 +1511,10 @@ class Index:
             yield documents[i : i + batch_size]
 
     @staticmethod
+    def _combine_documents(documents: list[list[Any]]) -> list[Any]:
+        return [x for y in documents for x in y]
+
+    @staticmethod
     async def _generate_auto_batches(
         documents: list[dict[str, Any]], max_payload_size: int
     ) -> AsyncGenerator[list[dict], None]:
@@ -1225,7 +1568,9 @@ class Index:
             return datetime.strptime(reduced, "%Y-%m-%dT%H:%M:%S.%fZ")
 
     @staticmethod
-    async def _load_documents_from_file(file_path: Path | str) -> list[dict]:
+    async def _load_documents_from_file(
+        file_path: Path | str,
+    ) -> list[dict[str, Any]]:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
@@ -1234,7 +1579,12 @@ class Index:
 
         async with aiofiles.open(file_path, mode="r") as f:
             data = await f.read()
-            return await loop.run_in_executor(None, partial(json.loads, data))
+            documents = await loop.run_in_executor(None, partial(json.loads, data))
+
+            if not isinstance(documents, list):
+                raise InvalidDocumentError("MeiliSearch requires documents to be in a list")
+
+            return documents
 
     @staticmethod
     def _validate_json_path(file_path: Path) -> None:
