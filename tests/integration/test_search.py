@@ -204,3 +204,30 @@ async def test_custom_search_params_with_many_params(index_with_documents):
     assert "overview" not in response.hits[0]
     assert "release_date" not in response.hits[0]
     assert response.hits[0]["title"] == "Avengers: Infinity War"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "sort, titles",
+    [
+        (
+            ["title:asc"],
+            ["After", "Us"],
+        ),
+        (
+            ["title:desc"],
+            ["Us", "After"],
+        ),
+    ],
+)
+async def test_search_sort(sort, titles, index_with_documents):
+    index = await index_with_documents()
+    response = await index.update_sortable_attributes(["title"])
+    await index.wait_for_pending_update(response.update_id)
+    stats = await index.get_stats()  # get this to get the total document count
+
+    # Using a placeholder search because ranking rules affect sort otherwaise meaning the results
+    # will almost never be in alphabetical order.
+    response = await index.search(sort=sort, limit=stats.number_of_documents)
+    assert response.hits[0]["title"] == titles[0]
+    assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
