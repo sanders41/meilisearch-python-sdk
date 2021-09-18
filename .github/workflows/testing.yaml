@@ -20,9 +20,20 @@ jobs:
       run: |
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
         echo "${HOME}/.local/bin" >> $GITHUB_PATH
-    - name: Install Dependencies
+    - name: Configure poetry
       run: |
-        poetry install
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
+    - name: Cache poetry venv
+      uses: actions/cache@v2
+      id: poetry-cache
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: venv-${{ runner.os }}-poetry-
+    - name: Install Dependencies
+      if: steps.poetry-cache.outputs.cache-hit != 'true'
+      run: poetry install
     - name: Isort check
       run: |
         poetry run isort meilisearch_python_async tests --check-only
@@ -55,13 +66,24 @@ jobs:
       run: |
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
         echo "${HOME}/.local/bin" >> $GITHUB_PATH
-    - name: Poetry configuration
+    - name: Configure poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
+    - name: Configure poetry Python 3.10
       if: matrix.python-version == '3.10.0-beta - 3.10.0'  # Poetry installs are currently failing with the experimental installer on 3.10
       run: |
         poetry config experimental.new-installer false
+    - name: Cache poetry venv
+      uses: actions/cache@v2
+      id: poetry-cache
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: venv-${{ runner.os }}-poetry-
     - name: Install Dependencies
-      run: |
-        poetry install
+      if: steps.poetry-cache.outputs.cache-hit != 'true'
+      run: poetry install
     - name: MeiliSearch (latest version) setup with Docker
       run: docker run -d -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --no-analytics=true --master-key=masterKey
     - name: Test with pytest
