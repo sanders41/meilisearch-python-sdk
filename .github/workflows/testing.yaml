@@ -54,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10.0-beta - 3.10.0"]
+        python-version: [3.7, 3.8, 3.9, "3.10.0"]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.3.4
@@ -71,7 +71,7 @@ jobs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
     - name: Configure poetry Python 3.10
-      if: matrix.python-version == '3.10.0-beta - 3.10.0'  # Poetry installs are currently failing with the experimental installer on 3.10
+      if: matrix.python-version == '3.10.0'  # Poetry installs are currently failing with the experimental installer on 3.10
       run: |
         poetry config experimental.new-installer false
     - name: Cache poetry venv
