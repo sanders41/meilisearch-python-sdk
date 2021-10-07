@@ -106,6 +106,17 @@ def small_movies_csv_path(small_movies, tmp_path):
     return file_path
 
 
+@pytest.fixture
+def small_movies_ndjson_path(small_movies, tmp_path):
+    file_path = tmp_path / "small_movies.ndjson"
+    nd_json = [json.dumps(x) for x in small_movies]
+    with open(file_path, "w") as f:
+        for line in nd_json:
+            f.write(f"{line}\n")
+
+    return file_path
+
+
 @pytest.fixture(scope="session")
 def small_movies_path():
     return SMALL_MOVIES_PATH
