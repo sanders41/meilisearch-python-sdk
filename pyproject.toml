@@ -1,6 +1,10 @@
 [tool.poetry]
 name = "meilisearch-python-async"
+<<<<<<< HEAD
 version = "0.16.2"
+=======
+version = "0.17.0"
+>>>>>>> 8cc87c1 (Add option to add/update documents from csv files)
 description = "A Python async client for the MeiliSearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"

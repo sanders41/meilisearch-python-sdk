@@ -157,7 +157,7 @@ See our [docs](https://meilisearch-python-async.paulsanders.dev) for the full do
 
 ## Compatibility with MeiliSearch
 
-This package only guarantees the compatibility with [version v0.22 of MeiliSearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.22.0).
+This package only guarantees the compatibility with [version v0.23 of MeiliSearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.22.0).
 
 ## Contributing
 

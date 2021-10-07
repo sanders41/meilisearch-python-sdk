@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from asyncio import get_running_loop, sleep
+from csv import DictReader
 from datetime import datetime
 from functools import partial
 from pathlib import Path
@@ -651,10 +652,12 @@ class Index:
         directory_path: Path | str,
         *,
         primary_key: str | None = None,
+        document_type: str = "json",
         combine_documents: bool = True,
     ) -> list[UpdateId]:
         """Load all json files from a directory and add the documents to the index.
 
+<<<<<<< HEAD
         **Args:**
 
         * **directory_path:** Path to the directory that contains the json files.
@@ -671,6 +674,17 @@ class Index:
         * **MeiliSearchError:** If the file path is not valid
         * **MeilisearchCommunicationError:** If there was an error communicating with the server.
         * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+=======
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
+                ndjson. For csv files the first row of the document should be a header row contining
+                the field names, and ever for should have a title.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+>>>>>>> 8cc87c1 (Add option to add/update documents from csv files)
 
         Usage:
 
@@ -688,9 +702,12 @@ class Index:
         if combine_documents:
             all_documents = []
             for path in directory.iterdir():
-                if path.suffix == ".json":
+                if path.suffix == f".{document_type}":
                     documents = await Index._load_documents_from_file(path)
                     all_documents.append(documents)
+
+            Index._raise_on_no_documents(all_documents, document_type, directory_path)
+
             loop = get_running_loop()
             combined = await loop.run_in_executor(
                 None, partial(Index._combine_documents, all_documents)
@@ -702,10 +719,13 @@ class Index:
         responses = []
 
         for path in directory.iterdir():
-            if path.suffix == ".json":
+            if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
+
                 response = await self.add_documents(documents, primary_key)
                 responses.append(response)
+
+        Index._raise_on_no_documents(responses, document_type, directory_path)
 
         return responses
 
@@ -715,6 +735,7 @@ class Index:
         *,
         max_payload_size: int = 104857600,
         primary_key: str | None = None,
+        document_type: str = "json",
         combine_documents: bool = True,
     ) -> list[UpdateId]:
         """Load all json files from a directory and add the documents to the index.
@@ -722,6 +743,7 @@ class Index:
         Documents are automatically split into batches as large as possible based on the max payload
         size.
 
+<<<<<<< HEAD
         **Args:**
         * **directory_path:** Path to the directory that contains the json files.
         * **max_payload_size:** The maximum payload size in bytes. Defaults to 104857600.
@@ -749,15 +771,39 @@ class Index:
         >>>     index = client.index("movies")
         >>>     await index.add_documents_from_directory_auto_batch(directory_path)
         ```
+=======
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            max_payload_size: The maximum payload size in bytes. Defaults to 104857600.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
+                ndjson. For csv files the first row of the document should be a header row contining
+                the field names, and ever for should have a title.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+
+        Returns:
+            List of update ids to track the action.
+
+        Raises:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+>>>>>>> 8cc87c1 (Add option to add/update documents from csv files)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
         if combine_documents:
             all_documents = []
             for path in directory.iterdir():
-                if path.suffix == ".json":
+                if path.suffix == f".{document_type}":
                     documents = await Index._load_documents_from_file(path)
                     all_documents.append(documents)
+
+            Index._raise_on_no_documents(all_documents, document_type, directory_path)
+
             loop = get_running_loop()
             combined = await loop.run_in_executor(
                 None, partial(Index._combine_documents, all_documents)
@@ -770,12 +816,14 @@ class Index:
         responses: list[UpdateId] = []
 
         for path in directory.iterdir():
-            if path.suffix == ".json":
+            if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
                 response = await self.add_documents_auto_batch(
                     documents, max_payload_size=max_payload_size, primary_key=primary_key
                 )
                 responses = [*responses, *response]
+
+        Index._raise_on_no_documents(responses, document_type, directory_path)
 
         return responses
 
@@ -785,6 +833,7 @@ class Index:
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        document_type: str = "json",
         combine_documents: bool = True,
     ) -> list[UpdateId]:
         """Load all json files from a directory and add the documents to the index in batches.
@@ -795,6 +844,9 @@ class Index:
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
+                ndjson. For csv files the first row of the document should be a header row contining
+                the field names, and ever for should have a title.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
 
@@ -823,9 +875,12 @@ class Index:
         if combine_documents:
             all_documents = []
             for path in directory.iterdir():
-                if path.suffix == ".json":
+                if path.suffix == f".{document_type}":
                     documents = await Index._load_documents_from_file(path)
                     all_documents.append(documents)
+
+            Index._raise_on_no_documents(all_documents, document_type, directory_path)
+
             loop = get_running_loop()
             combined = await loop.run_in_executor(
                 None, partial(Index._combine_documents, all_documents)
@@ -838,12 +893,14 @@ class Index:
         responses: list[UpdateId] = []
 
         for path in directory.iterdir():
-            if path.suffix == ".json":
+            if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
                 response = await self.add_documents_in_batches(
                     documents, batch_size=batch_size, primary_key=primary_key
                 )
                 responses = [*responses, *response]
+
+        Index._raise_on_no_documents(responses, document_type, directory_path)
 
         return responses
 
@@ -1101,10 +1158,12 @@ class Index:
         directory_path: Path | str,
         *,
         primary_key: str | None = None,
+        document_type: str = "json",
         combine_documents: bool = True,
     ) -> list[UpdateId]:
         """Load all json files from a directory and update the documents.
 
+<<<<<<< HEAD
         **Args:**
 
         * **directory_path:** Path to the directory that contains the json files.
@@ -1114,6 +1173,17 @@ class Index:
             before indexing them. Defaults to True.
 
         **Returns:** Update id to track the action.
+=======
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
+                ndjson. For csv files the first row of the document should be a header row contining
+                the field names, and ever for should have a title.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+>>>>>>> 8cc87c1 (Add option to add/update documents from csv files)
 
         **Raises:**
 
@@ -1138,9 +1208,12 @@ class Index:
         if combine_documents:
             all_documents = []
             for path in directory.iterdir():
-                if path.suffix == ".json":
+                if path.suffix == f".{document_type}":
                     documents = await Index._load_documents_from_file(path)
                     all_documents.append(documents)
+
+            Index._raise_on_no_documents(all_documents, document_type, directory_path)
+
             loop = get_running_loop()
             combined = await loop.run_in_executor(
                 None, partial(Index._combine_documents, all_documents)
@@ -1152,10 +1225,12 @@ class Index:
         responses = []
 
         for path in directory.iterdir():
-            if path.suffix == ".json":
+            if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
                 response = await self.update_documents(documents, primary_key)
                 responses.append(response)
+
+        Index._raise_on_no_documents(responses, document_type, directory_path)
 
         return responses
 
@@ -1165,6 +1240,7 @@ class Index:
         *,
         max_payload_size: int = 104857600,
         primary_key: str | None = None,
+        document_type: str = "json",
         combine_documents: bool = True,
     ) -> list[UpdateId]:
         """Load all json files from a directory and update the documents.
@@ -1172,6 +1248,7 @@ class Index:
         Documents are automatically split into batches as large as possible based on the max payload
         size.
 
+<<<<<<< HEAD
         **Args:**
 
         * **directory_path:** Path to the directory that contains the json files.
@@ -1180,6 +1257,18 @@ class Index:
             Defaults to None.
         * **combine_documents:** If set to True this will combine the documents from all the files
             before indexing them. Defaults to True.
+=======
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            max_payload_size: The maximum payload size in bytes. Defaults to 104857600.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
+                ndjson. For csv files the first row of the document should be a header row contining
+                the field names, and ever for should have a title.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+>>>>>>> 8cc87c1 (Add option to add/update documents from csv files)
 
         **Returns:** List of update ids to track the action.
 
@@ -1206,9 +1295,12 @@ class Index:
         if combine_documents:
             all_documents = []
             for path in directory.iterdir():
-                if path.suffix == ".json":
+                if path.suffix == f".{document_type}":
                     documents = await Index._load_documents_from_file(path)
                     all_documents.append(documents)
+
+            Index._raise_on_no_documents(all_documents, document_type, directory_path)
+
             loop = get_running_loop()
             combined = await loop.run_in_executor(
                 None, partial(Index._combine_documents, all_documents)
@@ -1221,12 +1313,14 @@ class Index:
         responses: list[UpdateId] = []
 
         for path in directory.iterdir():
-            if path.suffix == ".json":
+            if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
                 response = await self.update_documents_auto_batch(
                     documents, max_payload_size=max_payload_size, primary_key=primary_key
                 )
                 responses = [*responses, *response]
+
+        Index._raise_on_no_documents(responses, document_type, directory_path)
 
         return responses
 
@@ -1236,10 +1330,12 @@ class Index:
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        document_type: str = "json",
         combine_documents: bool = True,
     ) -> list[UpdateId]:
         """Load all json files from a directory and update the documents.
 
+<<<<<<< HEAD
         **Args:**
 
         * **directory_path:** Path to the directory that contains the json files.
@@ -1258,6 +1354,19 @@ class Index:
         * **MeiliSearchError:** If the file path is not valid
         * **MeilisearchCommunicationError:** If there was an error communicating with the server.
         * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+=======
+        Args:
+            directory_path: Path to the directory that contains the json files.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
+                ndjson. For csv files the first row of the document should be a header row contining
+                the field names, and ever for should have a title.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
+>>>>>>> 8cc87c1 (Add option to add/update documents from csv files)
 
         Usage:
 
@@ -1275,9 +1384,12 @@ class Index:
         if combine_documents:
             all_documents = []
             for path in directory.iterdir():
-                if path.suffix == ".json":
+                if path.suffix == f".{document_type}":
                     documents = await Index._load_documents_from_file(path)
                     all_documents.append(documents)
+
+            Index._raise_on_no_documents(all_documents, document_type, directory_path)
+
             loop = get_running_loop()
             combined = await loop.run_in_executor(
                 None, partial(Index._combine_documents, all_documents)
@@ -1290,12 +1402,14 @@ class Index:
         responses: list[UpdateId] = []
 
         for path in directory.iterdir():
-            if path.suffix == ".json":
+            if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
                 response = await self.update_documents_in_batches(
                     documents, batch_size=batch_size, primary_key=primary_key
                 )
                 responses = [*responses, *response]
+
+        Index._raise_on_no_documents(responses, document_type, directory_path)
 
         return responses
 
@@ -2236,6 +2350,13 @@ class Index:
             yield documents[i : i + batch_size]
 
     @staticmethod
+    def _raise_on_no_documents(
+        documents: list[Any], document_type: str, directory_path: str | Path
+    ) -> None:
+        if not documents:
+            raise MeiliSearchError(f"No {document_type} files found in {directory_path}")
+
+    @staticmethod
     def _combine_documents(documents: list[list[Any]]) -> list[Any]:
         return [x for y in documents for x in y]
 
@@ -2295,15 +2416,20 @@ class Index:
     @staticmethod
     async def _load_documents_from_file(
         file_path: Path | str,
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[Any, Any]]:
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
         loop = get_running_loop()
-        await loop.run_in_executor(None, partial(Index._validate_json_path, file_path))
+        await loop.run_in_executor(None, partial(Index._validate_file_type, file_path))
 
-        async with aiofiles.open(file_path, mode="r") as f:
-            data = await f.read()
+        if file_path.suffix == ".csv":
+            with open(file_path, mode="r") as f:
+                documents = await loop.run_in_executor(None, partial(DictReader, f))
+                return list(documents)
+
+        async with aiofiles.open(file_path, mode="r") as f:  # type: ignore
+            data = await f.read()  # type: ignore
             documents = await loop.run_in_executor(None, partial(json.loads, data))
 
             if not isinstance(documents, list):
@@ -2312,6 +2438,6 @@ class Index:
             return documents
 
     @staticmethod
-    def _validate_json_path(file_path: Path) -> None:
-        if file_path.suffix != ".json":
-            raise MeiliSearchError("File must be a json file")
+    def _validate_file_type(file_path: Path) -> None:
+        if file_path.suffix not in (".json", ".csv"):
+            raise MeiliSearchError("File must be a json or csv file")

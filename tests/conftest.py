@@ -1,4 +1,5 @@
 import asyncio
+import csv
 import json
 from pathlib import Path
 
@@ -39,10 +40,7 @@ async def test_client():
 @pytest.mark.asyncio
 @pytest.fixture(autouse=True)
 async def clear_indexes(test_client):
-    """Auto-clears the indexes after each test function run.
-
-    Makes all the test functions independent.
-    """
+    """Auto-clears the indexes after each test function run."""
     yield
     indexes = await test_client.get_indexes()
     if indexes:
@@ -92,12 +90,20 @@ async def indexes_sample(test_client):
 
 @pytest.fixture(scope="session")
 def small_movies():
-    """Runs once per session.
-
-    Provides the content of small_movies.json
-    """
     with open(SMALL_MOVIES_PATH, "r") as movie_file:
         yield json.loads(movie_file.read())
+
+
+@pytest.fixture
+def small_movies_csv_path(small_movies, tmp_path):
+    file_path = tmp_path / "small_movies.csv"
+    with open(file_path, "w") as f:
+        field_names = list(small_movies[0].keys())
+        writer = csv.DictWriter(f, fieldnames=field_names)
+        writer.writeheader()
+        writer.writerows(small_movies)
+
+    return file_path
 
 
 @pytest.fixture(scope="session")
