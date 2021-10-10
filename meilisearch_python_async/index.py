@@ -2372,6 +2372,10 @@ class Index:
                 documents = await loop.run_in_executor(None, partial(DictReader, f))
                 return list(documents)
 
+        if file_path.suffix == ".ndjson":
+            with open(file_path, mode="r") as f:
+                return [await loop.run_in_executor(None, partial(json.loads, x)) for x in f]
+
         async with aiofiles.open(file_path, mode="r") as f:  # type: ignore
             data = await f.read()  # type: ignore
             documents = await loop.run_in_executor(None, partial(json.loads, data))
@@ -2383,5 +2387,5 @@ class Index:
 
     @staticmethod
     def _validate_file_type(file_path: Path) -> None:
-        if file_path.suffix not in (".json", ".csv"):
-            raise MeiliSearchError("File must be a json or csv file")
+        if file_path.suffix not in (".json", ".csv", ".ndjson"):
+            raise MeiliSearchError("File must be a json, ndjson, or csv file")
