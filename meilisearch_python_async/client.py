@@ -17,11 +17,12 @@ class Client:
     def __init__(self, url: str, api_key: str | None = None, timeout: int | None = None) -> None:
         """Class initializer.
 
-        Args:
-            url: The url to the MeiliSearch API (ex: http://localhost:7700)
-            api_key: The optional API key for MeiliSearch. Defaults to None.
-            timeout: The amount of time in seconds that the client will wait for a response before
-                timing out. Defaults to None.
+        **Args:**
+
+        * **url:** The url to the MeiliSearch API (ex: http://localhost:7700)
+        * **api_key:** The optional API key for MeiliSearch. Defaults to None.
+        * **timeout:** The amount of time in seconds that the client will wait for a response before
+            timing out. Defaults to None.
         """
         self._http_client = AsyncClient(
             base_url=url, timeout=timeout, headers=self._set_headers(api_key)
@@ -49,13 +50,21 @@ class Client:
     async def create_dump(self) -> DumpInfo:
         """Trigger the creation of a MeiliSearch dump.
 
-        Returns:
-            Information about the dump.
+        **Returns:** Information about the dump.
             https://docs.meilisearch.com/reference/api/dump.html#create-a-dump
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     await client.create_dump()
+        ```
         """
         response = await self._http_requests.post("dumps")
         return DumpInfo(**response.json())
@@ -63,31 +72,49 @@ class Client:
     async def create_index(self, uid: str, primary_key: str | None = None) -> Index:
         """Creates a new index.
 
-        Args:
-            uid: The index's unique identifier.
-            primary_key: The primary key of the documents. Defaults to None.
+        **Args:**
 
-        Returns:
-            An instance of Index containing the information of the newly created index.
+        * **uid:** The index's unique identifier.
+        * **primary_key:** The primary key of the documents. Defaults to None.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Returns:** An instance of Index containing the information of the newly created index.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = await client.create_index("movies")
+        ```
         """
         return await Index.create(self._http_client, uid, primary_key)
 
     async def delete_index_if_exists(self, uid: str) -> bool:
         """Deletes an index if it already exists.
 
-        Args:
-            uid: The index's unique identifier.
+        **Args:**
 
-        Returns:
-            True if an index was deleted for False if not.
+        * **uid:** The index's unique identifier.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Returns:** True if an index was deleted for False if not.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     await client.delete_index_if_exists()
+        ```
         """
         try:
             url = f"indexes/{uid}"
@@ -101,12 +128,19 @@ class Client:
     async def get_indexes(self) -> list[Index] | None:
         """Get all indexes.
 
-        Returns:
-            A list of all indexes.
+        **Returns:** A list of all indexes.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Raises:**
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     indexes = await client.get_indexes()
+        ```
         """
         response = await self._http_requests.get("indexes")
 
@@ -127,15 +161,24 @@ class Client:
     async def get_index(self, uid: str) -> Index:
         """Gets a single index based on the uid of the index.
 
-        Args:
-            uid: The index's unique identifier.
+        **Args:**
 
-        Returns:
-            An Index instance containing the information of the fetched index.
+        * **uid:** The index's unique identifier.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Returns:** An Index instance containing the information of the fetched index.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = await client.get_index()
+        ```
         """
         return await Index(self._http_client, uid).fetch_info()
 
@@ -144,28 +187,45 @@ class Client:
 
         Because no network call is made this method is not awaitable.
 
-        Args:
-            uid: The index's unique identifier.
+        **Args:**
 
-        Returns:
-            An Index instance.
+        * **uid:** The index's unique identifier.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Returns:** An Index instance.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        ```
         """
         return Index(self._http_client, uid=uid)
 
     async def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.
 
-        Returns:
-            Information about database size and all indexes.
+        **Returns:** Information about database size and all indexes.
             https://docs.meilisearch.com/reference/api/stats.html
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     stats = await client.get_all_stats()
+        ```
         """
         response = await self._http_requests.get("stats")
         return ClientStats(**response.json())
@@ -173,16 +233,24 @@ class Client:
     async def get_dump_status(self, uid: str) -> DumpInfo:
         """Retrieve the status of a MeiliSearch dump creation.
 
-        Args:
-            uid: The index's unique identifier.
+        **Args:**
+        * **uid:** The update identifier for the dump creation.
 
-        Returns:
-            Information about the dump status.
+        **Returns:** Information about the dump status.
             https://docs.meilisearch.com/reference/api/dump.html#get-dump-status
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     status = await client.get_dump_status("20201101-110357260")
+        ```
         """
         url = f"dumps/{uid}/status"
         response = await self._http_requests.get(url)
@@ -191,17 +259,26 @@ class Client:
     async def get_or_create_index(self, uid: str, primary_key: str | None = None) -> Index:
         """Get an index, or create it if it doesn't exist.
 
-        Args:
-            uid: The index's unique identifier.
-            primary_key: The primary key of the documents. Defaults to None.
+        **Args:**
 
-        Returns:
-            An instance of Index containing the information of the retrieved or newly created index.
+        * **uid:** The index's unique identifier.
+        * **primary_key:** The primary key of the documents. Defaults to None.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.MeiliSearchTimeoutError: If the connection times out.
+        **Returns:** An instance of Index containing the information of the retrieved or newly created index.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.MeiliSearchTimeoutError: If the connection times out.
             MeiliSearchTimeoutError: If the connection times out.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = await client.get_or_create_index("movies")
+        ```
         """
         try:
             index_instance = await self.get_index(uid)
@@ -214,13 +291,21 @@ class Client:
     async def get_keys(self) -> Keys:
         """Gets the MeiliSearch public and private keys.
 
-        Returns:
-            The public and private keys.
+        **Returns:** The public and private keys.
             https://docs.meilisearch.com/reference/api/keys.html#get-keys
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     keys = await client.get_keys()
+        ```
         """
         response = await self._http_requests.get("keys")
         return Keys(**response.json())
@@ -228,15 +313,24 @@ class Client:
     async def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an Index instance.
 
-        Args:
-            uid: The index's unique identifier.
+        **Args:**
 
-        Returns:
-            Index information rather than an Index instance.
+        * **uid:** The index's unique identifier.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Returns:** Index information rather than an Index instance.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = await client.get_raw_index("movies")
+        ```
         """
         response = await self._http_client.get(f"indexes/{uid}")
 
@@ -250,12 +344,20 @@ class Client:
 
         Returns all the index information rather than an Index instance.
 
-        Returns:
-            A list of the Index information rather than an Index instances.
+        **Returns:** A list of the Index information rather than an Index instances.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = await client.get_raw_indexes()
+        ```
         """
         response = await self._http_requests.get("indexes")
 
@@ -267,12 +369,20 @@ class Client:
     async def get_version(self) -> Version:
         """Get the MeiliSearch version.
 
-        Returns:
-            Information about the version of MeiliSearch.
+        **Returns:** Information about the version of MeiliSearch.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     version = await client.get_version()
+        ```
         """
         response = await self._http_requests.get("version")
         return Version(**response.json())
@@ -280,12 +390,20 @@ class Client:
     async def health(self) -> Health:
         """Get health of the MeiliSearch server.
 
-        Returns:
-            The status of the MeiliSearch server.
+        **Returns:** The status of the MeiliSearch server.
 
-        Raises:
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     health = await client.get_healths()
+        ```
         """
         response = await self._http_requests.get("health")
         return Health(**response.json())

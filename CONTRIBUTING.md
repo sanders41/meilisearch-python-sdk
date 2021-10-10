@@ -93,13 +93,15 @@ poetry run flake8 meilisearch_python_async tests
 poetry run mypy meilisearch_python_async
 ```
 
-It is also suggested that you setup [pre-commit](https://pre-commit.com/) in order to run linting when you commit changes to you branch. To setup pre-commit for this project run:
+It is also suggested that you setup [pre-commit](https://pre-commit.com/) in order to run linting
+when you commit changes to you branch. To setup pre-commit for this project run:
 
 ```sh
 pre-commit install
 ```
 
-After this pre-commit will automatically run any time you check in code to your branches. You can also run pre-commit at any time with:
+After this pre-commit will automatically run any time you check in code to your branches. You can
+also run pre-commit at any time with:
 
 ```sh
 pre-commit run --all
@@ -107,7 +109,8 @@ pre-commit run --all
 
 ### Type Hints
 
-At a minimum all variables/arguments that receive data should contain type hints, and all functions/methods should specify the return type.
+At a minimum all variables/arguments that receive data should contain type hints, and all
+functions/methods should specify the return type.
 
 Accepted examples:
 
@@ -162,13 +165,33 @@ poetry run pytest --cov-report term-missing
 In additon to mainting the coverage percentage please ensure that all
 tests are passing before submitting a pull request.
 
-tox can be used to run both linting, and run the tests in all versions of Python meilisearch-python-async supports. Note that you will need to have all the verions of Python installed for this to work.
+tox can be used to run both linting, and run the tests in all versions of Python meilisearch-python-async
+supports. Note that you will need to have all the verions of Python installed for this to work.
 
 ```sh
 poetry run tox
 ```
 
-Running tox before submitting a pull request can save your time because these tests will be run by Continuious Integraion when a pull request is submitted and will need to pass there before being accepted.
+Running tox before submitting a pull request can save your time because these tests will be run by
+Continuious Integraion when a pull request is submitted and will need to pass there before being accepted.
+
+## Docs
+
+Documenation is automatically generated based on the doc strings from the functions/methods. If
+functions/methods are added/removed make sure to update the
+[api documentation page](https://github.com/sanders41/meilisearch-python-async/docs/api.md) accordingly.
+
+You can view any changes to the docs locally by running:
+
+```sh
+mkdocs serve
+```
+
+Building the docs can be testing by running:
+
+```sh
+mkdocs build --strict
+```
 
 ## Committing your code
 

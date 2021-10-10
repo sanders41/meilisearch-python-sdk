@@ -93,3 +93,33 @@ jobs:
       uses: codecov/codecov-action@v2.1.0
       with:
         fail_ci_if_error: true
+
+  Docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - name: Set up Python
+      uses: actions/setup-python@v2.2.2
+      with:
+        python-version: 3.9
+    - name: Install Poetry and add to path
+      run: |
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
+        echo "${HOME}/.local/bin" >> $GITHUB_PATH
+    - name: Configure poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
+    - name: Cache poetry venv
+      uses: actions/cache@v2
+      id: poetry-cache
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: venv-${{ runner.os }}-poetry-
+    - name: Install Dependencies
+      if: steps.poetry-cache.outputs.cache-hit != 'true'
+      run: poetry install
+    - name: Test Docs Build
+      run: |
+        mkdocs build --strict
