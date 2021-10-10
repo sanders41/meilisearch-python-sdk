@@ -122,4 +122,4 @@ jobs:
       run: poetry install
     - name: Test Docs Build
       run: |
-        mkdocs build --strict
+        poetry run mkdocs build --strict

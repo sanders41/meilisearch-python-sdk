@@ -20,7 +20,7 @@ jobs:
       run: |
         poetry install
     - name: Deploy Docs
-      run: mkdocs gh-deploy --force
+      run: poetry run mkdocs gh-deploy --force
     - name: Add pypi token to Poetry
       run: |
         poetry config pypi-token.pypi ${{ secrets.PYPI_API_KEY }}
