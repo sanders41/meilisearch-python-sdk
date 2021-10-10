@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "meilisearch-python-async"
-version = "0.16.1"
+version = "0.16.2"
 description = "A Python async client for the MeiliSearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/sanders41/meilisearch-python-async"
 homepage = "https://github.com/sanders41/meilisearch-python-async"
-documentation = "https://github.com/sanders41/meilisearch-python-async"
+documentation = "https://sanders41.github.io/meilisearch-python-async"
 keywords = ["meilisearch", "async", "python"]
 classifiers=[
   "Programming Language :: Python :: 3.7",
@@ -38,6 +38,9 @@ tox = "^3.24.4"
 pytest-asyncio = "^0.15.1"
 types-aiofiles = "^0.1.9"
 flake8-docstrings = "^1.6.0"
+mkdocs = "^1.2.2"
+mkdocs-material = "^7.3.2"
+mkautodoc = "^0.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

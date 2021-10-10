@@ -1,0 +1,45 @@
+site_name: MeiliSearch Python Async
+site_description: A Python async client for the MeiliSearch API
+site_url: https://sanders41.github.io/meilisearch-python-async
+
+theme:
+  name: material
+  locale: en
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+  - scheme: slate
+    primary: green
+    accent: blue
+    toggle:
+      icon: material/lightbulb-outline
+      name: Switch to dark mode
+  - scheme: default
+    primary: green
+    accent: blue
+    toggle:
+      icon: material/lightbulb
+      name: Switch to light mode
+  features:
+  - search.suggest
+  - search.highlight
+
+repo_name: sanders41/meilisearch-python-async
+repo_url: https://github.com/sanders41/meilisearch-python-async
+
+nav:
+  - Home: index.md
+  - API: api.md
+  - Pydantic: pydantic.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - mkautodoc
+
+extra_css:
+  - css/custom.css
+
+extra:
+  previous: false
+  generator: false
