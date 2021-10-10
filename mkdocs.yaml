@@ -1,6 +1,6 @@
 site_name: MeiliSearch Python Async
 site_description: A Python async client for the MeiliSearch API
-site_url: https://paulsanders.dev/meilisearch-python-async
+site_url: https://meilisearch-python-async.paulsanders.dev
 
 theme:
   name: material
