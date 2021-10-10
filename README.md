@@ -153,7 +153,7 @@ SearchResults(
 
 ## Documentation
 
-See our [docs](https://paulsanders.dev/meilisearch-python-async) for the full documentation.
+See our [docs](https://meilisearch-python-async.paulsanders.dev) for the full documentation.
 
 ## Compatibility with MeiliSearch
 
