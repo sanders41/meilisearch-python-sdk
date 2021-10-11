@@ -288,7 +288,7 @@ class Index:
 
         **Args:**
 
-        * **update_id:* Identifier of the update to retrieve.
+        * **update_id:** Identifier of the update to retrieve.
 
         **Returns:** The details of the update status.
 
@@ -613,6 +613,7 @@ class Index:
         """Adds documents in batches to reduce RAM usage with indexing.
 
         **Args:**
+
         * **documents:** List of documents.
         * **batch_size:** The number of documents that should be included in each batch.
             Defaults to 1000.
@@ -660,7 +661,7 @@ class Index:
         **Args:**
 
         * **directory_path:** Path to the directory that contains the json files.
-        * **primary_key: The primary key of the documents. This will be ignored if already set.
+        * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
         * **document_type:** The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row contining
@@ -735,6 +736,7 @@ class Index:
         size.
 
         **Args:**
+
         * **directory_path:** Path to the directory that contains the json files.
         * **max_payload_size:** The maximum payload size in bytes. Defaults to 104857600.
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
@@ -883,9 +885,10 @@ class Index:
         """Add documents to the index from a json file.
 
         **Args:**
-            file_path: Path to the json file.
-            primary_key: The primary key of the documents. This will be ignored if already set.
-                Defaults to None.
+
+        * **file_path:** Path to the json file.
+        * **primary_key:** The primary key of the documents. This will be ignored if already set.
+            Defaults to None.
 
         **Returns:** Update id to track the action.
 

@@ -43,7 +43,7 @@ class Client:
     async def aclose(self) -> None:
         """Closes the client.
 
-        This only needs to be used if the client was not created with context manager.
+        This only needs to be used if the client was not created with a context manager.
         """
         await self._http_client.aclose()
 
