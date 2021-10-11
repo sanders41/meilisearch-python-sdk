@@ -94,7 +94,7 @@ jobs:
       with:
         fail_ci_if_error: true
 
-  Docs:
+  docs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.3.4
