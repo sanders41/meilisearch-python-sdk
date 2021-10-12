@@ -99,7 +99,7 @@ def small_movies_csv_path(small_movies, tmp_path):
     file_path = tmp_path / "small_movies.csv"
     with open(file_path, "w") as f:
         field_names = list(small_movies[0].keys())
-        writer = csv.DictWriter(f, fieldnames=field_names)
+        writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL)
         writer.writeheader()
         writer.writerows(small_movies)
 
