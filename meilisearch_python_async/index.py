@@ -1001,6 +1001,61 @@ class Index:
             documents, batch_size=batch_size, primary_key=primary_key
         )
 
+    async def add_documents_from_raw_file(
+        self, file_path: Path | str, primary_key: str | None = None
+    ) -> UpdateId:
+        """Directly send csv or ndjson files to MeiliSearch without pre-processing.
+
+        The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
+        for batching.
+
+        **Args:**
+
+        * **file_path:** The path to the file to send to MeiliSearch. Only csv and ndjson files are
+            allowed.
+        * **primary_key:** The primary key of the documents. This will be ignored if already set.
+            Defaults to None.
+
+        **Returns:** Update id to track the action.
+
+        **Raises:**
+
+        * **ValueError:** If the file is not a csv or ndjson file.
+        * **MeiliSearchError:** If the file path is not valid
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from pathlib import Path
+        >>> from meilisearch_async_client import Client
+        >>> file_path = Path("/path/to/file.csv")
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     await index.add_documents_from_raw_file(file_path)
+        ```
+        """
+        upload_path = Path(file_path) if isinstance(file_path, str) else file_path
+        if not upload_path.exists():
+            raise MeiliSearchError("No file found at the specified path")
+
+        if upload_path.suffix not in (".csv", ".ndjson"):
+            raise ValueError("Only csv and ndjson files can be sent as binary files")
+
+        content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
+        url = self._documents_url
+        if primary_key:
+            formatted_primary_key = urlencode({"primaryKey": primary_key})
+            url = f"{url}?{formatted_primary_key}"
+
+        async with aiofiles.open(upload_path, "r") as f:
+            data = await f.read()
+
+        response = await self._http_requests.post(url, body=data, content_type=content_type)
+
+        return UpdateId(**response.json())
+
     async def update_documents(
         self, documents: list[dict], primary_key: str | None = None
     ) -> UpdateId:
@@ -1474,6 +1529,61 @@ class Index:
         return await self.update_documents_in_batches(
             documents, batch_size=batch_size, primary_key=primary_key
         )
+
+    async def update_documents_from_raw_file(
+        self, file_path: Path | str, primary_key: str | None = None
+    ) -> UpdateId:
+        """Directly send csv or ndjson files to MeiliSearch without pre-processing.
+
+        The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
+        for batching.
+
+        **Args:**
+
+        * **file_path:** The path to the file to send to MeiliSearch. Only csv and ndjson files are
+            allowed.
+        * **primary_key:** The primary key of the documents. This will be ignored if already set.
+            Defaults to None.
+
+        **Returns:** Update id to track the action.
+
+        **Raises:**
+
+        * **ValueError:** If the file is not a csv or ndjson file.
+        * **MeiliSearchError:** If the file path is not valid
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from pathlib import Path
+        >>> from meilisearch_async_client import Client
+        >>> file_path = Path("/path/to/file.csv")
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     await index.update_documents_from_raw_file(file_path)
+        ```
+        """
+        upload_path = Path(file_path) if isinstance(file_path, str) else file_path
+        if not upload_path.exists():
+            raise MeiliSearchError("No file found at the specified path")
+
+        if upload_path.suffix not in (".csv", ".ndjson"):
+            raise ValueError("Only csv and ndjson files can be sent as binary files")
+
+        content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
+        url = self._documents_url
+        if primary_key:
+            formatted_primary_key = urlencode({"primaryKey": primary_key})
+            url = f"{url}?{formatted_primary_key}"
+
+        async with aiofiles.open(upload_path, "r") as f:
+            data = await f.read()
+
+        response = await self._http_requests.put(url, body=data, content_type=content_type)
+
+        return UpdateId(**response.json())
 
     async def delete_document(self, document_id: str) -> UpdateId:
         """Delete one document from the index.

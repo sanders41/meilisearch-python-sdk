@@ -32,9 +32,14 @@ class _HttpRequests:
                 if content_type is None:
                     content_type = "application/json"
 
-                response = await http_method(
-                    path, json=body, headers={"Content-Type": content_type}
-                )
+                if content_type != "application/json":
+                    response = await http_method(
+                        path, content=body, headers={"Content-Type": content_type}
+                    )
+                else:
+                    response = await http_method(
+                        path, json=body, headers={"Content-Type": content_type}
+                    )
 
             response.raise_for_status()
             return response

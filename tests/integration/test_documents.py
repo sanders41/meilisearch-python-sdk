@@ -503,6 +503,56 @@ async def test_add_documents_from_file_csv(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
 @pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_add_documents_raw_file_csv(
+    path_type, primary_key, expected_primary_key, test_client, small_movies_csv_path
+):
+    index = test_client.index("movies")
+    path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
+    response = await index.add_documents_from_raw_file(path, primary_key)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == expected_primary_key
+    assert update.status == "processed"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+@pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_add_documents_raw_file_ndjson(
+    path_type, primary_key, expected_primary_key, test_client, small_movies_ndjson_path
+):
+    index = test_client.index("movies")
+    path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
+    response = await index.add_documents_from_raw_file(path, primary_key)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == expected_primary_key
+    assert update.status == "processed"
+
+
+@pytest.mark.asyncio
+async def test_add_documents_raw_file_not_found_error(test_client, tmp_path):
+    with pytest.raises(MeiliSearchError):
+        index = test_client.index("movies")
+        await index.add_documents_from_raw_file(tmp_path / "file.csv")
+
+
+@pytest.mark.asyncio
+async def test_add_document_raw_file_extension_error(test_client, tmp_path):
+    file_path = tmp_path / "file.bad"
+    with open(file_path, "w") as f:
+        f.write("test")
+
+    with pytest.raises(ValueError):
+        index = test_client.index("movies")
+        await index.add_documents_from_raw_file(file_path)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+@pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_from_file_ndjson(
     path_type, primary_key, expected_primary_key, test_client, small_movies_ndjson_path
 ):
@@ -1386,6 +1436,68 @@ async def test_update_documents_from_file_in_batches_invalid_extension(test_clie
 
     with pytest.raises(MeiliSearchError):
         await index.update_documents_from_file_in_batches("test.bad")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_update_documents_raw_file_csv(
+    path_type, test_client, small_movies_csv_path, small_movies
+):
+    small_movies[0]["title"] = "Some title"
+    movie_id = small_movies[0]["id"]
+    index = test_client.index("movies")
+    response = await index.add_documents(small_movies)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    got_title = filter(lambda x: x["id"] == movie_id, response)
+    assert list(got_title)[0]["title"] == "Some title"
+    path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
+    update = await index.update_documents_from_raw_file(path, primary_key="id")
+    update = await index.wait_for_pending_update(update.update_id)
+    assert update.status == "processed"
+    response = await index.get_documents()
+    assert response[0]["title"] != "Some title"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_update_documents_raw_file_ndjson(
+    path_type, test_client, small_movies_ndjson_path, small_movies
+):
+    small_movies[0]["title"] = "Some title"
+    movie_id = small_movies[0]["id"]
+    index = test_client.index("movies")
+    response = await index.add_documents(small_movies)
+    update = await index.wait_for_pending_update(response.update_id)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    got_title = filter(lambda x: x["id"] == movie_id, response)
+    assert list(got_title)[0]["title"] == "Some title"
+    path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
+    update = await index.update_documents_from_raw_file(path)
+    update = await index.wait_for_pending_update(update.update_id)
+    assert update.status == "processed"
+    response = await index.get_documents()
+    assert response[0]["title"] != "Some title"
+
+
+@pytest.mark.asyncio
+async def test_update_documents_raw_file_not_found_error(test_client, tmp_path):
+    with pytest.raises(MeiliSearchError):
+        index = test_client.index("movies")
+        await index.update_documents_from_raw_file(tmp_path / "file.csv")
+
+
+@pytest.mark.asyncio
+async def test_update_document_raw_file_extension_error(test_client, tmp_path):
+    file_path = tmp_path / "file.bad"
+    with open(file_path, "w") as f:
+        f.write("test")
+
+    with pytest.raises(ValueError):
+        index = test_client.index("movies")
+        await index.update_documents_from_raw_file(file_path)
 
 
 @pytest.mark.asyncio
