@@ -813,7 +813,7 @@ class Index:
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await add_documents.pop()
             responses = await gather(*add_documents)
-            responses = [*first_response, *[x for y in responses for x in y]]
+            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
         else:
             responses = await add_documents[0]
 
@@ -902,7 +902,7 @@ class Index:
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await add_documents.pop()
             responses = await gather(*add_documents)
-            responses = [*first_response, *[x for y in responses for x in y]]
+            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
         else:
             responses = await add_documents[0]
 
@@ -1464,7 +1464,7 @@ class Index:
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await update_documents.pop()
             responses = await gather(*update_documents)
-            responses = [*first_response, *[x for y in responses for x in y]]
+            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
         else:
             responses = await update_documents[0]
 
