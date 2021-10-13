@@ -253,16 +253,28 @@ async def test_add_documents_in_batches(
 @pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
-async def test_add_documents_from_directory(path_type, combine_documents, test_client, tmp_path):
-    add_json_file(tmp_path / "test1.json", 50, 0)
-    add_json_file(tmp_path / "test2.json", 50, 51)
+@pytest.mark.parametrize(
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+)
+async def test_add_documents_from_directory(
+    path_type,
+    combine_documents,
+    number_of_files,
+    documents_per_file,
+    total_documents,
+    test_client,
+    tmp_path,
+):
+    for i in range(number_of_files):
+        add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
+
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(path, combine_documents=combine_documents)
     for response in responses:
         await index.wait_for_pending_update(response.update_id)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == total_documents
 
 
 @pytest.mark.asyncio
@@ -318,11 +330,22 @@ async def test_add_documents_from_directory_no_documents(combine_documents, test
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize(
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+)
 async def test_add_documents_from_directory_auto_batch(
-    path_type, combine_documents, max_payload, test_client, tmp_path
+    path_type,
+    combine_documents,
+    max_payload,
+    number_of_files,
+    documents_per_file,
+    total_documents,
+    test_client,
+    tmp_path,
 ):
-    add_json_file(tmp_path / "test1.json", 50, 0)
-    add_json_file(tmp_path / "test2.json", 50, 51)
+    for i in range(number_of_files):
+        add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
+
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
 
@@ -338,7 +361,7 @@ async def test_add_documents_from_directory_auto_batch(
     for response in responses:
         await index.wait_for_pending_update(response.update_id)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == total_documents
 
 
 @pytest.mark.asyncio
@@ -405,11 +428,22 @@ async def test_add_documents_from_directory_auto_batch_ndjson(
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize(
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+)
 async def test_add_documents_from_directory_in_batchs(
-    path_type, combine_documents, batch_size, test_client, tmp_path
+    path_type,
+    combine_documents,
+    batch_size,
+    number_of_files,
+    documents_per_file,
+    total_documents,
+    test_client,
+    tmp_path,
 ):
-    add_json_file(tmp_path / "test1.json", 50, 0)
-    add_json_file(tmp_path / "test2.json", 50, 51)
+    for i in range(number_of_files):
+        add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
+
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
@@ -419,7 +453,7 @@ async def test_add_documents_from_directory_in_batchs(
     for response in responses:
         await index.wait_for_pending_update(response.update_id)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == total_documents
 
 
 @pytest.mark.asyncio
@@ -936,9 +970,21 @@ async def test_update_documents_in_batches_with_primary_key(batch_size, test_cli
 @pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
-async def test_update_documents_from_directory(path_type, combine_documents, test_client, tmp_path):
-    add_json_file(tmp_path / "test1.json", 50, 0)
-    add_json_file(tmp_path / "test2.json", 50, 51)
+@pytest.mark.parametrize(
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+)
+async def test_update_documents_from_directory(
+    path_type,
+    combine_documents,
+    number_of_files,
+    documents_per_file,
+    total_documents,
+    test_client,
+    tmp_path,
+):
+    for i in range(number_of_files):
+        add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
+
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
@@ -947,7 +993,7 @@ async def test_update_documents_from_directory(path_type, combine_documents, tes
     for response in responses:
         await index.wait_for_pending_update(response.update_id)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == total_documents
 
 
 @pytest.mark.asyncio
@@ -992,11 +1038,22 @@ async def test_update_documents_from_directory_ndjson(
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize(
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+)
 async def test_update_documents_from_directory_auto_batch(
-    path_type, combine_documents, max_payload, test_client, tmp_path
+    path_type,
+    combine_documents,
+    max_payload,
+    number_of_files,
+    documents_per_file,
+    total_documents,
+    test_client,
+    tmp_path,
 ):
-    add_json_file(tmp_path / "test1.json", 50, 0)
-    add_json_file(tmp_path / "test2.json", 50, 51)
+    for i in range(number_of_files):
+        add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
+
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
 
@@ -1014,7 +1071,7 @@ async def test_update_documents_from_directory_auto_batch(
     for response in responses:
         await index.wait_for_pending_update(response.update_id)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == total_documents
 
 
 @pytest.mark.asyncio
@@ -1081,11 +1138,22 @@ async def test_update_documents_from_directory_auto_batch_ndjson(
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize(
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+)
 async def test_update_documents_from_directory_in_batchs(
-    path_type, combine_documents, batch_size, test_client, tmp_path
+    path_type,
+    combine_documents,
+    batch_size,
+    number_of_files,
+    documents_per_file,
+    total_documents,
+    test_client,
+    tmp_path,
 ):
-    add_json_file(tmp_path / "test1.json", 50, 0)
-    add_json_file(tmp_path / "test2.json", 50, 51)
+    for i in range(number_of_files):
+        add_json_file(tmp_path / f"text{i}.json", documents_per_file, i * documents_per_file)
+
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
@@ -1095,7 +1163,7 @@ async def test_update_documents_from_directory_in_batchs(
     for response in responses:
         await index.wait_for_pending_update(response.update_id)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == total_documents
 
 
 @pytest.mark.asyncio

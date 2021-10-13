@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from asyncio import get_running_loop, sleep
+from asyncio import gather, get_running_loop, sleep
 from csv import DictReader
 from datetime import datetime
 from functools import partial
@@ -216,7 +216,8 @@ class Index:
     ) -> Index:
         """Creates a new index.
 
-        In general this method should not be used directly and instead the index should be created through the `Client`.
+        In general this method should not be used directly and instead the index should be created
+        through the `Client`.
 
         **Args:**
 
@@ -708,16 +709,22 @@ class Index:
             response = await self.add_documents(combined, primary_key)
             return [response]
 
-        responses = []
-
+        add_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
+                add_documents.append(self.add_documents(documents, primary_key))
 
-                response = await self.add_documents(documents, primary_key)
-                responses.append(response)
+        Index._raise_on_no_documents(add_documents, document_type, directory_path)
 
-        Index._raise_on_no_documents(responses, document_type, directory_path)
+        if len(add_documents) > 1:
+            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # returns an error because it thinks all entries are trying to create the same index.
+            first_response = [await add_documents.pop()]
+            responses = await gather(*add_documents)
+            responses = [*first_response, *responses]
+        else:
+            responses = [await add_documents[0]]
 
         return responses
 
@@ -789,15 +796,26 @@ class Index:
 
         responses: list[UpdateId] = []
 
+        add_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
-                response = await self.add_documents_auto_batch(
-                    documents, max_payload_size=max_payload_size, primary_key=primary_key
+                add_documents.append(
+                    self.add_documents_auto_batch(
+                        documents, max_payload_size=max_payload_size, primary_key=primary_key
+                    )
                 )
-                responses = [*responses, *response]
 
-        Index._raise_on_no_documents(responses, document_type, directory_path)
+        Index._raise_on_no_documents(add_documents, document_type, directory_path)
+
+        if len(add_documents) > 1:
+            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # returns an error because it thinks all entries are trying to create the same index.
+            first_response = await add_documents.pop()
+            responses = await gather(*add_documents)
+            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
+        else:
+            responses = await add_documents[0]
 
         return responses
 
@@ -867,15 +885,26 @@ class Index:
 
         responses: list[UpdateId] = []
 
+        add_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
-                response = await self.add_documents_in_batches(
-                    documents, batch_size=batch_size, primary_key=primary_key
+                add_documents.append(
+                    self.add_documents_in_batches(
+                        documents, batch_size=batch_size, primary_key=primary_key
+                    )
                 )
-                responses = [*responses, *response]
 
-        Index._raise_on_no_documents(responses, document_type, directory_path)
+        Index._raise_on_no_documents(add_documents, document_type, directory_path)
+
+        if len(add_documents) > 1:
+            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # returns an error because it thinks all entries are trying to create the same index.
+            first_response = await add_documents.pop()
+            responses = await gather(*add_documents)
+            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
+        else:
+            responses = await add_documents[0]
 
         return responses
 
@@ -1244,15 +1273,22 @@ class Index:
             response = await self.update_documents(combined, primary_key)
             return [response]
 
-        responses = []
-
+        update_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
-                response = await self.update_documents(documents, primary_key)
-                responses.append(response)
+                update_documents.append(self.update_documents(documents, primary_key))
 
-        Index._raise_on_no_documents(responses, document_type, directory_path)
+        Index._raise_on_no_documents(update_documents, document_type, directory_path)
+
+        if len(update_documents) > 1:
+            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # returns an error because it thinks all entries are trying to create the same index.
+            first_response = [await update_documents.pop()]
+            responses = await gather(*update_documents)
+            responses = [*first_response, *responses]
+        else:
+            responses = [await update_documents[0]]
 
         return responses
 
@@ -1322,17 +1358,26 @@ class Index:
                 combined, max_payload_size=max_payload_size, primary_key=primary_key
             )
 
-        responses: list[UpdateId] = []
-
+        update_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
-                response = await self.update_documents_auto_batch(
-                    documents, max_payload_size=max_payload_size, primary_key=primary_key
+                update_documents.append(
+                    self.update_documents_auto_batch(
+                        documents, max_payload_size=max_payload_size, primary_key=primary_key
+                    )
                 )
-                responses = [*responses, *response]
 
-        Index._raise_on_no_documents(responses, document_type, directory_path)
+        Index._raise_on_no_documents(update_documents, document_type, directory_path)
+
+        if len(update_documents) > 1:
+            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # returns an error because it thinks all entries are trying to create the same index.
+            first_response = await update_documents.pop()
+            responses = await gather(*update_documents)
+            responses = [*first_response, *[x for y in responses for x in y]]
+        else:
+            responses = await update_documents[0]
 
         return responses
 
@@ -1402,15 +1447,26 @@ class Index:
 
         responses: list[UpdateId] = []
 
+        update_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = await Index._load_documents_from_file(path)
-                response = await self.update_documents_in_batches(
-                    documents, batch_size=batch_size, primary_key=primary_key
+                update_documents.append(
+                    self.update_documents_in_batches(
+                        documents, batch_size=batch_size, primary_key=primary_key
+                    )
                 )
-                responses = [*responses, *response]
 
-        Index._raise_on_no_documents(responses, document_type, directory_path)
+        Index._raise_on_no_documents(update_documents, document_type, directory_path)
+
+        if len(update_documents) > 1:
+            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # returns an error because it thinks all entries are trying to create the same index.
+            first_response = await update_documents.pop()
+            responses = await gather(*update_documents)
+            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
+        else:
+            responses = await update_documents[0]
 
         return responses
 
