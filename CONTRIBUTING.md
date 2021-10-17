@@ -104,7 +104,7 @@ After this pre-commit will automatically run any time you check in code to your 
 also run pre-commit at any time with:
 
 ```sh
-pre-commit run --all
+pre-commit run --all-files
 ```
 
 ### Type Hints
@@ -141,7 +141,7 @@ Type hints on files in the tests directory are optional.
 This project uses [pytest](https://docs.pytest.org/en/stable/) and [tox](https://tox.readthedocs.io/en/latest/) for testing. Please ensure that any additions/changes you make to the code have tests to go along with them. Code coverage should not drop blow it's current level with any pull requests you make, if it does the pull request will not be accepted.
 You can view the current coverage level in the codecov badge on the
 [main github page](https://github.com/sanders41/meilisearch-python-async). You can run tests and see the
-code coverage by running.
+code coverage.
 
 Before running the tests start a Docker container running MeiliSearch.
 
