@@ -124,12 +124,12 @@ class Index:
                 raise error
             return False
 
-    async def update(self, primary_key: str | None = None) -> Index:
+    async def update(self, primary_key: str) -> Index:
         """Update the index primary key.
 
         **Args:**
 
-        * **primary_key:** The primary key of the documents. Defaults to None.
+        * **primary_key:** The primary key of the documents.
 
         **Returns:** An instance of the Index with the updated information.
 
@@ -147,10 +147,7 @@ class Index:
         >>>     updated_index = await index.update()
         ```
         """
-        payload = {}
-        if primary_key is not None:
-            payload["primaryKey"] = primary_key
-
+        payload = {"primaryKey": primary_key}
         url = f"{self._base_url_with_uid}"
         response = await self._http_requests.put(url, payload)
         self.primary_key = response.json()["primaryKey"]
@@ -313,7 +310,7 @@ class Index:
         return UpdateStatus(**response.json())
 
     async def wait_for_pending_update(
-        self, update_id: int, timeout_in_ms: int = 5000, interval_in_ms: int = 50
+        self, update_id: int, *, timeout_in_ms: int = 5000, interval_in_ms: int = 50
     ) -> UpdateStatus:
         """Wait until MeiliSearch processes an update, and get its status.
 

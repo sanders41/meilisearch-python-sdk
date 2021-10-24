@@ -14,7 +14,7 @@ from meilisearch_python_async.models import ClientStats, DumpInfo, Health, Index
 class Client:
     """The client to connect to the MeiliSearchApi."""
 
-    def __init__(self, url: str, api_key: str | None = None, timeout: int | None = None) -> None:
+    def __init__(self, url: str, api_key: str | None = None, *, timeout: int | None = None) -> None:
         """Class initializer.
 
         **Args:**
