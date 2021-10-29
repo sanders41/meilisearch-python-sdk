@@ -23,19 +23,19 @@ class MeiliSearchApiError(MeiliSearchError):
 
     def __init__(self, error: str, response: Response) -> None:
         self.status_code = response.status_code
-        self.error_code = ""
+        self.code = ""
         self.message = ""
-        self.error_link = ""
+        self.link = ""
         if response.content:
             self.message = f" Error message: {response.json().get('message') or ''}."
-            self.error_code = f"{response.json().get('errorCode') or ''}"
-            self.error_link = f" Error documentation: {response.json().get('errorLink') or ''}"
+            self.code = f"{response.json().get('code') or ''}"
+            self.link = f" Error documentation: {response.json().get('link') or ''}"
         else:
             self.message = error
         super().__init__(self.message)
 
     def __str__(self) -> str:
-        return f"MeiliSearchApiError.{self.error_code}{self.message}{self.error_link}"
+        return f"MeiliSearchApiError.{self.code}{self.message}{self.link}"
 
 
 class MeiliSearchCommunicationError(MeiliSearchError):
