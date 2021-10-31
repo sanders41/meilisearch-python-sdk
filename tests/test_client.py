@@ -2,7 +2,7 @@ from asyncio import sleep
 from datetime import datetime
 
 import pytest
-from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError, Response
+from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
 
 from meilisearch_python_async.client import Client
 from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchCommunicationError
@@ -99,10 +99,10 @@ async def test_get_or_create_index(test_client, uid, primary_key):
 @pytest.mark.asyncio
 async def test_get_or_create_index_communication_error(test_client, monkeypatch):
     async def mock_get_response(*args, **kwargs):
-        raise ConnectError("test", request="GET")
+        raise ConnectError("test", request=Request("GET", url="http://localhost"))
 
     async def mock_post_response(*args, **kwargs):
-        raise ConnectError("test", request="POST")
+        raise ConnectError("test", request=Request("POST", url="http://localhost"))
 
     monkeypatch.setattr(AsyncClient, "get", mock_get_response)
     monkeypatch.setattr(AsyncClient, "post", mock_post_response)

@@ -46,7 +46,7 @@ jobs:
         poetry run flake8 meilisearch_python_async tests --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
     - name: mypy check
       run: |
-        poetry run mypy meilisearch_python_async
+        poetry run mypy .
 
   testing:
     strategy:
