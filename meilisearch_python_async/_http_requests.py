@@ -23,23 +23,19 @@ class _HttpRequests:
         http_method: Callable,
         path: str,
         body: Any | None = None,
-        content_type: str | None = None,
+        content_type: str = "applicaiton/json",
     ) -> Response:
         try:
             if not body:
                 response = await http_method(path)
+            elif content_type != "application/json":
+                response = await http_method(
+                    path, content=body, headers={"Content-Type": content_type}
+                )
             else:
-                if content_type is None:
-                    content_type = "application/json"
-
-                if content_type != "application/json":
-                    response = await http_method(
-                        path, content=body, headers={"Content-Type": content_type}
-                    )
-                else:
-                    response = await http_method(
-                        path, json=body, headers={"Content-Type": content_type}
-                    )
+                response = await http_method(
+                    path, json=body, headers={"Content-Type": content_type}
+                )
 
             response.raise_for_status()
             return response
@@ -53,7 +49,6 @@ class _HttpRequests:
         except HTTPError as err:
             if response:
                 raise MeiliSearchApiError(str(err), response) from err
-
             raise
 
     async def get(self, path: str) -> Response:
