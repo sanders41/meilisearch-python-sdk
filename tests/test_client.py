@@ -9,9 +9,11 @@ from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchComm
 from meilisearch_python_async.models import DumpInfo, IndexInfo, Version
 
 
-async def wait_for_dump_creation(test_client, dump_uid, timeout_in_ms=10000, interval_in_ms=500):
+async def wait_for_dump_creation(
+    test_client, dump_uid, timeout_in_ms=10000.0, interval_in_ms=500.0
+):
     start_time = datetime.now()
-    elapsed_time = 0
+    elapsed_time = 0.0
     while elapsed_time < timeout_in_ms:
         dump = await test_client.get_dump_status(dump_uid)
         if dump.status != "in_progress":
