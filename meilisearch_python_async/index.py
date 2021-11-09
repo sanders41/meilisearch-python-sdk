@@ -21,13 +21,10 @@ from meilisearch_python_async.errors import (
     MeiliSearchTimeoutError,
     PayloadTooLarge,
 )
-from meilisearch_python_async.models import (
-    IndexStats,
-    MeiliSearchSettings,
-    SearchResults,
-    UpdateId,
-    UpdateStatus,
-)
+from meilisearch_python_async.models.index import IndexStats
+from meilisearch_python_async.models.search import SearchResults
+from meilisearch_python_async.models.settings import MeiliSearchSettings
+from meilisearch_python_async.models.update import UpdateId, UpdateStatus
 
 
 class Index:

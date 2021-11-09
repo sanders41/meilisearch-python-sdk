@@ -6,7 +6,9 @@ from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError
 
 from meilisearch_python_async.client import Client
 from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchCommunicationError
-from meilisearch_python_async.models import DumpInfo, IndexInfo, Version
+from meilisearch_python_async.models.dump import DumpInfo
+from meilisearch_python_async.models.index import IndexInfo
+from meilisearch_python_async.models.version import Version
 
 
 async def wait_for_dump_creation(
