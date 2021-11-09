@@ -8,7 +8,11 @@ from httpx import AsyncClient
 from meilisearch_python_async._http_requests import _HttpRequests
 from meilisearch_python_async.errors import MeiliSearchApiError
 from meilisearch_python_async.index import Index
-from meilisearch_python_async.models import ClientStats, DumpInfo, Health, IndexInfo, Keys, Version
+from meilisearch_python_async.models.client import ClientStats, Keys
+from meilisearch_python_async.models.dump import DumpInfo
+from meilisearch_python_async.models.health import Health
+from meilisearch_python_async.models.index import IndexInfo
+from meilisearch_python_async.models.version import Version
 
 
 class Client:

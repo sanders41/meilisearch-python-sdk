@@ -6,7 +6,7 @@ from httpx import Response
 from meilisearch_python_async._http_requests import _HttpRequests
 from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchTimeoutError
 from meilisearch_python_async.index import Index
-from meilisearch_python_async.models import MeiliSearchSettings
+from meilisearch_python_async.models.settings import MeiliSearchSettings
 
 
 @pytest.fixture

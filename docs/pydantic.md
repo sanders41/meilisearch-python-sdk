@@ -16,8 +16,8 @@ you could put the results into an object with the following:
 from datetime import datetime
 from typing import Optional
 
+from camel_converter.pydantic_base import CamelBase
 from meilisearch_python_async import Client
-from meilisearch_python_async.models import CamelBase
 
 
 # Inheriting from CamelBase will allow your class to automatically convert
