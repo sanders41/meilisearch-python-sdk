@@ -117,7 +117,7 @@ class Index:
             await self.delete()
             return True
         except MeiliSearchApiError as error:
-            if error.error_code != "index_not_found":
+            if error.code != "index_not_found":
                 raise error
             return False
 

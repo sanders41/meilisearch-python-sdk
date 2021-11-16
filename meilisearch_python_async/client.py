@@ -125,7 +125,7 @@ class Client:
             await self._http_requests.delete(url)
             return True
         except MeiliSearchApiError as error:
-            if error.error_code != "index_not_found":
+            if error.code != "index_not_found":
                 raise error
             return False
 
@@ -287,7 +287,7 @@ class Client:
         try:
             index_instance = await self.get_index(uid)
         except MeiliSearchApiError as err:
-            if "index_not_found" not in err.error_code:
+            if "index_not_found" not in err.code:
                 raise err
             index_instance = await self.create_index(uid, primary_key)
         return index_instance

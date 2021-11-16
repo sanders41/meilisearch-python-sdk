@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
@@ -12,8 +12,10 @@ class UpdateId(CamelBase):
 class UpdateStatus(CamelBase):
     status: str
     update_id: int
-    update_type: Dict = Field(..., alias="type")
+    update_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
     enqueued_at: datetime
     duration: Optional[float] = None
     processed_at: Optional[datetime] = None
-    error: Optional[str] = None
+    message: Optional[str] = None
+    code: Optional[str] = None
+    link: Optional[str] = None
