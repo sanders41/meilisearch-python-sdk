@@ -21,7 +21,7 @@ include = ["meilisearch_python_async/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-httpx = ">=0.17,<0.21"
+httpx = ">=0.17,<0.22"
 pydantic = "^1.8"
 aiofiles = "^0.7.0"
 camel-converter = "^1.0.0"
