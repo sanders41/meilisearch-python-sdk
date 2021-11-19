@@ -47,9 +47,7 @@ class _HttpRequests:
         except ConnectTimeout as err:
             raise MeiliSearchCommunicationError(str(err)) from err
         except HTTPError as err:
-            if response:
-                raise MeiliSearchApiError(str(err), response) from err
-            raise
+            raise MeiliSearchApiError(str(err), response) from err
 
     async def get(self, path: str) -> Response:
         return await self._send_request(self.http_client.get, path)
