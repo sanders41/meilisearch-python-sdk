@@ -123,11 +123,12 @@ class Client:
         try:
             url = f"indexes/{uid}"
             await self._http_requests.delete(url)
-            return True
         except MeiliSearchApiError as error:
             if error.code != "index_not_found":
                 raise
             return False
+
+        return True
 
     async def get_indexes(self) -> list[Index] | None:
         """Get all indexes.
