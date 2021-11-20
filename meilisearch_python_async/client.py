@@ -274,7 +274,7 @@ class Client:
 
         * **MeilisearchCommunicationError:** If there was an error communicating with the server.
         * **MeilisearchApiError:** If the MeiliSearch API returned an error.MeiliSearchTimeoutError: If the connection times out.
-            MeiliSearchTimeoutError: If the connection times out.
+        * **MeiliSearchTimeoutError:** If the connection times out.
 
         Usage:
 
