@@ -14,8 +14,8 @@ jobs:
         python-version: 3.9
     - name: Install Poetry and add to path
       run: |
-        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
-        echo "${HOME}/.poetry/bin" >> $GITHUB_PATH
+        curl -sSL https://install.python-poetry.org/install-poetry.py | python -
+        echo "${HOME}/.local/bin" >> $GITHUB_PATH
     - name: Install Dependencies
       run: |
         poetry install
