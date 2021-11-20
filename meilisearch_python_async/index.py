@@ -118,7 +118,7 @@ class Index:
             return True
         except MeiliSearchApiError as error:
             if error.code != "index_not_found":
-                raise error
+                raise
             return False
 
     async def update(self, primary_key: str) -> Index:

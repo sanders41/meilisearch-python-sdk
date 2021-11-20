@@ -126,7 +126,7 @@ class Client:
             return True
         except MeiliSearchApiError as error:
             if error.code != "index_not_found":
-                raise error
+                raise
             return False
 
     async def get_indexes(self) -> list[Index] | None:
@@ -288,7 +288,7 @@ class Client:
             index_instance = await self.get_index(uid)
         except MeiliSearchApiError as err:
             if "index_not_found" not in err.code:
-                raise err
+                raise
             index_instance = await self.create_index(uid, primary_key)
         return index_instance
 
