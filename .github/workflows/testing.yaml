@@ -16,7 +16,7 @@ jobs:
         python-version: 3.9
     - name: Install Poetry and add to path
       run: |
-        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
+        curl -sSL https://install.python-poetry.org/install-poetry.py | python -
         echo "${HOME}/.local/bin" >> $GITHUB_PATH
     - name: Configure poetry
       run: |
@@ -53,16 +53,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Poetry and add to path
       run: |
-        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
+        curl -sSL https://install.python-poetry.org/install-poetry.py | python -
         echo "${HOME}/.local/bin" >> $GITHUB_PATH
     - name: Configure poetry
       run: |
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
-    - name: Configure poetry Python 3.10
-      if: matrix.python-version == '3.10'  # Poetry installs are currently failing with the experimental installer on 3.10
-      run: |
-        poetry config experimental.new-installer false
     - name: Cache poetry venv
       uses: actions/cache@v2
       id: poetry-cache
