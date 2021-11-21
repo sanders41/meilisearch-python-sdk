@@ -14,7 +14,7 @@ from httpx import (
 from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchCommunicationError
 
 
-class _HttpRequests:
+class HttpRequests:
     def __init__(self, http_client: AsyncClient) -> None:
         self.http_client = http_client
 
@@ -40,11 +40,7 @@ class _HttpRequests:
             response.raise_for_status()
             return response
 
-        except RemoteProtocolError as err:
-            raise MeiliSearchCommunicationError(str(err)) from err
-        except ConnectError as err:
-            raise MeiliSearchCommunicationError(str(err)) from err
-        except ConnectTimeout as err:
+        except (ConnectError, ConnectTimeout, RemoteProtocolError) as err:
             raise MeiliSearchCommunicationError(str(err)) from err
         except HTTPError as err:
             raise MeiliSearchApiError(str(err), response) from err
