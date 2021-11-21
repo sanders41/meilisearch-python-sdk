@@ -5,7 +5,7 @@ from typing import Type
 
 from httpx import AsyncClient
 
-from meilisearch_python_async._http_requests import _HttpRequests
+from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import MeiliSearchApiError
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.client import ClientStats, Keys
@@ -31,7 +31,7 @@ class Client:
         self._http_client = AsyncClient(
             base_url=url, timeout=timeout, headers=self._set_headers(api_key)
         )
-        self._http_requests = _HttpRequests(self._http_client)
+        self._http_requests = HttpRequests(self._http_client)
 
     async def __aenter__(self) -> Client:
         return self

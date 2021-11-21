@@ -13,7 +13,7 @@ from urllib.parse import urlencode
 import aiofiles
 from httpx import AsyncClient
 
-from meilisearch_python_async._http_requests import _HttpRequests
+from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import (
     InvalidDocumentError,
     MeiliSearchApiError,
@@ -61,7 +61,7 @@ class Index:
         self._documents_url = f"{self._base_url_with_uid}/documents"
         self._stats_url = f"{self._base_url_with_uid}/stats"
         self._settings_url = f"{self._base_url_with_uid}/settings"
-        self._http_requests = _HttpRequests(http_client)
+        self._http_requests = HttpRequests(http_client)
 
     def __str__(self) -> str:
         return f"{type(self).__name__}(uid={self.uid}, primary_key={self.primary_key}, created_at={self.created_at}, updated_at={self.updated_at})"
@@ -115,11 +115,12 @@ class Index:
         """
         try:
             await self.delete()
-            return True
         except MeiliSearchApiError as error:
             if error.code != "index_not_found":
                 raise
             return False
+
+        return True
 
     async def update(self, primary_key: str) -> Index:
         """Update the index primary key.
@@ -241,7 +242,7 @@ class Index:
             payload = {"primaryKey": primary_key, "uid": uid}
 
         url = "indexes"
-        response = await _HttpRequests(http_client).post(url, payload)
+        response = await HttpRequests(http_client).post(url, payload)
         index_dict = response.json()
         return cls(
             http_client=http_client,

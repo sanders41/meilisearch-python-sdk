@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 from httpx import Response
 
-from meilisearch_python_async._http_requests import _HttpRequests
+from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchTimeoutError
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.settings import MeiliSearchSettings
@@ -517,7 +517,7 @@ async def test_delete_if_exists_error(test_client, index_uid, monkeypatch):
     async def mock_response(*args, **kwargs):
         raise MeiliSearchApiError("test", Response(status_code=404))
 
-    monkeypatch.setattr(_HttpRequests, "_send_request", mock_response)
+    monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
     with pytest.raises(MeiliSearchApiError):
         await test_client.index(index_uid).delete_if_exists()
 
@@ -547,6 +547,6 @@ async def test_delete_index_if_exists_error(test_client, index_uid, monkeypatch)
     async def mock_response(*args, **kwargs):
         raise MeiliSearchApiError("test", Response(status_code=404))
 
-    monkeypatch.setattr(_HttpRequests, "_send_request", mock_response)
+    monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
     with pytest.raises(MeiliSearchApiError):
         await test_client.delete_index_if_exists(index_uid)
