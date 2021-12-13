@@ -39,7 +39,7 @@ pytest-asyncio = "^0.16.0"
 types-aiofiles = "^0.7.0"
 flake8-docstrings = "^1.6.0"
 mkdocs = "^1.2.3"
-mkdocs-material = "^8.0.5"
+mkdocs-material = "^8.1.0"
 mkautodoc = "^0.1.0"
 
 [build-system]
