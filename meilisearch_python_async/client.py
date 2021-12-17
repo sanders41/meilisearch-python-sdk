@@ -416,7 +416,7 @@ class Client:
     def _set_headers(self, api_key: str | None = None) -> dict[str, str]:
         if api_key:
             return {
-                "X-Meili-Api-Key": api_key,
+                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
             }
         else:
