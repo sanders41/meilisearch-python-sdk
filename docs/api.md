@@ -51,5 +51,5 @@ finally:
 ::: meilisearch_python_async.task.get_task
     :docstring:
 
-::: meilisearch_python_async.wait_for_task
+::: meilisearch_python_async.task.wait_for_task
     :docstring:
