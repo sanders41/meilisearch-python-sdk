@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from meilisearch_python_async.client import Client
+from meilisearch_python_async.task import wait_for_task
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"
@@ -140,7 +141,7 @@ async def index_with_documents(empty_index, small_movies, index_uid):
     async def index_maker(index_name=index_uid, documents=small_movies):
         index = await empty_index(index_name)
         response = await index.add_documents(documents)
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
         return index
 
     return index_maker

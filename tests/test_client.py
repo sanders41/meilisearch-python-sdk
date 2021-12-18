@@ -176,8 +176,7 @@ async def test_health(test_client):
 async def test_get_keys(test_client):
     response = await test_client.get_keys()
 
-    assert response.public is not None
-    assert response.private is not None
+    assert len(response) == 2
 
 
 @pytest.mark.asyncio
