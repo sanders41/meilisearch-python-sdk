@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from types import TracebackType
 from typing import Type
 
@@ -8,7 +9,7 @@ from httpx import AsyncClient
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import MeiliSearchApiError
 from meilisearch_python_async.index import Index
-from meilisearch_python_async.models.client import ClientStats, Key
+from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeyUpdate
 from meilisearch_python_async.models.dump import DumpInfo
 from meilisearch_python_async.models.health import Health
 from meilisearch_python_async.models.index import IndexInfo
@@ -121,19 +122,12 @@ class Client:
         >>>     await client.delete_index_if_exists()
         ```
         """
-        try:
-            url = f"indexes/{uid}"
-            response = await self._http_requests.delete(url)
-            status = await wait_for_task(self.http_client, response.json()["uid"])
-            if status.status == "succeeded":
-                return True
-            return False
-        except MeiliSearchApiError as error:
-            if error.code != "index_not_found":
-                raise
-            return False
-
-        return True
+        url = f"indexes/{uid}"
+        response = await self._http_requests.delete(url)
+        status = await wait_for_task(self.http_client, response.json()["uid"])
+        if status.status == "succeeded":
+            return True
+        return False
 
     async def get_indexes(self) -> list[Index] | None:
         """Get all indexes.
@@ -298,11 +292,69 @@ class Client:
             index_instance = await self.create_index(uid, primary_key)
         return index_instance
 
-    async def get_keys(self) -> list[Key]:
-        """Gets the MeiliSearch public and private keys.
+    async def create_key(self, key: KeyCreate) -> Key:
+        """Creates a new API key.
 
-        **Returns:** The public and private keys.
-            https://docs.meilisearch.com/reference/api/keys.html#get-keys
+        **Args:**
+
+        * **key:** The information to use in creating the key. Note that if an expires_at value
+            is included it should be in UTC time.
+
+        **Returns:** The new API key.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> from meilissearch_async_client.models.client import KeyCreate
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     key_info = KeyCreate(
+        >>>         description="My new key",
+        >>>         actions=["search"],
+        >>>         indexes=["movies"],
+        >>>     )
+        >>>     keys = await client.create_key(key_info)
+        ```
+        """
+        # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
+        # but can when converting to a json string.
+        response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))
+        return Key(**response.json())
+
+    async def delete_key(self, key: str) -> int:
+        """Deletes an API key.
+
+        **Args:**
+
+        * **key:** The key to delete.
+
+        **Returns:** The Response status code. 204 signifies a successful delete.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     await client.delete_key("abc123")
+        ```
+        """
+        response = await self._http_requests.delete(f"keys/{key}")
+        return response.status_code
+
+    async def get_keys(self) -> list[Key]:
+        """Gets the MeiliSearch API keys.
+
+        **Returns:** API keys.
 
         **Raises:**
 
@@ -321,6 +373,66 @@ class Client:
         keys = [Key(**x) for x in response.json()]
 
         return keys
+
+    async def get_key(self, key: str) -> Key:
+        """Gets information about a specific API key.
+
+        **Args:**
+
+        * **key:** The key for which to retrieve the information.
+
+        **Returns:** The API key, or `None` if the key is not found.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     keys = await client.get_key("abc123")
+        ```
+        """
+        response = await self._http_requests.get(f"keys/{key}")
+        return Key(**response.json())
+
+    async def update_key(self, key: KeyUpdate) -> Key:
+        """Update an API key.
+
+        **Args:**
+
+        * **key:** The information to use in updating the key. Note that if an expires_at value
+            is included it should be in UTC time.
+
+        **Returns:** The updated API key.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> from meilissearch_async_client.models.client import KeyUpdate
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     key_info = KeyUpdate(
+                    key="abc123",
+        >>>         indexes=["*"],
+        >>>     )
+        >>>     keys = await client.update_key(key_info)
+        ```
+        """
+        # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
+        # but can when converting to a json string.
+        response = await self._http_requests.patch(
+            f"keys/{key.key}", json.loads(key.json(by_alias=True))
+        )
+        return Key(**response.json())
 
     async def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an Index instance.
