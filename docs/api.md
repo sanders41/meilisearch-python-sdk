@@ -35,7 +35,7 @@ finally:
 
 ::: meilisearch_python_async.Client
     :docstring:
-    :members: __init__ aclose create_dump create_index delete_index_if_exists get_indexes get_index index get_all_stats get_dump_status get_or_create_index get_keys get_raw_index get_raw_indexes get_version health
+    :members: __init__ aclose create_dump create_index delete_index_if_exists get_indexes get_index index get_all_stats get_dump_status get_or_create_index create_key get_keys get_key update_key get_raw_index get_raw_indexes get_version health
 
 ## `Index`
 

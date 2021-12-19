@@ -14,12 +14,7 @@ import aiofiles
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import (
-    InvalidDocumentError,
-    MeiliSearchApiError,
-    MeiliSearchError,
-    PayloadTooLarge,
-)
+from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchError, PayloadTooLarge
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
 from meilisearch_python_async.models.settings import MeiliSearchSettings
@@ -114,19 +109,12 @@ class Index:
         >>>     await index.delete_if_exists()
         ```
         """
-        try:
-            response = await self.delete()
-            status = await wait_for_task(self.http_client, response.uid)
-            if status.status == "succeeded":
-                return True
+        response = await self.delete()
+        status = await wait_for_task(self.http_client, response.uid)
+        if status.status == "succeeded":
+            return True
 
-            return False
-        except MeiliSearchApiError as error:
-            if error.code != "index_not_found":
-                raise
-            return False
-
-        return True
+        return False
 
     async def update(self, primary_key: str) -> Index:
         """Update the index primary key.

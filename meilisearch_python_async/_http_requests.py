@@ -48,6 +48,11 @@ class HttpRequests:
     async def get(self, path: str) -> Response:
         return await self._send_request(self.http_client.get, path)
 
+    async def patch(
+        self, path: str, body: Any | None = None, content_type: str = "application/json"
+    ) -> Response:
+        return await self._send_request(self.http_client.patch, path, body, content_type)
+
     async def post(
         self, path: str, body: Any | None = None, content_type: str = "application/json"
     ) -> Response:
