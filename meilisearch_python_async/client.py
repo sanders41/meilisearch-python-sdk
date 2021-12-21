@@ -30,10 +30,12 @@ class Client:
         * **timeout:** The amount of time in seconds that the client will wait for a response before
             timing out. Defaults to None.
         """
-        self.http_client = AsyncClient(base_url=url, timeout=timeout)
-
         if api_key:
-            self.http_client.headers = {"Authorization": f"Bearer {api_key}"}
+            headers = {"Authorization": f"Bearer {api_key}"}
+        else:
+            headers = None
+
+        self.http_client = AsyncClient(base_url=url, timeout=timeout, headers=headers)
         self._http_requests = HttpRequests(self.http_client)
 
     async def __aenter__(self) -> Client:
