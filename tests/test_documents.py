@@ -120,7 +120,7 @@ async def test_add_documents_auto_batch_payload_size_error(empty_index, small_mo
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [2, 3])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -144,7 +144,7 @@ async def test_add_documents_in_batches(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_add_documents_from_directory(
     path_type,
@@ -221,7 +221,7 @@ async def test_add_documents_from_directory_no_documents(combine_documents, test
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_add_documents_from_directory_auto_batch(
     path_type,
@@ -319,7 +319,7 @@ async def test_add_documents_from_directory_auto_batch_ndjson(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_add_documents_from_directory_in_batchs(
     path_type,
@@ -929,7 +929,7 @@ async def test_update_documents_from_directory_ndjson(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_update_documents_from_directory_auto_batch(
     path_type,
@@ -1029,7 +1029,7 @@ async def test_update_documents_from_directory_auto_batch_ndjson(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_update_documents_from_directory_in_batchs(
     path_type,

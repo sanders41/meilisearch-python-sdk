@@ -99,9 +99,9 @@ def small_movies():
         yield json.loads(movie_file.read())
 
 
-@pytest.fixture
-def small_movies_csv_path(small_movies, tmp_path):
-    file_path = tmp_path / "small_movies.csv"
+@pytest.fixture(scope="session")
+def small_movies_csv_path(small_movies, tmp_path_factory):
+    file_path = tmp_path_factory.mktemp("csv") / "small_movies.csv"
     with open(file_path, "w") as f:
         field_names = list(small_movies[0].keys())
         writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL)
@@ -111,9 +111,9 @@ def small_movies_csv_path(small_movies, tmp_path):
     return file_path
 
 
-@pytest.fixture
-def small_movies_ndjson_path(small_movies, tmp_path):
-    file_path = tmp_path / "small_movies.ndjson"
+@pytest.fixture(scope="session")
+def small_movies_ndjson_path(small_movies, tmp_path_factory):
+    file_path = tmp_path_factory.mktemp("ndjson") / "small_movies.ndjson"
     nd_json = [json.dumps(x) for x in small_movies]
     with open(file_path, "w") as f:
         for line in nd_json:
