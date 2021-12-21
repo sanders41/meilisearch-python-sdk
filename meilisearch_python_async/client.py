@@ -30,9 +30,12 @@ class Client:
         * **timeout:** The amount of time in seconds that the client will wait for a response before
             timing out. Defaults to None.
         """
-        self.http_client = AsyncClient(
-            base_url=url, timeout=timeout, headers=self._set_headers(api_key)
-        )
+        if api_key:
+            headers = {"Authorization": f"Bearer {api_key}"}
+        else:
+            headers = None
+
+        self.http_client = AsyncClient(base_url=url, timeout=timeout, headers=headers)
         self._http_requests = HttpRequests(self.http_client)
 
     async def __aenter__(self) -> Client:
@@ -532,14 +535,3 @@ class Client:
         """
         response = await self._http_requests.get("health")
         return Health(**response.json())
-
-    def _set_headers(self, api_key: str | None = None) -> dict[str, str]:
-        if api_key:
-            return {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            }
-        else:
-            return {
-                "Content-Type": "application/json",
-            }
