@@ -18,6 +18,19 @@ async def test_get_tasks(empty_index, small_movies):
 
 
 @pytest.mark.asyncio
+async def test_get_tasks_for_index(empty_index, small_movies):
+    index = await empty_index()
+    tasks = await get_tasks(index.http_client, index.uid)
+    current_tasks = len(tasks)
+    response = await index.add_documents(small_movies)
+    await wait_for_task(index.http_client, response.uid)
+    response = await index.add_documents(small_movies)
+    await wait_for_task(index.http_client, response.uid)
+    response = await get_tasks(index.http_client, index.uid)
+    assert len(response) - current_tasks == 2
+
+
+@pytest.mark.asyncio
 async def test_get_task(empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies)
