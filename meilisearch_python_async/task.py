@@ -54,8 +54,6 @@ async def get_task(http_client: AsyncClient, task_id: int) -> TaskStatus:
 
     * **http_client** An AsyncClient instance.
     * **task_id:** Identifier of the task to retrieve.
-    * **index_id** The id of the index for which to get the tasks. If provided this will get the
-        tasks only for the specified index, if not all tasks will be returned. Default = None
 
     **Returns:** A list of all tasks.
 
