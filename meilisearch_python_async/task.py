@@ -10,12 +10,14 @@ from meilisearch_python_async.errors import MeiliSearchTimeoutError
 from meilisearch_python_async.models.task import TaskStatus
 
 
-async def get_tasks(http_client: AsyncClient) -> list[TaskStatus]:
+async def get_tasks(http_client: AsyncClient, index_id: str | None = None) -> list[TaskStatus]:
     """Get all tasks.
 
     **Args:**
 
     * **http_client** An AsyncClient instance.
+    * **index_id** The id of the index for which to get the tasks. If provided this will get the
+        tasks only for the specified index, if not all tasks will be returned. Default = None
 
     **Returns:** A list of all tasks.
 
@@ -35,7 +37,11 @@ async def get_tasks(http_client: AsyncClient) -> list[TaskStatus]:
     >>>     await get_tasks(client.http_client)
     ```
     """
-    response = await http_client.get("tasks")
+    if index_id:
+        url = f"indexes/{index_id}/tasks"
+    else:
+        url = "tasks"
+    response = await http_client.get(url)
     tasks = [TaskStatus(**x) for x in response.json()["results"]]
 
     return tasks
