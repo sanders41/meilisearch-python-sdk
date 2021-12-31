@@ -37,10 +37,7 @@ async def get_tasks(http_client: AsyncClient, index_id: str | None = None) -> li
     >>>     await get_tasks(client.http_client)
     ```
     """
-    if index_id:
-        url = f"indexes/{index_id}/tasks"
-    else:
-        url = "tasks"
+    url = f"indexes/{index_id}/tasks" if index_id else "tasks"
     response = await http_client.get(url)
     tasks = [TaskStatus(**x) for x in response.json()["results"]]
 
