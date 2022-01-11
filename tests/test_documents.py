@@ -4,7 +4,6 @@ from math import ceil
 
 import pytest
 
-from meilisearch_python_async.decorators import status_check
 from meilisearch_python_async.errors import (
     InvalidDocumentError,
     MeiliSearchApiError,
@@ -12,6 +11,7 @@ from meilisearch_python_async.errors import (
     PayloadTooLarge,
 )
 from meilisearch_python_async.index import Index
+from meilisearch_python_async.task import wait_for_task
 
 
 def generate_test_movies(num_movies=50, id_start=0):
@@ -79,119 +79,9 @@ async def test_get_documents_default(empty_index):
 async def test_add_documents(primary_key, expected_primary_key, empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies, primary_key)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == expected_primary_key
-    assert update.status == "processed"
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "docs, expected_fail, expected_indexed",
-    [
-        (
-            [
-                {
-                    "id": 1,
-                    "name": "test 1",
-                },
-                {
-                    "id": 2,
-                    "name": "test 2",
-                },
-            ],
-            False,
-            2,
-        ),
-        (
-            [
-                {
-                    "name": "test 1",
-                },
-                {
-                    "name": "test 2",
-                },
-            ],
-            True,
-            0,
-        ),
-    ],
-)
-async def test_status_check_decorator(docs, expected_fail, expected_indexed, empty_index, capfd):
-    index = await empty_index()
-
-    @status_check(index=index)
-    async def fn():
-        await index.add_documents(docs)
-
-    await fn()
-    stats = await index.get_stats()
-    assert stats.number_of_documents == expected_indexed
-
-    out, _ = capfd.readouterr()
-
-    fail_text = "status='failed'"
-
-    if expected_fail:
-        assert fail_text in out
-    else:
-        assert fail_text not in out
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "docs, expected_fail, expected_indexed, expected_messages",
-    [
-        (
-            [
-                {
-                    "id": 1,
-                    "name": "test 1",
-                },
-                {
-                    "id": 2,
-                    "name": "test 2",
-                },
-            ],
-            False,
-            2,
-            0,
-        ),
-        (
-            [
-                {
-                    "name": "test 1",
-                },
-                {
-                    "name": "test 2",
-                },
-            ],
-            True,
-            0,
-            2,
-        ),
-    ],
-)
-async def test_status_check_decorator_batch(
-    docs, expected_fail, expected_indexed, expected_messages, empty_index, capfd
-):
-    index = await empty_index()
-
-    @status_check(index=index)
-    async def fn():
-        await index.add_documents_in_batches(docs, batch_size=1)
-
-    await fn()
-    stats = await index.get_stats()
-    assert stats.number_of_documents == expected_indexed
-
-    out, _ = capfd.readouterr()
-
-    fail_text = "status='failed'"
-
-    if expected_fail:
-        assert out.count(fail_text) == expected_messages
-    else:
-        assert fail_text not in out
+    assert update.status == "succeeded"
 
 
 @pytest.mark.asyncio
@@ -213,8 +103,8 @@ async def test_add_documents_auto_batch(
         response = await index.add_documents_auto_batch(movies, primary_key=primary_key)
 
     for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
 
     stats = await index.get_stats()
 
@@ -230,7 +120,7 @@ async def test_add_documents_auto_batch_payload_size_error(empty_index, small_mo
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [2, 3])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -244,8 +134,8 @@ async def test_add_documents_in_batches(
     assert ceil(len(small_movies) / batch_size) == len(response)
 
     for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
 
     assert await index.get_primary_key() == expected_primary_key
 
@@ -254,7 +144,7 @@ async def test_add_documents_in_batches(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_add_documents_from_directory(
     path_type,
@@ -272,7 +162,7 @@ async def test_add_documents_from_directory(
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(path, combine_documents=combine_documents)
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -291,7 +181,7 @@ async def test_add_documents_from_directory_csv(
         path, combine_documents=combine_documents, document_type="csv"
     )
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -310,7 +200,7 @@ async def test_add_documents_from_directory_ndjson(
         path, combine_documents=combine_documents, document_type="ndjson"
     )
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -331,7 +221,7 @@ async def test_add_documents_from_directory_no_documents(combine_documents, test
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_add_documents_from_directory_auto_batch(
     path_type,
@@ -359,7 +249,7 @@ async def test_add_documents_from_directory_auto_batch(
         )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -389,7 +279,7 @@ async def test_add_documents_from_directory_auto_batch_csv(
         )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -419,7 +309,7 @@ async def test_add_documents_from_directory_auto_batch_ndjson(
         )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -429,7 +319,7 @@ async def test_add_documents_from_directory_auto_batch_ndjson(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_add_documents_from_directory_in_batchs(
     path_type,
@@ -451,7 +341,7 @@ async def test_add_documents_from_directory_in_batchs(
     )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -472,7 +362,7 @@ async def test_add_documents_from_directory_in_batchs_csv(
     )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -493,7 +383,7 @@ async def test_add_documents_from_directory_in_batchs_ndjson(
     )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -510,9 +400,9 @@ async def test_add_documents_from_file(
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = await index.add_documents_from_file(path, primary_key)
 
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == expected_primary_key
-    assert update.status == "processed"
+    assert update.status == "succeeded"
 
 
 @pytest.mark.asyncio
@@ -527,9 +417,9 @@ async def test_add_documents_from_file_csv(
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = await index.add_documents_from_file(path, primary_key)
 
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == expected_primary_key
-    assert update.status == "processed"
+    assert update.status == "succeeded"
 
 
 @pytest.mark.asyncio
@@ -543,9 +433,9 @@ async def test_add_documents_raw_file_csv(
     index = test_client.index("movies")
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = await index.add_documents_from_raw_file(path, primary_key)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == expected_primary_key
-    assert update.status == "processed"
+    assert update.status == "succeeded"
 
 
 @pytest.mark.asyncio
@@ -559,9 +449,9 @@ async def test_add_documents_raw_file_ndjson(
     index = test_client.index("movies")
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = await index.add_documents_from_raw_file(path, primary_key)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == expected_primary_key
-    assert update.status == "processed"
+    assert update.status == "succeeded"
 
 
 @pytest.mark.asyncio
@@ -594,9 +484,9 @@ async def test_add_documents_from_file_ndjson(
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = await index.add_documents_from_file(path, primary_key)
 
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == expected_primary_key
-    assert update.status == "processed"
+    assert update.status == "succeeded"
 
 
 @pytest.mark.asyncio
@@ -634,8 +524,8 @@ async def test_add_documents_from_file_auto_batch(
         )
 
     for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
 
     stats = await index.get_stats()
 
@@ -671,8 +561,8 @@ async def test_add_documents_from_file_auto_batch_csv(
         )
 
     for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
 
     stats = await index.get_stats()
 
@@ -708,8 +598,8 @@ async def test_add_documents_from_file_auto_batch_ndjson(
         )
 
     for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
 
     stats = await index.get_stats()
 
@@ -741,8 +631,8 @@ async def test_add_documents_from_file_in_batches(
     assert ceil(len(small_movies) / batch_size) == len(response)
 
     for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
 
     assert await index.get_primary_key() == expected_primary_key
 
@@ -771,8 +661,8 @@ async def test_add_documents_from_file_in_batches_csv(
     assert ceil(len(small_movies) / batch_size) == len(response)
 
     for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
 
     assert await index.get_primary_key() == expected_primary_key
 
@@ -801,8 +691,8 @@ async def test_add_documents_from_file_in_batches_ndjson(
     assert ceil(len(small_movies) / batch_size) == len(response)
 
     for r in response:
-        update = await index.wait_for_pending_update(r.update_id)
-        assert update.status == "processed"
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
 
     assert await index.get_primary_key() == expected_primary_key
 
@@ -854,11 +744,11 @@ async def test_update_documents(index_with_documents, small_movies):
     response = await index.get_documents()
     response[0]["title"] = "Some title"
     update = await index.update_documents([response[0]])
-    await index.wait_for_pending_update(update.update_id)
+    await wait_for_task(index.http_client, update.uid)
     response = await index.get_documents()
     assert response[0]["title"] == "Some title"
     update = await index.update_documents(small_movies)
-    await index.wait_for_pending_update(update.update_id)
+    await wait_for_task(index.http_client, update.uid)
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
 
@@ -868,7 +758,7 @@ async def test_update_documents_with_primary_key(test_client, small_movies):
     primary_key = "release_date"
     index = test_client.index("movies")
     update = await index.update_documents(small_movies, primary_key=primary_key)
-    await index.wait_for_pending_update(update.update_id)
+    await wait_for_task(index.http_client, update.uid)
     assert await index.get_primary_key() == primary_key
 
 
@@ -879,8 +769,8 @@ async def test_update_documents_auto_batch(max_payload, test_client):
 
     index = test_client.index("movies")
     response = await index.add_documents(documents)
-    update = await index.wait_for_pending_update(response.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, response.uid)
+    assert update.status == "succeeded"
 
     response = await index.get_documents(limit=len(documents))
     assert response[0]["title"] != "Some title"
@@ -893,7 +783,7 @@ async def test_update_documents_auto_batch(max_payload, test_client):
         updates = await index.update_documents_auto_batch(response)
 
     for update in updates:
-        await index.wait_for_pending_update(update.update_id)
+        await wait_for_task(index.http_client, update.uid)
 
     stats = await index.get_stats()
     assert stats.number_of_documents == len(documents)
@@ -916,8 +806,8 @@ async def test_update_documents_auto_batch_primary_key(test_client, max_payload)
         updates = await index.update_documents_auto_batch(documents, primary_key=primary_key)
 
     for update in updates:
-        update_status = await index.wait_for_pending_update(update.update_id)
-        assert update_status.status == "processed"
+        update_status = await wait_for_task(index.http_client, update.uid)
+        assert update_status.status == "succeeded"
 
     assert await index.get_primary_key() == primary_key
 
@@ -936,7 +826,7 @@ async def test_update_documents_in_batches(batch_size, index_with_documents, sma
     response = await index.get_documents()
     response[0]["title"] = "Some title"
     update = await index.update_documents([response[0]])
-    await index.wait_for_pending_update(update.update_id)
+    await wait_for_task(index.http_client, update.uid)
 
     response = await index.get_documents()
     assert response[0]["title"] == "Some title"
@@ -944,7 +834,7 @@ async def test_update_documents_in_batches(batch_size, index_with_documents, sma
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:
-        await index.wait_for_pending_update(update.update_id)
+        await wait_for_task(index.http_client, update.uid)
 
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
@@ -961,8 +851,8 @@ async def test_update_documents_in_batches_with_primary_key(batch_size, test_cli
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:
-        update_status = await index.wait_for_pending_update(update.update_id)
-        assert update_status.status == "processed"
+        update_status = await wait_for_task(index.http_client, update.uid)
+        assert update_status.status == "succeeded"
 
     assert await index.get_primary_key() == primary_key
 
@@ -991,7 +881,7 @@ async def test_update_documents_from_directory(
         path, combine_documents=combine_documents
     )
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -1010,7 +900,7 @@ async def test_update_documents_from_directory_csv(
         path, combine_documents=combine_documents, document_type="csv"
     )
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -1029,7 +919,7 @@ async def test_update_documents_from_directory_ndjson(
         path, combine_documents=combine_documents, document_type="ndjson"
     )
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -1039,7 +929,7 @@ async def test_update_documents_from_directory_ndjson(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_update_documents_from_directory_auto_batch(
     path_type,
@@ -1069,7 +959,7 @@ async def test_update_documents_from_directory_auto_batch(
         )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -1099,7 +989,7 @@ async def test_update_documents_from_directory_auto_batch_csv(
         )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -1129,7 +1019,7 @@ async def test_update_documents_from_directory_auto_batch_ndjson(
         )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -1139,7 +1029,7 @@ async def test_update_documents_from_directory_auto_batch_ndjson(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
+    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 async def test_update_documents_from_directory_in_batchs(
     path_type,
@@ -1161,7 +1051,7 @@ async def test_update_documents_from_directory_in_batchs(
     )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -1182,7 +1072,7 @@ async def test_update_documents_from_directory_in_batchs_csv(
     )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -1203,7 +1093,7 @@ async def test_update_documents_from_directory_in_batchs_ndjson(
     )
 
     for response in responses:
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
     stats = await index.get_stats()
     assert stats.number_of_documents == 100
 
@@ -1215,15 +1105,15 @@ async def test_update_documents_from_file(path_type, test_client, small_movies, 
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     update = await index.update_documents_from_file(path)
-    update = await index.wait_for_pending_update(update.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, update.uid)
+    assert update.status == "succeeded"
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
 
@@ -1237,15 +1127,15 @@ async def test_update_documents_from_file_csv(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     update = await index.update_documents_from_file(path)
-    update = await index.wait_for_pending_update(update.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, update.uid)
+    assert update.status == "succeeded"
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
 
@@ -1259,15 +1149,15 @@ async def test_update_documents_from_file_ndjson(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     update = await index.update_documents_from_file(path)
-    update = await index.wait_for_pending_update(update.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, update.uid)
+    assert update.status == "succeeded"
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
 
@@ -1277,7 +1167,7 @@ async def test_update_documents_from_file_with_primary_key(test_client, small_mo
     primary_key = "release_date"
     index = test_client.index("movies")
     update = await index.update_documents_from_file(small_movies_path, primary_key=primary_key)
-    await index.wait_for_pending_update(update.update_id)
+    await wait_for_task(index.http_client, update.uid)
     assert await index.get_primary_key() == primary_key
 
 
@@ -1297,8 +1187,8 @@ async def test_update_documents_from_file_auto_batch(path_type, max_payload, tes
 
     index = test_client.index("movies")
     response = await index.add_documents(documents)
-    update = await index.wait_for_pending_update(response.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, response.uid)
+    assert update.status == "succeeded"
 
     response = await index.get_documents(limit=len(documents))
     assert response[0]["title"] != "Some title"
@@ -1317,7 +1207,7 @@ async def test_update_documents_from_file_auto_batch(path_type, max_payload, tes
         updates = await index.update_documents_from_file_auto_batch(test_file)
 
     for update in updates:
-        await index.wait_for_pending_update(update.update_id)
+        await wait_for_task(index.http_client, update.uid)
 
     response = await index.get_documents()
     stats = await index.get_stats()
@@ -1341,8 +1231,8 @@ async def test_update_documents_from_file_auto_batch_csv(
 
     index = test_client.index("movies")
     response = await index.add_documents(documents)
-    update = await index.wait_for_pending_update(response.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, response.uid)
+    assert update.status == "succeeded"
 
     response = await index.get_documents(limit=len(documents))
     assert response[0]["title"] != "Some title"
@@ -1363,7 +1253,7 @@ async def test_update_documents_from_file_auto_batch_csv(
         updates = await index.update_documents_from_file_auto_batch(test_file)
 
     for update in updates:
-        await index.wait_for_pending_update(update.update_id)
+        await wait_for_task(index.http_client, update.uid)
 
     response = await index.get_documents()
     stats = await index.get_stats()
@@ -1387,8 +1277,8 @@ async def test_update_documents_from_file_auto_batch_ndjson(
 
     index = test_client.index("movies")
     response = await index.add_documents(documents)
-    update = await index.wait_for_pending_update(response.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, response.uid)
+    assert update.status == "succeeded"
 
     response = await index.get_documents(limit=len(documents))
     assert response[0]["title"] != "Some title"
@@ -1408,7 +1298,7 @@ async def test_update_documents_from_file_auto_batch_ndjson(
         updates = await index.update_documents_from_file_auto_batch(test_file)
 
     for update in updates:
-        await index.wait_for_pending_update(update.update_id)
+        await wait_for_task(index.http_client, update.uid)
 
     response = await index.get_documents()
     stats = await index.get_stats()
@@ -1427,7 +1317,7 @@ async def test_update_documents_from_file_in_batches(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
@@ -1437,8 +1327,8 @@ async def test_update_documents_from_file_in_batches(
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:
-        update_status = await index.wait_for_pending_update(update.update_id)
-        assert update_status.status == "processed"
+        update_status = await wait_for_task(index.http_client, update.uid)
+        assert update_status.status == "succeeded"
 
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
@@ -1454,7 +1344,7 @@ async def test_update_documents_from_file_in_batches_csv(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
@@ -1464,8 +1354,8 @@ async def test_update_documents_from_file_in_batches_csv(
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:
-        update_status = await index.wait_for_pending_update(update.update_id)
-        assert update_status.status == "processed"
+        update_status = await wait_for_task(index.http_client, update.uid)
+        assert update_status.status == "succeeded"
 
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
@@ -1481,7 +1371,7 @@ async def test_update_documents_from_file_in_batches_ndjson(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
@@ -1491,8 +1381,8 @@ async def test_update_documents_from_file_in_batches_ndjson(
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:
-        update_status = await index.wait_for_pending_update(update.update_id)
-        assert update_status.status == "processed"
+        update_status = await wait_for_task(index.http_client, update.uid)
+        assert update_status.status == "succeeded"
 
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
@@ -1515,15 +1405,15 @@ async def test_update_documents_raw_file_csv(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     update = await index.update_documents_from_raw_file(path, primary_key="id")
-    update = await index.wait_for_pending_update(update.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, update.uid)
+    assert update.status == "succeeded"
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
 
@@ -1537,15 +1427,15 @@ async def test_update_documents_raw_file_ndjson(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await index.wait_for_pending_update(response.update_id)
+    update = await wait_for_task(index.http_client, response.uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     update = await index.update_documents_from_raw_file(path)
-    update = await index.wait_for_pending_update(update.update_id)
-    assert update.status == "processed"
+    update = await wait_for_task(index.http_client, update.uid)
+    assert update.status == "succeeded"
     response = await index.get_documents()
     assert response[0]["title"] != "Some title"
 
@@ -1572,7 +1462,7 @@ async def test_update_document_raw_file_extension_error(test_client, tmp_path):
 async def test_delete_document(index_with_documents):
     index = await index_with_documents()
     response = await index.delete_document("500682")
-    await index.wait_for_pending_update(response.update_id)
+    await wait_for_task(index.http_client, response.uid)
     with pytest.raises(MeiliSearchApiError):
         await index.get_document("500682")
 
@@ -1582,7 +1472,7 @@ async def test_delete_documents(index_with_documents):
     to_delete = ["522681", "450465", "329996"]
     index = await index_with_documents()
     response = await index.delete_documents(to_delete)
-    await index.wait_for_pending_update(response.update_id)
+    await wait_for_task(index.http_client, response.uid)
     documents = await index.get_documents()
     ids = [x["id"] for x in documents]
     assert to_delete not in ids
@@ -1592,7 +1482,7 @@ async def test_delete_documents(index_with_documents):
 async def test_delete_all_documents(index_with_documents):
     index = await index_with_documents()
     response = await index.delete_all_documents()
-    await index.wait_for_pending_update(response.update_id)
+    await wait_for_task(index.http_client, response.uid)
     response = await index.get_documents()
     assert response is None
 

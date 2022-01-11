@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from camel_converter.pydantic_base import CamelBase
 
@@ -12,6 +12,36 @@ class ClientStats(CamelBase):
     indexes: Optional[Dict[str, IndexStats]] = None
 
 
-class Keys(CamelBase):
-    public: Optional[str]
-    private: Optional[str]
+class Key(CamelBase):
+    description: str
+    key: str
+    actions: List[str]
+    indexes: List[str]
+    expires_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+
+class KeyCreate(CamelBase):
+    description: str
+    actions: List[str]
+    indexes: List[str]
+    expires_at: Optional[datetime] = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+        }
+
+
+class KeyUpdate(CamelBase):
+    key: str
+    description: Optional[str] = None
+    actions: Optional[List[str]] = None
+    indexes: Optional[List[str]] = None
+    expires_at: Optional[datetime] = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+        }

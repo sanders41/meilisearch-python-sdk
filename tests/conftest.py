@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from meilisearch_python_async.client import Client
+from meilisearch_python_async.task import wait_for_task
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"
@@ -48,7 +49,8 @@ async def clear_indexes(test_client):
     indexes = await test_client.get_indexes()
     if indexes:
         for index in indexes:
-            await test_client.index(index.uid).delete()
+            response = await test_client.index(index.uid).delete()
+            await wait_for_task(test_client.http_client, response.uid)
 
 
 @pytest.fixture(scope="session")
@@ -97,9 +99,9 @@ def small_movies():
         yield json.loads(movie_file.read())
 
 
-@pytest.fixture
-def small_movies_csv_path(small_movies, tmp_path):
-    file_path = tmp_path / "small_movies.csv"
+@pytest.fixture(scope="session")
+def small_movies_csv_path(small_movies, tmp_path_factory):
+    file_path = tmp_path_factory.mktemp("csv") / "small_movies.csv"
     with open(file_path, "w") as f:
         field_names = list(small_movies[0].keys())
         writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL)
@@ -109,9 +111,9 @@ def small_movies_csv_path(small_movies, tmp_path):
     return file_path
 
 
-@pytest.fixture
-def small_movies_ndjson_path(small_movies, tmp_path):
-    file_path = tmp_path / "small_movies.ndjson"
+@pytest.fixture(scope="session")
+def small_movies_ndjson_path(small_movies, tmp_path_factory):
+    file_path = tmp_path_factory.mktemp("ndjson") / "small_movies.ndjson"
     nd_json = [json.dumps(x) for x in small_movies]
     with open(file_path, "w") as f:
         for line in nd_json:
@@ -140,7 +142,7 @@ async def index_with_documents(empty_index, small_movies, index_uid):
     async def index_maker(index_name=index_uid, documents=small_movies):
         index = await empty_index(index_name)
         response = await index.add_documents(documents)
-        await index.wait_for_pending_update(response.update_id)
+        await wait_for_task(index.http_client, response.uid)
         return index
 
     return index_maker

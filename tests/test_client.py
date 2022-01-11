@@ -1,14 +1,45 @@
 from asyncio import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
 
 from meilisearch_python_async.client import Client
 from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchCommunicationError
+from meilisearch_python_async.models.client import KeyCreate, KeyUpdate
 from meilisearch_python_async.models.dump import DumpInfo
 from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.version import Version
+
+
+@pytest.fixture
+@pytest.mark.asyncio
+async def test_key(test_client):
+    key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
+
+    key = await test_client.create_key(key_info)
+
+    yield key
+
+    try:
+        await test_client.delete_key(key.key)
+    except MeiliSearchApiError:
+        pass
+
+
+@pytest.fixture
+@pytest.mark.asyncio
+async def test_key_info(test_client):
+    key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
+
+    yield key_info
+
+    try:
+        keys = await test_client.get_keys()
+        key = next(x for x in keys if x.description == key_info.description)
+        await test_client.delete_key(key.key)
+    except MeiliSearchApiError:
+        pass
 
 
 async def wait_for_dump_creation(
@@ -172,12 +203,68 @@ async def test_health(test_client):
     assert health.status == "available"
 
 
+@pytest.mark.parametrize(
+    "expires_at",
+    (
+        None,
+        datetime.utcnow() + timedelta(days=2),
+    ),
+)
+@pytest.mark.asyncio
+async def test_create_key(expires_at, test_key_info, test_client):
+    if expires_at:
+        test_key_info.expires_at = expires_at
+
+    key = await test_client.create_key(test_key_info)
+
+    assert key.description == test_key_info.description
+    assert key.actions == test_key_info.actions
+    assert key.indexes == test_key_info.indexes
+
+    if expires_at:
+        assert key.expires_at.date() == expires_at.date()
+    else:
+        assert key.expires_at is None
+
+
+@pytest.mark.asyncio
+async def test_delete_key(test_key, test_client):
+    result = await test_client.delete_key(test_key.key)
+    assert result == 204
+
+    with pytest.raises(MeiliSearchApiError):
+        await test_client.get_key(test_key.key)
+
+
 @pytest.mark.asyncio
 async def test_get_keys(test_client):
     response = await test_client.get_keys()
 
-    assert response.public is not None
-    assert response.private is not None
+    assert len(response) == 2
+
+
+@pytest.mark.asyncio
+async def test_get_key(test_key, test_client):
+    key = await test_client.get_key(test_key.key)
+    assert key.description == test_key.description
+
+
+@pytest.mark.asyncio
+async def test_update_key(test_key, test_client):
+    update_key_info = KeyUpdate(
+        key=test_key.key,
+        description="updated",
+        actions=["*"],
+        indexes=["*"],
+        expires_at=datetime.utcnow() + timedelta(days=2),
+    )
+
+    key = await test_client.update_key(update_key_info)
+
+    assert key.description == update_key_info.description
+    assert key.actions == update_key_info.actions
+    assert key.indexes == update_key_info.indexes
+    assert key.expires_at.date() == update_key_info.expires_at.date()  # type: ignore
 
 
 @pytest.mark.asyncio

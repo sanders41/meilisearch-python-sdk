@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from asyncio import gather, get_running_loop, sleep
+from asyncio import gather, get_running_loop
 from csv import DictReader
 from datetime import datetime
 from functools import partial
@@ -14,17 +14,12 @@ import aiofiles
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import (
-    InvalidDocumentError,
-    MeiliSearchApiError,
-    MeiliSearchError,
-    MeiliSearchTimeoutError,
-    PayloadTooLarge,
-)
+from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchError, PayloadTooLarge
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
 from meilisearch_python_async.models.settings import MeiliSearchSettings
-from meilisearch_python_async.models.update import UpdateId, UpdateStatus
+from meilisearch_python_async.models.task import TaskId, TaskStatus
+from meilisearch_python_async.task import wait_for_task
 
 
 class Index:
@@ -61,6 +56,7 @@ class Index:
         self._documents_url = f"{self._base_url_with_uid}/documents"
         self._stats_url = f"{self._base_url_with_uid}/stats"
         self._settings_url = f"{self._base_url_with_uid}/settings"
+        self.http_client = http_client
         self._http_requests = HttpRequests(http_client)
 
     def __str__(self) -> str:
@@ -69,10 +65,10 @@ class Index:
     def __repr__(self) -> str:
         return f"{type(self).__name__}(uid={self.uid!r}, primary_key={self.primary_key!r}, created_at={self.created_at!r}, updated_at={self.updated_at!r})"
 
-    async def delete(self) -> int:
+    async def delete(self) -> TaskStatus:
         """Deletes the index.
 
-        **Returns:** The status code returned from the server. 204 means the index was successfully deleted.
+        **Returns:** The details of the task status.
 
         **Raises:**
 
@@ -92,7 +88,7 @@ class Index:
         """
         url = f"{self._base_url_with_uid}"
         response = await self._http_requests.delete(url)
-        return response.status_code
+        return TaskStatus(**response.json())
 
     async def delete_if_exists(self) -> bool:
         """Delete the index if it already exists.
@@ -113,14 +109,12 @@ class Index:
         >>>     await index.delete_if_exists()
         ```
         """
-        try:
-            await self.delete()
-        except MeiliSearchApiError as error:
-            if error.code != "index_not_found":
-                raise
-            return False
+        response = await self.delete()
+        status = await wait_for_task(self.http_client, response.uid)
+        if status.status == "succeeded":
+            return True
 
-        return True
+        return False
 
     async def update(self, primary_key: str) -> Index:
         """Update the index primary key.
@@ -148,7 +142,9 @@ class Index:
         payload = {"primaryKey": primary_key}
         url = f"{self._base_url_with_uid}"
         response = await self._http_requests.put(url, payload)
-        self.primary_key = response.json()["primaryKey"]
+        await wait_for_task(self.http_client, response.json()["uid"], timeout_in_ms=100000)
+        index_response = await self._http_requests.get(f"{url}")
+        self.primary_key = index_response.json()["primaryKey"]
         return self
 
     async def fetch_info(self) -> Index:
@@ -242,116 +238,17 @@ class Index:
             payload = {"primaryKey": primary_key, "uid": uid}
 
         url = "indexes"
-        response = await HttpRequests(http_client).post(url, payload)
-        index_dict = response.json()
+        http_request = HttpRequests(http_client)
+        response = await http_request.post(url, payload)
+        await wait_for_task(http_client, response.json()["uid"], timeout_in_ms=100000)
+        index_response = await http_request.get(f"{url}/{uid}")
+        index_dict = index_response.json()
         return cls(
             http_client=http_client,
             uid=index_dict["uid"],
             primary_key=index_dict["primaryKey"],
             created_at=index_dict["createdAt"],
             updated_at=index_dict["updatedAt"],
-        )
-
-    async def get_all_update_status(self) -> list[UpdateStatus] | None:
-        """Get all update status.
-
-        **Returns:** A list of all enqueued and processed actions of the index.
-
-        **Raises:**
-
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-
-        Usage:
-
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     update_status = await index.get_all_update_status()
-        ```
-        """
-        url = f"{self._base_url_with_uid}/updates"
-        response = await self._http_requests.get(url)
-
-        if not response.json():
-            return None
-
-        return [UpdateStatus(**x) for x in response.json()]
-
-    async def get_update_status(self, update_id: int) -> UpdateStatus:
-        """Gets an update status based on the update id.
-
-        **Args:**
-
-        * **update_id:** Identifier of the update to retrieve.
-
-        **Returns:** The details of the update status.
-
-        **Raises:**
-
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-
-        Usage:
-
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     update_status = await index.get_update_status("20201101-110357260")
-        ```
-        """
-        url = f"{self._base_url_with_uid}/updates/{update_id}"
-        response = await self._http_requests.get(url)
-
-        return UpdateStatus(**response.json())
-
-    async def wait_for_pending_update(
-        self, update_id: int, *, timeout_in_ms: int = 5000, interval_in_ms: int = 50
-    ) -> UpdateStatus:
-        """Wait until MeiliSearch processes an update, and get its status.
-
-        **Args:**
-
-        * **update_id:** Identifier of the update to retrieve.
-        * **timeout_in_ms:** Amount of time in milliseconds to wait before raising a
-            MeiliSearchTimeoutError. Defaults to 5000.
-        * **interval_in_ms:** Time interval in miliseconds to sleep between requests. Defaults to 50.
-
-        **Returns:** Details of the processed update status.
-
-        **Raises:**
-
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-            MeiliSearchTimeoutError: If the connection times out.
-
-        Usage:
-
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> >>> documents = [
-        >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
-        >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
-        >>> ]
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     response = await index.add_documents(documents)
-        >>>     await index.wait_for_pending_update(response.update_id)
-        ```
-        """
-        start_time = datetime.now()
-        elapsed_time = 0.0
-        while elapsed_time < timeout_in_ms:
-            get_update = await self.get_update_status(update_id)
-            if get_update.status in ["processed", "failed"]:
-                return get_update
-            await sleep(interval_in_ms / 1000)
-            time_delta = datetime.now() - start_time
-            elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
-        raise MeiliSearchTimeoutError(
-            f"timeout of {timeout_in_ms}ms has exceeded on process {update_id} when waiting for pending update to resolve."
         )
 
     async def get_stats(self) -> IndexStats:
@@ -518,9 +415,7 @@ class Index:
 
         return response.json()
 
-    async def add_documents(
-        self, documents: list[dict], primary_key: str | None = None
-    ) -> UpdateId:
+    async def add_documents(self, documents: list[dict], primary_key: str | None = None) -> TaskId:
         """Add documents to the index.
 
         **Args:**
@@ -555,7 +450,7 @@ class Index:
             url = f"{url}?{formatted_primary_key}"
 
         response = await self._http_requests.post(url, documents)
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def add_documents_auto_batch(
         self,
@@ -563,7 +458,7 @@ class Index:
         *,
         max_payload_size: int = 104857600,
         primary_key: str | None = None,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Automatically splits the documents into batches when adding.
 
         Each batch tries to fill the max_payload_size
@@ -596,16 +491,16 @@ class Index:
         >>>     await index.add_documents_auto_batch(documents)
         ```
         """
-        update_ids = []
+        task_ids = []
         async for batch in Index._generate_auto_batches(documents, max_payload_size):
-            update_id = await self.add_documents(batch, primary_key)
-            update_ids.append(update_id)
+            task_id = await self.add_documents(batch, primary_key)
+            task_ids.append(task_id)
 
-        return update_ids
+        return task_ids
 
     async def add_documents_in_batches(
         self, documents: list[dict], *, batch_size: int = 1000, primary_key: str | None = None
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
         **Args:**
@@ -636,13 +531,13 @@ class Index:
         >>>     await index.add_documents_in_batches(documents)
         ```
         """
-        update_ids: list[UpdateId] = []
+        task_ids: list[TaskId] = []
 
         async for document_batch in Index._batch(documents, batch_size):
-            update_id = await self.add_documents(document_batch, primary_key)
-            update_ids.append(update_id)
+            task_id = await self.add_documents(document_batch, primary_key)
+            task_ids.append(task_id)
 
-        return update_ids
+        return task_ids
 
     async def add_documents_from_directory(
         self,
@@ -651,7 +546,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Load all json files from a directory and add the documents to the index.
 
         **Args:**
@@ -731,7 +626,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Load all json files from a directory and add the documents to the index.
 
         Documents are automatically split into batches as large as possible based on the max payload
@@ -789,7 +684,7 @@ class Index:
                 combined, max_payload_size=max_payload_size, primary_key=primary_key
             )
 
-        responses: list[UpdateId] = []
+        responses: list[TaskId] = []
 
         add_documents = []
         for path in directory.iterdir():
@@ -807,8 +702,8 @@ class Index:
             # Send the first document on its own before starting the gather. Otherwise MeiliSearch
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await add_documents.pop()
-            responses = await gather(*add_documents)
-            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
+            responses_gather = await gather(*add_documents)
+            responses = [*first_response, *[x for y in responses_gather for x in y]]
         else:
             responses = await add_documents[0]
 
@@ -822,7 +717,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Load all json files from a directory and add the documents to the index in batches.
 
         **Args:**
@@ -878,7 +773,7 @@ class Index:
                 combined, batch_size=batch_size, primary_key=primary_key
             )
 
-        responses: list[UpdateId] = []
+        responses: list[TaskId] = []
 
         add_documents = []
         for path in directory.iterdir():
@@ -896,8 +791,8 @@ class Index:
             # Send the first document on its own before starting the gather. Otherwise MeiliSearch
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await add_documents.pop()
-            responses = await gather(*add_documents)
-            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
+            responses_gather = await gather(*add_documents)
+            responses = [*first_response, *[x for y in responses_gather for x in y]]
         else:
             responses = await add_documents[0]
 
@@ -905,7 +800,7 @@ class Index:
 
     async def add_documents_from_file(
         self, file_path: Path | str, primary_key: str | None = None
-    ) -> UpdateId:
+    ) -> TaskId:
         """Add documents to the index from a json file.
 
         **Args:**
@@ -944,7 +839,7 @@ class Index:
         *,
         max_payload_size: int = 104857600,
         primary_key: str | None = None,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Automatically splits the documents into batches when adding from a json file.
 
         Each batch tries to fill the max_payload_size
@@ -979,16 +874,16 @@ class Index:
         """
         documents = await Index._load_documents_from_file(file_path)
 
-        update_ids = []
+        task_ids = []
         async for batch in Index._generate_auto_batches(documents, max_payload_size):
-            update_id = await self.add_documents(batch, primary_key)
-            update_ids.append(update_id)
+            task_id = await self.add_documents(batch, primary_key)
+            task_ids.append(task_id)
 
-        return update_ids
+        return task_ids
 
     async def add_documents_from_file_in_batches(
         self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
         **Args:**
@@ -1027,7 +922,7 @@ class Index:
 
     async def add_documents_from_raw_file(
         self, file_path: Path | str, primary_key: str | None = None
-    ) -> UpdateId:
+    ) -> TaskId:
         """Directly send csv or ndjson files to MeiliSearch without pre-processing.
 
         The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
@@ -1078,11 +973,11 @@ class Index:
 
         response = await self._http_requests.post(url, body=data, content_type=content_type)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def update_documents(
         self, documents: list[dict], primary_key: str | None = None
-    ) -> UpdateId:
+    ) -> TaskId:
         """Update documents in the index.
 
         **Args:**
@@ -1117,7 +1012,7 @@ class Index:
             url = f"{url}?{formatted_primary_key}"
 
         response = await self._http_requests.put(url, documents)
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def update_documents_auto_batch(
         self,
@@ -1125,7 +1020,7 @@ class Index:
         *,
         max_payload_size: int = 104857600,
         primary_key: str | None = None,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Automatically splits the documents into batches when updating.
 
         Each batch tries to fill the max_payload_size
@@ -1158,16 +1053,16 @@ class Index:
         >>>     await index.update_documents_auto_batch(documents)
         ```
         """
-        update_ids = []
+        task_ids = []
         async for batch in Index._generate_auto_batches(documents, max_payload_size):
-            update_id = await self.update_documents(batch, primary_key)
-            update_ids.append(update_id)
+            task_id = await self.update_documents(batch, primary_key)
+            task_ids.append(task_id)
 
-        return update_ids
+        return task_ids
 
     async def update_documents_in_batches(
         self, documents: list[dict], *, batch_size: int = 1000, primary_key: str | None = None
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Update documents in batches to reduce RAM usage with indexing.
 
         Each batch tries to fill the max_payload_size
@@ -1200,13 +1095,13 @@ class Index:
         >>>     await index.update_documents_in_batches(documents)
         ```
         """
-        update_ids: list[UpdateId] = []
+        task_ids: list[TaskId] = []
 
         async for document_batch in Index._batch(documents, batch_size):
-            update_id = await self.update_documents(document_batch, primary_key)
-            update_ids.append(update_id)
+            task_id = await self.update_documents(document_batch, primary_key)
+            task_ids.append(task_id)
 
-        return update_ids
+        return task_ids
 
     async def update_documents_from_directory(
         self,
@@ -1215,7 +1110,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Load all json files from a directory and update the documents.
 
         **Args:**
@@ -1295,7 +1190,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Load all json files from a directory and update the documents.
 
         Documents are automatically split into batches as large as possible based on the max payload
@@ -1384,7 +1279,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Load all json files from a directory and update the documents.
 
         **Args:**
@@ -1440,7 +1335,7 @@ class Index:
                 combined, batch_size=batch_size, primary_key=primary_key
             )
 
-        responses: list[UpdateId] = []
+        responses: list[TaskId] = []
 
         update_documents = []
         for path in directory.iterdir():
@@ -1458,8 +1353,8 @@ class Index:
             # Send the first document on its own before starting the gather. Otherwise MeiliSearch
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await update_documents.pop()
-            responses = await gather(*update_documents)
-            responses = [*first_response, *[x for y in responses for x in y]]  # type: ignore
+            responses_gather = await gather(*update_documents)
+            responses = [*first_response, *[x for y in responses_gather for x in y]]
         else:
             responses = await update_documents[0]
 
@@ -1467,7 +1362,7 @@ class Index:
 
     async def update_documents_from_file(
         self, file_path: Path | str, primary_key: str | None = None
-    ) -> UpdateId:
+    ) -> TaskId:
         """Add documents in the index from a json file.
 
         **Args:**
@@ -1504,7 +1399,7 @@ class Index:
         *,
         max_payload_size: int = 104857600,
         primary_key: str | None = None,
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Automatically splits the documents into batches when updating from a json file.
 
         Each batch tries to fill the max_payload_size
@@ -1537,16 +1432,16 @@ class Index:
         """
         documents = await Index._load_documents_from_file(file_path)
 
-        update_ids = []
+        task_ids = []
         async for batch in Index._generate_auto_batches(documents, max_payload_size):
-            update_id = await self.update_documents(batch, primary_key)
-            update_ids.append(update_id)
+            task_id = await self.update_documents(batch, primary_key)
+            task_ids.append(task_id)
 
-        return update_ids
+        return task_ids
 
     async def update_documents_from_file_in_batches(
         self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
-    ) -> list[UpdateId]:
+    ) -> list[TaskId]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
         **Args:**
@@ -1583,7 +1478,7 @@ class Index:
 
     async def update_documents_from_raw_file(
         self, file_path: Path | str, primary_key: str | None = None
-    ) -> UpdateId:
+    ) -> TaskId:
         """Directly send csv or ndjson files to MeiliSearch without pre-processing.
 
         The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
@@ -1634,9 +1529,9 @@ class Index:
 
         response = await self._http_requests.put(url, body=data, content_type=content_type)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def delete_document(self, document_id: str) -> UpdateId:
+    async def delete_document(self, document_id: str) -> TaskId:
         """Delete one document from the index.
 
         **Args:**
@@ -1662,9 +1557,9 @@ class Index:
         url = f"{self._documents_url}/{document_id}"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def delete_documents(self, ids: list[str]) -> UpdateId:
+    async def delete_documents(self, ids: list[str]) -> TaskId:
         """Delete multiple documents from the index.
 
         **Args:**
@@ -1690,9 +1585,9 @@ class Index:
         url = f"{self._documents_url}/delete-batch"
         response = await self._http_requests.post(url, ids)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def delete_all_documents(self) -> UpdateId:
+    async def delete_all_documents(self) -> TaskId:
         """Delete all documents from the index.
 
         **Returns:** Update id to track the action.
@@ -1714,7 +1609,7 @@ class Index:
         url = f"{self._documents_url}"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_settings(self) -> MeiliSearchSettings:
         """Get settings of the index.
@@ -1740,7 +1635,7 @@ class Index:
 
         return MeiliSearchSettings(**response.json())
 
-    async def update_settings(self, body: MeiliSearchSettings) -> UpdateId:
+    async def update_settings(self, body: MeiliSearchSettings) -> TaskId:
         """Update settings of the index.
 
         **Args:**
@@ -1788,9 +1683,9 @@ class Index:
         url = f"{self._settings_url}"
         response = await self._http_requests.post(url, body_dict)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def reset_settings(self) -> UpdateId:
+    async def reset_settings(self) -> TaskId:
         """Reset settings of the index to default values.
 
         **Returns:** Update id to track the action.
@@ -1812,7 +1707,7 @@ class Index:
         url = f"{self._settings_url}"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_ranking_rules(self) -> list[str]:
         """Get ranking rules of the index.
@@ -1838,7 +1733,7 @@ class Index:
 
         return response.json()
 
-    async def update_ranking_rules(self, ranking_rules: list[str]) -> UpdateId:
+    async def update_ranking_rules(self, ranking_rules: list[str]) -> TaskId:
         """Update ranking rules of the index.
 
         **Args:**
@@ -1874,9 +1769,9 @@ class Index:
         url = f"{self._settings_url}/ranking-rules"
         respose = await self._http_requests.post(url, ranking_rules)
 
-        return UpdateId(**respose.json())
+        return TaskId(**respose.json())
 
-    async def reset_ranking_rules(self) -> UpdateId:
+    async def reset_ranking_rules(self) -> TaskId:
         """Reset ranking rules of the index to default values.
 
         **Returns:** Update id to track the action.
@@ -1898,7 +1793,7 @@ class Index:
         url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_distinct_attribute(self) -> str | None:
         """Get distinct attribute of the index.
@@ -1928,7 +1823,7 @@ class Index:
 
         return response.json()
 
-    async def update_distinct_attribute(self, body: str) -> UpdateId:
+    async def update_distinct_attribute(self, body: str) -> TaskId:
         """Update distinct attribute of the index.
 
         **Args:**
@@ -1954,9 +1849,9 @@ class Index:
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.post(url, body)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def reset_distinct_attribute(self) -> UpdateId:
+    async def reset_distinct_attribute(self) -> TaskId:
         """Reset distinct attribute of the index to default values.
 
         **Returns:** Update id to track the action.
@@ -1978,7 +1873,7 @@ class Index:
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_searchable_attributes(self) -> list[str]:
         """Get searchable attributes of the index.
@@ -2003,7 +1898,7 @@ class Index:
         response = await self._http_requests.get(url)
         return response.json()
 
-    async def update_searchable_attributes(self, body: list[str]) -> UpdateId:
+    async def update_searchable_attributes(self, body: list[str]) -> TaskId:
         """Update searchable attributes of the index.
 
         **Args:**
@@ -2029,9 +1924,9 @@ class Index:
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.post(url, body)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def reset_searchable_attributes(self) -> UpdateId:
+    async def reset_searchable_attributes(self) -> TaskId:
         """Reset searchable attributes of the index to default values.
 
         **Args:**
@@ -2057,7 +1952,7 @@ class Index:
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_displayed_attributes(self) -> list[str]:
         """Get displayed attributes of the index.
@@ -2082,7 +1977,7 @@ class Index:
         response = await self._http_requests.get(url)
         return response.json()
 
-    async def update_displayed_attributes(self, body: list[str]) -> UpdateId:
+    async def update_displayed_attributes(self, body: list[str]) -> TaskId:
         """Update displayed attributes of the index.
 
         **Args:**
@@ -2110,9 +2005,9 @@ class Index:
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.post(url, body)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def reset_displayed_attributes(self) -> UpdateId:
+    async def reset_displayed_attributes(self) -> TaskId:
         """Reset displayed attributes of the index to default values.
 
         **Returns:** Update id to track the action.
@@ -2134,7 +2029,7 @@ class Index:
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_stop_words(self) -> list[str] | None:
         """Get stop words of the index.
@@ -2163,7 +2058,7 @@ class Index:
 
         return response.json()
 
-    async def update_stop_words(self, body: list[str]) -> UpdateId:
+    async def update_stop_words(self, body: list[str]) -> TaskId:
         """Update stop words of the index.
 
         **Args:**
@@ -2189,9 +2084,9 @@ class Index:
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.post(url, body)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def reset_stop_words(self) -> UpdateId:
+    async def reset_stop_words(self) -> TaskId:
         """Reset stop words of the index to default values.
 
         **Returns:** Update id to track the action.
@@ -2213,7 +2108,7 @@ class Index:
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_synonyms(self) -> dict[str, list[str]] | None:
         """Get synonyms of the index.
@@ -2242,7 +2137,7 @@ class Index:
 
         return response.json()
 
-    async def update_synonyms(self, body: dict[str, list[str]]) -> UpdateId:
+    async def update_synonyms(self, body: dict[str, list[str]]) -> TaskId:
         """Update synonyms of the index.
 
         **Args:**
@@ -2270,9 +2165,9 @@ class Index:
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.post(url, body)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def reset_synonyms(self) -> UpdateId:
+    async def reset_synonyms(self) -> TaskId:
         """Reset synonyms of the index to default values.
 
         **Returns:** Update id to track the action.
@@ -2294,7 +2189,7 @@ class Index:
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_filterable_attributes(self) -> list[str] | None:
         """Get filterable attributes of the index.
@@ -2323,7 +2218,7 @@ class Index:
 
         return response.json()
 
-    async def update_filterable_attributes(self, body: list[str]) -> UpdateId:
+    async def update_filterable_attributes(self, body: list[str]) -> TaskId:
         """Update filterable attributes of the index.
 
         **Args:**
@@ -2349,9 +2244,9 @@ class Index:
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.post(url, body)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def reset_filterable_attributes(self) -> UpdateId:
+    async def reset_filterable_attributes(self) -> TaskId:
         """Reset filterable attributes of the index to default values.
 
         **Returns:** Update id to track the action.
@@ -2373,7 +2268,7 @@ class Index:
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     async def get_sortable_attributes(self) -> list[str]:
         """Get sortable attributes of the Index.
@@ -2403,7 +2298,7 @@ class Index:
 
         return response.json()
 
-    async def update_sortable_attributes(self, sortable_attributes: list[str]) -> UpdateId:
+    async def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskId:
         """Get sortable attributes of the Index.
 
         **Returns:** List containing the sortable attributes of the Index.
@@ -2425,9 +2320,9 @@ class Index:
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.post(url, sortable_attributes)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
-    async def reset_sortable_attributes(self) -> UpdateId:
+    async def reset_sortable_attributes(self) -> TaskId:
         """Reset sortable attributes of the index to default values.
 
         **Returns:** Update id to track the action.
@@ -2449,7 +2344,7 @@ class Index:
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.delete(url)
 
-        return UpdateId(**response.json())
+        return TaskId(**response.json())
 
     @staticmethod
     async def _batch(documents: list[dict], batch_size: int) -> AsyncGenerator[list[dict], None]:
