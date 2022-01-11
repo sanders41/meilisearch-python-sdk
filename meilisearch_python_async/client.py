@@ -373,7 +373,7 @@ class Client:
         ```
         """
         response = await self._http_requests.get("keys")
-        keys = [Key(**x) for x in response.json()]
+        keys = [Key(**x) for x in response.json()["results"]]
 
         return keys
 
