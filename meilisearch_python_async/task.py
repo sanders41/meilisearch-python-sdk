@@ -15,8 +15,8 @@ async def get_tasks(http_client: AsyncClient, index_id: str | None = None) -> li
 
     **Args:**
 
-    * **http_client** An AsyncClient instance.
-    * **index_id** The id of the index for which to get the tasks. If provided this will get the
+    * **http_client:** An AsyncClient instance.
+    * **index_id:** The id of the index for which to get the tasks. If provided this will get the
         tasks only for the specified index, if not all tasks will be returned. Default = None
 
     **Returns:** A list of all tasks.
@@ -25,7 +25,7 @@ async def get_tasks(http_client: AsyncClient, index_id: str | None = None) -> li
 
     * **MeilisearchCommunicationError:** If there was an error communicating with the server.
     * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-        MeiliSearchTimeoutError: If the connection times out.
+    * **MeiliSearchTimeoutError:** If the connection times out.
 
     Usage:
 
@@ -49,7 +49,7 @@ async def get_task(http_client: AsyncClient, task_id: int) -> TaskStatus:
 
     **Args:**
 
-    * **http_client** An AsyncClient instance.
+    * **http_client:** An AsyncClient instance.
     * **task_id:** Identifier of the task to retrieve.
 
     **Returns:** A list of all tasks.
@@ -58,7 +58,7 @@ async def get_task(http_client: AsyncClient, task_id: int) -> TaskStatus:
 
     * **MeilisearchCommunicationError:** If there was an error communicating with the server.
     * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-        MeiliSearchTimeoutError: If the connection times out.
+    * **MeiliSearchTimeoutError:** If the connection times out.
 
     Usage:
 
@@ -82,7 +82,7 @@ async def wait_for_task(
 
     **Args:**
 
-    * **http_client** An AsyncClient instance.
+    * **http_client:** An AsyncClient instance.
     * **task_id:** Identifier of the task to retrieve.
     * **timeout_in_ms:** Amount of time in milliseconds to wait before raising a
         MeiliSearchTimeoutError. Defaults to 5000.
@@ -94,7 +94,7 @@ async def wait_for_task(
 
     * **MeilisearchCommunicationError:** If there was an error communicating with the server.
     * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-        MeiliSearchTimeoutError: If the connection times out.
+    * **MeiliSearchTimeoutError:** If the connection times out.
 
     Usage:
 
