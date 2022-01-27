@@ -734,7 +734,6 @@ async def test_get_documents_offset_optional_params(index_with_documents):
     response_offset_limit = await index.get_documents(
         limit=3, offset=1, attributes_to_retrieve=["title", "overview"]
     )
-    print(response_offset_limit)
     assert len(response_offset_limit) == 3
     assert response_offset_limit[0]["title"] == response[1]["title"]
     assert response_offset_limit[0]["overview"] == response[1]["overview"]
