@@ -371,7 +371,7 @@ class Index:
         return response.json()
 
     async def get_documents(
-        self, *, offset: int = 0, limit: int = 20, attributes_to_retrieve: str | None = None
+        self, *, offset: int = 0, limit: int = 20, attributes_to_retrieve: list[str] | None = None
     ) -> list[dict[str, Any]] | None:
         """Get a batch documents from the index.
 
@@ -405,7 +405,7 @@ class Index:
         }
 
         if attributes_to_retrieve:
-            parameters["attributesToRetrieve"] = attributes_to_retrieve
+            parameters["attributesToRetrieve"] = ",".join(attributes_to_retrieve)
 
         url = f"{self._documents_url}?{urlencode(parameters)}"
         response = await self._http_requests.get(url)
