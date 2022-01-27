@@ -363,7 +363,7 @@ class Index:
         >>> from meilisearch_async_client import Client
         >>> async with Client("http://localhost.com", "masterKey") as client:
         >>>     index = client.index("movies")
-        >>>     document = await index.get_documents("1234")
+        >>>     document = await index.get_document("1234")
         ```
         """
         url = f"{self._documents_url}/{document_id}"
