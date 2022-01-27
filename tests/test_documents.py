@@ -732,10 +732,11 @@ async def test_get_documents_offset_optional_params(index_with_documents):
     response = await index.get_documents()
     assert len(response) == 20
     response_offset_limit = await index.get_documents(
-        limit=3, offset=1, attributes_to_retrieve="title"
+        limit=3, offset=1, attributes_to_retrieve=["title", "overview"]
     )
     assert len(response_offset_limit) == 3
     assert response_offset_limit[0]["title"] == response[1]["title"]
+    assert response_offset_limit[0]["overview"] == response[1]["overview"]
 
 
 @pytest.mark.asyncio
