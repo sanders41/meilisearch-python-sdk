@@ -1,5 +1,5 @@
-site_name: MeiliSearch Python Async
-site_description: A Python async client for the MeiliSearch API
+site_name: Meilisearch Python Async
+site_description: A Python async client for the Meilisearch API
 site_url: https://meilisearch-python-async.paulsanders.dev
 
 theme:
@@ -8,21 +8,21 @@ theme:
   icon:
     repo: fontawesome/brands/github
   palette:
-  - scheme: slate
-    primary: green
-    accent: blue
-    toggle:
-      icon: material/lightbulb-outline
-      name: Switch to dark mode
-  - scheme: default
-    primary: green
-    accent: blue
-    toggle:
-      icon: material/lightbulb
-      name: Switch to light mode
+    - scheme: slate
+      primary: green
+      accent: blue
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
+    - scheme: default
+      primary: green
+      accent: blue
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
   features:
-  - search.suggest
-  - search.highlight
+    - search.suggest
+    - search.highlight
 
 repo_name: sanders41/meilisearch-python-async
 repo_url: https://github.com/sanders41/meilisearch-python-async

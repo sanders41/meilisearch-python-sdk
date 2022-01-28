@@ -14,13 +14,13 @@ Please include:
 1. A short, self-contained Python snippet reproducing the problem. You can format the code by using
 [GitHub markdown](https://docs.github.com/en/free-pro-team@latest/github/writing-on-github). For example:
 
-    ```py
-    from meilisearch_python_async import Client
+  ```py
+  from meilisearch_python_async import Client
 
-    async with Client(BASE_URL, MASTER_KEY) as client:
-        client.index("movies")
-        ...
-    ```
+  async with Client(BASE_URL, MASTER_KEY) as client:
+      client.index("movies")
+      ...
+  ```
 
 2. Explain what is currently happening and what you expect instead.
 
@@ -143,7 +143,7 @@ You can view the current coverage level in the codecov badge on the
 [main github page](https://github.com/sanders41/meilisearch-python-async). You can run tests and see the
 code coverage.
 
-Before running the tests start a Docker container running MeiliSearch.
+Before running the tests start a Docker container running Meilisearch.
 
 ```sh
 docker pull getmeili/meilisearch:latest

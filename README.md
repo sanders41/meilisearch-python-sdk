@@ -1,4 +1,4 @@
-# MeiliSearch Python Async
+# Meilisearch Python Async
 
 [![Tests Status](https://github.com/sanders41/meilisearch-python-async/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/meilisearch-python-async/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/meilisearch-python-async/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/meilisearch-python-async/main)
@@ -6,7 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/meilisearch-python-async.svg)](https://badge.fury.io/py/meilisearch-python-async)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/meilisearch-python-async?color=5cc141)](https://github.com/sanders41/meilisearch-python-async)
 
-Meilisearch Python Async is a Python async client for the [MeiliSearch](https://github.com/meilisearch/MeiliSearch) API. MeiliSearch also has an official [Python client](https://github.com/meilisearch/meilisearch-python).
+Meilisearch Python Async is a Python async client for the [Meilisearch](https://github.com/meilisearch/meilisearch) API. Meilisearch also has an official [Python client](https://github.com/meilisearch/meilisearch-python).
 
 Which of the two clients to use comes down to your particular use case. The purpose for this async client is to allow for non-blocking calls when working in async frameworks such as [FastAPI](https://fastapi.tiangolo.com/), or if your own code base you are working in is async. If this does not match your use case then the official client will be a better choice.
 
@@ -18,9 +18,9 @@ Using a virtual environmnet is recommended for installing this package. Once the
 pip install meilisearch-python-async
 ```
 
-## Run MeiliSearch
+## Run Meilisearch
 
-There are several ways to [run MeiliSearch](https://docs.meilisearch.com/reference/features/installation.html#download-and-launch).
+There are several ways to [run Meilisearch](https://docs.meilisearch.com/reference/features/installation.html#download-and-launch).
 Pick the one that works best for your use case and then start the server.
 
 As as example to use Docker:
@@ -34,7 +34,7 @@ docker run -it --rm -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --mas
 
 ### Add Documents
 
-* Note: `client.index("books") creates an instance of an Index object but does not make a network call to send the data yet so it does not need to be awaited.
+- Note: `client.index("books") creates an instance of an Index object but does not make a network call to send the data yet so it does not need to be awaited.
 
 ```py
 from meilisearch_python_async import Client
@@ -155,9 +155,9 @@ SearchResults(
 
 See our [docs](https://meilisearch-python-async.paulsanders.dev) for the full documentation.
 
-## Compatibility with MeiliSearch
+## Compatibility with Meilisearch
 
-This package only guarantees the compatibility with [version v0.25 of MeiliSearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.25.0).
+This package only guarantees the compatibility with [version v0.25 of Meilisearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.25.0).
 
 ## Contributing
 
