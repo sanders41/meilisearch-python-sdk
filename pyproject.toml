@@ -75,6 +75,7 @@ src_paths = ["meilisearch_python_async", "tests"]
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "--cov=meilisearch_python_async"
+asyncio_mode = "auto"
 
 [tool.mypy]
 check_untyped_defs = true
