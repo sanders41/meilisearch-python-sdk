@@ -25,7 +25,7 @@ httpx = ">=0.17,<0.23"
 pydantic = "^1.8"
 aiofiles = ">=0.7,<0.9"
 camel-converter = "^1.0.0"
-mkdocs-material = "^8.1.9"
+mkdocs-material = "^8.1.10"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1"
