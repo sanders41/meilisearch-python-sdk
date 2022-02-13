@@ -58,18 +58,26 @@ async def wait_for_dump_creation(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("primary_key", ["pk_test", None])
-async def test_create_index(test_client, primary_key):
+async def test_create_index_with_primary_key(test_client):
     uid = "test"
+    primary_key = "pk_test"
     index = await test_client.create_index(uid=uid, primary_key=primary_key)
 
     assert index.uid == uid
 
-    if primary_key:
-        assert index.primary_key == primary_key
-    else:
-        assert index.primary_key is None
+    assert index.primary_key == primary_key
+    assert isinstance(index.created_at, datetime)
+    assert isinstance(index.updated_at, datetime)
 
+
+@pytest.mark.asyncio
+async def test_create_index_no_primary_key(test_client):
+    uid = "test"
+    index = await test_client.create_index(uid=uid)
+
+    assert index.uid == uid
+
+    assert index.primary_key is None
     assert isinstance(index.created_at, datetime)
     assert isinstance(index.updated_at, datetime)
 
@@ -117,16 +125,22 @@ def test_index(test_client):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("uid, primary_key", [("test1", "pk_test"), ("test2", None)])
-async def test_get_or_create_index(test_client, uid, primary_key):
+async def test_get_or_create_index_with_primary_key(test_client):
+    primary_key = "pk_test"
+    uid = "test1"
     response = await test_client.get_or_create_index(uid, primary_key)
 
     assert response.uid == uid
+    assert response.primary_key == primary_key
 
-    if primary_key:
-        assert response.primary_key == primary_key
-    else:
-        assert response.primary_key is None
+
+@pytest.mark.asyncio
+async def test_get_or_create_index_no_primary_key(test_client):
+    uid = "test"
+    response = await test_client.get_or_create_index(uid)
+
+    assert response.uid == uid
+    assert response.primary_key is None
 
 
 @pytest.mark.asyncio
@@ -203,28 +217,26 @@ async def test_health(test_client):
     assert health.status == "available"
 
 
-@pytest.mark.parametrize(
-    "expires_at",
-    (
-        None,
-        datetime.utcnow() + timedelta(days=2),
-    ),
-)
 @pytest.mark.asyncio
-async def test_create_key(expires_at, test_key_info, test_client):
-    if expires_at:
-        test_key_info.expires_at = expires_at
-
+async def test_create_key(test_key_info, test_client):
+    expires_at = datetime.utcnow() + timedelta(days=2)
+    test_key_info.expires_at = expires_at
     key = await test_client.create_key(test_key_info)
 
     assert key.description == test_key_info.description
     assert key.actions == test_key_info.actions
     assert key.indexes == test_key_info.indexes
+    assert key.expires_at.date() == expires_at.date()
 
-    if expires_at:
-        assert key.expires_at.date() == expires_at.date()
-    else:
-        assert key.expires_at is None
+
+@pytest.mark.asyncio
+async def test_create_key_no_expires(test_key_info, test_client):
+    key = await test_client.create_key(test_key_info)
+
+    assert key.description == test_key_info.description
+    assert key.actions == test_key_info.actions
+    assert key.indexes == test_key_info.indexes
+    assert key.expires_at is None
 
 
 @pytest.mark.asyncio

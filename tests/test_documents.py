@@ -85,7 +85,7 @@ async def test_add_documents(primary_key, expected_primary_key, empty_index, sma
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("max_payload", [None, 3500, 2500])
+@pytest.mark.parametrize("max_payload", [3500, 2500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
 )
@@ -95,12 +95,9 @@ async def test_add_documents_auto_batch(
     movies = generate_test_movies()
 
     index = await empty_index()
-    if max_payload:
-        response = await index.add_documents_auto_batch(
-            movies, max_payload_size=max_payload, primary_key=primary_key
-        )
-    else:
-        response = await index.add_documents_auto_batch(movies, primary_key=primary_key)
+    response = await index.add_documents_auto_batch(
+        movies, max_payload_size=max_payload, primary_key=primary_key
+    )
 
     for r in response:
         update = await wait_for_task(index.http_client, r.uid)
@@ -110,6 +107,23 @@ async def test_add_documents_auto_batch(
 
     assert stats.number_of_documents == len(movies)
     assert await index.get_primary_key() == expected_primary_key
+
+
+@pytest.mark.asyncio
+async def test_add_documents_auto_batch_no_max_payload(empty_index):
+    movies = generate_test_movies()
+
+    index = await empty_index()
+    response = await index.add_documents_auto_batch(movies)
+
+    for r in response:
+        update = await wait_for_task(index.http_client, r.uid)
+        assert update.status == "succeeded"
+
+    stats = await index.get_stats()
+
+    assert stats.number_of_documents == len(movies)
+    assert await index.get_primary_key() == "id"
 
 
 @pytest.mark.asyncio
@@ -170,7 +184,7 @@ async def test_add_documents_from_directory(
 @pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
-async def test_add_documents_from_directory_csv(
+async def test_add_documents_from_directory_csv_path(
     path_type, combine_documents, test_client, tmp_path
 ):
     add_csv_file(tmp_path / "test1.csv", 50, 0)
