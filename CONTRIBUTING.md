@@ -147,7 +147,7 @@ Before running the tests start a Docker container running Meilisearch.
 
 ```sh
 docker pull getmeili/meilisearch:latest
-docker run -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --master-key=masterKey --no-analytics=true
+docker run -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --master-key=masterKey --no-analytics
 ```
 
 Now with the container running run the test suite
