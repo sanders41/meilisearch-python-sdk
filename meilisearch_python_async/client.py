@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import json
 from types import TracebackType
-from typing import Type
+from typing import Any, Type
 
+import jwt
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import MeiliSearchApiError
+from meilisearch_python_async.errors import (
+    InvalidKeyError,
+    InvalidRestriction,
+    KeyNotFoundError,
+    MeiliSearchApiError,
+)
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeyUpdate
 from meilisearch_python_async.models.dump import DumpInfo
@@ -131,6 +137,50 @@ class Client:
         if status.status == "succeeded":
             return True
         return False
+
+    async def generate_token(self, restrictions: dict[str, Any], key: Key | None = None) -> str:
+        """Generates a tenant token to use for searching.
+
+        **Args:**
+
+        * **restrictions:** The restrictions to use for the token. If "indexes" is included it must
+              be equal to or more restrictive than the key used to generate the token."
+        * **key:** The API key to use to generate the token. Note that only API keys with actions of
+              can be used.
+
+        **Returns:** A JWT token
+
+        **Raises:**
+
+        * **InvalidKeyError:** If the key specified has actions other than search.
+        * **InvalidRestriction:** If the restrictions are less strict than the permissions allowed
+              in the API key.
+        * **KeyNotFoundError:** If no API search key is found.
+        """
+        if not key:
+            keys = await self.get_keys()
+            jwt_key = None
+            for k in keys:
+                if "Default Search API Key" in k.description:
+                    jwt_key = k
+                    break
+        else:
+            if key.actions != ["search"]:
+                raise InvalidKeyError("Only search keys can be used for tokens")
+
+            jwt_key = key
+
+        if not jwt_key:
+            raise KeyNotFoundError("No API search key found")
+
+        if restrictions.get("indexes"):
+            Client._validate_restrictions(restrictions, jwt_key)
+        else:
+            restrictions["indexes"] = jwt_key.indexes
+
+        restrictions["algorithms"] = ["HS256"]
+
+        return jwt.encode(restrictions, jwt_key.key, algorithm="HS256")
 
     async def get_indexes(self) -> list[Index] | None:
         """Get all indexes.
@@ -535,3 +585,12 @@ class Client:
         """
         response = await self._http_requests.get("health")
         return Health(**response.json())
+
+    @staticmethod
+    def _validate_restrictions(restrictions: dict[str, Any], key: Key) -> None:
+        if restrictions.get("indexes"):
+            for index in restrictions["indexes"]:
+                if index not in key.indexes:
+                    raise InvalidRestriction(
+                        "Invalid index. The token cannot be less restrictive than the API key"
+                    )

@@ -1,15 +1,43 @@
 from asyncio import sleep
 from datetime import datetime, timedelta
 
+import jwt
 import pytest
 from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
 
 from meilisearch_python_async.client import Client
-from meilisearch_python_async.errors import MeiliSearchApiError, MeiliSearchCommunicationError
+from meilisearch_python_async.errors import (
+    InvalidKeyError,
+    InvalidRestriction,
+    KeyNotFoundError,
+    MeiliSearchApiError,
+    MeiliSearchCommunicationError,
+)
 from meilisearch_python_async.models.client import KeyCreate, KeyUpdate
 from meilisearch_python_async.models.dump import DumpInfo
 from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.version import Version
+
+
+@pytest.fixture
+async def default_search_key(test_client):
+    keys = await test_client.get_keys()
+    for key in keys:
+        if "Default Search API Key" in key.description:
+            return key
+
+
+@pytest.fixture
+async def remove_default_search_key(default_search_key, test_client):
+    await test_client.delete_key(default_search_key.key)
+    yield
+    key = KeyCreate(
+        description=default_search_key.description,
+        actions=default_search_key.actions,
+        indexes=default_search_key.indexes,
+        expires_at=default_search_key.expires_at,
+    )
+    await test_client.create_key(key)
 
 
 @pytest.fixture
@@ -80,6 +108,41 @@ async def test_create_index_no_primary_key(test_client):
     assert index.primary_key is None
     assert isinstance(index.created_at, datetime)
     assert isinstance(index.updated_at, datetime)
+
+
+async def test_generate_token_custom_key(test_client, test_key):
+    restrictions = {"test": "value"}
+    token = await test_client.generate_token(restrictions, test_key)
+    assert restrictions == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
+
+
+async def test_generate_token_default_key(test_client, default_search_key):
+    restrictions = {"test": "value"}
+    token = await test_client.generate_token(restrictions)
+    assert restrictions == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
+
+
+async def test_generate_token_invalid_key(test_key_info, test_client):
+    test_key_info.actions = ["*"]
+    key = await test_client.create_key(test_key_info)
+
+    with pytest.raises(InvalidKeyError):
+        await test_client.generate_token({"test": "value"}, key=key)
+
+
+async def test_generate_token_invalid_restriction(test_key_info, test_client):
+    test_key_info.indexes = ["good"]
+    key = await test_client.create_key(test_key_info)
+    restrictions = {"indexes": ["bad"]}
+
+    with pytest.raises(InvalidRestriction):
+        await test_client.generate_token(restrictions, key)
+
+
+@pytest.mark.usefixtures("remove_default_search_key")
+async def test_generate_token_no_default_search_key(test_client):
+    with pytest.raises(KeyNotFoundError):
+        await test_client.generate_token({"test": "value"})
 
 
 @pytest.mark.asyncio

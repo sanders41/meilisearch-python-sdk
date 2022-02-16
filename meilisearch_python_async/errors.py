@@ -7,6 +7,18 @@ class InvalidDocumentError(Exception):
     pass
 
 
+class InvalidKeyError(Exception):
+    pass
+
+
+class InvalidRestriction(Exception):
+    pass
+
+
+class KeyNotFoundError(Exception):
+    pass
+
+
 class MeiliSearchError(Exception):
     """Generic class for MeiliSearch error handling."""
 
