@@ -110,39 +110,39 @@ async def test_create_index_no_primary_key(test_client):
     assert isinstance(index.updated_at, datetime)
 
 
-async def test_generate_token_custom_key(test_client, test_key):
-    restrictions = {"test": "value"}
-    token = await test_client.generate_token(restrictions, test_key)
-    assert restrictions == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
+async def test_generate_tenant_token_custom_key(test_client, test_key):
+    payload = {"test": "value", "apiKeyPrefix": test_key.key[:8]}
+    token = await test_client.generate_tenant_token(payload, test_key)
+    assert payload == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
 
 
-async def test_generate_token_default_key(test_client, default_search_key):
-    restrictions = {"test": "value"}
-    token = await test_client.generate_token(restrictions)
-    assert restrictions == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
+async def test_generate_tenant_token_default_key(test_client, default_search_key):
+    payload = {"test": "value", "apiKeyPrefix": default_search_key.key[:8]}
+    token = await test_client.generate_tenant_token(payload)
+    assert payload == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
-async def test_generate_token_invalid_key(test_key_info, test_client):
+async def test_generate_tenant_token_invalid_key(test_key_info, test_client):
     test_key_info.actions = ["*"]
     key = await test_client.create_key(test_key_info)
 
     with pytest.raises(InvalidKeyError):
-        await test_client.generate_token({"test": "value"}, key=key)
+        await test_client.generate_tenant_token({"test": "value"}, key=key)
 
 
-async def test_generate_token_invalid_restriction(test_key_info, test_client):
+async def test_generate_tenant_token_invalid_restriction(test_key_info, test_client):
     test_key_info.indexes = ["good"]
     key = await test_client.create_key(test_key_info)
-    restrictions = {"indexes": ["bad"]}
+    payload = {"indexes": ["bad"]}
 
     with pytest.raises(InvalidRestriction):
-        await test_client.generate_token(restrictions, key)
+        await test_client.generate_tenant_token(payload, key)
 
 
 @pytest.mark.usefixtures("remove_default_search_key")
-async def test_generate_token_no_default_search_key(test_client):
+async def test_generate_tenant_token_no_default_search_key(test_client):
     with pytest.raises(KeyNotFoundError):
-        await test_client.generate_token({"test": "value"})
+        await test_client.generate_tenant_token({"test": "value"})
 
 
 @pytest.mark.asyncio
