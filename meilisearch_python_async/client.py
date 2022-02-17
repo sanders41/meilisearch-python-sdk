@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from types import TracebackType
 from typing import Any, Type
 
@@ -138,17 +139,23 @@ class Client:
             return True
         return False
 
-    async def generate_tenant_token(self, payload: dict[str, Any], key: Key | None = None) -> str:
+    async def generate_tenant_token(
+        self,
+        search_rules: dict[str, Any],
+        *,
+        expires_at: datetime | None = None,
+        api_key: Key | None = None,
+    ) -> str:
         """Generates a JWT token to use for searching.
 
         **Args:**
 
-        * **payload:** The settings to use for the token. If "indexes" is included it must
-              be equal to or more restrictive than the key used to generate the token. "searchRules"
-              contains restrictions to use for the token. The default rules for the API key used for
-              signing can be used by setting searchRules to ["*"]. to include an expiration date for
-              the token include "exp" in the payload as a timestamp.
-        * **key:** The API key to use to generate the token. Note that only API keys with actions of
+        * **search_rules:** Contains restrictions to use for the token. The default rules used for
+              the API key used for signing can be used by setting searchRules to ["*"]. If "indexes"
+              is included it must be equal to or more restrictive than the key used to generate the
+              token.
+        * **expires_at:** The timepoint at which the token should expire: Optional.
+        * **api_key:** The API key to use to generate the token. Note that only API keys with actions of
               can be used.
 
         **Returns:** A JWT token
@@ -161,14 +168,18 @@ class Client:
         * **KeyNotFoundError:** If no API search key is found.
 
         ```py
+        >>> from datetime import datetime, timedelta
         >>> from meilisearch_async_client import Client
+        >>>
+        >>> expires_at = datetime.utcnow() + timedelta(days=7)
+        >>>
         >>> async with Client("http://localhost.com", "masterKey") as client:
         >>>     token = await client.generate_tenant_token(
-                    payload={"searchRules": ["*"]}, "exp": "1645138523"
+                    search_rules = ["*"], expires_at=expires_at
                 )
         ```
         """
-        if not key:
+        if not api_key:
             keys = await self.get_keys()
             jwt_key = None
             for k in keys:
@@ -176,13 +187,15 @@ class Client:
                     jwt_key = k
                     break
         else:
-            if key.actions != ["search"]:
+            if api_key.actions != ["search"]:
                 raise InvalidKeyError("Only search keys can be used for tokens")
 
-            jwt_key = key
+            jwt_key = api_key
 
         if not jwt_key:
             raise KeyNotFoundError("No API search key found")
+
+        payload = search_rules
 
         if payload.get("indexes"):
             for index in payload["indexes"]:
@@ -190,6 +203,9 @@ class Client:
                     raise InvalidRestriction(
                         "Invalid index. The token cannot be less restrictive than the API key"
                     )
+
+        if expires_at:
+            payload["exp"] = datetime.timestamp(expires_at)
 
         return jwt.encode(payload, jwt_key.key, algorithm="HS256")
 

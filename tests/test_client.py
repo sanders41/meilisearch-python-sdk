@@ -1,5 +1,6 @@
 from asyncio import sleep
 from datetime import datetime, timedelta
+from typing import Any
 
 import jwt
 import pytest
@@ -111,15 +112,24 @@ async def test_create_index_no_primary_key(test_client):
 
 
 async def test_generate_tenant_token_custom_key(test_client, test_key):
-    payload = {"test": "value", "apiKeyPrefix": test_key.key[:8]}
-    token = await test_client.generate_tenant_token(payload, test_key)
-    assert payload == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
+    search_rules = {"test": "value"}
+    token = await test_client.generate_tenant_token(search_rules, api_key=test_key)
+    assert search_rules == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
 
 
 async def test_generate_tenant_token_default_key(test_client, default_search_key):
-    payload = {"test": "value", "apiKeyPrefix": default_search_key.key[:8]}
-    token = await test_client.generate_tenant_token(payload)
-    assert payload == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
+    search_rules = {"test": "value"}
+    token = await test_client.generate_tenant_token(search_rules)
+    assert search_rules == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
+
+
+async def test_generate_tenant_token_default_key_expires(test_client, default_search_key):
+    search_rules: dict[str, Any] = {"test": "value"}
+    expires_at = datetime.utcnow() + timedelta(days=1)
+    expected = search_rules
+    expected["exp"] = expires_at
+    token = await test_client.generate_tenant_token(search_rules, expires_at=expires_at)
+    assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
 async def test_generate_tenant_token_invalid_key(test_key_info, test_client):
@@ -127,7 +137,7 @@ async def test_generate_tenant_token_invalid_key(test_key_info, test_client):
     key = await test_client.create_key(test_key_info)
 
     with pytest.raises(InvalidKeyError):
-        await test_client.generate_tenant_token({"test": "value"}, key=key)
+        await test_client.generate_tenant_token({"test": "value"}, api_key=key)
 
 
 async def test_generate_tenant_token_invalid_restriction(test_key_info, test_client):
@@ -136,7 +146,7 @@ async def test_generate_tenant_token_invalid_restriction(test_key_info, test_cli
     payload = {"indexes": ["bad"]}
 
     with pytest.raises(InvalidRestriction):
-        await test_client.generate_tenant_token(payload, key)
+        await test_client.generate_tenant_token(payload, api_key=key)
 
 
 @pytest.mark.usefixtures("remove_default_search_key")
