@@ -199,7 +199,7 @@ class Client:
 
         if payload.get("indexes"):
             for index in payload["indexes"]:
-                if index not in jwt_key.indexes:
+                if jwt_key.indexes != ["*"] and index not in jwt_key.indexes:
                     raise InvalidRestriction(
                         "Invalid index. The token cannot be less restrictive than the API key"
                     )
