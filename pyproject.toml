@@ -26,6 +26,7 @@ pydantic = "^1.8"
 aiofiles = ">=0.7,<0.9"
 camel-converter = "^1.0.0"
 mkdocs-material = "^8.2.5"
+PyJWT = "^2.3.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1"
