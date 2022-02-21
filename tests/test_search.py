@@ -1,5 +1,6 @@
 import pytest
 
+from meilisearch_python_async import Client
 from meilisearch_python_async.task import wait_for_task
 
 
@@ -233,3 +234,14 @@ async def test_search_sort(sort, titles, index_with_documents):
     response = await index.search(sort=sort, limit=stats.number_of_documents)
     assert response.hits[0]["title"] == titles[0]
     assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
+
+
+async def test_search_with_tenant_token(test_client, index_with_documents, base_url, index_uid):
+    token = await test_client.generate_tenant_token(search_rules=["*"])
+    await index_with_documents()
+
+    async with Client(base_url, token) as client:
+        index = client.index(index_uid)
+        response = await index.search("How to Train Your Dragon")
+
+    assert response.hits[0]["id"] == "166428"

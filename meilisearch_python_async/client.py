@@ -141,7 +141,7 @@ class Client:
 
     async def generate_tenant_token(
         self,
-        search_rules: dict[str, Any],
+        search_rules: dict[str, Any] | list[str],
         *,
         expires_at: datetime | None = None,
         api_key: Key | None = None,
@@ -195,15 +195,15 @@ class Client:
         if not jwt_key:
             raise KeyNotFoundError("No API search key found")
 
-        payload = search_rules
-
-        if payload.get("indexes"):
-            for index in payload["indexes"]:
+        if isinstance(search_rules, dict) and search_rules.get("indexes"):
+            for index in search_rules["indexes"]:
                 if jwt_key.indexes != ["*"] and index not in jwt_key.indexes:
                     raise InvalidRestriction(
                         "Invalid index. The token cannot be less restrictive than the API key"
                     )
+        payload: dict[str, Any] = {"searchRules": search_rules}
 
+        payload["apiKeyPrefix"] = jwt_key.key[:8]
         if expires_at:
             payload["exp"] = datetime.timestamp(expires_at)
 
@@ -312,6 +312,7 @@ class Client:
         ```
         """
         response = await self._http_requests.get("stats")
+        print(response.json())
         return ClientStats(**response.json())
 
     async def get_dump_status(self, uid: str) -> DumpInfo:

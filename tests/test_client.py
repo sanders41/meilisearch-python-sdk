@@ -113,21 +113,24 @@ async def test_create_index_no_primary_key(test_client):
 
 async def test_generate_tenant_token_custom_key(test_client, test_key):
     search_rules = {"test": "value"}
+    expected = {"searchRules": search_rules, "apiKeyPrefix": test_key.key[:8]}
     token = await test_client.generate_tenant_token(search_rules, api_key=test_key)
-    assert search_rules == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
+    assert expected == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
 
 
 async def test_generate_tenant_token_default_key(test_client, default_search_key):
     search_rules = {"test": "value"}
+    expected = {"searchRules": search_rules, "apiKeyPrefix": default_search_key.key[:8]}
     token = await test_client.generate_tenant_token(search_rules)
-    assert search_rules == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
+    assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
 async def test_generate_tenant_token_default_key_expires(test_client, default_search_key):
     search_rules: dict[str, Any] = {"test": "value"}
     expires_at = datetime.utcnow() + timedelta(days=1)
-    expected = search_rules
-    expected["exp"] = expires_at
+    expected: dict[str, Any] = {"searchRules": search_rules}
+    expected["apiKeyPrefix"] = default_search_key.key[:8]
+    expected["exp"] = datetime.timestamp(expires_at)
     token = await test_client.generate_tenant_token(search_rules, expires_at=expires_at)
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
