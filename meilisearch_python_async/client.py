@@ -312,7 +312,6 @@ class Client:
         ```
         """
         response = await self._http_requests.get("stats")
-        print(response.json())
         return ClientStats(**response.json())
 
     async def get_dump_status(self, uid: str) -> DumpInfo:
