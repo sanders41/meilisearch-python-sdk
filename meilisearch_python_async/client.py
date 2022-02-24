@@ -134,7 +134,7 @@ class Client:
             return True
         return False
 
-    async def generate_tenant_token(
+    def generate_tenant_token(
         self,
         search_rules: dict[str, Any] | list[str],
         *,
@@ -168,7 +168,7 @@ class Client:
         >>> expires_at = datetime.utcnow() + timedelta(days=7)
         >>>
         >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     token = await client.generate_tenant_token(
+        >>>     token = client.generate_tenant_token(
         >>>         search_rules = ["*"], api_key=api_key, expires_at=expires_at
         >>>     )
         ```

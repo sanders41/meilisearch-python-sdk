@@ -238,7 +238,7 @@ async def test_search_sort(sort, titles, index_with_documents):
 async def test_search_with_tenant_token(
     test_client, index_with_documents, base_url, index_uid, default_search_key
 ):
-    token = await test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
+    token = test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     await index_with_documents()
 
     async with Client(base_url, token) as client:
