@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import pytest
 
 from meilisearch_python_async import Client
@@ -239,6 +241,22 @@ async def test_search_with_tenant_token(
     test_client, index_with_documents, base_url, index_uid, default_search_key
 ):
     token = test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
+    await index_with_documents()
+
+    async with Client(base_url, token) as client:
+        index = client.index(index_uid)
+        response = await index.search("How to Train Your Dragon")
+
+    assert response.hits[0]["id"] == "166428"
+
+
+async def test_search_with_tenant_token_and_expire_date(
+    test_client, index_with_documents, base_url, index_uid, default_search_key
+):
+    expires_at = datetime.utcnow() + timedelta(days=1)
+    token = test_client.generate_tenant_token(
+        search_rules=["*"], api_key=default_search_key, expires_at=expires_at
+    )
     await index_with_documents()
 
     async with Client(base_url, token) as client:
