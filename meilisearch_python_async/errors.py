@@ -7,15 +7,7 @@ class InvalidDocumentError(Exception):
     pass
 
 
-class InvalidKeyError(Exception):
-    pass
-
-
 class InvalidRestriction(Exception):
-    pass
-
-
-class KeyNotFoundError(Exception):
     pass
 
 

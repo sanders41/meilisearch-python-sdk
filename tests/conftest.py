@@ -146,3 +146,11 @@ async def index_with_documents(empty_index, small_movies, index_uid):
         return index
 
     return index_maker
+
+
+@pytest.fixture
+async def default_search_key(test_client):
+    keys = await test_client.get_keys()
+    for key in keys:
+        if "Default Search API Key" in key.description:
+            return key

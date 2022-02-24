@@ -9,12 +9,7 @@ import jwt
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import (
-    InvalidKeyError,
-    InvalidRestriction,
-    KeyNotFoundError,
-    MeiliSearchApiError,
-)
+from meilisearch_python_async.errors import InvalidRestriction, MeiliSearchApiError
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeyUpdate
 from meilisearch_python_async.models.dump import DumpInfo
@@ -143,8 +138,8 @@ class Client:
         self,
         search_rules: dict[str, Any] | list[str],
         *,
+        api_key: Key,
         expires_at: datetime | None = None,
-        api_key: Key | None = None,
     ) -> str:
         """Generates a JWT token to use for searching.
 
@@ -154,15 +149,14 @@ class Client:
               the API key used for signing can be used by setting searchRules to ["*"]. If "indexes"
               is included it must be equal to or more restrictive than the key used to generate the
               token.
-        * **expires_at:** The timepoint at which the token should expire: Optional.
-        * **api_key:** The API key to use to generate the token. Note that only API keys with actions of
-              can be used.
+        * **api_key:** The API key to use to generate the token.
+        * **expires_at:** The timepoint at which the token should expire. If value is provided it
+              shoud be a UTC time in the future. Default = None.
 
         **Returns:** A JWT token
 
         **Raises:**
 
-        * **InvalidKeyError:** If the key specified has actions other than search.
         * **InvalidRestriction:** If the restrictions are less strict than the permissions allowed
               in the API key.
         * **KeyNotFoundError:** If no API search key is found.
@@ -175,39 +169,26 @@ class Client:
         >>>
         >>> async with Client("http://localhost.com", "masterKey") as client:
         >>>     token = await client.generate_tenant_token(
-                    search_rules = ["*"], expires_at=expires_at
-                )
+        >>>         search_rules = ["*"], api_key=api_key, expires_at=expires_at
+        >>>     )
         ```
         """
-        if not api_key:
-            keys = await self.get_keys()
-            jwt_key = None
-            for k in keys:
-                if "Default Search API Key" in k.description:
-                    jwt_key = k
-                    break
-        else:
-            if api_key.actions != ["search"]:
-                raise InvalidKeyError("Only search keys can be used for tokens")
-
-            jwt_key = api_key
-
-        if not jwt_key:
-            raise KeyNotFoundError("No API search key found")
-
         if isinstance(search_rules, dict) and search_rules.get("indexes"):
             for index in search_rules["indexes"]:
-                if jwt_key.indexes != ["*"] and index not in jwt_key.indexes:
+                if api_key.indexes != ["*"] and index not in api_key.indexes:
                     raise InvalidRestriction(
                         "Invalid index. The token cannot be less restrictive than the API key"
                     )
         payload: dict[str, Any] = {"searchRules": search_rules}
 
-        payload["apiKeyPrefix"] = jwt_key.key[:8]
+        payload["apiKeyPrefix"] = api_key.key[:8]
         if expires_at:
-            payload["exp"] = datetime.timestamp(expires_at)
+            if expires_at <= datetime.utcnow():
+                raise ValueError("expires_at must be a time in the future")
 
-        return jwt.encode(payload, jwt_key.key, algorithm="HS256")
+            payload["exp"] = int(datetime.timestamp(expires_at))
+
+        return jwt.encode(payload, api_key.key, algorithm="HS256")
 
     async def get_indexes(self) -> list[Index] | None:
         """Get all indexes.

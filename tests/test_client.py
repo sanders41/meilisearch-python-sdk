@@ -8,9 +8,7 @@ from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError
 
 from meilisearch_python_async.client import Client
 from meilisearch_python_async.errors import (
-    InvalidKeyError,
     InvalidRestriction,
-    KeyNotFoundError,
     MeiliSearchApiError,
     MeiliSearchCommunicationError,
 )
@@ -18,14 +16,6 @@ from meilisearch_python_async.models.client import KeyCreate, KeyUpdate
 from meilisearch_python_async.models.dump import DumpInfo
 from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.version import Version
-
-
-@pytest.fixture
-async def default_search_key(test_client):
-    keys = await test_client.get_keys()
-    for key in keys:
-        if "Default Search API Key" in key.description:
-            return key
 
 
 @pytest.fixture
@@ -121,7 +111,7 @@ async def test_generate_tenant_token_custom_key(test_client, test_key):
 async def test_generate_tenant_token_default_key(test_client, default_search_key):
     search_rules = {"test": "value"}
     expected = {"searchRules": search_rules, "apiKeyPrefix": default_search_key.key[:8]}
-    token = await test_client.generate_tenant_token(search_rules)
+    token = await test_client.generate_tenant_token(search_rules, api_key=default_search_key)
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
@@ -130,17 +120,20 @@ async def test_generate_tenant_token_default_key_expires(test_client, default_se
     expires_at = datetime.utcnow() + timedelta(days=1)
     expected: dict[str, Any] = {"searchRules": search_rules}
     expected["apiKeyPrefix"] = default_search_key.key[:8]
-    expected["exp"] = datetime.timestamp(expires_at)
-    token = await test_client.generate_tenant_token(search_rules, expires_at=expires_at)
+    expected["exp"] = int(datetime.timestamp(expires_at))
+    token = await test_client.generate_tenant_token(
+        search_rules, api_key=default_search_key, expires_at=expires_at
+    )
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
-async def test_generate_tenant_token_invalid_key(test_key_info, test_client):
-    test_key_info.actions = ["*"]
-    key = await test_client.create_key(test_key_info)
-
-    with pytest.raises(InvalidKeyError):
-        await test_client.generate_tenant_token({"test": "value"}, api_key=key)
+async def test_generate_tenant_token_default_key_expires_past(test_client, default_search_key):
+    search_rules: dict[str, Any] = {"test": "value"}
+    expires_at = datetime.utcnow() + timedelta(days=-1)
+    with pytest.raises(ValueError):
+        await test_client.generate_tenant_token(
+            search_rules, api_key=default_search_key, expires_at=expires_at
+        )
 
 
 async def test_generate_tenant_token_invalid_restriction(test_key_info, test_client):
@@ -150,12 +143,6 @@ async def test_generate_tenant_token_invalid_restriction(test_key_info, test_cli
 
     with pytest.raises(InvalidRestriction):
         await test_client.generate_tenant_token(payload, api_key=key)
-
-
-@pytest.mark.usefixtures("remove_default_search_key")
-async def test_generate_tenant_token_no_default_search_key(test_client):
-    with pytest.raises(KeyNotFoundError):
-        await test_client.generate_tenant_token({"test": "value"})
 
 
 @pytest.mark.asyncio

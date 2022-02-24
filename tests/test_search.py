@@ -209,7 +209,6 @@ async def test_custom_search_params_with_many_params(index_with_documents):
     assert response.hits[0]["title"] == "Avengers: Infinity War"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "sort, titles",
     [
@@ -236,8 +235,10 @@ async def test_search_sort(sort, titles, index_with_documents):
     assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
 
 
-async def test_search_with_tenant_token(test_client, index_with_documents, base_url, index_uid):
-    token = await test_client.generate_tenant_token(search_rules=["*"])
+async def test_search_with_tenant_token(
+    test_client, index_with_documents, base_url, index_uid, default_search_key
+):
+    token = await test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     await index_with_documents()
 
     async with Client(base_url, token) as client:
