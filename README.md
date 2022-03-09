@@ -59,36 +59,6 @@ update = await index.add_documents(documents)
 status = await client.index('books').get_update_status(update.update_id)
 ```
 
-### Add Documents In Batches
-
-Splitting documents into batches can be useful with large dataset because it reduces the RAM usage
-during indexing.
-
-```py
-from meilisearch_python_async import Client
-
-async with Client('http://127.0.0.1:7700', 'masterKey') as client:
-    index = client.index("books")
-
-    documents = [
-        {"id": 1, "title": "Ready Player One"},
-        {"id": 42, "title": "The Hitchhiker's Guide to the Galaxy"},
-        ...
-    ]
-
-    await index.add_documents_in_batches(documents, batch_size=100)
-```
-
-The server will return a list of update ids that can be used to [get the status](https://docs.meilisearch.com/reference/api/updates.html#get-an-update-status)
-of the updates. To do this you would save the result response from adding the documets to a variable,
-this will be a list of UpdateId objects, and use it to check the status of the updates.
-
-```py
-updates = await index.add_documents_in_batches(documents, batch_size=20)
-for update in updates:
-    status = await client.index('books').get_update_status(update.update_id)
-```
-
 ### Basic Searching
 
 ```py
