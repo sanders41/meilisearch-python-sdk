@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from asyncio import sleep
 from datetime import datetime, timedelta
 from typing import Any
