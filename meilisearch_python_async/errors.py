@@ -7,6 +7,10 @@ class InvalidDocumentError(Exception):
     pass
 
 
+class InvalidRestriction(Exception):
+    pass
+
+
 class MeiliSearchError(Exception):
     """Generic class for MeiliSearch error handling."""
 
