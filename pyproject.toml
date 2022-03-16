@@ -25,7 +25,6 @@ httpx = ">=0.17,<0.23"
 pydantic = "^1.8"
 aiofiles = ">=0.7,<0.9"
 camel-converter = "^1.0.0"
-mkdocs-material = "^8.2.5"
 PyJWT = "^2.3.0"
 
 [tool.poetry.dev-dependencies]
@@ -41,7 +40,7 @@ pytest-asyncio = "^0.18.2"
 types-aiofiles = "^0.8.4"
 flake8-docstrings = "^1.6.0"
 mkdocs = "^1.2.3"
-mkdocs-material = "^8.1.8"
+mkdocs-material = "^8.2.5"
 mkautodoc = "^0.1.0"
 
 [build-system]
