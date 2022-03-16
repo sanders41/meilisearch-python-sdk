@@ -126,7 +126,7 @@ unicode_backport = ["unicodedata2"]
 name = "click"
 version = "8.0.3"
 description = "Composable command line interface toolkit"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -138,7 +138,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -206,7 +206,7 @@ pydocstyle = ">=2.1"
 name = "ghp-import"
 version = "2.0.2"
 description = "Copy your docs directly to the gh-pages branch."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -286,7 +286,7 @@ python-versions = ">=3.5"
 name = "importlib-metadata"
 version = "4.2.0"
 description = "Read metadata from Python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -324,7 +324,7 @@ plugins = ["setuptools"]
 name = "jinja2"
 version = "3.0.3"
 description = "A very fast and expressive template engine."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -338,7 +338,7 @@ i18n = ["Babel (>=2.7)"]
 name = "markdown"
 version = "3.3.5"
 description = "Python implementation of Markdown."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -349,7 +349,7 @@ testing = ["coverage", "pyyaml"]
 name = "markupsafe"
 version = "2.0.1"
 description = "Safely add untrusted strings to HTML/XML markup."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -365,7 +365,7 @@ python-versions = "*"
 name = "mergedeep"
 version = "1.3.4"
 description = "A deep merge function for 🐍."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -381,7 +381,7 @@ python-versions = ">=3.6"
 name = "mkdocs"
 version = "1.2.3"
 description = "Project documentation with Markdown."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -404,7 +404,7 @@ i18n = ["babel (>=2.9.0)"]
 name = "mkdocs-material"
 version = "8.2.5"
 description = "A Material Design theme for MkDocs"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -420,7 +420,7 @@ pymdown-extensions = ">=9.0"
 name = "mkdocs-material-extensions"
 version = "1.0.3"
 description = "Extension pack for Python Markdown."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -463,7 +463,7 @@ python-versions = "*"
 name = "packaging"
 version = "21.3"
 description = "Core utilities for Python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -579,7 +579,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "pygments"
 version = "2.10.0"
 description = "Pygments is a syntax highlighting package written in Python."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -601,7 +601,7 @@ tests = ["pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)"]
 name = "pymdown-extensions"
 version = "9.1"
 description = "Extension pack for Python Markdown."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -612,7 +612,7 @@ Markdown = ">=3.2"
 name = "pyparsing"
 version = "3.0.6"
 description = "Python parsing module"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -675,7 +675,7 @@ testing = ["fields", "hunter", "process-tests", "six", "pytest-xdist", "virtuale
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 
@@ -686,7 +686,7 @@ six = ">=1.5"
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -694,7 +694,7 @@ python-versions = ">=3.6"
 name = "pyyaml-env-tag"
 version = "0.1"
 description = "A custom YAML tag for referencing environment variables in YAML files. "
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -719,7 +719,7 @@ idna2008 = ["idna"]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -826,7 +826,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 name = "watchdog"
 version = "2.1.6"
 description = "Filesystem events monitoring"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -837,7 +837,7 @@ watchmedo = ["PyYAML (>=3.10)"]
 name = "zipp"
 version = "3.6.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -848,7 +848,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "8c030c17d5def21f777bb8790dea7f7a6c834158b5b4ce83f333af7f75cc3959"
+content-hash = "7b587b8153492fe56ac59cfec367916b46c5e241e79cbb04e62b26250632caed"
 
 [metadata.files]
 aiofiles = [
