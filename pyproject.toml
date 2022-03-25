@@ -75,7 +75,7 @@ src_paths = ["meilisearch_python_async", "tests"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--cov=meilisearch_python_async"
+addopts = "--cov=meilisearch_python_async --cov-report term-missing"
 asyncio_mode = "auto"
 
 [tool.mypy]
