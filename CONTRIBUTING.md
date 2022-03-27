@@ -143,6 +143,35 @@ You can view the current coverage level in the codecov badge on the
 [main github page](https://github.com/sanders41/meilisearch-python-async). You can run tests and see the
 code coverage.
 
+There are two way to run the tests.
+
+#### With make
+
+If you have make installed you can run the tests with make. This option will automatically start
+Meilisearch in a Docker container before starting the tests and stop the contain with the tests
+are completed.
+
+First make sure you have the Meilisearch Docker image.
+
+```sh
+docker pull getmeili/meilisearch:latest
+```
+
+Then tests can be run with:
+
+```sh
+make test
+```
+
+If the tests are stopped before they complete, for example pressing `Ctrl + c`, the Docker container
+will be left running. If this happens you can stop it with:
+
+```sh
+make clean
+```
+
+#### Without make
+
 Before running the tests start a Docker container running Meilisearch.
 
 ```sh
@@ -150,16 +179,10 @@ docker pull getmeili/meilisearch:latest
 docker run -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --master-key=masterKey --no-analytics
 ```
 
-Now with the container running run the test suite
+Now with the container running, run the test suite
 
 ```sh
 poetry run pytest
-```
-
-If you want to see which lines are missing code coverage run the test with:
-
-```sh
-poetry run pytest --cov-report term-missing
 ```
 
 In additon to mainting the coverage percentage please ensure that all
