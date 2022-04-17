@@ -17,7 +17,7 @@ from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchError, PayloadTooLarge
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
-from meilisearch_python_async.models.settings import MeiliSearchSettings
+from meilisearch_python_async.models.settings import MeiliSearchSettings, TypoTolerance
 from meilisearch_python_async.models.task import TaskId, TaskStatus
 from meilisearch_python_async.task import wait_for_task
 
@@ -424,7 +424,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -560,7 +560,7 @@ class Index:
         * **combine_documents:** If set to True this will combine the documents from all the files
             before indexing them. Defaults to True.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -809,7 +809,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -935,7 +935,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -986,7 +986,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1124,7 +1124,7 @@ class Index:
         * **combine_documents:** If set to True this will combine the documents from all the files
             before indexing them. Defaults to True.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1371,7 +1371,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1491,7 +1491,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1538,7 +1538,7 @@ class Index:
 
         * **document_id:** Unique identifier of the document.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Rases:**
 
@@ -1590,7 +1590,7 @@ class Index:
     async def delete_all_documents(self) -> TaskId:
         """Delete all documents from the index.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1642,7 +1642,7 @@ class Index:
 
         * **body:** Settings of the index.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1688,7 +1688,7 @@ class Index:
     async def reset_settings(self) -> TaskId:
         """Reset settings of the index to default values.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1740,7 +1740,7 @@ class Index:
 
         * **ranking_rules:** List containing the ranking rules.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1774,7 +1774,7 @@ class Index:
     async def reset_ranking_rules(self) -> TaskId:
         """Reset ranking rules of the index to default values.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1830,7 +1830,7 @@ class Index:
 
         * **body:** Distinct attribute.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1854,7 +1854,7 @@ class Index:
     async def reset_distinct_attribute(self) -> TaskId:
         """Reset distinct attribute of the index to default values.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1905,7 +1905,7 @@ class Index:
 
         * **body:** List containing the searchable attributes.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1933,7 +1933,7 @@ class Index:
 
         * **body:** List containing the searchable attributes.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -1984,7 +1984,7 @@ class Index:
 
         * **body:** List containing the displayed attributes.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2010,7 +2010,7 @@ class Index:
     async def reset_displayed_attributes(self) -> TaskId:
         """Reset displayed attributes of the index to default values.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2065,7 +2065,7 @@ class Index:
 
         * **body:** List containing the stop words of the index.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2089,7 +2089,7 @@ class Index:
     async def reset_stop_words(self) -> TaskId:
         """Reset stop words of the index to default values.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2144,7 +2144,7 @@ class Index:
 
         * **body:** The synonyms of the index.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2170,7 +2170,7 @@ class Index:
     async def reset_synonyms(self) -> TaskId:
         """Reset synonyms of the index to default values.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2225,7 +2225,7 @@ class Index:
 
         * **body:** List containing the filterable attributes of the index.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2249,7 +2249,7 @@ class Index:
     async def reset_filterable_attributes(self) -> TaskId:
         """Reset filterable attributes of the index to default values.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2273,10 +2273,6 @@ class Index:
     async def get_sortable_attributes(self) -> list[str]:
         """Get sortable attributes of the Index.
 
-        **Args:**
-
-        * **sortable_attributes:** List containing the sortable attributes of the index.
-
         **Returns:** List containing the sortable attributes of the Index.
 
         **Raises:**
@@ -2299,9 +2295,9 @@ class Index:
         return response.json()
 
     async def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskId:
-        """Get sortable attributes of the Index.
+        """Update sortable attributes of the Index.
 
-        **Returns:** List containing the sortable attributes of the Index.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2325,7 +2321,7 @@ class Index:
     async def reset_sortable_attributes(self) -> TaskId:
         """Reset sortable attributes of the index to default values.
 
-        **Returns:** Update id to track the action.
+        **Returns:** Task id to track the action.
 
         **Raises:**
 
@@ -2342,6 +2338,79 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/sortable-attributes"
+        response = await self._http_requests.delete(url)
+
+        return TaskId(**response.json())
+
+    async def get_typo_tolerance(self) -> TypoTolerance:
+        """Get typo tolerance for the index.
+
+        **Returns:** TypoTolerance for the index.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     sortable_attributes = await index.get_typo_tolerance()
+        ```
+        """
+        url = f"{self._settings_url}/typo-tolerance"
+        response = await self._http_requests.get(url)
+
+        return TypoTolerance(**response.json())
+
+    async def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskId:
+        """Update typo tolerance.
+
+        **Returns:** Task id to track the action.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     TypoTolerance(enabled=False)
+        >>>     await index.update_typo_tolerance()
+        ```
+        """
+        url = f"{self._settings_url}/typo-tolerance"
+        response = await self._http_requests.post(url, typo_tolerance.dict(by_alias=True))
+
+        return TaskId(**response.json())
+
+    async def reset_typo_tolerance(self) -> TaskId:
+        """Reset typo tolerance to default values.
+
+        **Returns:** Task id to track the action.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     await index.reset_typo_tolerance()
+        ```
+        """
+        url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.delete(url)
 
         return TaskId(**response.json())
