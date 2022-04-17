@@ -6,7 +6,11 @@ from httpx import Response
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import MeiliSearchApiError
 from meilisearch_python_async.index import Index
-from meilisearch_python_async.models.settings import MeiliSearchSettings
+from meilisearch_python_async.models.settings import (
+    MeiliSearchSettings,
+    MinWordLengthForTypo,
+    TypoTolerance,
+)
 from meilisearch_python_async.task import wait_for_task
 
 
@@ -16,6 +20,7 @@ def new_settings():
         ranking_rules=["typo", "words"],
         searchable_attributes=["title", "overview"],
         sortable_attributes=["genre", "title"],
+        typo_tolerance=TypoTolerance(enabled=False),
     )
 
 
@@ -119,6 +124,7 @@ async def test_get_settings_default(empty_index, default_ranking_rules):
     assert response.stop_words == []
     assert response.synonyms == {}
     assert response.sortable_attributes == []
+    assert response.typo_tolerance.enabled is True
 
 
 @pytest.mark.asyncio
@@ -135,6 +141,7 @@ async def test_update_settings(empty_index, new_settings):
     assert response.stop_words == []
     assert response.synonyms == {}
     assert response.sortable_attributes == new_settings.sortable_attributes
+    assert response.typo_tolerance.enabled is False
 
 
 @pytest.mark.asyncio
@@ -151,6 +158,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.stop_words == []
     assert response.synonyms == {}
     assert response.sortable_attributes == new_settings.sortable_attributes
+    assert response.typo_tolerance.enabled is False
     response = await index.reset_settings()
     update = await wait_for_task(index.http_client, response.uid)
     assert update.status == "succeeded"
@@ -162,6 +170,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.stop_words == []
     assert response.synonyms == {}
     assert response.sortable_attributes == []
+    assert response.typo_tolerance.enabled is True
 
 
 @pytest.mark.asyncio
@@ -415,6 +424,36 @@ async def test_reset_sortable_attributes(empty_index, sortable_attributes):
     await wait_for_task(index.http_client, response.uid)
     response = await index.get_sortable_attributes()
     assert response == []
+
+
+async def test_get_typo_tolerance(empty_index):
+    index = await empty_index()
+    response = await index.get_typo_tolerance()
+    assert response.enabled is True
+
+
+async def test_update_typo_tolerance(empty_index):
+    typo_tolerance = TypoTolerance(
+        enabled=True,
+        disable_on_attributes=["title"],
+        disable_on_words=["spiderman"],
+        min_word_length_for_typo=MinWordLengthForTypo(one_typo=10, two_typos=20),
+    )
+    index = await empty_index()
+    response = await index.update_typo_tolerance(typo_tolerance)
+    await wait_for_task(index.http_client, response.uid)
+    response = await index.get_typo_tolerance()
+    assert response.dict() == typo_tolerance.dict()
+
+
+async def test_reset_typo_tolerance(empty_index):
+    index = await empty_index()
+    response = await index.update_typo_tolerance(TypoTolerance(enabled=False))
+    await wait_for_task(index.http_client, response.uid)
+    response = await index.reset_typo_tolerance()
+    await wait_for_task(index.http_client, response.uid)
+    response = await index.get_typo_tolerance()
+    assert response.enabled is True
 
 
 @pytest.mark.parametrize(
