@@ -289,6 +289,9 @@ class Index:
         attributes_to_highlight: list[str] | None = None,
         sort: list[str] | None = None,
         matches: bool = False,
+        highlight_pre_tag: str = "<em>",
+        highlight_post_tag: str = "</em>",
+        crop_marker: str = "...",
     ) -> SearchResults:
         """Search the index.
 
@@ -302,12 +305,16 @@ class Index:
         * **attributes_to_retrieve:** Attributes to display in the returned documents.
             Defaults to ["*"].
         * **attributes_to_crop:** Attributes whose values have to be cropped. Defaults to None.
-        * **crop_length:** Length used to crop field values. Defaults to 200.
+        * **crop_length:** The maximun number of words to display. Defaults to 200.
         * **attributes_to_highlight:** Attributes whose values will contain highlighted matching terms.
             Defaults to None.
         * **sort:** Attributes by which to sort the results. Defaults to None.
         * **matches:** Defines whether an object that contains information about the matches should be
             returned or not. Defaults to False.
+        * **hightlight_pre_tag:** The opening tag for highlighting text. Defaults to <em>.
+        * **hightlight_post_tag:** The closing tag for highlighting text. Defaults to </em>
+        * **crop_marker:** Marker to display when the number of words excedes the `crop_length`.
+            Defaults to ...
 
         **Returns:** Results of the search
 
@@ -337,6 +344,9 @@ class Index:
             "attributesToHighlight": attributes_to_highlight,
             "sort": sort,
             "matches": matches,
+            "highlightPreTag": highlight_pre_tag,
+            "highlightPostTag": highlight_post_tag,
+            "cropMarker": crop_marker,
         }
         url = f"{self._base_url_with_uid}/search"
         response = await self._http_requests.post(url, body=body)
