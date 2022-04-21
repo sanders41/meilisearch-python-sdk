@@ -3,9 +3,7 @@ from typing import Any, Dict, List, Optional
 from camel_converter.pydantic_base import CamelBase
 
 
-# Name change coming in next RC
-# class MinWordSizeForTypos(CamelBase):
-class MinWordLengthForTypo(CamelBase):
+class MinWordSizeForTypos(CamelBase):
     one_typo: Optional[int] = None
     two_typos: Optional[int] = None
 
@@ -14,8 +12,7 @@ class TypoTolerance(CamelBase):
     enabled: bool = True
     disable_on_attributes: Optional[List[str]] = None
     disable_on_words: Optional[List[str]] = None
-    # min_word_size_for_typos: Optional[MinWordSizeForTypos] = None
-    min_word_length_for_typo: Optional[MinWordLengthForTypo] = None
+    min_word_size_for_typos: Optional[MinWordSizeForTypos] = None
 
 
 class MeiliSearchSettings(CamelBase):
