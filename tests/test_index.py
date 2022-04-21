@@ -8,7 +8,7 @@ from meilisearch_python_async.errors import MeiliSearchApiError
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.settings import (
     MeiliSearchSettings,
-    MinWordLengthForTypo,
+    MinWordSizeForTypos,
     TypoTolerance,
 )
 from meilisearch_python_async.task import wait_for_task
@@ -437,7 +437,7 @@ async def test_update_typo_tolerance(empty_index):
         enabled=True,
         disable_on_attributes=["title"],
         disable_on_words=["spiderman"],
-        min_word_length_for_typo=MinWordLengthForTypo(one_typo=10, two_typos=20),
+        min_word_size_for_typos=MinWordSizeForTypos(one_typo=10, two_typos=20),
     )
     index = await empty_index()
     response = await index.update_typo_tolerance(typo_tolerance)
