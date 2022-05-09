@@ -17,7 +17,7 @@ from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchError, PayloadTooLarge
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
-from meilisearch_python_async.models.settings import MeiliSearchSettings
+from meilisearch_python_async.models.settings import MeiliSearchSettings, TypoTolerance
 from meilisearch_python_async.models.task import TaskStatus
 from meilisearch_python_async.task import wait_for_task
 
@@ -289,6 +289,9 @@ class Index:
         attributes_to_highlight: list[str] | None = None,
         sort: list[str] | None = None,
         matches: bool = False,
+        highlight_pre_tag: str = "<em>",
+        highlight_post_tag: str = "</em>",
+        crop_marker: str = "...",
     ) -> SearchResults:
         """Search the index.
 
@@ -302,12 +305,16 @@ class Index:
         * **attributes_to_retrieve:** Attributes to display in the returned documents.
             Defaults to ["*"].
         * **attributes_to_crop:** Attributes whose values have to be cropped. Defaults to None.
-        * **crop_length:** Length used to crop field values. Defaults to 200.
+        * **crop_length:** The maximun number of words to display. Defaults to 200.
         * **attributes_to_highlight:** Attributes whose values will contain highlighted matching terms.
             Defaults to None.
         * **sort:** Attributes by which to sort the results. Defaults to None.
         * **matches:** Defines whether an object that contains information about the matches should be
             returned or not. Defaults to False.
+        * **hightlight_pre_tag:** The opening tag for highlighting text. Defaults to <em>.
+        * **hightlight_post_tag:** The closing tag for highlighting text. Defaults to </em>
+        * **crop_marker:** Marker to display when the number of words excedes the `crop_length`.
+            Defaults to ...
 
         **Returns:** Results of the search
 
@@ -337,6 +344,9 @@ class Index:
             "attributesToHighlight": attributes_to_highlight,
             "sort": sort,
             "matches": matches,
+            "highlightPreTag": highlight_pre_tag,
+            "highlightPostTag": highlight_post_tag,
+            "cropMarker": crop_marker,
         }
         url = f"{self._base_url_with_uid}/search"
         response = await self._http_requests.post(url, body=body)
@@ -2275,10 +2285,6 @@ class Index:
     async def get_sortable_attributes(self) -> list[str]:
         """Get sortable attributes of the Index.
 
-        **Args:**
-
-        * **sortable_attributes:** List containing the sortable attributes of the index.
-
         **Returns:** List containing the sortable attributes of the Index.
 
         **Raises:**
@@ -2303,7 +2309,7 @@ class Index:
     async def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskStatus:
         """Get sortable attributes of the Index.
 
-        **Returns:** List containing the sortable attributes of the Index.
+        **Returns:** The details of the task status.
 
         **Raises:**
 
@@ -2344,6 +2350,79 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/sortable-attributes"
+        response = await self._http_requests.delete(url)
+
+        return TaskStatus(**response.json())
+
+    async def get_typo_tolerance(self) -> TypoTolerance:
+        """Get typo tolerance for the index.
+
+        **Returns:** TypoTolerance for the index.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     sortable_attributes = await index.get_typo_tolerance()
+        ```
+        """
+        url = f"{self._settings_url}/typo-tolerance"
+        response = await self._http_requests.get(url)
+
+        return TypoTolerance(**response.json())
+
+    async def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskStatus:
+        """Update typo tolerance.
+
+        **Returns:** Task  to track the action.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     TypoTolerance(enabled=False)
+        >>>     await index.update_typo_tolerance()
+        ```
+        """
+        url = f"{self._settings_url}/typo-tolerance"
+        response = await self._http_requests.post(url, typo_tolerance.dict(by_alias=True))
+
+        return TaskStatus(**response.json())
+
+    async def reset_typo_tolerance(self) -> TaskStatus:
+        """Reset typo tolerance to default values.
+
+        **Returns:** The details of the task status.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     await index.reset_typo_tolerance()
+        ```
+        """
+        url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.delete(url)
 
         return TaskStatus(**response.json())

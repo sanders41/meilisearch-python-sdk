@@ -39,6 +39,23 @@ async def test_custom_search(index_with_documents):
     assert "dragon" in response.hits[0]["_formatted"]["title"].lower()
 
 
+async def test_custom_search_hightlight_tags_and_crop_marker(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search(
+        "Dragon",
+        crop_length=5,
+        attributes_to_highlight=["title"],
+        highlight_pre_tag="<strong>",
+        highlight_post_tag="</strong>",
+        crop_marker="***",
+    )
+    assert response.hits[0]["id"] == "166428"
+    assert "_formatted" in response.hits[0]
+    assert "dragon" in response.hits[0]["_formatted"]["title"].lower()
+    assert "<strong>" in response.hits[0]["_formatted"]["title"]
+    assert "</strong>" in response.hits[0]["_formatted"]["title"]
+
+
 @pytest.mark.asyncio
 async def test_custom_search_with_empty_query(index_with_documents):
     index = await index_with_documents()
