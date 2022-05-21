@@ -6,7 +6,6 @@ from meilisearch_python_async import Client
 from meilisearch_python_async.task import wait_for_task
 
 
-@pytest.mark.asyncio
 async def test_basic_search(index_with_documents):
     index = await index_with_documents()
     response = await index.search("How to Train Your Dragon")
@@ -14,7 +13,6 @@ async def test_basic_search(index_with_documents):
     assert "_formatted" not in response.hits[0]
 
 
-@pytest.mark.asyncio
 async def test_basic_search_with_empty_params(index_with_documents):
     index = await index_with_documents()
     response = await index.search("How to Train Your Dragon")
@@ -22,7 +20,6 @@ async def test_basic_search_with_empty_params(index_with_documents):
     assert "_formatted" not in response.hits[0]
 
 
-@pytest.mark.asyncio
 async def test_search_with_empty_query(index_with_documents):
     index = await index_with_documents()
     response = await index.search("")
@@ -30,7 +27,6 @@ async def test_search_with_empty_query(index_with_documents):
     assert response.query == ""
 
 
-@pytest.mark.asyncio
 async def test_custom_search(index_with_documents):
     index = await index_with_documents()
     response = await index.search("Dragon", attributes_to_highlight=["title"])
@@ -56,7 +52,6 @@ async def test_custom_search_hightlight_tags_and_crop_marker(index_with_document
     assert "</strong>" in response.hits[0]["_formatted"]["title"]
 
 
-@pytest.mark.asyncio
 async def test_custom_search_with_empty_query(index_with_documents):
     index = await index_with_documents()
     response = await index.search("", attributes_to_highlight=["title"])
@@ -64,14 +59,12 @@ async def test_custom_search_with_empty_query(index_with_documents):
     assert response.query == ""
 
 
-@pytest.mark.asyncio
 async def test_custom_search_with_no_query(index_with_documents):
     index = await index_with_documents()
     response = await index.search("", limit=5)
     assert len(response.hits) == 5
 
 
-@pytest.mark.asyncio
 async def test_custom_search_params_with_wildcard(index_with_documents):
     index = await index_with_documents()
     response = await index.search(
@@ -86,7 +79,6 @@ async def test_custom_search_params_with_wildcard(index_with_documents):
     assert "title" in response.hits[0]["_formatted"]
 
 
-@pytest.mark.asyncio
 async def test_custom_search_params_with_simple_string(index_with_documents):
     index = await index_with_documents()
     response = await index.search(
@@ -102,7 +94,6 @@ async def test_custom_search_params_with_simple_string(index_with_documents):
     assert "release_date" not in response.hits[0]["_formatted"]
 
 
-@pytest.mark.asyncio
 async def test_custom_search_params_with_string_list(index_with_documents):
     index = await index_with_documents()
     response = await index.search(
@@ -119,7 +110,6 @@ async def test_custom_search_params_with_string_list(index_with_documents):
     assert "<em>" not in response.hits[0]["_formatted"]["overview"]
 
 
-@pytest.mark.asyncio
 async def test_custom_search_params_with_facets_distribution(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
@@ -134,7 +124,6 @@ async def test_custom_search_params_with_facets_distribution(index_with_document
     assert response.facets_distribution["genre"]["fantasy"] == 1
 
 
-@pytest.mark.asyncio
 async def test_custom_search_params_with_facet_filters(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
@@ -145,7 +134,6 @@ async def test_custom_search_params_with_facet_filters(index_with_documents):
     assert response.exhaustive_facets_count is None
 
 
-@pytest.mark.asyncio
 async def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
@@ -158,7 +146,6 @@ async def test_custom_search_params_with_multiple_facet_filters(index_with_docum
     assert response.exhaustive_facets_count is None
 
 
-@pytest.mark.asyncio
 async def test_custom_search_facet_filters_with_space(test_client):
     dataset = [
         {
@@ -210,7 +197,6 @@ async def test_custom_search_facet_filters_with_space(test_client):
     assert response.hits[0]["title"] == "The Hobbit"
 
 
-@pytest.mark.asyncio
 async def test_custom_search_params_with_many_params(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])

@@ -34,14 +34,12 @@ def event_loop():
     loop.close()
 
 
-@pytest.mark.asyncio
 @pytest.fixture(scope="session")
 async def test_client():
     async with Client(BASE_URL, MASTER_KEY) as client:
         yield client
 
 
-@pytest.mark.asyncio
 @pytest.fixture(autouse=True)
 async def clear_indexes(test_client):
     """Auto-clears the indexes after each test function run."""
@@ -83,7 +81,6 @@ def index_uid4():
     return INDEX_UID4
 
 
-@pytest.mark.asyncio
 @pytest.fixture
 async def indexes_sample(test_client):
     indexes = []
@@ -127,7 +124,6 @@ def small_movies_path():
     return SMALL_MOVIES_PATH
 
 
-@pytest.mark.asyncio
 @pytest.fixture
 async def empty_index(test_client):
     async def index_maker(index_name=INDEX_UID):
@@ -136,7 +132,6 @@ async def empty_index(test_client):
     return index_maker
 
 
-@pytest.mark.asyncio
 @pytest.fixture
 async def index_with_documents(empty_index, small_movies, index_uid):
     async def index_maker(index_name=index_uid, documents=small_movies):

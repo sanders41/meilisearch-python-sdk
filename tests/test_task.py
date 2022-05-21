@@ -4,7 +4,6 @@ from meilisearch_python_async.errors import MeiliSearchTimeoutError
 from meilisearch_python_async.task import get_task, get_tasks, wait_for_task
 
 
-@pytest.mark.asyncio
 async def test_get_tasks(empty_index, small_movies):
     index = await empty_index()
     tasks = await get_tasks(index.http_client)
@@ -17,7 +16,6 @@ async def test_get_tasks(empty_index, small_movies):
     assert len(response) - current_tasks == 2
 
 
-@pytest.mark.asyncio
 async def test_get_tasks_for_index(empty_index, small_movies):
     index = await empty_index()
     tasks = await get_tasks(index.http_client, index.uid)
@@ -30,7 +28,6 @@ async def test_get_tasks_for_index(empty_index, small_movies):
     assert len(response) - current_tasks == 2
 
 
-@pytest.mark.asyncio
 async def test_get_task(empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies)
@@ -39,7 +36,6 @@ async def test_get_task(empty_index, small_movies):
     assert update.status == "succeeded"
 
 
-@pytest.mark.asyncio
 async def test_wait_for_task(empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies)
@@ -47,7 +43,6 @@ async def test_wait_for_task(empty_index, small_movies):
     assert update.status == "succeeded"
 
 
-@pytest.mark.asyncio
 async def test_wait_for_pending_update_time_out(empty_index, small_movies):
     index = await empty_index()
     with pytest.raises(MeiliSearchTimeoutError):
