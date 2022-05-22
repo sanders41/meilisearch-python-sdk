@@ -181,6 +181,19 @@ async def test_update_ranking_rules(empty_index, new_ranking_rules):
     assert response == new_ranking_rules
 
 
+@pytest.mark.asyncio
+async def test_reset_ranking_rules(empty_index, new_ranking_rules, default_ranking_rules):
+    index = await empty_index()
+    response = await index.update_ranking_rules(new_ranking_rules)
+    await wait_for_task(index.http_client, response.uid)
+    response = await index.get_ranking_rules()
+    assert response == new_ranking_rules
+    response = await index.reset_ranking_rules()
+    await wait_for_task(index.http_client, response.uid)
+    response = await index.get_ranking_rules()
+    assert response == default_ranking_rules
+
+
 async def test_get_distinct_attribute(empty_index, default_distinct_attribute):
     index = await empty_index()
     response = await index.get_distinct_attribute()
