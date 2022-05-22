@@ -34,7 +34,6 @@ async def remove_default_search_key(default_search_key, test_client):
 
 
 @pytest.fixture
-@pytest.mark.asyncio
 async def test_key(test_client):
     key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
 
@@ -49,7 +48,6 @@ async def test_key(test_client):
 
 
 @pytest.fixture
-@pytest.mark.asyncio
 async def test_key_info(test_client):
     key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
 
@@ -78,7 +76,6 @@ async def wait_for_dump_creation(
     raise TimeoutError
 
 
-@pytest.mark.asyncio
 async def test_create_index_with_primary_key(test_client):
     uid = "test"
     primary_key = "pk_test"
@@ -91,7 +88,6 @@ async def test_create_index_with_primary_key(test_client):
     assert isinstance(index.updated_at, datetime)
 
 
-@pytest.mark.asyncio
 async def test_create_index_no_primary_key(test_client):
     uid = "test"
     index = await test_client.create_index(uid=uid)
@@ -147,7 +143,6 @@ async def test_generate_tenant_token_invalid_restriction(test_key_info, test_cli
         test_client.generate_tenant_token(payload, api_key=key)
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("indexes_sample")
 async def test_get_indexes(test_client, index_uid, index_uid2):
     response = await test_client.get_indexes()
@@ -158,14 +153,12 @@ async def test_get_indexes(test_client, index_uid, index_uid2):
     assert len(response) == 2
 
 
-@pytest.mark.asyncio
 async def test_get_indexes_none(test_client):
     response = await test_client.get_indexes()
 
     assert response is None
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("indexes_sample")
 async def test_get_index(test_client, index_uid):
     response = await test_client.get_index(index_uid)
@@ -176,7 +169,6 @@ async def test_get_index(test_client, index_uid):
     assert isinstance(response.updated_at, datetime)
 
 
-@pytest.mark.asyncio
 async def test_get_index_not_found(test_client):
     with pytest.raises(MeiliSearchApiError):
         await test_client.get_index("test")
@@ -189,7 +181,6 @@ def test_index(test_client):
     assert response.uid == uid
 
 
-@pytest.mark.asyncio
 async def test_get_or_create_index_with_primary_key(test_client):
     primary_key = "pk_test"
     uid = "test1"
@@ -199,7 +190,6 @@ async def test_get_or_create_index_with_primary_key(test_client):
     assert response.primary_key == primary_key
 
 
-@pytest.mark.asyncio
 async def test_get_or_create_index_no_primary_key(test_client):
     uid = "test"
     response = await test_client.get_or_create_index(uid)
@@ -208,7 +198,6 @@ async def test_get_or_create_index_no_primary_key(test_client):
     assert response.primary_key is None
 
 
-@pytest.mark.asyncio
 async def test_get_or_create_index_communication_error(test_client, monkeypatch):
     async def mock_get_response(*args, **kwargs):
         raise ConnectError("test", request=Request("GET", url="http://localhost"))
@@ -222,7 +211,6 @@ async def test_get_or_create_index_communication_error(test_client, monkeypatch)
         await test_client.get_or_create_index("test")
 
 
-@pytest.mark.asyncio
 async def test_get_or_create_index_api_error(test_client, monkeypatch):
     async def mock_response(*args, **kwargs):
         raise MeiliSearchApiError("test", Response(status_code=404))
@@ -232,7 +220,6 @@ async def test_get_or_create_index_api_error(test_client, monkeypatch):
         await test_client.get_or_create_index("test")
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("indexes_sample")
 async def test_get_all_stats(test_client, index_uid, index_uid2):
     response = await test_client.get_all_stats()
@@ -241,7 +228,6 @@ async def test_get_all_stats(test_client, index_uid, index_uid2):
     assert index_uid2 in response.indexes
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("indexes_sample")
 async def test_get_raw_index(test_client, index_uid):
     response = await test_client.get_raw_index(index_uid)
@@ -250,14 +236,12 @@ async def test_get_raw_index(test_client, index_uid):
     assert isinstance(response, IndexInfo)
 
 
-@pytest.mark.asyncio
 async def test_get_raw_index_none(test_client):
     response = await test_client.get_raw_index("test")
 
     assert response is None
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("indexes_sample")
 async def test_get_raw_indexes(test_client, index_uid, index_uid2):
     response = await test_client.get_raw_indexes()
@@ -268,21 +252,18 @@ async def test_get_raw_indexes(test_client, index_uid, index_uid2):
     assert len(response) == 2
 
 
-@pytest.mark.asyncio
 async def test_get_raw_indexes_none(test_client):
     response = await test_client.get_raw_indexes()
 
     assert response is None
 
 
-@pytest.mark.asyncio
 async def test_health(test_client):
     health = await test_client.health()
 
     assert health.status == "available"
 
 
-@pytest.mark.asyncio
 async def test_create_key(test_key_info, test_client):
     expires_at = datetime.utcnow() + timedelta(days=2)
     test_key_info.expires_at = expires_at
@@ -294,7 +275,6 @@ async def test_create_key(test_key_info, test_client):
     assert key.expires_at.date() == expires_at.date()
 
 
-@pytest.mark.asyncio
 async def test_create_key_no_expires(test_key_info, test_client):
     key = await test_client.create_key(test_key_info)
 
@@ -304,7 +284,6 @@ async def test_create_key_no_expires(test_key_info, test_client):
     assert key.expires_at is None
 
 
-@pytest.mark.asyncio
 async def test_delete_key(test_key, test_client):
     result = await test_client.delete_key(test_key.key)
     assert result == 204
@@ -313,20 +292,17 @@ async def test_delete_key(test_key, test_client):
         await test_client.get_key(test_key.key)
 
 
-@pytest.mark.asyncio
 async def test_get_keys(test_client):
     response = await test_client.get_keys()
 
     assert len(response) == 2
 
 
-@pytest.mark.asyncio
 async def test_get_key(test_key, test_client):
     key = await test_client.get_key(test_key.key)
     assert key.description == test_key.description
 
 
-@pytest.mark.asyncio
 async def test_update_key(test_key, test_client):
     update_key_info = KeyUpdate(
         key=test_key.key,
@@ -344,14 +320,12 @@ async def test_update_key(test_key, test_client):
     assert key.expires_at.date() == update_key_info.expires_at.date()  # type: ignore
 
 
-@pytest.mark.asyncio
 async def test_get_version(test_client):
     response = await test_client.get_version()
 
     assert isinstance(response, Version)
 
 
-@pytest.mark.asyncio
 async def test_create_dump(test_client, index_with_documents):
     await index_with_documents("indexUID-dump-creation")
 
@@ -362,7 +336,6 @@ async def test_create_dump(test_client, index_with_documents):
     assert complete is None
 
 
-@pytest.mark.asyncio
 async def test_get_dump_status(test_client, index_with_documents):
     await index_with_documents("indexUID-dump-status")
     dump = await test_client.create_dump()
@@ -377,34 +350,29 @@ async def test_get_dump_status(test_client, index_with_documents):
     assert complete is None
 
 
-@pytest.mark.asyncio
 async def test_get_dump_status_error(test_client):
     with pytest.raises(MeiliSearchApiError):
         await test_client.get_dump_status("bad")
 
 
-@pytest.mark.asyncio
 async def test_no_master_key(base_url):
     with pytest.raises(MeiliSearchApiError):
         async with Client(base_url) as client:
             await client.create_index("some_index")
 
 
-@pytest.mark.asyncio
 async def test_bad_master_key(base_url, master_key):
     with pytest.raises(MeiliSearchApiError):
         async with Client(base_url) as client:
             await client.create_index("some_index", f"{master_key}bad")
 
 
-@pytest.mark.asyncio
 async def test_communication_error(master_key):
     with pytest.raises(MeiliSearchCommunicationError):
         async with Client("http://wrongurl:1234", master_key, timeout=1) as client:
             await client.create_index("some_index")
 
 
-@pytest.mark.asyncio
 async def test_remote_protocol_error(test_client, monkeypatch):
     def mock_error(*args, **kwargs):
         raise RemoteProtocolError("error", request=args[0])
@@ -414,7 +382,6 @@ async def test_remote_protocol_error(test_client, monkeypatch):
         await test_client.create_index("some_index")
 
 
-@pytest.mark.asyncio
 async def test_connection_timeout(test_client, monkeypatch):
     def mock_error(*args, **kwargs):
         raise ConnectTimeout("error")

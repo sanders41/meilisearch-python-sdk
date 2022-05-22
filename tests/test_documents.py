@@ -65,14 +65,12 @@ def add_document():
     }
 
 
-@pytest.mark.asyncio
 async def test_get_documents_default(empty_index):
     index = await empty_index()
     response = await index.get_documents()
     assert response is None
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -84,7 +82,6 @@ async def test_add_documents(primary_key, expected_primary_key, empty_index, sma
     assert update.status == "succeeded"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [3500, 2500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
@@ -109,7 +106,6 @@ async def test_add_documents_auto_batch(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.asyncio
 async def test_add_documents_auto_batch_no_max_payload(empty_index):
     movies = generate_test_movies()
 
@@ -126,14 +122,12 @@ async def test_add_documents_auto_batch_no_max_payload(empty_index):
     assert await index.get_primary_key() == "id"
 
 
-@pytest.mark.asyncio
 async def test_add_documents_auto_batch_payload_size_error(empty_index, small_movies):
     with pytest.raises(PayloadTooLarge):
         index = await empty_index()
         await index.add_documents_auto_batch(small_movies, max_payload_size=1)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
@@ -154,7 +148,6 @@ async def test_add_documents_in_batches(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
@@ -181,7 +174,6 @@ async def test_add_documents_from_directory(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_csv_path(
@@ -200,7 +192,6 @@ async def test_add_documents_from_directory_csv_path(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_ndjson(
@@ -219,7 +210,6 @@ async def test_add_documents_from_directory_ndjson(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_no_documents(combine_documents, test_client, tmp_path):
     with open(tmp_path / "test.txt", "w") as f:
@@ -230,7 +220,6 @@ async def test_add_documents_from_directory_no_documents(combine_documents, test
         await index.add_documents_from_directory(tmp_path, combine_documents=combine_documents)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -268,7 +257,6 @@ async def test_add_documents_from_directory_auto_batch(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -298,7 +286,6 @@ async def test_add_documents_from_directory_auto_batch_csv(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -328,7 +315,6 @@ async def test_add_documents_from_directory_auto_batch_ndjson(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -360,7 +346,6 @@ async def test_add_documents_from_directory_in_batchs(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -381,7 +366,6 @@ async def test_add_documents_from_directory_in_batchs_csv(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -402,7 +386,6 @@ async def test_add_documents_from_directory_in_batchs_ndjson(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -419,7 +402,6 @@ async def test_add_documents_from_file(
     assert update.status == "succeeded"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -436,7 +418,6 @@ async def test_add_documents_from_file_csv(
     assert update.status == "succeeded"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -452,7 +433,6 @@ async def test_add_documents_raw_file_csv(
     assert update.status == "succeeded"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -468,14 +448,12 @@ async def test_add_documents_raw_file_ndjson(
     assert update.status == "succeeded"
 
 
-@pytest.mark.asyncio
 async def test_add_documents_raw_file_not_found_error(test_client, tmp_path):
     with pytest.raises(MeiliSearchError):
         index = test_client.index("movies")
         await index.add_documents_from_raw_file(tmp_path / "file.csv")
 
 
-@pytest.mark.asyncio
 async def test_add_document_raw_file_extension_error(test_client, tmp_path):
     file_path = tmp_path / "file.bad"
     with open(file_path, "w") as f:
@@ -486,7 +464,6 @@ async def test_add_document_raw_file_extension_error(test_client, tmp_path):
         await index.add_documents_from_raw_file(file_path)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -503,7 +480,6 @@ async def test_add_documents_from_file_ndjson(
     assert update.status == "succeeded"
 
 
-@pytest.mark.asyncio
 async def test_add_documents_from_file_invalid_extension(test_client):
     index = test_client.index("movies")
 
@@ -511,7 +487,6 @@ async def test_add_documents_from_file_invalid_extension(test_client):
         await index.add_documents_from_file("test.bad")
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
@@ -547,7 +522,6 @@ async def test_add_documents_from_file_auto_batch(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
@@ -584,7 +558,6 @@ async def test_add_documents_from_file_auto_batch_csv(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("pk_test", "pk_test"), (None, "id")]
@@ -621,7 +594,6 @@ async def test_add_documents_from_file_auto_batch_ndjson(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
@@ -651,7 +623,6 @@ async def test_add_documents_from_file_in_batches(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
@@ -681,7 +652,6 @@ async def test_add_documents_from_file_in_batches_csv(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
@@ -711,7 +681,6 @@ async def test_add_documents_from_file_in_batches_ndjson(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.asyncio
 async def test_add_documents_from_file_in_batches_invalid_extension(test_client):
     index = test_client.index("movies")
 
@@ -719,28 +688,24 @@ async def test_add_documents_from_file_in_batches_invalid_extension(test_client)
         await index.add_documents_from_file_in_batches("test.bad")
 
 
-@pytest.mark.asyncio
 async def test_get_document(index_with_documents):
     index = await index_with_documents()
     response = await index.get_document("500682")
     assert response["title"] == "The Highwaymen"
 
 
-@pytest.mark.asyncio
 async def test_get_document_inexistent(empty_index):
     with pytest.raises(MeiliSearchApiError):
         index = await empty_index()
         await index.get_document("123")
 
 
-@pytest.mark.asyncio
 async def test_get_documents_populated(index_with_documents):
     index = await index_with_documents()
     response = await index.get_documents()
     assert len(response) == 20
 
 
-@pytest.mark.asyncio
 async def test_get_documents_offset_optional_params(index_with_documents):
     index = await index_with_documents()
     response = await index.get_documents()
@@ -753,7 +718,6 @@ async def test_get_documents_offset_optional_params(index_with_documents):
     assert response_offset_limit[0]["overview"] == response[1]["overview"]
 
 
-@pytest.mark.asyncio
 async def test_update_documents(index_with_documents, small_movies):
     index = await index_with_documents()
     response = await index.get_documents()
@@ -768,7 +732,6 @@ async def test_update_documents(index_with_documents, small_movies):
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 async def test_update_documents_with_primary_key(test_client, small_movies):
     primary_key = "release_date"
     index = test_client.index("movies")
@@ -777,7 +740,6 @@ async def test_update_documents_with_primary_key(test_client, small_movies):
     assert await index.get_primary_key() == primary_key
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 async def test_update_documents_auto_batch(max_payload, test_client):
     documents = generate_test_movies()
@@ -807,7 +769,6 @@ async def test_update_documents_auto_batch(max_payload, test_client):
     assert response[0]["title"] == "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 async def test_update_documents_auto_batch_primary_key(test_client, max_payload):
     documents = generate_test_movies()
@@ -827,14 +788,12 @@ async def test_update_documents_auto_batch_primary_key(test_client, max_payload)
     assert await index.get_primary_key() == primary_key
 
 
-@pytest.mark.asyncio
 async def test_update_documents_auto_batch_payload_size_error(empty_index, small_movies):
     with pytest.raises(PayloadTooLarge):
         index = await empty_index()
         await index.update_documents_auto_batch(small_movies, max_payload_size=1)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 async def test_update_documents_in_batches(batch_size, index_with_documents, small_movies):
     index = await index_with_documents()
@@ -855,7 +814,6 @@ async def test_update_documents_in_batches(batch_size, index_with_documents, sma
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 async def test_update_documents_in_batches_with_primary_key(batch_size, test_client, small_movies):
     primary_key = "release_date"
@@ -872,7 +830,6 @@ async def test_update_documents_in_batches_with_primary_key(batch_size, test_cli
     assert await index.get_primary_key() == primary_key
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
@@ -901,7 +858,6 @@ async def test_update_documents_from_directory(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_csv(
@@ -920,7 +876,6 @@ async def test_update_documents_from_directory_csv(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_ndjson(
@@ -939,7 +894,6 @@ async def test_update_documents_from_directory_ndjson(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -979,7 +933,6 @@ async def test_update_documents_from_directory_auto_batch(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -1009,7 +962,6 @@ async def test_update_documents_from_directory_auto_batch_csv(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -1039,7 +991,6 @@ async def test_update_documents_from_directory_auto_batch_ndjson(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -1071,7 +1022,6 @@ async def test_update_documents_from_directory_in_batchs(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -1092,7 +1042,6 @@ async def test_update_documents_from_directory_in_batchs_csv(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -1113,7 +1062,6 @@ async def test_update_documents_from_directory_in_batchs_ndjson(
     assert stats.number_of_documents == 100
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_from_file(path_type, test_client, small_movies, small_movies_path):
     small_movies[0]["title"] = "Some title"
@@ -1133,7 +1081,6 @@ async def test_update_documents_from_file(path_type, test_client, small_movies, 
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_from_file_csv(
     path_type, test_client, small_movies, small_movies_csv_path
@@ -1155,7 +1102,6 @@ async def test_update_documents_from_file_csv(
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_from_file_ndjson(
     path_type, test_client, small_movies, small_movies_ndjson_path
@@ -1177,7 +1123,6 @@ async def test_update_documents_from_file_ndjson(
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 async def test_update_documents_from_file_with_primary_key(test_client, small_movies_path):
     primary_key = "release_date"
     index = test_client.index("movies")
@@ -1186,7 +1131,6 @@ async def test_update_documents_from_file_with_primary_key(test_client, small_mo
     assert await index.get_primary_key() == primary_key
 
 
-@pytest.mark.asyncio
 async def test_update_documents_from_file_invalid_extension(test_client):
     index = test_client.index("movies")
 
@@ -1194,7 +1138,6 @@ async def test_update_documents_from_file_invalid_extension(test_client):
         await index.update_documents_from_file("test.bad")
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 async def test_update_documents_from_file_auto_batch(path_type, max_payload, test_client, tmp_path):
@@ -1231,7 +1174,6 @@ async def test_update_documents_from_file_auto_batch(path_type, max_payload, tes
     assert response[0]["title"] == "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 async def test_update_documents_from_file_auto_batch_csv(
@@ -1277,7 +1219,6 @@ async def test_update_documents_from_file_auto_batch_csv(
     assert response[0]["title"] == "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("max_payload", [None, 3500, 2500])
 async def test_update_documents_from_file_auto_batch_ndjson(
@@ -1322,7 +1263,6 @@ async def test_update_documents_from_file_auto_batch_ndjson(
     assert response[0]["title"] == "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 async def test_update_documents_from_file_in_batches(
@@ -1349,7 +1289,6 @@ async def test_update_documents_from_file_in_batches(
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 async def test_update_documents_from_file_in_batches_csv(
@@ -1376,7 +1315,6 @@ async def test_update_documents_from_file_in_batches_csv(
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 async def test_update_documents_from_file_in_batches_ndjson(
@@ -1403,7 +1341,6 @@ async def test_update_documents_from_file_in_batches_ndjson(
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 async def test_update_documents_from_file_in_batches_invalid_extension(test_client):
     index = test_client.index("movies")
 
@@ -1411,7 +1348,6 @@ async def test_update_documents_from_file_in_batches_invalid_extension(test_clie
         await index.update_documents_from_file_in_batches("test.bad")
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_raw_file_csv(
     path_type, test_client, small_movies_csv_path, small_movies
@@ -1433,7 +1369,6 @@ async def test_update_documents_raw_file_csv(
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_raw_file_ndjson(
     path_type, test_client, small_movies_ndjson_path, small_movies
@@ -1455,14 +1390,12 @@ async def test_update_documents_raw_file_ndjson(
     assert response[0]["title"] != "Some title"
 
 
-@pytest.mark.asyncio
 async def test_update_documents_raw_file_not_found_error(test_client, tmp_path):
     with pytest.raises(MeiliSearchError):
         index = test_client.index("movies")
         await index.update_documents_from_raw_file(tmp_path / "file.csv")
 
 
-@pytest.mark.asyncio
 async def test_update_document_raw_file_extension_error(test_client, tmp_path):
     file_path = tmp_path / "file.bad"
     with open(file_path, "w") as f:
@@ -1473,7 +1406,6 @@ async def test_update_document_raw_file_extension_error(test_client, tmp_path):
         await index.update_documents_from_raw_file(file_path)
 
 
-@pytest.mark.asyncio
 async def test_delete_document(index_with_documents):
     index = await index_with_documents()
     response = await index.delete_document("500682")
@@ -1482,7 +1414,6 @@ async def test_delete_document(index_with_documents):
         await index.get_document("500682")
 
 
-@pytest.mark.asyncio
 async def test_delete_documents(index_with_documents):
     to_delete = ["522681", "450465", "329996"]
     index = await index_with_documents()
@@ -1493,7 +1424,6 @@ async def test_delete_documents(index_with_documents):
     assert to_delete not in ids
 
 
-@pytest.mark.asyncio
 async def test_delete_all_documents(index_with_documents):
     index = await index_with_documents()
     response = await index.delete_all_documents()
@@ -1502,7 +1432,6 @@ async def test_delete_all_documents(index_with_documents):
     assert response is None
 
 
-@pytest.mark.asyncio
 async def test_load_documents_from_file_invalid_document(tmp_path):
     doc = {"id": 1, "name": "test"}
     file_path = tmp_path / "test.json"
