@@ -7,4 +7,4 @@ Meilisearch itself and how to use it can be found in [here](https://docs.meilise
 
 ## Compatibility with Meilisearch
 
-This package only guarantees the compatibility with [version v0.27 of Meilisearch](https://github.com/meilisearch/meilisearch/releases/tag/v0.27.0).
+This package only guarantees the compatibility with [version v0.28 of Meilisearch](https://github.com/meilisearch/meilisearch/releases/tag/v0.28.0).
