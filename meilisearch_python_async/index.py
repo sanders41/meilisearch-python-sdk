@@ -142,7 +142,7 @@ class Index:
         payload = {"primaryKey": primary_key}
         url = f"{self._base_url_with_uid}"
         response = await self._http_requests.patch(url, payload)
-        await wait_for_task(self.http_client, response.json()["uid"], timeout_in_ms=100000)
+        await wait_for_task(self.http_client, response.json()["taskUid"], timeout_in_ms=100000)
         index_response = await self._http_requests.get(f"{url}")
         self.primary_key = index_response.json()["primaryKey"]
         return self
@@ -282,13 +282,13 @@ class Index:
         offset: int = 0,
         limit: int = 20,
         filter: str | list[str | list[str]] | None = None,
-        facets_distribution: list[str] | None = None,
+        facets: list[str] | None = None,
         attributes_to_retrieve: list[str] = ["*"],
         attributes_to_crop: list[str] | None = None,
         crop_length: int = 200,
         attributes_to_highlight: list[str] | None = None,
         sort: list[str] | None = None,
-        matches: bool = False,
+        showMatchesPosition: bool = False,
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
@@ -301,7 +301,7 @@ class Index:
         * **offset:** Number of documents to skip. Defaults to 0.
         * **limit:** Maximum number of documents returned. Defaults to 20.
         * **filter:** Filter queries by an attribute value. Defaults to None.
-        * **facets_distribution:** Facets for which to retrieve the matching count. Defaults to None.
+        * **facets:** Facets for which to retrieve the matching count. Defaults to None.
         * **attributes_to_retrieve:** Attributes to display in the returned documents.
             Defaults to ["*"].
         * **attributes_to_crop:** Attributes whose values have to be cropped. Defaults to None.
@@ -309,7 +309,7 @@ class Index:
         * **attributes_to_highlight:** Attributes whose values will contain highlighted matching terms.
             Defaults to None.
         * **sort:** Attributes by which to sort the results. Defaults to None.
-        * **matches:** Defines whether an object that contains information about the matches should be
+        * **showMatchesPostions:** Defines whether an object that contains information about the matches should be
             returned or not. Defaults to False.
         * **hightlight_pre_tag:** The opening tag for highlighting text. Defaults to <em>.
         * **hightlight_post_tag:** The closing tag for highlighting text. Defaults to </em>
@@ -337,13 +337,13 @@ class Index:
             "offset": offset,
             "limit": limit,
             "filter": filter,
-            "facetsDistribution": facets_distribution,
+            "facets": facets,
             "attributesToRetrieve": attributes_to_retrieve,
             "attributesToCrop": attributes_to_crop,
             "cropLength": crop_length,
             "attributesToHighlight": attributes_to_highlight,
             "sort": sort,
-            "matches": matches,
+            "showMatchesPosition": showMatchesPosition,
             "highlightPreTag": highlight_pre_tag,
             "highlightPostTag": highlight_post_tag,
             "cropMarker": crop_marker,
@@ -1413,7 +1413,7 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/ranking-rules"
-        respose = await self._http_requests.patch(url, ranking_rules)
+        respose = await self._http_requests.put(url, ranking_rules)
 
         return TaskInfo(**respose.json())
 
@@ -1493,7 +1493,7 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/distinct-attribute"
-        response = await self._http_requests.patch(url, body)
+        response = await self._http_requests.put(url, body)
 
         return TaskInfo(**response.json())
 
@@ -1568,7 +1568,7 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/searchable-attributes"
-        response = await self._http_requests.patch(url, body)
+        response = await self._http_requests.put(url, body)
 
         return TaskInfo(**response.json())
 
@@ -2033,7 +2033,7 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/typo-tolerance"
-        response = await self._http_requests.put(url, typo_tolerance.dict(by_alias=True))
+        response = await self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))
 
         return TaskInfo(**response.json())
 

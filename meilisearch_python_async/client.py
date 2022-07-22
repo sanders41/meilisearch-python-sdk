@@ -11,7 +11,7 @@ from httpx import AsyncClient
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidRestriction, MeiliSearchApiError
 from meilisearch_python_async.index import Index
-from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeyUpdate
+from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeySearch, KeyUpdate
 from meilisearch_python_async.models.health import Health
 from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.task import TaskInfo
@@ -128,7 +128,7 @@ class Client:
         """
         url = f"indexes/{uid}"
         response = await self._http_requests.delete(url)
-        status = await wait_for_task(self.http_client, response.json()["uid"])
+        status = await wait_for_task(self.http_client, response.json()["taskUid"])
         if status.status == "succeeded":
             return True
         return False
@@ -385,7 +385,7 @@ class Client:
         response = await self._http_requests.delete(f"keys/{key}")
         return response.status_code
 
-    async def get_keys(self) -> list[Key]:
+    async def get_keys(self) -> KeySearch:
         """Gets the MeiliSearch API keys.
 
         **Returns:** API keys.
@@ -404,7 +404,7 @@ class Client:
         ```
         """
         response = await self._http_requests.get("keys")
-        return [Key(**x) for x in response.json()["results"]]
+        return KeySearch(**response.json())
 
     async def get_key(self, key: str) -> Key:
         """Gets information about a specific API key.

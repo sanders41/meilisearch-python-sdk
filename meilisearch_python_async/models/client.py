@@ -47,3 +47,10 @@ class KeyUpdate(CamelBase):
         json_encoders = {
             datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
         }
+
+
+class KeySearch(CamelBase):
+    results: List[Key]
+    offset: int
+    limit: int
+    total: int
