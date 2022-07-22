@@ -13,6 +13,7 @@ class ClientStats(CamelBase):
 
 
 class _KeyBase(CamelBase):
+    name: Optional[str] = None
     description: str
     actions: List[str]
     indexes: List[str]
@@ -34,5 +35,15 @@ class KeyCreate(_KeyBase):
     pass
 
 
-class KeyUpdate(_KeyBase):
+class KeyUpdate(CamelBase):
     key: str
+    name: Optional[str] = None
+    description: Optional[str] = None
+    actions: Optional[List[str]] = None
+    indexes: Optional[List[str]] = None
+    expires_at: Optional[datetime] = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+        }

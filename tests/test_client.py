@@ -15,9 +15,9 @@ from meilisearch_python_async.errors import (
     MeiliSearchCommunicationError,
 )
 from meilisearch_python_async.models.client import KeyCreate, KeyUpdate
-from meilisearch_python_async.models.dump import DumpInfo
 from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.version import Version
+from meilisearch_python_async.task import get_task, wait_for_task
 
 
 @pytest.fixture
@@ -307,17 +307,14 @@ async def test_update_key(test_key, test_client):
     update_key_info = KeyUpdate(
         key=test_key.key,
         description="updated",
-        actions=["*"],
-        indexes=["*"],
-        expires_at=datetime.utcnow() + timedelta(days=2),
     )
 
     key = await test_client.update_key(update_key_info)
 
     assert key.description == update_key_info.description
-    assert key.actions == update_key_info.actions
-    assert key.indexes == update_key_info.indexes
-    assert key.expires_at.date() == update_key_info.expires_at.date()  # type: ignore
+    assert key.actions == test_key.actions
+    assert key.indexes == test_key.indexes
+    assert key.expires_at == test_key.expires_at
 
 
 async def test_get_version(test_client):
@@ -327,32 +324,15 @@ async def test_get_version(test_client):
 
 
 async def test_create_dump(test_client, index_with_documents):
-    await index_with_documents("indexUID-dump-creation")
+    index = await index_with_documents("indexUID-dump-creation")
 
     response = await test_client.create_dump()
-    assert response.status == "in_progress"
-    complete = await wait_for_dump_creation(test_client, response.uid)
 
-    assert complete is None
+    await wait_for_task(index.http_client, response.task_uid)
 
-
-async def test_get_dump_status(test_client, index_with_documents):
-    await index_with_documents("indexUID-dump-status")
-    dump = await test_client.create_dump()
-
-    assert dump.status == "in_progress"
-
-    dump_status = await test_client.get_dump_status(dump.uid)
-    assert isinstance(dump_status, DumpInfo)
-
-    complete = await wait_for_dump_creation(test_client, dump.uid)
-
-    assert complete is None
-
-
-async def test_get_dump_status_error(test_client):
-    with pytest.raises(MeiliSearchApiError):
-        await test_client.get_dump_status("bad")
+    dump_status = await get_task(index.http_client, response.task_uid)
+    assert dump_status.status == "succeeded"
+    assert dump_status.task_type == "dumpCreation"
 
 
 async def test_no_master_key(base_url):

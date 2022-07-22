@@ -12,9 +12,9 @@ from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidRestriction, MeiliSearchApiError
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeyUpdate
-from meilisearch_python_async.models.dump import DumpInfo
 from meilisearch_python_async.models.health import Health
 from meilisearch_python_async.models.index import IndexInfo
+from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.models.version import Version
 from meilisearch_python_async.task import wait_for_task
 
@@ -58,11 +58,10 @@ class Client:
         """
         await self.http_client.aclose()
 
-    async def create_dump(self) -> DumpInfo:
+    async def create_dump(self) -> TaskInfo:
         """Trigger the creation of a MeiliSearch dump.
 
-        **Returns:** Information about the dump.
-            https://docs.meilisearch.com/reference/api/dump.html#create-a-dump
+        **Returns:** The details of the task.
 
         **Raises:**
 
@@ -78,7 +77,7 @@ class Client:
         ```
         """
         response = await self._http_requests.post("dumps")
-        return DumpInfo(**response.json())
+        return TaskInfo(**response.json())
 
     async def create_index(self, uid: str, primary_key: str | None = None) -> Index:
         """Creates a new index.
@@ -209,7 +208,7 @@ class Client:
         """
         response = await self._http_requests.get("indexes")
 
-        if not response.json():
+        if not response.json()["results"]:
             return None
 
         return [
@@ -220,7 +219,7 @@ class Client:
                 created_at=x["createdAt"],
                 updated_at=x["updatedAt"],
             )
-            for x in response.json()
+            for x in response.json()["results"]
         ]
 
     async def get_index(self, uid: str) -> Index:
@@ -294,32 +293,6 @@ class Client:
         """
         response = await self._http_requests.get("stats")
         return ClientStats(**response.json())
-
-    async def get_dump_status(self, uid: str) -> DumpInfo:
-        """Retrieve the status of a MeiliSearch dump creation.
-
-        **Args:**
-        * **uid:** The update identifier for the dump creation.
-
-        **Returns:** Information about the dump status.
-            https://docs.meilisearch.com/reference/api/dump.html#get-dump-status
-
-        **Raises:**
-
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-
-        Usage:
-
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     status = await client.get_dump_status("20201101-110357260")
-        ```
-        """
-        url = f"dumps/{uid}/status"
-        response = await self._http_requests.get(url)
-        return DumpInfo(**response.json())
 
     async def get_or_create_index(self, uid: str, primary_key: str | None = None) -> Index:
         """Get an index, or create it if it doesn't exist.
@@ -431,9 +404,7 @@ class Client:
         ```
         """
         response = await self._http_requests.get("keys")
-        keys = [Key(**x) for x in response.json()["results"]]
-
-        return keys
+        return [Key(**x) for x in response.json()["results"]]
 
     async def get_key(self, key: str) -> Key:
         """Gets information about a specific API key.
@@ -490,9 +461,8 @@ class Client:
         """
         # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
         # but can when converting to a json string.
-        response = await self._http_requests.patch(
-            f"keys/{key.key}", json.loads(key.json(by_alias=True))
-        )
+        payload = {k: v for k, v in json.loads(key.json(by_alias=True)).items() if v is not None}
+        response = await self._http_requests.patch(f"keys/{key.key}", payload)
         return Key(**response.json())
 
     async def get_raw_index(self, uid: str) -> IndexInfo | None:
@@ -546,10 +516,10 @@ class Client:
         """
         response = await self._http_requests.get("indexes")
 
-        if not response.json():
+        if not response.json()["results"]:
             return None
 
-        return [IndexInfo(**x) for x in response.json()]
+        return [IndexInfo(**x) for x in response.json()["results"]]
 
     async def get_version(self) -> Version:
         """Get the MeiliSearch version.
