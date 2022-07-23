@@ -343,7 +343,7 @@ class Index:
             "cropLength": crop_length,
             "attributesToHighlight": attributes_to_highlight,
             "sort": sort,
-            "show_matches_position": show_matches_position,
+            "showMatchesPosition": show_matches_position,
             "highlightPreTag": highlight_pre_tag,
             "highlightPostTag": highlight_post_tag,
             "cropMarker": crop_marker,
