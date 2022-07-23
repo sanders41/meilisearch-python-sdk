@@ -13,6 +13,8 @@ class ClientStats(CamelBase):
 
 
 class _KeyBase(CamelBase):
+    uid: str
+    name: Optional[str] = None
     description: str
     actions: List[str]
     indexes: List[str]
@@ -30,9 +32,35 @@ class Key(_KeyBase):
     updated_at: Optional[datetime] = None
 
 
-class KeyCreate(_KeyBase):
-    pass
+class KeyCreate(CamelBase):
+    name: Optional[str] = None
+    description: str
+    actions: List[str]
+    indexes: List[str]
+    expires_at: Optional[datetime] = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+        }
 
 
-class KeyUpdate(_KeyBase):
+class KeyUpdate(CamelBase):
     key: str
+    name: Optional[str] = None
+    description: Optional[str] = None
+    actions: Optional[List[str]] = None
+    indexes: Optional[List[str]] = None
+    expires_at: Optional[datetime] = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+        }
+
+
+class KeySearch(CamelBase):
+    results: List[Key]
+    offset: int
+    limit: int
+    total: int

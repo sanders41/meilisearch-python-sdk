@@ -10,7 +10,7 @@ class TaskId(CamelBase):
 
 
 class TaskStatus(TaskId):
-    index_uid: str
+    index_uid: Optional[str] = None
     status: str
     task_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
     details: Optional[Dict[str, Any]]
@@ -18,3 +18,11 @@ class TaskStatus(TaskId):
     enqueued_at: datetime
     started_at: Optional[datetime]
     finished_at: Optional[datetime]
+
+
+class TaskInfo(CamelBase):
+    task_uid: int
+    index_uid: Optional[str] = None
+    status: str
+    task_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
+    enqueued_at: datetime

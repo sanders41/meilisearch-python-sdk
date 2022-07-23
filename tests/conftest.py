@@ -48,7 +48,7 @@ async def clear_indexes(test_client):
     if indexes:
         for index in indexes:
             response = await test_client.index(index.uid).delete()
-            await wait_for_task(test_client.http_client, response.uid)
+            await wait_for_task(test_client.http_client, response.task_uid)
 
 
 @pytest.fixture(scope="session")
@@ -137,7 +137,7 @@ async def index_with_documents(empty_index, small_movies, index_uid):
     async def index_maker(index_name=index_uid, documents=small_movies):
         index = await empty_index(index_name)
         response = await index.add_documents(documents)
-        await wait_for_task(index.http_client, response.uid)
+        await wait_for_task(index.http_client, response.task_uid)
         return index
 
     return index_maker
@@ -146,6 +146,7 @@ async def index_with_documents(empty_index, small_movies, index_uid):
 @pytest.fixture
 async def default_search_key(test_client):
     keys = await test_client.get_keys()
-    for key in keys:
-        if "Default Search API Key" in key.description:
+
+    for key in keys.results:
+        if key.actions == ["search"]:
             return key

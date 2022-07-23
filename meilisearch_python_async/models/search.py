@@ -1,15 +1,13 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from camel_converter.pydantic_base import CamelBase
 
 
 class SearchResults(CamelBase):
-    hits: List[Dict]
+    hits: List[Dict[str, Any]]
     offset: int
     limit: int
-    nb_hits: int
-    exhaustive_nb_hits: bool
-    facets_distribution: Optional[Dict] = None
-    exhaustive_facets_count: Optional[bool] = None
+    estimated_total_hits: int
     processing_time_ms: float
     query: str
+    facet_distribution: Optional[Dict[str, Any]] = None

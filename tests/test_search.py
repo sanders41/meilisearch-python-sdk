@@ -110,40 +110,37 @@ async def test_custom_search_params_with_string_list(index_with_documents):
     assert "<em>" not in response.hits[0]["_formatted"]["overview"]
 
 
-async def test_custom_search_params_with_facets_distribution(index_with_documents):
+async def test_custom_search_params_with_facets(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.uid)
-    response = await index.search("world", facets_distribution=["genre"])
+    await wait_for_task(index.http_client, update.task_uid)
+    response = await index.search("world", facets=["genre"])
     assert len(response.hits) == 12
-    assert response.facets_distribution is not None
-    assert response.exhaustive_facets_count is not None
-    assert "genre" in response.facets_distribution
-    assert response.facets_distribution["genre"]["cartoon"] == 1
-    assert response.facets_distribution["genre"]["action"] == 3
-    assert response.facets_distribution["genre"]["fantasy"] == 1
+    assert response.facet_distribution is not None
+    assert "genre" in response.facet_distribution
+    assert response.facet_distribution["genre"]["cartoon"] == 1
+    assert response.facet_distribution["genre"]["action"] == 3
+    assert response.facet_distribution["genre"]["fantasy"] == 1
 
 
 async def test_custom_search_params_with_facet_filters(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.uid)
+    await wait_for_task(index.http_client, update.task_uid)
     response = await index.search("world", filter=[["genre = action"]])
     assert len(response.hits) == 3
-    assert response.facets_distribution is None
-    assert response.exhaustive_facets_count is None
+    assert response.facet_distribution is None
 
 
 async def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.uid)
+    await wait_for_task(index.http_client, update.task_uid)
     response = await index.search(
         "world", filter=["genre = action", ["genre = action", "genre = action"]]
     )
     assert len(response.hits) == 3
-    assert response.facets_distribution is None
-    assert response.exhaustive_facets_count is None
+    assert response.facet_distribution is None
 
 
 async def test_custom_search_facet_filters_with_space(test_client):
@@ -189,9 +186,9 @@ async def test_custom_search_facet_filters_with_space(test_client):
 
     index = test_client.index("books")
     update = await index.add_documents(dataset)
-    await wait_for_task(index.http_client, update.uid)
+    await wait_for_task(index.http_client, update.task_uid)
     update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.uid)
+    await wait_for_task(index.http_client, update.task_uid)
     response = await index.search("h", filter=["genre = 'sci fi'"])
     assert len(response.hits) == 1
     assert response.hits[0]["title"] == "The Hobbit"
@@ -200,13 +197,12 @@ async def test_custom_search_facet_filters_with_space(test_client):
 async def test_custom_search_params_with_many_params(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.uid)
+    await wait_for_task(index.http_client, update.task_uid)
     response = await index.search(
         "world", filter=[["genre = action"]], attributes_to_retrieve=["title", "poster"]
     )
     assert len(response.hits) == 3
-    assert response.facets_distribution is None
-    assert response.exhaustive_facets_count is None
+    assert response.facet_distribution is None
     assert "title" in response.hits[0]
     assert "poster" in response.hits[0]
     assert "overview" not in response.hits[0]
@@ -230,7 +226,7 @@ async def test_custom_search_params_with_many_params(index_with_documents):
 async def test_search_sort(sort, titles, index_with_documents):
     index = await index_with_documents()
     response = await index.update_sortable_attributes(["title"])
-    await wait_for_task(index.http_client, response.uid)
+    await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()  # get this to get the total document count
 
     # Using a placeholder search because ranking rules affect sort otherwaise meaning the results

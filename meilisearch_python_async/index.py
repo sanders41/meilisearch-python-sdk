@@ -6,7 +6,6 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from sys import getsizeof
 from typing import Any, AsyncGenerator
 from urllib.parse import urlencode
 
@@ -14,11 +13,12 @@ import aiofiles
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchError, PayloadTooLarge
+from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchError
+from meilisearch_python_async.models.documents import DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
 from meilisearch_python_async.models.settings import MeiliSearchSettings, TypoTolerance
-from meilisearch_python_async.models.task import TaskStatus
+from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.task import wait_for_task
 
 
@@ -65,10 +65,10 @@ class Index:
     def __repr__(self) -> str:
         return f"{type(self).__name__}(uid={self.uid!r}, primary_key={self.primary_key!r}, created_at={self.created_at!r}, updated_at={self.updated_at!r})"
 
-    async def delete(self) -> TaskStatus:
+    async def delete(self) -> TaskInfo:
         """Deletes the index.
 
-        **Returns:** The details of the task status.
+        **Returns:** The details of the task.
 
         **Raises:**
 
@@ -88,7 +88,7 @@ class Index:
         """
         url = f"{self._base_url_with_uid}"
         response = await self._http_requests.delete(url)
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def delete_if_exists(self) -> bool:
         """Delete the index if it already exists.
@@ -110,7 +110,7 @@ class Index:
         ```
         """
         response = await self.delete()
-        status = await wait_for_task(self.http_client, response.uid)
+        status = await wait_for_task(self.http_client, response.task_uid)
         if status.status == "succeeded":
             return True
 
@@ -141,8 +141,8 @@ class Index:
         """
         payload = {"primaryKey": primary_key}
         url = f"{self._base_url_with_uid}"
-        response = await self._http_requests.put(url, payload)
-        await wait_for_task(self.http_client, response.json()["uid"], timeout_in_ms=100000)
+        response = await self._http_requests.patch(url, payload)
+        await wait_for_task(self.http_client, response.json()["taskUid"], timeout_in_ms=100000)
         index_response = await self._http_requests.get(f"{url}")
         self.primary_key = index_response.json()["primaryKey"]
         return self
@@ -240,7 +240,7 @@ class Index:
         url = "indexes"
         http_request = HttpRequests(http_client)
         response = await http_request.post(url, payload)
-        await wait_for_task(http_client, response.json()["uid"], timeout_in_ms=100000)
+        await wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=100000)
         index_response = await http_request.get(f"{url}/{uid}")
         index_dict = index_response.json()
         return cls(
@@ -282,13 +282,13 @@ class Index:
         offset: int = 0,
         limit: int = 20,
         filter: str | list[str | list[str]] | None = None,
-        facets_distribution: list[str] | None = None,
+        facets: list[str] | None = None,
         attributes_to_retrieve: list[str] = ["*"],
         attributes_to_crop: list[str] | None = None,
         crop_length: int = 200,
         attributes_to_highlight: list[str] | None = None,
         sort: list[str] | None = None,
-        matches: bool = False,
+        showMatchesPosition: bool = False,
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
@@ -301,7 +301,7 @@ class Index:
         * **offset:** Number of documents to skip. Defaults to 0.
         * **limit:** Maximum number of documents returned. Defaults to 20.
         * **filter:** Filter queries by an attribute value. Defaults to None.
-        * **facets_distribution:** Facets for which to retrieve the matching count. Defaults to None.
+        * **facets:** Facets for which to retrieve the matching count. Defaults to None.
         * **attributes_to_retrieve:** Attributes to display in the returned documents.
             Defaults to ["*"].
         * **attributes_to_crop:** Attributes whose values have to be cropped. Defaults to None.
@@ -309,7 +309,7 @@ class Index:
         * **attributes_to_highlight:** Attributes whose values will contain highlighted matching terms.
             Defaults to None.
         * **sort:** Attributes by which to sort the results. Defaults to None.
-        * **matches:** Defines whether an object that contains information about the matches should be
+        * **showMatchesPostions:** Defines whether an object that contains information about the matches should be
             returned or not. Defaults to False.
         * **hightlight_pre_tag:** The opening tag for highlighting text. Defaults to <em>.
         * **hightlight_post_tag:** The closing tag for highlighting text. Defaults to </em>
@@ -337,13 +337,13 @@ class Index:
             "offset": offset,
             "limit": limit,
             "filter": filter,
-            "facetsDistribution": facets_distribution,
+            "facets": facets,
             "attributesToRetrieve": attributes_to_retrieve,
             "attributesToCrop": attributes_to_crop,
             "cropLength": crop_length,
             "attributesToHighlight": attributes_to_highlight,
             "sort": sort,
-            "matches": matches,
+            "showMatchesPosition": showMatchesPosition,
             "highlightPreTag": highlight_pre_tag,
             "highlightPostTag": highlight_post_tag,
             "cropMarker": crop_marker,
@@ -353,7 +353,7 @@ class Index:
 
         return SearchResults(**response.json())
 
-    async def get_document(self, document_id: str) -> dict:
+    async def get_document(self, document_id: str) -> dict[str, Any]:
         """Get one document with given document identifier.
 
         **Args:**
@@ -381,18 +381,18 @@ class Index:
         return response.json()
 
     async def get_documents(
-        self, *, offset: int = 0, limit: int = 20, attributes_to_retrieve: list[str] | None = None
-    ) -> list[dict[str, Any]] | None:
+        self, *, offset: int = 0, limit: int = 20, fields: list[str] | None = None
+    ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
         **Args:**
 
         * **offset:** Number of documents to skip. Defaults to 0.
         * **limit:** Maximum number of documents returnedd. Defaults to 20.
-        * **attributes_to_retrieve:** Document attributes to show. If this value is None then all
+        * **fields:** Document attributes to show. If this value is None then all
             attributes are retrieved. Defaults to None.
 
-        **Returns:** A list of documents.
+        **Returns:** Documents info.
 
         **Raises:**
 
@@ -414,20 +414,17 @@ class Index:
             "limit": limit,
         }
 
-        if attributes_to_retrieve:
-            parameters["attributesToRetrieve"] = ",".join(attributes_to_retrieve)
+        if fields:
+            parameters["fields"] = ",".join(fields)
 
         url = f"{self._documents_url}?{urlencode(parameters)}"
         response = await self._http_requests.get(url)
 
-        if not response.json():
-            return None
-
-        return response.json()
+        return DocumentsInfo(**response.json())
 
     async def add_documents(
         self, documents: list[dict], primary_key: str | None = None
-    ) -> TaskStatus:
+    ) -> TaskInfo:
         """Add documents to the index.
 
         **Args:**
@@ -436,7 +433,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** The details of the task status.
+        **Returns:** The details of the task.
 
         **Raises:**
 
@@ -462,57 +459,11 @@ class Index:
             url = f"{url}?{formatted_primary_key}"
 
         response = await self._http_requests.post(url, documents)
-        return TaskStatus(**response.json())
-
-    async def add_documents_auto_batch(
-        self,
-        documents: list[dict],
-        *,
-        max_payload_size: int = 104857600,
-        primary_key: str | None = None,
-    ) -> list[TaskStatus]:
-        """Automatically splits the documents into batches when adding.
-
-        Each batch tries to fill the max_payload_size
-
-        **Args:**
-
-        * **documents:** List of documents.
-        * **max_payload_size:** The maximum payload size in bytes. Defaults to 104857600 (100MB).
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-
-        **Returns:** List of update ids to track the action.
-
-        **Raises:**
-
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-            PayloadTooLarge: If the largest document is larget than the max_payload_size
-
-        Usage:
-
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> >>> documents = [
-        >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
-        >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
-        >>> ]
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_auto_batch(documents)
-        ```
-        """
-        task_ids = []
-        async for batch in Index._generate_auto_batches(documents, max_payload_size):
-            task_id = await self.add_documents(batch, primary_key)
-            task_ids.append(task_id)
-
-        return task_ids
+        return TaskInfo(**response.json())
 
     async def add_documents_in_batches(
         self, documents: list[dict], *, batch_size: int = 1000, primary_key: str | None = None
-    ) -> list[TaskStatus]:
+    ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
         **Args:**
@@ -543,7 +494,7 @@ class Index:
         >>>     await index.add_documents_in_batches(documents)
         ```
         """
-        task_ids: list[TaskStatus] = []
+        task_ids: list[TaskInfo] = []
 
         async for document_batch in Index._batch(documents, batch_size):
             task_id = await self.add_documents(document_batch, primary_key)
@@ -558,7 +509,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[TaskStatus]:
+    ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index.
 
         **Args:**
@@ -630,97 +581,6 @@ class Index:
 
         return responses
 
-    async def add_documents_from_directory_auto_batch(
-        self,
-        directory_path: Path | str,
-        *,
-        max_payload_size: int = 104857600,
-        primary_key: str | None = None,
-        document_type: str = "json",
-        combine_documents: bool = True,
-    ) -> list[TaskStatus]:
-        """Load all json files from a directory and add the documents to the index.
-
-        Documents are automatically split into batches as large as possible based on the max payload
-        size.
-
-        **Args:**
-
-        * **directory_path:** Path to the directory that contains the json files.
-        * **max_payload_size:** The maximum payload size in bytes. Defaults to 104857600.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-        * **document_type:** The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
-                the field names, and ever for should have a title.
-        * **combine_documents:** If set to True this will combine the documents from all the files
-            before indexing them. Defaults to True.
-
-        **Returns:** List of update ids to track the action.
-
-        **Raises:**
-
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-
-        Usage:
-
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> directory_path = Path("/path/to/directory/containing/files")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_from_directory_auto_batch(directory_path)
-        ```
-        """
-        directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
-
-        if combine_documents:
-            all_documents = []
-            for path in directory.iterdir():
-                if path.suffix == f".{document_type}":
-                    documents = await Index._load_documents_from_file(path)
-                    all_documents.append(documents)
-
-            Index._raise_on_no_documents(all_documents, document_type, directory_path)
-
-            loop = get_running_loop()
-            combined = await loop.run_in_executor(
-                None, partial(Index._combine_documents, all_documents)
-            )
-
-            return await self.add_documents_auto_batch(
-                combined, max_payload_size=max_payload_size, primary_key=primary_key
-            )
-
-        responses: list[TaskStatus] = []
-
-        add_documents = []
-        for path in directory.iterdir():
-            if path.suffix == f".{document_type}":
-                documents = await Index._load_documents_from_file(path)
-                add_documents.append(
-                    self.add_documents_auto_batch(
-                        documents, max_payload_size=max_payload_size, primary_key=primary_key
-                    )
-                )
-
-        Index._raise_on_no_documents(add_documents, document_type, directory_path)
-
-        if len(add_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
-            # returns an error because it thinks all entries are trying to create the same index.
-            first_response = await add_documents.pop()
-            responses_gather = await gather(*add_documents)
-            responses = [*first_response, *[x for y in responses_gather for x in y]]
-        else:
-            responses = await add_documents[0]
-
-        return responses
-
     async def add_documents_from_directory_in_batches(
         self,
         directory_path: Path | str,
@@ -729,7 +589,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[TaskStatus]:
+    ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index in batches.
 
         **Args:**
@@ -785,7 +645,7 @@ class Index:
                 combined, batch_size=batch_size, primary_key=primary_key
             )
 
-        responses: list[TaskStatus] = []
+        responses: list[TaskInfo] = []
 
         add_documents = []
         for path in directory.iterdir():
@@ -812,7 +672,7 @@ class Index:
 
     async def add_documents_from_file(
         self, file_path: Path | str, primary_key: str | None = None
-    ) -> TaskStatus:
+    ) -> TaskInfo:
         """Add documents to the index from a json file.
 
         **Args:**
@@ -845,57 +705,9 @@ class Index:
 
         return await self.add_documents(documents, primary_key=primary_key)
 
-    async def add_documents_from_file_auto_batch(
-        self,
-        file_path: Path | str,
-        *,
-        max_payload_size: int = 104857600,
-        primary_key: str | None = None,
-    ) -> list[TaskStatus]:
-        """Automatically splits the documents into batches when adding from a json file.
-
-        Each batch tries to fill the max_payload_size
-
-        **Args:**
-
-        * **file_path:** Path to the json file.
-        * **max_payload_size:** The maximum payload size in bytes. Defaults to 104857600 (100MB).
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-
-        **Returns:** List of update ids to track the action.
-
-        **Raises:**
-
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid.
-        * **MeiliSearchCommunicationError:** If there was an error communicating with the server.
-        * **MeiliSearchApiError:** If the MeiliSearch API returned an error.
-        * **PayloadTooLarge:** If the largest document is larget than the max_payload_size
-
-        Usage:
-
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> file_path = Path("/path/to/file.json")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_from_file_auto_batch(file_path)
-        ```
-        """
-        documents = await Index._load_documents_from_file(file_path)
-
-        task_ids = []
-        async for batch in Index._generate_auto_batches(documents, max_payload_size):
-            task_id = await self.add_documents(batch, primary_key)
-            task_ids.append(task_id)
-
-        return task_ids
-
     async def add_documents_from_file_in_batches(
         self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
-    ) -> list[TaskStatus]:
+    ) -> list[TaskInfo]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
         **Args:**
@@ -934,7 +746,7 @@ class Index:
 
     async def add_documents_from_raw_file(
         self, file_path: Path | str, primary_key: str | None = None
-    ) -> TaskStatus:
+    ) -> TaskInfo:
         """Directly send csv or ndjson files to MeiliSearch without pre-processing.
 
         The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
@@ -947,7 +759,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** The details of the task status.
+        **Returns:** The details of the task.
 
         **Raises:**
 
@@ -985,11 +797,11 @@ class Index:
 
         response = await self._http_requests.post(url, body=data, content_type=content_type)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def update_documents(
         self, documents: list[dict], primary_key: str | None = None
-    ) -> TaskStatus:
+    ) -> TaskInfo:
         """Update documents in the index.
 
         **Args:**
@@ -998,7 +810,7 @@ class Index:
         * **primary_key:** The primary key of the documents. This will be ignored if already set.
             Defaults to None.
 
-        **Returns:** The details of the task status.
+        **Returns:** The details of the task.
 
         **Raises:**
 
@@ -1024,57 +836,11 @@ class Index:
             url = f"{url}?{formatted_primary_key}"
 
         response = await self._http_requests.put(url, documents)
-        return TaskStatus(**response.json())
-
-    async def update_documents_auto_batch(
-        self,
-        documents: list[dict],
-        *,
-        max_payload_size: int = 104857600,
-        primary_key: str | None = None,
-    ) -> list[TaskStatus]:
-        """Automatically splits the documents into batches when updating.
-
-        Each batch tries to fill the max_payload_size
-
-        **Args:**
-
-        * **documents:** List of documents.
-        * **max_payload_size:** The maximum payload size in bytes. Defaults to 104857600 (100MB).
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-
-        **Returns:** List of update ids to track the action.
-
-        **Raises:**
-
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-            PayloadTooLarge: If the largest document is larget than the max_payload_size
-
-        Usage:
-
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> documents = [
-        >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
-        >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
-        >>> ]
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_auto_batch(documents)
-        ```
-        """
-        task_ids = []
-        async for batch in Index._generate_auto_batches(documents, max_payload_size):
-            task_id = await self.update_documents(batch, primary_key)
-            task_ids.append(task_id)
-
-        return task_ids
+        return TaskInfo(**response.json())
 
     async def update_documents_in_batches(
         self, documents: list[dict], *, batch_size: int = 1000, primary_key: str | None = None
-    ) -> list[TaskStatus]:
+    ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
 
         Each batch tries to fill the max_payload_size
@@ -1107,7 +873,7 @@ class Index:
         >>>     await index.update_documents_in_batches(documents)
         ```
         """
-        task_ids: list[TaskStatus] = []
+        task_ids: list[TaskInfo] = []
 
         async for document_batch in Index._batch(documents, batch_size):
             task_id = await self.update_documents(document_batch, primary_key)
@@ -1122,7 +888,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[TaskStatus]:
+    ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
         **Args:**
@@ -1194,95 +960,6 @@ class Index:
 
         return responses
 
-    async def update_documents_from_directory_auto_batch(
-        self,
-        directory_path: Path | str,
-        *,
-        max_payload_size: int = 104857600,
-        primary_key: str | None = None,
-        document_type: str = "json",
-        combine_documents: bool = True,
-    ) -> list[TaskStatus]:
-        """Load all json files from a directory and update the documents.
-
-        Documents are automatically split into batches as large as possible based on the max payload
-        size.
-
-        **Args:**
-
-        * **directory_path:** Path to the directory that contains the json files.
-        * **max_payload_size:** The maximum payload size in bytes. Defaults to 104857600.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-        * **document_type:** The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
-                the field names, and ever for should have a title.
-        * **combine_documents:** If set to True this will combine the documents from all the files
-            before indexing them. Defaults to True.
-
-        **Returns:** List of update ids to track the action.
-
-        **Raises:**
-
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-
-        Usage:
-
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> directory_path = Path("/path/to/directory/containing/files")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_from_directory_auto_batch(directory_path)
-        ```
-        """
-        directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
-
-        if combine_documents:
-            all_documents = []
-            for path in directory.iterdir():
-                if path.suffix == f".{document_type}":
-                    documents = await Index._load_documents_from_file(path)
-                    all_documents.append(documents)
-
-            Index._raise_on_no_documents(all_documents, document_type, directory_path)
-
-            loop = get_running_loop()
-            combined = await loop.run_in_executor(
-                None, partial(Index._combine_documents, all_documents)
-            )
-
-            return await self.update_documents_auto_batch(
-                combined, max_payload_size=max_payload_size, primary_key=primary_key
-            )
-
-        update_documents = []
-        for path in directory.iterdir():
-            if path.suffix == f".{document_type}":
-                documents = await Index._load_documents_from_file(path)
-                update_documents.append(
-                    self.update_documents_auto_batch(
-                        documents, max_payload_size=max_payload_size, primary_key=primary_key
-                    )
-                )
-
-        Index._raise_on_no_documents(update_documents, document_type, directory_path)
-
-        if len(update_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
-            # returns an error because it thinks all entries are trying to create the same index.
-            first_response = await update_documents.pop()
-            responses = await gather(*update_documents)
-            responses = [*first_response, *[x for y in responses for x in y]]
-        else:
-            responses = await update_documents[0]
-
-        return responses
-
     async def update_documents_from_directory_in_batches(
         self,
         directory_path: Path | str,
@@ -1291,7 +968,7 @@ class Index:
         primary_key: str | None = None,
         document_type: str = "json",
         combine_documents: bool = True,
-    ) -> list[TaskStatus]:
+    ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
         **Args:**
@@ -1347,7 +1024,7 @@ class Index:
                 combined, batch_size=batch_size, primary_key=primary_key
             )
 
-        responses: list[TaskStatus] = []
+        responses: list[TaskInfo] = []
 
         update_documents = []
         for path in directory.iterdir():
@@ -1374,7 +1051,7 @@ class Index:
 
     async def update_documents_from_file(
         self, file_path: Path | str, primary_key: str | None = None
-    ) -> TaskStatus:
+    ) -> TaskInfo:
         """Add documents in the index from a json file.
 
         **Args:**
@@ -1405,55 +1082,9 @@ class Index:
 
         return await self.update_documents(documents, primary_key=primary_key)
 
-    async def update_documents_from_file_auto_batch(
-        self,
-        file_path: Path | str,
-        *,
-        max_payload_size: int = 104857600,
-        primary_key: str | None = None,
-    ) -> list[TaskStatus]:
-        """Automatically splits the documents into batches when updating from a json file.
-
-        Each batch tries to fill the max_payload_size
-
-        **Args:**
-
-        * **file_path:** Path to the json file.
-        * **batch_size:** The number of documents that should be included in each batch.
-            Defaults to 1000.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-
-        **Returns:** List of update ids to track the action.
-
-        **Raises:**
-
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
-
-        Usage:
-
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> file_path = Path("/path/to/file.json")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_from_file_auto_batch(file_path)
-        ```
-        """
-        documents = await Index._load_documents_from_file(file_path)
-
-        task_ids = []
-        async for batch in Index._generate_auto_batches(documents, max_payload_size):
-            task_id = await self.update_documents(batch, primary_key)
-            task_ids.append(task_id)
-
-        return task_ids
-
     async def update_documents_from_file_in_batches(
         self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
-    ) -> list[TaskStatus]:
+    ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
         **Args:**
@@ -1490,7 +1121,7 @@ class Index:
 
     async def update_documents_from_raw_file(
         self, file_path: Path | str, primary_key: str | None = None
-    ) -> TaskStatus:
+    ) -> TaskInfo:
         """Directly send csv or ndjson files to MeiliSearch without pre-processing.
 
         The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
@@ -1541,9 +1172,9 @@ class Index:
 
         response = await self._http_requests.put(url, body=data, content_type=content_type)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def delete_document(self, document_id: str) -> TaskStatus:
+    async def delete_document(self, document_id: str) -> TaskInfo:
         """Delete one document from the index.
 
         **Args:**
@@ -1569,9 +1200,9 @@ class Index:
         url = f"{self._documents_url}/{document_id}"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def delete_documents(self, ids: list[str]) -> TaskStatus:
+    async def delete_documents(self, ids: list[str]) -> TaskInfo:
         """Delete multiple documents from the index.
 
         **Args:**
@@ -1597,9 +1228,9 @@ class Index:
         url = f"{self._documents_url}/delete-batch"
         response = await self._http_requests.post(url, ids)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def delete_all_documents(self) -> TaskStatus:
+    async def delete_all_documents(self) -> TaskInfo:
         """Delete all documents from the index.
 
         **Returns:** The details of the task status.
@@ -1621,7 +1252,7 @@ class Index:
         url = f"{self._documents_url}"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_settings(self) -> MeiliSearchSettings:
         """Get settings of the index.
@@ -1647,7 +1278,7 @@ class Index:
 
         return MeiliSearchSettings(**response.json())
 
-    async def update_settings(self, body: MeiliSearchSettings) -> TaskStatus:
+    async def update_settings(self, body: MeiliSearchSettings) -> TaskInfo:
         """Update settings of the index.
 
         **Args:**
@@ -1693,11 +1324,11 @@ class Index:
         body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}
 
         url = f"{self._settings_url}"
-        response = await self._http_requests.post(url, body_dict)
+        response = await self._http_requests.patch(url, body_dict)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_settings(self) -> TaskStatus:
+    async def reset_settings(self) -> TaskInfo:
         """Reset settings of the index to default values.
 
         **Returns:** The details of the task status.
@@ -1719,7 +1350,7 @@ class Index:
         url = f"{self._settings_url}"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_ranking_rules(self) -> list[str]:
         """Get ranking rules of the index.
@@ -1745,7 +1376,7 @@ class Index:
 
         return response.json()
 
-    async def update_ranking_rules(self, ranking_rules: list[str]) -> TaskStatus:
+    async def update_ranking_rules(self, ranking_rules: list[str]) -> TaskInfo:
         """Update ranking rules of the index.
 
         **Args:**
@@ -1779,11 +1410,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/ranking-rules"
-        respose = await self._http_requests.post(url, ranking_rules)
+        respose = await self._http_requests.put(url, ranking_rules)
 
-        return TaskStatus(**respose.json())
+        return TaskInfo(**respose.json())
 
-    async def reset_ranking_rules(self) -> TaskStatus:
+    async def reset_ranking_rules(self) -> TaskInfo:
         """Reset ranking rules of the index to default values.
 
         **Returns:** The details of the task status.
@@ -1805,7 +1436,7 @@ class Index:
         url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_distinct_attribute(self) -> str | None:
         """Get distinct attribute of the index.
@@ -1835,7 +1466,7 @@ class Index:
 
         return response.json()
 
-    async def update_distinct_attribute(self, body: str) -> TaskStatus:
+    async def update_distinct_attribute(self, body: str) -> TaskInfo:
         """Update distinct attribute of the index.
 
         **Args:**
@@ -1859,11 +1490,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/distinct-attribute"
-        response = await self._http_requests.post(url, body)
+        response = await self._http_requests.put(url, body)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_distinct_attribute(self) -> TaskStatus:
+    async def reset_distinct_attribute(self) -> TaskInfo:
         """Reset distinct attribute of the index to default values.
 
         **Returns:** The details of the task status.
@@ -1885,7 +1516,7 @@ class Index:
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_searchable_attributes(self) -> list[str]:
         """Get searchable attributes of the index.
@@ -1910,7 +1541,7 @@ class Index:
         response = await self._http_requests.get(url)
         return response.json()
 
-    async def update_searchable_attributes(self, body: list[str]) -> TaskStatus:
+    async def update_searchable_attributes(self, body: list[str]) -> TaskInfo:
         """Update searchable attributes of the index.
 
         **Args:**
@@ -1934,11 +1565,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/searchable-attributes"
-        response = await self._http_requests.post(url, body)
+        response = await self._http_requests.put(url, body)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_searchable_attributes(self) -> TaskStatus:
+    async def reset_searchable_attributes(self) -> TaskInfo:
         """Reset searchable attributes of the index to default values.
 
         **Args:**
@@ -1964,7 +1595,7 @@ class Index:
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_displayed_attributes(self) -> list[str]:
         """Get displayed attributes of the index.
@@ -1989,7 +1620,7 @@ class Index:
         response = await self._http_requests.get(url)
         return response.json()
 
-    async def update_displayed_attributes(self, body: list[str]) -> TaskStatus:
+    async def update_displayed_attributes(self, body: list[str]) -> TaskInfo:
         """Update displayed attributes of the index.
 
         **Args:**
@@ -2015,11 +1646,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/displayed-attributes"
-        response = await self._http_requests.post(url, body)
+        response = await self._http_requests.put(url, body)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_displayed_attributes(self) -> TaskStatus:
+    async def reset_displayed_attributes(self) -> TaskInfo:
         """Reset displayed attributes of the index to default values.
 
         **Returns:** The details of the task status.
@@ -2041,7 +1672,7 @@ class Index:
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_stop_words(self) -> list[str] | None:
         """Get stop words of the index.
@@ -2070,7 +1701,7 @@ class Index:
 
         return response.json()
 
-    async def update_stop_words(self, body: list[str]) -> TaskStatus:
+    async def update_stop_words(self, body: list[str]) -> TaskInfo:
         """Update stop words of the index.
 
         **Args:**
@@ -2094,11 +1725,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/stop-words"
-        response = await self._http_requests.post(url, body)
+        response = await self._http_requests.put(url, body)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_stop_words(self) -> TaskStatus:
+    async def reset_stop_words(self) -> TaskInfo:
         """Reset stop words of the index to default values.
 
         **Returns:** The details of the task status.
@@ -2120,7 +1751,7 @@ class Index:
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_synonyms(self) -> dict[str, list[str]] | None:
         """Get synonyms of the index.
@@ -2149,7 +1780,7 @@ class Index:
 
         return response.json()
 
-    async def update_synonyms(self, body: dict[str, list[str]]) -> TaskStatus:
+    async def update_synonyms(self, body: dict[str, list[str]]) -> TaskInfo:
         """Update synonyms of the index.
 
         **Args:**
@@ -2175,11 +1806,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/synonyms"
-        response = await self._http_requests.post(url, body)
+        response = await self._http_requests.put(url, body)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_synonyms(self) -> TaskStatus:
+    async def reset_synonyms(self) -> TaskInfo:
         """Reset synonyms of the index to default values.
 
         **Returns:** The details of the task status.
@@ -2201,7 +1832,7 @@ class Index:
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_filterable_attributes(self) -> list[str] | None:
         """Get filterable attributes of the index.
@@ -2230,7 +1861,7 @@ class Index:
 
         return response.json()
 
-    async def update_filterable_attributes(self, body: list[str]) -> TaskStatus:
+    async def update_filterable_attributes(self, body: list[str]) -> TaskInfo:
         """Update filterable attributes of the index.
 
         **Args:**
@@ -2254,11 +1885,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/filterable-attributes"
-        response = await self._http_requests.post(url, body)
+        response = await self._http_requests.put(url, body)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_filterable_attributes(self) -> TaskStatus:
+    async def reset_filterable_attributes(self) -> TaskInfo:
         """Reset filterable attributes of the index to default values.
 
         **Returns:** The details of the task status.
@@ -2280,7 +1911,7 @@ class Index:
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_sortable_attributes(self) -> list[str]:
         """Get sortable attributes of the Index.
@@ -2306,7 +1937,7 @@ class Index:
 
         return response.json()
 
-    async def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskStatus:
+    async def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskInfo:
         """Get sortable attributes of the Index.
 
         **Returns:** The details of the task status.
@@ -2326,11 +1957,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/sortable-attributes"
-        response = await self._http_requests.post(url, sortable_attributes)
+        response = await self._http_requests.put(url, sortable_attributes)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_sortable_attributes(self) -> TaskStatus:
+    async def reset_sortable_attributes(self) -> TaskInfo:
         """Reset sortable attributes of the index to default values.
 
         **Returns:** The details of the task status.
@@ -2352,7 +1983,7 @@ class Index:
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     async def get_typo_tolerance(self) -> TypoTolerance:
         """Get typo tolerance for the index.
@@ -2378,7 +2009,7 @@ class Index:
 
         return TypoTolerance(**response.json())
 
-    async def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskStatus:
+    async def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskInfo:
         """Update typo tolerance.
 
         **Returns:** Task  to track the action.
@@ -2399,11 +2030,11 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/typo-tolerance"
-        response = await self._http_requests.post(url, typo_tolerance.dict(by_alias=True))
+        response = await self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
-    async def reset_typo_tolerance(self) -> TaskStatus:
+    async def reset_typo_tolerance(self) -> TaskInfo:
         """Reset typo tolerance to default values.
 
         **Returns:** The details of the task status.
@@ -2425,7 +2056,7 @@ class Index:
         url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.delete(url)
 
-        return TaskStatus(**response.json())
+        return TaskInfo(**response.json())
 
     @staticmethod
     async def _batch(documents: list[dict], batch_size: int) -> AsyncGenerator[list[dict], None]:
@@ -2443,38 +2074,6 @@ class Index:
     @staticmethod
     def _combine_documents(documents: list[list[Any]]) -> list[Any]:
         return [x for y in documents for x in y]
-
-    @staticmethod
-    async def _generate_auto_batches(
-        documents: list[dict[str, Any]], max_payload_size: int
-    ) -> AsyncGenerator[list[dict], None]:
-        loop = get_running_loop()
-
-        # Check the size of all documents together if it is below the max size yield it all at onece
-        doc_json_str = await loop.run_in_executor(None, partial(json.dumps, documents))
-        doc_size = await loop.run_in_executor(None, partial(getsizeof, doc_json_str))
-        if doc_size < max_payload_size:
-            yield documents
-        else:
-            batch = []
-            batch_size = 0
-            for doc in documents:
-                doc_json_str = await loop.run_in_executor(None, partial(json.dumps, doc))
-                doc_size = await loop.run_in_executor(None, partial(getsizeof, doc_json_str))
-                if doc_size > max_payload_size:
-                    raise PayloadTooLarge(
-                        f"Payload size {doc_size} is greater than the maximum payload size of {max_payload_size}"
-                    )
-                batch_size += doc_size
-                batch.append(doc)
-                if batch_size >= max_payload_size:
-                    batch.pop()
-                    yield batch
-                    batch.clear()
-                    batch.append(doc)
-                    batch_size = doc_size
-            if batch:
-                yield batch
 
     @staticmethod
     def _iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:

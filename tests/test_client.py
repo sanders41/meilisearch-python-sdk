@@ -15,9 +15,9 @@ from meilisearch_python_async.errors import (
     MeiliSearchCommunicationError,
 )
 from meilisearch_python_async.models.client import KeyCreate, KeyUpdate
-from meilisearch_python_async.models.dump import DumpInfo
 from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.version import Version
+from meilisearch_python_async.task import get_task, wait_for_task
 
 
 @pytest.fixture
@@ -55,7 +55,7 @@ async def test_key_info(test_client):
 
     try:
         keys = await test_client.get_keys()
-        key = next(x for x in keys if x.description == key_info.description)
+        key = next(x for x in keys.results if x.description == key_info.description)
         await test_client.delete_key(key.key)
     except MeiliSearchApiError:
         pass
@@ -101,14 +101,14 @@ async def test_create_index_no_primary_key(test_client):
 
 async def test_generate_tenant_token_custom_key(test_client, test_key):
     search_rules = {"test": "value"}
-    expected = {"searchRules": search_rules, "apiKeyPrefix": test_key.key[:8]}
+    expected = {"searchRules": search_rules, "apiKeyUid": test_key.uid}
     token = test_client.generate_tenant_token(search_rules, api_key=test_key)
     assert expected == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
 
 
 async def test_generate_tenant_token_default_key(test_client, default_search_key):
     search_rules = {"test": "value"}
-    expected = {"searchRules": search_rules, "apiKeyPrefix": default_search_key.key[:8]}
+    expected = {"searchRules": search_rules, "apiKeyUid": default_search_key.uid}
     token = test_client.generate_tenant_token(search_rules, api_key=default_search_key)
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
@@ -117,7 +117,7 @@ async def test_generate_tenant_token_default_key_expires(test_client, default_se
     search_rules: dict[str, Any] = {"test": "value"}
     expires_at = datetime.utcnow() + timedelta(days=1)
     expected: dict[str, Any] = {"searchRules": search_rules}
-    expected["apiKeyPrefix"] = default_search_key.key[:8]
+    expected["apiKeyUid"] = default_search_key.uid
     expected["exp"] = int(datetime.timestamp(expires_at))
     token = test_client.generate_tenant_token(
         search_rules, api_key=default_search_key, expires_at=expires_at
@@ -294,8 +294,7 @@ async def test_delete_key(test_key, test_client):
 
 async def test_get_keys(test_client):
     response = await test_client.get_keys()
-
-    assert len(response) == 2
+    assert len(response.results) == 2
 
 
 async def test_get_key(test_key, test_client):
@@ -307,17 +306,14 @@ async def test_update_key(test_key, test_client):
     update_key_info = KeyUpdate(
         key=test_key.key,
         description="updated",
-        actions=["*"],
-        indexes=["*"],
-        expires_at=datetime.utcnow() + timedelta(days=2),
     )
 
     key = await test_client.update_key(update_key_info)
 
     assert key.description == update_key_info.description
-    assert key.actions == update_key_info.actions
-    assert key.indexes == update_key_info.indexes
-    assert key.expires_at.date() == update_key_info.expires_at.date()  # type: ignore
+    assert key.actions == test_key.actions
+    assert key.indexes == test_key.indexes
+    assert key.expires_at == test_key.expires_at
 
 
 async def test_get_version(test_client):
@@ -327,32 +323,15 @@ async def test_get_version(test_client):
 
 
 async def test_create_dump(test_client, index_with_documents):
-    await index_with_documents("indexUID-dump-creation")
+    index = await index_with_documents("indexUID-dump-creation")
 
     response = await test_client.create_dump()
-    assert response.status == "in_progress"
-    complete = await wait_for_dump_creation(test_client, response.uid)
 
-    assert complete is None
+    await wait_for_task(index.http_client, response.task_uid)
 
-
-async def test_get_dump_status(test_client, index_with_documents):
-    await index_with_documents("indexUID-dump-status")
-    dump = await test_client.create_dump()
-
-    assert dump.status == "in_progress"
-
-    dump_status = await test_client.get_dump_status(dump.uid)
-    assert isinstance(dump_status, DumpInfo)
-
-    complete = await wait_for_dump_creation(test_client, dump.uid)
-
-    assert complete is None
-
-
-async def test_get_dump_status_error(test_client):
-    with pytest.raises(MeiliSearchApiError):
-        await test_client.get_dump_status("bad")
+    dump_status = await get_task(index.http_client, response.task_uid)
+    assert dump_status.status == "succeeded"
+    assert dump_status.task_type == "dumpCreation"
 
 
 async def test_no_master_key(base_url):
