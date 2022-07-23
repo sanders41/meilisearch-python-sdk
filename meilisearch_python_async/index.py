@@ -288,7 +288,7 @@ class Index:
         crop_length: int = 200,
         attributes_to_highlight: list[str] | None = None,
         sort: list[str] | None = None,
-        showMatchesPosition: bool = False,
+        show_matches_position: bool = False,
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
@@ -309,7 +309,7 @@ class Index:
         * **attributes_to_highlight:** Attributes whose values will contain highlighted matching terms.
             Defaults to None.
         * **sort:** Attributes by which to sort the results. Defaults to None.
-        * **showMatchesPostions:** Defines whether an object that contains information about the matches should be
+        * **show_matches_postions:** Defines whether an object that contains information about the matches should be
             returned or not. Defaults to False.
         * **hightlight_pre_tag:** The opening tag for highlighting text. Defaults to <em>.
         * **hightlight_post_tag:** The closing tag for highlighting text. Defaults to </em>
@@ -343,7 +343,7 @@ class Index:
             "cropLength": crop_length,
             "attributesToHighlight": attributes_to_highlight,
             "sort": sort,
-            "showMatchesPosition": showMatchesPosition,
+            "show_matches_position": show_matches_position,
             "highlightPreTag": highlight_pre_tag,
             "highlightPostTag": highlight_post_tag,
             "cropMarker": crop_marker,
