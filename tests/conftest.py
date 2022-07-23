@@ -146,6 +146,7 @@ async def index_with_documents(empty_index, small_movies, index_uid):
 @pytest.fixture
 async def default_search_key(test_client):
     keys = await test_client.get_keys()
+
     for key in keys.results:
         if key.actions == ["search"]:
             return key

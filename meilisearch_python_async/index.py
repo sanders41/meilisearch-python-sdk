@@ -382,7 +382,7 @@ class Index:
 
     async def get_documents(
         self, *, offset: int = 0, limit: int = 20, fields: list[str] | None = None
-    ) -> DocumentsInfo | None:
+    ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
         **Args:**
@@ -419,9 +419,6 @@ class Index:
 
         url = f"{self._documents_url}?{urlencode(parameters)}"
         response = await self._http_requests.get(url)
-
-        if not response.json():
-            return None
 
         return DocumentsInfo(**response.json())
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 from datetime import datetime
 from types import TracebackType
 from typing import Any, Type
@@ -18,10 +17,6 @@ from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.models.version import Version
 from meilisearch_python_async.task import wait_for_task
-
-UUID4HEX = re.compile(
-    r"^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}", re.I
-)
 
 
 class Client:
@@ -189,7 +184,7 @@ class Client:
 
         payload: dict[str, Any] = {"searchRules": search_rules}
 
-        payload["apiKeyUid"] = api_key.key[:8]
+        payload["apiKeyUid"] = api_key.uid
         if expires_at:
             if expires_at <= datetime.utcnow():
                 raise ValueError("expires_at must be a time in the future")
@@ -374,7 +369,7 @@ class Client:
 
         **Args:**
 
-        * **key:** The key to delete.
+        * **key:** The key or uid to delete.
 
         **Returns:** The Response status code. 204 signifies a successful delete.
 
@@ -572,8 +567,3 @@ class Client:
         """
         response = await self._http_requests.get("health")
         return Health(**response.json())
-
-    @staticmethod
-    def _valid_uuid(uuid: str) -> bool:
-        match = UUID4HEX.match(uuid)
-        return bool(match)
