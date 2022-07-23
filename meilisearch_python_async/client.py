@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
 from types import TracebackType
 from typing import Any, Type
@@ -17,6 +18,10 @@ from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.models.version import Version
 from meilisearch_python_async.task import wait_for_task
+
+UUID4HEX = re.compile(
+    r"^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}", re.I
+)
 
 
 class Client:
@@ -172,15 +177,19 @@ class Client:
         >>>     )
         ```
         """
+        # if Client._valid_uuid(api_key.key) is False:
+        #     raise Exception("The uid must comply to the uuid4 format.")
+
         if isinstance(search_rules, dict) and search_rules.get("indexes"):
             for index in search_rules["indexes"]:
                 if api_key.indexes != ["*"] and index not in api_key.indexes:
                     raise InvalidRestriction(
                         "Invalid index. The token cannot be less restrictive than the API key"
                     )
+
         payload: dict[str, Any] = {"searchRules": search_rules}
 
-        payload["apiKeyPrefix"] = api_key.key[:8]
+        payload["apiKeyUid"] = api_key.key[:8]
         if expires_at:
             if expires_at <= datetime.utcnow():
                 raise ValueError("expires_at must be a time in the future")
@@ -563,3 +572,8 @@ class Client:
         """
         response = await self._http_requests.get("health")
         return Health(**response.json())
+
+    @staticmethod
+    def _valid_uuid(uuid: str) -> bool:
+        match = UUID4HEX.match(uuid)
+        return bool(match)

@@ -116,11 +116,11 @@ async def test_custom_search_params_with_facets(index_with_documents):
     await wait_for_task(index.http_client, update.task_uid)
     response = await index.search("world", facets=["genre"])
     assert len(response.hits) == 12
-    assert response.facets is not None
-    assert "genre" in response.facets
-    assert response.facets["genre"]["cartoon"] == 1
-    assert response.facets["genre"]["action"] == 3
-    assert response.facets["genre"]["fantasy"] == 1
+    assert response.facet_distribution is not None
+    assert "genre" in response.facet_distribution
+    assert response.facet_distribution["genre"]["cartoon"] == 1
+    assert response.facet_distribution["genre"]["action"] == 3
+    assert response.facet_distribution["genre"]["fantasy"] == 1
 
 
 async def test_custom_search_params_with_facet_filters(index_with_documents):
@@ -129,7 +129,7 @@ async def test_custom_search_params_with_facet_filters(index_with_documents):
     await wait_for_task(index.http_client, update.task_uid)
     response = await index.search("world", filter=[["genre = action"]])
     assert len(response.hits) == 3
-    assert response.facets is None
+    assert response.facet_distribution is None
 
 
 async def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
@@ -140,7 +140,7 @@ async def test_custom_search_params_with_multiple_facet_filters(index_with_docum
         "world", filter=["genre = action", ["genre = action", "genre = action"]]
     )
     assert len(response.hits) == 3
-    assert response.facets is None
+    assert response.facet_distribution is None
 
 
 async def test_custom_search_facet_filters_with_space(test_client):
@@ -202,7 +202,7 @@ async def test_custom_search_params_with_many_params(index_with_documents):
         "world", filter=[["genre = action"]], attributes_to_retrieve=["title", "poster"]
     )
     assert len(response.hits) == 3
-    assert response.facets is None
+    assert response.facet_distribution is None
     assert "title" in response.hits[0]
     assert "poster" in response.hits[0]
     assert "overview" not in response.hits[0]

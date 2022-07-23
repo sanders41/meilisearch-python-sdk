@@ -55,7 +55,7 @@ async def test_key_info(test_client):
 
     try:
         keys = await test_client.get_keys()
-        key = next(x for x in keys if x.description == key_info.description)
+        key = next(x for x in keys.results if x.description == key_info.description)
         await test_client.delete_key(key.key)
     except MeiliSearchApiError:
         pass
@@ -101,14 +101,14 @@ async def test_create_index_no_primary_key(test_client):
 
 async def test_generate_tenant_token_custom_key(test_client, test_key):
     search_rules = {"test": "value"}
-    expected = {"searchRules": search_rules, "apiKeyPrefix": test_key.key[:8]}
+    expected = {"searchRules": search_rules, "apiKeyUid": test_key.key[:8]}
     token = test_client.generate_tenant_token(search_rules, api_key=test_key)
     assert expected == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
 
 
 async def test_generate_tenant_token_default_key(test_client, default_search_key):
     search_rules = {"test": "value"}
-    expected = {"searchRules": search_rules, "apiKeyPrefix": default_search_key.key[:8]}
+    expected = {"searchRules": search_rules, "apiKeyUid": default_search_key.key[:8]}
     token = test_client.generate_tenant_token(search_rules, api_key=default_search_key)
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
@@ -117,7 +117,7 @@ async def test_generate_tenant_token_default_key_expires(test_client, default_se
     search_rules: dict[str, Any] = {"test": "value"}
     expires_at = datetime.utcnow() + timedelta(days=1)
     expected: dict[str, Any] = {"searchRules": search_rules}
-    expected["apiKeyPrefix"] = default_search_key.key[:8]
+    expected["apiKeyUid"] = default_search_key.key[:8]
     expected["exp"] = int(datetime.timestamp(expires_at))
     token = test_client.generate_tenant_token(
         search_rules, api_key=default_search_key, expires_at=expires_at
@@ -294,8 +294,7 @@ async def test_delete_key(test_key, test_client):
 
 async def test_get_keys(test_client):
     response = await test_client.get_keys()
-
-    assert len(response) == 2
+    assert len(response.results) == 2
 
 
 async def test_get_key(test_key, test_client):
