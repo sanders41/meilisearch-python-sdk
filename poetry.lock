@@ -152,7 +152,7 @@ testing = ["covdefaults (>=1.2.0)", "coverage (>=4)", "pytest (>=4)", "pytest-co
 
 [[package]]
 name = "flake8"
-version = "5.0.1"
+version = "5.0.3"
 description = "the modular source code checker: pep8 pyflakes and co"
 category = "dev"
 optional = false
@@ -819,7 +819,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "5c9a6853b744acf4110b9ca9fbbb8d3ee1b4248bb2c8a0762c9be2c0b923e613"
+content-hash = "839c5054c58f1ba215827b57b399a53322354f4ce14d8753bb3461213711e1c2"
 
 [metadata.files]
 aiofiles = [
@@ -934,8 +934,8 @@ filelock = [
     {file = "filelock-3.7.1.tar.gz", hash = "sha256:3a0fd85166ad9dbab54c9aec96737b744106dc5f15c0b09a6744a445299fcf04"},
 ]
 flake8 = [
-    {file = "flake8-5.0.1-py2.py3-none-any.whl", hash = "sha256:44e3ecd719bba1cb2ae65d1b54212cc9df4f5db15ac271f8856e5e6c2eebefed"},
-    {file = "flake8-5.0.1.tar.gz", hash = "sha256:9c51d3d1426379fd444d3b79eabbeb887849368bd053039066439523d8486961"},
+    {file = "flake8-5.0.3-py2.py3-none-any.whl", hash = "sha256:93aa565ae2f0316b95bb57a354f2b2d55ee8508e1fe1cb13b77b9c195b4a2537"},
+    {file = "flake8-5.0.3.tar.gz", hash = "sha256:b27fd7faa8d90aaae763664a489012292990388e5d3604f383b290caefbbc922"},
 ]
 flake8-docstrings = [
     {file = "flake8-docstrings-1.6.0.tar.gz", hash = "sha256:9fe7c6a306064af8e62a055c2f61e9eb1da55f84bb39caef2b84ce53708ac34b"},
