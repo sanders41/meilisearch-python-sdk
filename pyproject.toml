@@ -41,7 +41,7 @@ types-aiofiles = "^0.8.10"
 flake8-docstrings = "^1.6.0"
 mkdocs = "^1.2.4"
 mkdocs-material = "^8.2.7"
-mkautodoc = "^0.1.0"
+mkautodoc = "^0.2.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
