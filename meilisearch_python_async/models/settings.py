@@ -16,7 +16,7 @@ class TypoTolerance(CamelBase):
 
 
 class Faceting(CamelBase):
-    max_values_per_facet: Optional[int] = None
+    max_values_per_facet: int
 
 
 class MeiliSearchSettings(CamelBase):
