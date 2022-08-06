@@ -15,6 +15,10 @@ class TypoTolerance(CamelBase):
     min_word_size_for_typos: Optional[MinWordSizeForTypos] = None
 
 
+class Faceting(CamelBase):
+    max_values_per_facet: int
+
+
 class MeiliSearchSettings(CamelBase):
     synonyms: Optional[Dict[str, Any]] = None
     stop_words: Optional[List[str]] = None
@@ -25,3 +29,4 @@ class MeiliSearchSettings(CamelBase):
     displayed_attributes: Optional[List[str]] = None
     sortable_attributes: Optional[List[str]] = None
     typo_tolerance: Optional[TypoTolerance] = None
+    faceting: Optional[Faceting] = None

@@ -17,7 +17,7 @@ from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchErr
 from meilisearch_python_async.models.documents import DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
-from meilisearch_python_async.models.settings import MeiliSearchSettings, TypoTolerance
+from meilisearch_python_async.models.settings import Faceting, MeiliSearchSettings, TypoTolerance
 from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.task import wait_for_task
 
@@ -2012,7 +2012,7 @@ class Index:
     async def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskInfo:
         """Update typo tolerance.
 
-        **Returns:** Task  to track the action.
+        **Returns:** Task to track the action.
 
         **Raises:**
 
@@ -2054,6 +2054,78 @@ class Index:
         ```
         """
         url = f"{self._settings_url}/typo-tolerance"
+        response = await self._http_requests.delete(url)
+
+        return TaskInfo(**response.json())
+
+    async def get_faceting(self) -> Faceting:
+        """Get faceting for the index.
+
+        **Returns:** Faceting for the index.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     faceting = await index.get_faceting()
+        ```
+        """
+        url = f"{self._settings_url}/faceting"
+        response = await self._http_requests.get(url)
+
+        return Faceting(**response.json())
+
+    async def update_faceting(self, faceting: Faceting) -> TaskInfo:
+        """Partially update the faceting settings for an index.
+
+        **Returns:** Task to track the action.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     await index.update_faceting(faceting=Faceting(max_values_per_facet=100))
+        ```
+        """
+        url = f"{self._settings_url}/faceting"
+        response = await self._http_requests.patch(url, faceting.dict(by_alias=True))
+
+        return TaskInfo(**response.json())
+
+    async def reset_faceting(self) -> TaskInfo:
+        """Reset an index's faceting settings to their default value.
+
+        **Returns:** The details of the task status.
+
+        **Raises:**
+
+        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
+        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+
+        Usage:
+
+        ```py
+        >>> from meilisearch_async_client import Client
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     index = client.index("movies")
+        >>>     await index.reset_faceting()
+        ```
+        """
+        url = f"{self._settings_url}/faceting"
         response = await self._http_requests.delete(url)
 
         return TaskInfo(**response.json())

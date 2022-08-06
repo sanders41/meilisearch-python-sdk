@@ -7,6 +7,7 @@ from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import MeiliSearchApiError
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.settings import (
+    Faceting,
     MeiliSearchSettings,
     MinWordSizeForTypos,
     TypoTolerance,
@@ -21,12 +22,18 @@ def new_settings():
         searchable_attributes=["title", "overview"],
         sortable_attributes=["genre", "title"],
         typo_tolerance=TypoTolerance(enabled=False),
+        faceting=Faceting(max_values_per_facet=123),
     )
 
 
 @pytest.fixture
 def default_ranking_rules():
     return ["words", "typo", "proximity", "attribute", "sort", "exactness"]
+
+
+@pytest.fixture
+def default_faceting():
+    return Faceting(max_values_per_facet=100)
 
 
 @pytest.fixture
@@ -110,7 +117,7 @@ async def test_get_stats(empty_index, small_movies):
     assert response.number_of_documents == 30
 
 
-async def test_get_settings_default(empty_index, default_ranking_rules):
+async def test_get_settings_default(empty_index, default_ranking_rules, default_faceting):
     index = await empty_index()
     response = await index.get_settings()
     assert response.ranking_rules == default_ranking_rules
@@ -121,6 +128,7 @@ async def test_get_settings_default(empty_index, default_ranking_rules):
     assert response.synonyms == {}
     assert response.sortable_attributes == []
     assert response.typo_tolerance.enabled is True
+    assert response.faceting == default_faceting
 
 
 async def test_update_settings(empty_index, new_settings):
@@ -137,6 +145,9 @@ async def test_update_settings(empty_index, new_settings):
     assert response.synonyms == {}
     assert response.sortable_attributes == new_settings.sortable_attributes
     assert response.typo_tolerance.enabled is False
+    assert (
+        response.faceting.max_values_per_facet == new_settings.faceting.max_values_per_facet == 123
+    )
 
 
 async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
@@ -165,6 +176,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.synonyms == {}
     assert response.sortable_attributes == []
     assert response.typo_tolerance.enabled is True
+    assert response.faceting.max_values_per_facet == 100
 
 
 async def test_get_ranking_rules_default(empty_index, default_ranking_rules):
@@ -425,6 +437,31 @@ async def test_reset_typo_tolerance(empty_index):
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_typo_tolerance()
     assert response.enabled is True
+
+
+async def test_get_faceting(empty_index):
+    index = await empty_index()
+    response = await index.get_faceting()
+    assert response.max_values_per_facet == 100
+
+
+async def test_update_faceting(empty_index):
+    faceting = Faceting(max_values_per_facet=17)
+    index = await empty_index()
+    response = await index.update_faceting(faceting)
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_faceting()
+    assert response.dict() == faceting.dict()
+
+
+async def test_reset_faceting(empty_index, default_faceting):
+    index = await empty_index()
+    response = await index.update_faceting(Faceting(max_values_per_facet=17))
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.reset_faceting()
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_faceting()
+    assert response.dict() == default_faceting.dict()
 
 
 @pytest.mark.parametrize(
