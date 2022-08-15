@@ -64,14 +64,14 @@ typed-ast = {version = ">=1.4.2", markers = "python_version < \"3.8\" and implem
 typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
-colorama = ["colorama (>=0.4.3)"]
-d = ["aiohttp (>=3.7.4)"]
-jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
+jupyter = ["tokenize-rt (>=3.2.0)", "ipython (>=7.8.0)"]
+d = ["aiohttp (>=3.7.4)"]
+colorama = ["colorama (>=0.4.3)"]
 
 [[package]]
 name = "camel-converter"
-version = "1.0.5"
+version = "1.0.6"
 description = "Converts a string from snake case to camel case or camel case to snake case"
 category = "main"
 optional = false
@@ -147,8 +147,8 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["furo (>=2021.8.17b43)", "sphinx (>=4.1)", "sphinx-autodoc-typehints (>=1.12)"]
-testing = ["covdefaults (>=1.2.0)", "coverage (>=4)", "pytest (>=4)", "pytest-cov", "pytest-timeout (>=1.4.2)"]
+testing = ["pytest-timeout (>=1.4.2)", "pytest-cov", "pytest (>=4)", "coverage (>=4)", "covdefaults (>=1.2.0)"]
+docs = ["sphinx-autodoc-typehints (>=1.12)", "sphinx (>=4.1)", "furo (>=2021.8.17b43)"]
 
 [[package]]
 name = "flake8"
@@ -213,8 +213,8 @@ h11 = ">=0.11,<0.13"
 sniffio = ">=1.0.0,<2.0.0"
 
 [package.extras]
-http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (>=1.0.0,<2.0.0)"]
+http2 = ["h2 (>=3,<5)"]
 
 [[package]]
 name = "httpx"
@@ -231,10 +231,10 @@ rfc3986 = {version = ">=1.3,<2", extras = ["idna2008"]}
 sniffio = "*"
 
 [package.extras]
-brotli = ["brotlicffi", "brotli"]
-cli = ["click (>=8.0.0,<9.0.0)", "rich (>=10,<13)", "pygments (>=2.0.0,<3.0.0)"]
-http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (>=1.0.0,<2.0.0)"]
+http2 = ["h2 (>=3,<5)"]
+cli = ["pygments (>=2.0.0,<3.0.0)", "rich (>=10,<13)", "click (>=8.0.0,<9.0.0)"]
+brotli = ["brotli", "brotlicffi"]
 
 [[package]]
 name = "identify"
@@ -288,10 +288,10 @@ optional = false
 python-versions = ">=3.6.1,<4.0"
 
 [package.extras]
-pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
-requirements_deprecated_finder = ["pipreqs", "pip-api"]
-colors = ["colorama (>=0.4.3,<0.5.0)"]
 plugins = ["setuptools"]
+colors = ["colorama (>=0.4.3,<0.5.0)"]
+requirements_deprecated_finder = ["pip-api", "pipreqs"]
+pipfile_deprecated_finder = ["requirementslib", "pipreqs"]
 
 [[package]]
 name = "jinja2"
@@ -316,7 +316,7 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-testing = ["coverage", "pyyaml"]
+testing = ["pyyaml", "coverage"]
 
 [[package]]
 name = "markupsafe"
@@ -526,8 +526,8 @@ python-versions = ">=3.6.1"
 typing-extensions = ">=3.7.4.3"
 
 [package.extras]
-dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
+dotenv = ["python-dotenv (>=0.10.4)"]
 
 [[package]]
 name = "pydocstyle"
@@ -568,10 +568,10 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
+tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
+docs = ["zope.interface", "sphinx-rtd-theme", "sphinx"]
+dev = ["pre-commit", "mypy", "coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)", "cryptography (>=3.3.1)", "zope.interface", "sphinx-rtd-theme", "sphinx"]
 crypto = ["cryptography (>=3.3.1)"]
-dev = ["sphinx", "sphinx-rtd-theme", "zope.interface", "cryptography (>=3.3.1)", "pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)", "mypy", "pre-commit"]
-docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
-tests = ["pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)"]
 
 [[package]]
 name = "pymdown-extensions"
@@ -630,7 +630,7 @@ pytest = ">=6.1.0"
 typing-extensions = {version = ">=3.7.2", markers = "python_version < \"3.8\""}
 
 [package.extras]
-testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)", "flaky (>=3.5.0)", "mypy (>=0.931)", "pytest-trio (>=0.7.0)"]
+testing = ["pytest-trio (>=0.7.0)", "mypy (>=0.931)", "flaky (>=3.5.0)", "hypothesis (>=5.7.1)", "coverage (>=6.2)"]
 
 [[package]]
 name = "pytest-cov"
@@ -816,8 +816,8 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tidelift (>=1.4)"]
-testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.3)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
+testing = ["pytest-mypy (>=0.9.1)", "pytest-black (>=0.3.7)", "func-timeout", "jaraco.itertools", "pytest-enabler (>=1.3)", "pytest-cov", "pytest-flake8", "pytest-checkdocs (>=2.4)", "pytest (>=6)"]
+docs = ["jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "jaraco.packaging (>=9)", "sphinx"]
 
 [metadata]
 lock-version = "1.1"
@@ -866,8 +866,8 @@ black = [
     {file = "black-22.6.0.tar.gz", hash = "sha256:6c6d39e28aed379aec40da1c65434c77d75e65bb59a1e1c283de545fb4e7c6c9"},
 ]
 camel-converter = [
-    {file = "camel-converter-1.0.5.tar.gz", hash = "sha256:0442ce83e39e73563344b7a23aeb6bbb53aae4bf50b5a8af031f1d025b997f1d"},
-    {file = "camel_converter-1.0.5-py3-none-any.whl", hash = "sha256:7d7ab126f64e223184c12bbd3334cfd6da350ec99904dfb5e7eff0980f0f760a"},
+    {file = "camel-converter-1.0.6.tar.gz", hash = "sha256:e70c1f8b83b9c172270a6cd92f6cdcd8e30502923058fec07be71fb701e6ce95"},
+    {file = "camel_converter-1.0.6-py3-none-any.whl", hash = "sha256:8e752eb4c73b7cd94c45f74374fb4f6374286c80d60946002db998aae4349766"},
 ]
 certifi = [
     {file = "certifi-2022.6.15-py3-none-any.whl", hash = "sha256:fe86415d55e84719d75f8b69414f6438ac3547d2078ab91b67e779ef69378412"},
