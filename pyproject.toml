@@ -23,7 +23,7 @@ include = ["meilisearch_python_async/py.typed"]
 python = "^3.7"
 httpx = ">=0.17,<0.24"
 pydantic = "^1.8"
-aiofiles = ">=0.7,<0.9"
+aiofiles = ">=0.7,<22.2"
 camel-converter = "^1.0.0"
 PyJWT = "^2.3.0"
 
