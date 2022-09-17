@@ -292,6 +292,7 @@ class Index:
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
+        matching_strategy: str = "all",
     ) -> SearchResults:
         """Search the index.
 
@@ -315,6 +316,7 @@ class Index:
         * **hightlight_post_tag:** The closing tag for highlighting text. Defaults to </em>
         * **crop_marker:** Marker to display when the number of words excedes the `crop_length`.
             Defaults to ...
+        * **matching_strategy:** Specifies the matching strategy Meilisearch should use. Defaults to `all`.
 
         **Returns:** Results of the search
 
@@ -347,6 +349,7 @@ class Index:
             "highlightPreTag": highlight_pre_tag,
             "highlightPostTag": highlight_post_tag,
             "cropMarker": crop_marker,
+            "matchingStrategy": matching_strategy,
         }
         url = f"{self._base_url_with_uid}/search"
         response = await self._http_requests.post(url, body=body)
