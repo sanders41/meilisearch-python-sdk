@@ -99,6 +99,13 @@ async def test_create_index_no_primary_key(test_client):
     assert isinstance(index.updated_at, datetime)
 
 
+async def test_create_keys_with_wildcarded_actions(test_client, test_key_info):
+    test_key_info.actions = ["documents.*"]
+    key = await test_client.create_key(test_key_info)
+
+    assert key.actions == ["documents.*"]
+
+
 async def test_generate_tenant_token_custom_key(test_client, test_key):
     search_rules = {"test": "value"}
     expected = {"searchRules": search_rules, "apiKeyUid": test_key.uid}
