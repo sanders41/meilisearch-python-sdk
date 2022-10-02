@@ -23,23 +23,16 @@ theme:
   features:
     - search.suggest
     - search.highlight
-
 repo_name: sanders41/meilisearch-python-async
 repo_url: https://github.com/sanders41/meilisearch-python-async
 
 nav:
   - Home: index.md
-  - API: api.md
+  - API:
+    - Client: client_api.md
+    - Index: index_api.md
+    - Tasks: tasks_api.md
   - Pydantic: pydantic.md
 
-markdown_extensions:
-  - admonition
-  - codehilite
-  - mkautodoc
-
-extra_css:
-  - css/custom.css
-
-extra:
-  previous: false
-  generator: false
+plugins:
+  - mkdocstrings

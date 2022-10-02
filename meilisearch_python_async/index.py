@@ -38,14 +38,14 @@ class Index:
     ):
         """Class initializer.
 
-        **Args:**
+        Args:
 
-        * **http_client:** An instance of the AsyncClient. This automatically gets passed by the
-            Client when creating and Index instance.
-        * **uid:** The index's unique identifier.
-        * **primary_key:** The primary key of the documents. Defaults to None.
-        * **created_at:** The date and time the index was created. Defaults to None.
-        * **updated_at:** The date and time the index was last updated. Defaults to None.
+            http_client: An instance of the AsyncClient. This automatically gets passed by the
+                Client when creating and Index instance.
+            uid: The index's unique identifier.
+            primary_key: The primary key of the documents. Defaults to None.
+            created_at: The date and time the index was created. Defaults to None.
+            updated_at: The date and time the index was last updated. Defaults to None.
         """
         self.uid = uid
         self.primary_key = primary_key
@@ -68,23 +68,21 @@ class Index:
     async def delete(self) -> TaskInfo:
         """Deletes the index.
 
-        **Returns:** The details of the task.
+        Returns:
 
-        **Raises:**
+            The details of the task.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        **
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        Usage:
+        Examples:
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.delete()
-        ```
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.delete()
         """
         url = f"{self._base_url_with_uid}"
         response = await self._http_requests.delete(url)
@@ -93,21 +91,21 @@ class Index:
     async def delete_if_exists(self) -> bool:
         """Delete the index if it already exists.
 
-        **Returns:** True if the index was deleted or False if not.
+        Returns:
 
-        **Raises:**
+            True if the index was deleted or False if not.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.delete_if_exists()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.delete_if_exists()
         """
         response = await self.delete()
         status = await wait_for_task(self.http_client, response.task_uid)
@@ -119,25 +117,25 @@ class Index:
     async def update(self, primary_key: str) -> Index:
         """Update the index primary key.
 
-        **Args:**
+        Args:
 
-        * **primary_key:** The primary key of the documents.
+            primary_key: The primary key of the documents.
 
-        **Returns:** An instance of the Index with the updated information.
+        Returns:
 
-        **Raises:**
+            An instance of the Index with the updated information.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     updated_index = await index.update()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     updated_index = await index.update()
         """
         payload = {"primaryKey": primary_key}
         url = f"{self._base_url_with_uid}"
@@ -150,21 +148,21 @@ class Index:
     async def fetch_info(self) -> Index:
         """Gets the infromation about the index.
 
-        **Returns:** An instance of the Index containing the retrieved information.
+        Returns:
 
-        **Raises:**
+            An instance of the Index containing the retrieved information.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     index_info = await index.fetch_info()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index_info = await index.fetch_info()
         """
         url = f"{self._base_url_with_uid}"
         response = await self._http_requests.get(url)
@@ -182,21 +180,21 @@ class Index:
     async def get_primary_key(self) -> str | None:
         """Get the primary key.
 
-        **Returns:** The primary key for the documents in the index.
+        Returns:
 
-        **Raises:**
+            The primary key for the documents in the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     primary_key = await index.get_primary_key()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     primary_key = await index.get_primary_key()
         """
         info = await self.fetch_info()
         return info.primary_key
@@ -210,27 +208,27 @@ class Index:
         In general this method should not be used directly and instead the index should be created
         through the `Client`.
 
-        **Args:**
+        Args:
 
-        * **http_client:** An instance of the AsyncClient. This automatically gets passed by the
-            Client when creating and Index instance.
-        * **uid:** The index's unique identifier.
-        * **primary_key:** The primary key of the documents. Defaults to None.
+            http_client: An instance of the AsyncClient. This automatically gets passed by the
+                Client when creating and Index instance.
+            uid: The index's unique identifier.
+            primary_key: The primary key of the documents. Defaults to None.
 
-        **Returns:** An instance of Index containing the information of the newly created index.
+        Returns:
 
-        **Raises:**
+            An instance of Index containing the information of the newly created index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = await index.create(client, "movies")
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = await index.create(client, "movies")
         """
         if not primary_key:
             payload = {"uid": uid}
@@ -254,21 +252,21 @@ class Index:
     async def get_stats(self) -> IndexStats:
         """Get stats of the index.
 
-        **Returns:** Stats of the index.
+        Returns:
 
-        **Raises:**
+            Stats of the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     stats = await index.get_stats()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     stats = await index.get_stats()
         """
         url = f"{self._stats_url}"
         response = await self._http_requests.get(url)
@@ -295,42 +293,42 @@ class Index:
     ) -> SearchResults:
         """Search the index.
 
-        **Args:**
+        Args:
 
-        * **query:** String containing the word(s) to search
-        * **offset:** Number of documents to skip. Defaults to 0.
-        * **limit:** Maximum number of documents returned. Defaults to 20.
-        * **filter:** Filter queries by an attribute value. Defaults to None.
-        * **facets:** Facets for which to retrieve the matching count. Defaults to None.
-        * **attributes_to_retrieve:** Attributes to display in the returned documents.
-            Defaults to ["*"].
-        * **attributes_to_crop:** Attributes whose values have to be cropped. Defaults to None.
-        * **crop_length:** The maximun number of words to display. Defaults to 200.
-        * **attributes_to_highlight:** Attributes whose values will contain highlighted matching terms.
-            Defaults to None.
-        * **sort:** Attributes by which to sort the results. Defaults to None.
-        * **show_matches_postions:** Defines whether an object that contains information about the matches should be
-            returned or not. Defaults to False.
-        * **hightlight_pre_tag:** The opening tag for highlighting text. Defaults to <em>.
-        * **hightlight_post_tag:** The closing tag for highlighting text. Defaults to </em>
-        * **crop_marker:** Marker to display when the number of words excedes the `crop_length`.
-            Defaults to ...
+            query: String containing the word(s) to search
+            offset: Number of documents to skip. Defaults to 0.
+            limit: Maximum number of documents returned. Defaults to 20.
+            filter: Filter queries by an attribute value. Defaults to None.
+            facets: Facets for which to retrieve the matching count. Defaults to None.
+            attributes_to_retrieve: Attributes to display in the returned documents.
+                Defaults to ["*"].
+            attributes_to_crop: Attributes whose values have to be cropped. Defaults to None.
+            crop_length: The maximun number of words to display. Defaults to 200.
+            attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
+                Defaults to None.
+            sort: Attributes by which to sort the results. Defaults to None.
+            show_matches_position: Defines whether an object that contains information about the matches should be
+                returned or not. Defaults to False.
+            highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
+            highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
+            crop_marker: Marker to display when the number of words excedes the `crop_length`.
+                Defaults to ...
 
-        **Returns:** Results of the search
+        Returns:
 
-        **Raises:**
+            Results of the search
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     search_results = await index.search("Tron")
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_results = await index.search("Tron")
         """
         body = {
             "q": query,
@@ -356,25 +354,25 @@ class Index:
     async def get_document(self, document_id: str) -> dict[str, Any]:
         """Get one document with given document identifier.
 
-        **Args:**
+        Args:
 
-        * **document_id:** Unique identifier of the document.
+            document_id: Unique identifier of the document.
 
-        **Returns:** The document information
+        Returns:
 
-        **Raises:**
+            The document information
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     document = await index.get_document("1234")
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     document = await index.get_document("1234")
         """
         url = f"{self._documents_url}/{document_id}"
         response = await self._http_requests.get(url)
@@ -385,29 +383,29 @@ class Index:
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
-        **Args:**
+        Args:
 
-        * **offset:** Number of documents to skip. Defaults to 0.
-        * **limit:** Maximum number of documents returnedd. Defaults to 20.
-        * **fields:** Document attributes to show. If this value is None then all
-            attributes are retrieved. Defaults to None.
+            offset: Number of documents to skip. Defaults to 0.
+            limit: Maximum number of documents returnedd. Defaults to 20.
+            fields: Document attributes to show. If this value is None then all
+                attributes are retrieved. Defaults to None.
 
-        **Returns:** Documents info.
+        Returns:
 
-        **Raises:**
+            Documents info.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
 
-        Usage:
+        Examples:
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     documents = await index.get_documents()
-        ```
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     documents = await index.get_documents()
         """
         parameters: dict[str, Any] = {
             "offset": offset,
@@ -427,31 +425,31 @@ class Index:
     ) -> TaskInfo:
         """Add documents to the index.
 
-        **Args:**
+        Args:
 
-        * **documents:** List of documents.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            documents: List of documents.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** The details of the task.
+        Returns:
 
-        **Raises:**
+            The details of the task.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> >>> documents = [
-        >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
-        >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
-        >>> ]
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents(documents)
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> >>> documents = [
+            >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
+            >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
+            >>> ]
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.add_documents(documents)
         """
         url = f"{self._documents_url}"
         if primary_key:
@@ -466,33 +464,33 @@ class Index:
     ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
-        **Args:**
+        Args:
 
-        * **documents:** List of documents.
-        * **batch_size:** The number of documents that should be included in each batch.
-            Defaults to 1000.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            documents: List of documents.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** List of update ids to track the action.
+        Returns:
 
-        **Raises:**
+            List of update ids to track the action.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> >>> documents = [
-        >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
-        >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
-        >>> ]
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_in_batches(documents)
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> >>> documents = [
+            >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
+            >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
+            >>> ]
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.add_documents_in_batches(documents)
         """
         task_ids: list[TaskInfo] = []
 
@@ -512,36 +510,36 @@ class Index:
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index.
 
-        **Args:**
+        Args:
 
-        * **directory_path:** Path to the directory that contains the json files.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-        * **document_type:** The type of document being added. Accepted types are json, csv, and
+            directory_path: Path to the directory that contains the json files.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row contining
                 the field names, and ever for should have a title.
-        * **combine_documents:** If set to True this will combine the documents from all the files
-            before indexing them. Defaults to True.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> directory_path = Path("/path/to/directory/containing/files")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_from_directory(directory_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> directory_path = Path("/path/to/directory/containing/files")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.add_documents_from_directory(directory_path)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
@@ -592,38 +590,38 @@ class Index:
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index in batches.
 
-        **Args:**
+        Args:
 
-        * **directory_path:** Path to the directory that contains the json files.
-        * **batch_size:** The number of documents that should be included in each batch.
-            Defaults to 1000.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-        * **document_type:** The type of document being added. Accepted types are json, csv, and
-            ndjson. For csv files the first row of the document should be a header row contining
-            the field names, and ever for should have a title.
-        * **combine_documents:** If set to True this will combine the documents from all the files
-            before indexing them. Defaults to True.
+            directory_path: Path to the directory that contains the json files.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
+                ndjson. For csv files the first row of the document should be a header row contining
+                the field names, and ever for should have a title.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
 
-        **Returns:** List of update ids to track the action.
+        Returns:
 
-        **Raises:**
+            List of update ids to track the action.
 
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> directory_path = Path("/path/to/directory/containing/files")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_from_directory_in_batches(directory_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> directory_path = Path("/path/to/directory/containing/files")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.add_documents_from_directory_in_batches(directory_path)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
@@ -675,31 +673,31 @@ class Index:
     ) -> TaskInfo:
         """Add documents to the index from a json file.
 
-        **Args:**
+        Args:
 
-        * **file_path:** Path to the json file.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            file_path: Path to the json file.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> file_path = Path("/path/to/file.json")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_from_file(file_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> file_path = Path("/path/to/file.json")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.add_documents_from_file(file_path)
         """
         documents = await Index._load_documents_from_file(file_path)
 
@@ -710,33 +708,33 @@ class Index:
     ) -> list[TaskInfo]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
-        **Args:**
+        Args:
 
-        * **file_path:** Path to the json file.
-        * **batch_size:** The number of documents that should be included in each batch.
-            Defaults to 1000.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            file_path: Path to the json file.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** List of update ids to track the action.
+        Returns:
 
-        **Raises:**
+            List of update ids to track the action.
 
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> file_path = Path("/path/to/file.json")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_from_file_in_batches(file_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> file_path = Path("/path/to/file.json")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.add_documents_from_file_in_batches(file_path)
         """
         documents = await Index._load_documents_from_file(file_path)
 
@@ -752,32 +750,32 @@ class Index:
         The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
         for batching.
 
-        **Args:**
+        Args:
 
-        * **file_path:** The path to the file to send to MeiliSearch. Only csv and ndjson files are
-            allowed.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            file_path: The path to the file to send to MeiliSearch. Only csv and ndjson files are
+                allowed.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** The details of the task.
+        Returns:
 
-        **Raises:**
+            The details of the task.
 
-        * **ValueError:** If the file is not a csv or ndjson file.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            ValueError: If the file is not a csv or ndjson file.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> file_path = Path("/path/to/file.csv")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.add_documents_from_raw_file(file_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> file_path = Path("/path/to/file.csv")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.add_documents_from_raw_file(file_path)
         """
         upload_path = Path(file_path) if isinstance(file_path, str) else file_path
         if not upload_path.exists():
@@ -804,31 +802,31 @@ class Index:
     ) -> TaskInfo:
         """Update documents in the index.
 
-        **Args:**
+        Args:
 
-        * **documents:** List of documents.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            documents: List of documents.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** The details of the task.
+        Returns:
 
-        **Raises:**
+            The details of the task.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> documents = [
-        >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
-        >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
-        >>> ]
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents(documents)
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> documents = [
+            >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
+            >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
+            >>> ]
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_documents(documents)
         """
         url = f"{self._documents_url}"
         if primary_key:
@@ -845,33 +843,33 @@ class Index:
 
         Each batch tries to fill the max_payload_size
 
-        **Args:**
+        Args:
 
-        * **documents:** List of documents.
-        * **batch_size:** The number of documents that should be included in each batch.
-            Defaults to 1000.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            documents: List of documents.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** List of update ids to track the action.
+        Returns:
 
-        **Raises:**
+            List of update ids to track the action.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> documents = [
-        >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
-        >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
-        >>> ]
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_in_batches(documents)
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> documents = [
+            >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
+            >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
+            >>> ]
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_documents_in_batches(documents)
         """
         task_ids: list[TaskInfo] = []
 
@@ -891,36 +889,36 @@ class Index:
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
-        **Args:**
+        Args:
 
-        * **directory_path:** Path to the directory that contains the json files.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-        * **document_type:** The type of document being added. Accepted types are json, csv, and
+            directory_path: Path to the directory that contains the json files.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row contining
                 the field names, and ever for should have a title.
-        * **combine_documents:** If set to True this will combine the documents from all the files
-            before indexing them. Defaults to True.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> directory_path = Path("/path/to/directory/containing/files")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_from_directory(directory_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> directory_path = Path("/path/to/directory/containing/files")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_documents_from_directory(directory_path)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
@@ -971,38 +969,38 @@ class Index:
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
-        **Args:**
+        Args:
 
-        * **directory_path:** Path to the directory that contains the json files.
-        * **batch_size:** The number of documents that should be included in each batch.
-            Defaults to 1000.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
-        * **document_type:** The type of document being added. Accepted types are json, csv, and
+            directory_path: Path to the directory that contains the json files.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
+            document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row contining
                 the field names, and ever for should have a title.
-        * **combine_documents:** If set to True this will combine the documents from all the files
-            before indexing them. Defaults to True.
+            combine_documents: If set to True this will combine the documents from all the files
+                before indexing them. Defaults to True.
 
-        **Returns:** List of update ids to track the action.
+        Returns:
 
-        **Raises:**
+            List of update ids to track the action.
 
-        * **InvalidDocumentError:** If the docucment is not a valid format for MeiliSarch.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> directory_path = Path("/path/to/directory/containing/files")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_from_directory_in_batches(directory_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> directory_path = Path("/path/to/directory/containing/files")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_documents_from_directory_in_batches(directory_path)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
@@ -1054,29 +1052,29 @@ class Index:
     ) -> TaskInfo:
         """Add documents in the index from a json file.
 
-        **Args:**
+        Args:
 
-        * **file_path:** Path to the json file.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            file_path: Path to the json file.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> file_path = Path("/path/to/file.json")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_from_file(file_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> file_path = Path("/path/to/file.json")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_documents_from_file(file_path)
         """
         documents = await Index._load_documents_from_file(file_path)
 
@@ -1087,31 +1085,31 @@ class Index:
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
-        **Args:**
+        Args:
 
-        * **file_path:** Path to the json file.
-        * **batch_size:** The number of documents that should be included in each batch.
-            Defaults to 1000.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            file_path: Path to the json file.
+            batch_size: The number of documents that should be included in each batch.
+                Defaults to 1000.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** List of update ids to track the action.
+        Returns:
 
-        **Raises:**
+            List of update ids to track the action.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> file_path = Path("/path/to/file.json")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_from_file_in_batches(file_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> file_path = Path("/path/to/file.json")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_documents_from_file_in_batches(file_path)
         """
         documents = await Index._load_documents_from_file(file_path)
 
@@ -1127,32 +1125,32 @@ class Index:
         The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
         for batching.
 
-        **Args:**
+        Args:
 
-        * **file_path:** The path to the file to send to MeiliSearch. Only csv and ndjson files are
-            allowed.
-        * **primary_key:** The primary key of the documents. This will be ignored if already set.
-            Defaults to None.
+            file_path: The path to the file to send to MeiliSearch. Only csv and ndjson files are
+                allowed.
+            primary_key: The primary key of the documents. This will be ignored if already set.
+                Defaults to None.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **ValueError:** If the file is not a csv or ndjson file.
-        * **MeiliSearchError:** If the file path is not valid
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            ValueError: If the file is not a csv or ndjson file.
+            MeiliSearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from pathlib import Path
-        >>> from meilisearch_async_client import Client
-        >>> file_path = Path("/path/to/file.csv")
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_documents_from_raw_file(file_path)
-        ```
+        Examples:
+
+            >>> from pathlib import Path
+            >>> from meilisearch_async_client import Client
+            >>> file_path = Path("/path/to/file.csv")
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_documents_from_raw_file(file_path)
         """
         upload_path = Path(file_path) if isinstance(file_path, str) else file_path
         if not upload_path.exists():
@@ -1177,25 +1175,25 @@ class Index:
     async def delete_document(self, document_id: str) -> TaskInfo:
         """Delete one document from the index.
 
-        **Args:**
+        Args:
 
-        * **document_id:** Unique identifier of the document.
+            document_id: Unique identifier of the document.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Rases:**
+            The details of the task status.
 
-        * **MeiliSearchCommunicationError:** If there was an error communicating with the server.
-        * **MeiliSearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeiliSearchCommunicationError: If there was an error communicating with the server.
+            MeiliSearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.delete_document("1234")
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.delete_document("1234")
         """
         url = f"{self._documents_url}/{document_id}"
         response = await self._http_requests.delete(url)
@@ -1205,25 +1203,25 @@ class Index:
     async def delete_documents(self, ids: list[str]) -> TaskInfo:
         """Delete multiple documents from the index.
 
-        **Args:**
+        Args:
 
-        * **ids:** List of unique identifiers of documents.
+            ids: List of unique identifiers of documents.
 
-        **Returns:** List of update ids to track the action.
+        Returns:
 
-        **Raises:**
+            List of update ids to track the action.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.delete_documents(["1234", "5678"])
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.delete_documents(["1234", "5678"])
         """
         url = f"{self._documents_url}/delete-batch"
         response = await self._http_requests.post(url, ids)
@@ -1233,21 +1231,21 @@ class Index:
     async def delete_all_documents(self) -> TaskInfo:
         """Delete all documents from the index.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.delete_all_document()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.delete_all_document()
         """
         url = f"{self._documents_url}"
         response = await self._http_requests.delete(url)
@@ -1257,21 +1255,21 @@ class Index:
     async def get_settings(self) -> MeiliSearchSettings:
         """Get settings of the index.
 
-        **Returns:** Settings of the index.
+        Returns:
 
-        **Raises:**
+            Settings of the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     settings = await index.get_settings()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     settings = await index.get_settings()
         """
         url = f"{self._settings_url}"
         response = await self._http_requests.get(url)
@@ -1281,45 +1279,45 @@ class Index:
     async def update_settings(self, body: MeiliSearchSettings) -> TaskInfo:
         """Update settings of the index.
 
-        **Args:**
+        Args:
 
-        * **body:** Settings of the index.
+            body: Settings of the index.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> from meilisearch_async_client import MeiliSearchSettings
-        >>> new_settings = MeiliSearchSettings(
-        >>>     synonyms={"wolverine": ["xmen", "logan"], "logan": ["wolverine"]},
-        >>>     stop_words=["the", "a", "an"],
-        >>>     ranking_rules=[
-        >>>         "words",
-        >>>         "typo",
-        >>>         "proximity",
-        >>>         "attribute",
-        >>>         "sort",
-        >>>         "exactness",
-        >>>         "release_date:desc",
-        >>>         "rank:desc",
-        >>>    ],
-        >>>    filterable_attributes=["genre", "director"],
-        >>>    distinct_attribute="url",
-        >>>    searchable_attributes=["title", "description", "genre"],
-        >>>    displayed_attributes=["title", "description", "genre", "release_date"],
-        >>>    sortable_attributes=["title", "release_date"],
-        >>> )
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_settings(new_settings)
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import MeiliSearchSettings
+            >>> new_settings = MeiliSearchSettings(
+            >>>     synonyms={"wolverine": ["xmen", "logan"], "logan": ["wolverine"]},
+            >>>     stop_words=["the", "a", "an"],
+            >>>     ranking_rules=[
+            >>>         "words",
+            >>>         "typo",
+            >>>         "proximity",
+            >>>         "attribute",
+            >>>         "sort",
+            >>>         "exactness",
+            >>>         "release_date:desc",
+            >>>         "rank:desc",
+            >>>    ],
+            >>>    filterable_attributes=["genre", "director"],
+            >>>    distinct_attribute="url",
+            >>>    searchable_attributes=["title", "description", "genre"],
+            >>>    displayed_attributes=["title", "description", "genre", "release_date"],
+            >>>    sortable_attributes=["title", "release_date"],
+            >>> )
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_settings(new_settings)
         """
         body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}
 
@@ -1331,21 +1329,21 @@ class Index:
     async def reset_settings(self) -> TaskInfo:
         """Reset settings of the index to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_settings()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_settings()
         """
         url = f"{self._settings_url}"
         response = await self._http_requests.delete(url)
@@ -1355,21 +1353,21 @@ class Index:
     async def get_ranking_rules(self) -> list[str]:
         """Get ranking rules of the index.
 
-        **Returns:** List containing the ranking rules of the index.
+        Returns:
 
-        **Raises:**
+            List containing the ranking rules of the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     ranking_rules = await index.get_ranking_rules()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     ranking_rules = await index.get_ranking_rules()
         """
         url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.get(url)
@@ -1379,35 +1377,35 @@ class Index:
     async def update_ranking_rules(self, ranking_rules: list[str]) -> TaskInfo:
         """Update ranking rules of the index.
 
-        **Args:**
+        Args:
 
-        * **ranking_rules:** List containing the ranking rules.
+            ranking_rules: List containing the ranking rules.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> ranking_rules=[
-        >>>      "words",
-        >>>      "typo",
-        >>>      "proximity",
-        >>>      "attribute",
-        >>>      "sort",
-        >>>      "exactness",
-        >>>      "release_date:desc",
-        >>>      "rank:desc",
-        >>> ],
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_ranking_rules(ranking_rules)
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> ranking_rules=[
+            >>>      "words",
+            >>>      "typo",
+            >>>      "proximity",
+            >>>      "attribute",
+            >>>      "sort",
+            >>>      "exactness",
+            >>>      "release_date:desc",
+            >>>      "rank:desc",
+            >>> ],
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_ranking_rules(ranking_rules)
         """
         url = f"{self._settings_url}/ranking-rules"
         respose = await self._http_requests.put(url, ranking_rules)
@@ -1417,21 +1415,21 @@ class Index:
     async def reset_ranking_rules(self) -> TaskInfo:
         """Reset ranking rules of the index to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_ranking_rules()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_ranking_rules()
         """
         url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.delete(url)
@@ -1441,22 +1439,22 @@ class Index:
     async def get_distinct_attribute(self) -> str | None:
         """Get distinct attribute of the index.
 
-        **Returns:** String containing the distinct attribute of the index. If no distinct attribute
-            `None` is returned.
+        Returns:
 
-        **Raises:**
+            String containing the distinct attribute of the index. If no distinct attribute
+                `None` is returned.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     distinct_attribute = await index.get_distinct_attribute()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     distinct_attribute = await index.get_distinct_attribute()
         """
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.get(url)
@@ -1469,25 +1467,25 @@ class Index:
     async def update_distinct_attribute(self, body: str) -> TaskInfo:
         """Update distinct attribute of the index.
 
-        **Args:**
+        Args:
 
-        * **body:** Distinct attribute.
+            body: Distinct attribute.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_distinct_attribute("url")
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_distinct_attribute("url")
         """
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.put(url, body)
@@ -1497,21 +1495,21 @@ class Index:
     async def reset_distinct_attribute(self) -> TaskInfo:
         """Reset distinct attribute of the index to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_distinct_attributes()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_distinct_attributes()
         """
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.delete(url)
@@ -1521,21 +1519,21 @@ class Index:
     async def get_searchable_attributes(self) -> list[str]:
         """Get searchable attributes of the index.
 
-        **Returns:** List containing the searchable attributes of the index.
+        Returns:
 
-        **Raises:**
+            List containing the searchable attributes of the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     searchable_attributes = await index.get_searchable_attributes()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     searchable_attributes = await index.get_searchable_attributes()
         """
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.get(url)
@@ -1544,25 +1542,25 @@ class Index:
     async def update_searchable_attributes(self, body: list[str]) -> TaskInfo:
         """Update searchable attributes of the index.
 
-        **Args:**
+        Args:
 
-        * **body:** List containing the searchable attributes.
+            body: List containing the searchable attributes.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_searchable_attributes(["title", "description", "genre"])
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_searchable_attributes(["title", "description", "genre"])
         """
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.put(url, body)
@@ -1572,25 +1570,21 @@ class Index:
     async def reset_searchable_attributes(self) -> TaskInfo:
         """Reset searchable attributes of the index to default values.
 
-        **Args:**
+        Returns:
 
-        * **body:** List containing the searchable attributes.
+            The details of the task status.
 
-        **Returns:** The details of the task status.
+        Raises:
 
-        **Raises:**
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Examples:
 
-        Usage:
-
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_searchable_attributes()
-        ```
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_searchable_attributes()
         """
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.delete(url)
@@ -1600,21 +1594,21 @@ class Index:
     async def get_displayed_attributes(self) -> list[str]:
         """Get displayed attributes of the index.
 
-        **Returns:** List containing the displayed attributes of the index.
+        Returns:
 
-        **Raises:**
+            List containing the displayed attributes of the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     displayed_attributes = await index.get_displayed_attributes()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     displayed_attributes = await index.get_displayed_attributes()
         """
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.get(url)
@@ -1623,27 +1617,27 @@ class Index:
     async def update_displayed_attributes(self, body: list[str]) -> TaskInfo:
         """Update displayed attributes of the index.
 
-        **Args:**
+        Args:
 
-        * **body:** List containing the displayed attributes.
+            body: List containing the displayed attributes.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_displayed_attributes(
-        >>>         ["title", "description", "genre", "release_date"]
-        >>>     )
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_displayed_attributes(
+            >>>         ["title", "description", "genre", "release_date"]
+            >>>     )
         """
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.put(url, body)
@@ -1653,21 +1647,21 @@ class Index:
     async def reset_displayed_attributes(self) -> TaskInfo:
         """Reset displayed attributes of the index to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_displayed_attributes()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_displayed_attributes()
         """
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.delete(url)
@@ -1677,21 +1671,21 @@ class Index:
     async def get_stop_words(self) -> list[str] | None:
         """Get stop words of the index.
 
-        **Returns:** List containing the stop words of the index.
+        Returns:
 
-        **Raises:**
+            List containing the stop words of the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     stop_words = await index.get_stop_words()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     stop_words = await index.get_stop_words()
         """
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.get(url)
@@ -1704,25 +1698,25 @@ class Index:
     async def update_stop_words(self, body: list[str]) -> TaskInfo:
         """Update stop words of the index.
 
-        **Args:**
+        Args:
 
-        * **body:** List containing the stop words of the index.
+            body: List containing the stop words of the index.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_stop_words(["the", "a", "an"])
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_stop_words(["the", "a", "an"])
         """
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.put(url, body)
@@ -1732,21 +1726,21 @@ class Index:
     async def reset_stop_words(self) -> TaskInfo:
         """Reset stop words of the index to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_stop_words()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_stop_words()
         """
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.delete(url)
@@ -1756,21 +1750,21 @@ class Index:
     async def get_synonyms(self) -> dict[str, list[str]] | None:
         """Get synonyms of the index.
 
-        **Returns:** The synonyms of the index.
+        Returns:
 
-        **Raises:**
+            The synonyms of the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     synonyms = await index.get_synonyms()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     synonyms = await index.get_synonyms()
         """
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.get(url)
@@ -1783,27 +1777,27 @@ class Index:
     async def update_synonyms(self, body: dict[str, list[str]]) -> TaskInfo:
         """Update synonyms of the index.
 
-        **Args:**
+        Args:
 
-        * **body:** The synonyms of the index.
+            body: The synonyms of the index.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_synonyms(
-        >>>         {"wolverine": ["xmen", "logan"], "logan": ["wolverine"]}
-        >>>     )
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_synonyms(
+            >>>         {"wolverine": ["xmen", "logan"], "logan": ["wolverine"]}
+            >>>     )
         """
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.put(url, body)
@@ -1813,21 +1807,21 @@ class Index:
     async def reset_synonyms(self) -> TaskInfo:
         """Reset synonyms of the index to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_synonyms()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_synonyms()
         """
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.delete(url)
@@ -1837,21 +1831,21 @@ class Index:
     async def get_filterable_attributes(self) -> list[str] | None:
         """Get filterable attributes of the index.
 
-        **Returns:** List containing the filterable attributes of the index.
+        Returns:
 
-        **Raises:**
+            List containing the filterable attributes of the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     filterable_attributes = await index.get_filterable_attributes()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     filterable_attributes = await index.get_filterable_attributes()
         """
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.get(url)
@@ -1864,25 +1858,25 @@ class Index:
     async def update_filterable_attributes(self, body: list[str]) -> TaskInfo:
         """Update filterable attributes of the index.
 
-        **Args:**
+        Args:
 
-        * **body:** List containing the filterable attributes of the index.
+            body: List containing the filterable attributes of the index.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_filterable_attributes(["genre", "director"])
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_filterable_attributes(["genre", "director"])
         """
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.put(url, body)
@@ -1892,21 +1886,21 @@ class Index:
     async def reset_filterable_attributes(self) -> TaskInfo:
         """Reset filterable attributes of the index to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_filterable_attributes()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_filterable_attributes()
         """
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.delete(url)
@@ -1916,21 +1910,21 @@ class Index:
     async def get_sortable_attributes(self) -> list[str]:
         """Get sortable attributes of the Index.
 
-        **Returns:** List containing the sortable attributes of the Index.
+        Returns:
 
-        **Raises:**
+            List containing the sortable attributes of the Index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     sortable_attributes = await index.get_sortable_attributes()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     sortable_attributes = await index.get_sortable_attributes()
         """
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.get(url)
@@ -1940,21 +1934,21 @@ class Index:
     async def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskInfo:
         """Get sortable attributes of the Index.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_sortable_attributes(["title", "release_date"])
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_sortable_attributes(["title", "release_date"])
         """
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.put(url, sortable_attributes)
@@ -1964,21 +1958,21 @@ class Index:
     async def reset_sortable_attributes(self) -> TaskInfo:
         """Reset sortable attributes of the index to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_sortable_attributes()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_sortable_attributes()
         """
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.delete(url)
@@ -1988,21 +1982,21 @@ class Index:
     async def get_typo_tolerance(self) -> TypoTolerance:
         """Get typo tolerance for the index.
 
-        **Returns:** TypoTolerance for the index.
+        Returns:
 
-        **Raises:**
+            TypoTolerance for the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     sortable_attributes = await index.get_typo_tolerance()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     sortable_attributes = await index.get_typo_tolerance()
         """
         url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.get(url)
@@ -2012,22 +2006,22 @@ class Index:
     async def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskInfo:
         """Update typo tolerance.
 
-        **Returns:** Task to track the action.
+        Returns:
 
-        **Raises:**
+            Task to track the action.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     TypoTolerance(enabled=False)
-        >>>     await index.update_typo_tolerance()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     TypoTolerance(enabled=False)
+            >>>     await index.update_typo_tolerance()
         """
         url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))
@@ -2037,21 +2031,21 @@ class Index:
     async def reset_typo_tolerance(self) -> TaskInfo:
         """Reset typo tolerance to default values.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_typo_tolerance()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_typo_tolerance()
         """
         url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.delete(url)
@@ -2061,21 +2055,21 @@ class Index:
     async def get_faceting(self) -> Faceting:
         """Get faceting for the index.
 
-        **Returns:** Faceting for the index.
+        Returns:
 
-        **Raises:**
+            Faceting for the index.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     faceting = await index.get_faceting()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     faceting = await index.get_faceting()
         """
         url = f"{self._settings_url}/faceting"
         response = await self._http_requests.get(url)
@@ -2085,21 +2079,21 @@ class Index:
     async def update_faceting(self, faceting: Faceting) -> TaskInfo:
         """Partially update the faceting settings for an index.
 
-        **Returns:** Task to track the action.
+        Returns:
 
-        **Raises:**
+            Task to track the action.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.update_faceting(faceting=Faceting(max_values_per_facet=100))
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
         url = f"{self._settings_url}/faceting"
         response = await self._http_requests.patch(url, faceting.dict(by_alias=True))
@@ -2109,21 +2103,21 @@ class Index:
     async def reset_faceting(self) -> TaskInfo:
         """Reset an index's faceting settings to their default value.
 
-        **Returns:** The details of the task status.
+        Returns:
 
-        **Raises:**
+            The details of the task status.
 
-        * **MeilisearchCommunicationError:** If there was an error communicating with the server.
-        * **MeilisearchApiError:** If the MeiliSearch API returned an error.
+        Raises:
 
-        Usage:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
 
-        ```py
-        >>> from meilisearch_async_client import Client
-        >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     index = client.index("movies")
-        >>>     await index.reset_faceting()
-        ```
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_faceting()
         """
         url = f"{self._settings_url}/faceting"
         response = await self._http_requests.delete(url)

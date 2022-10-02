@@ -27,9 +27,8 @@ aiofiles = ">=0.7"
 camel-converter = ">=1.0.0"
 PyJWT = ">=2.3.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = ">=22.8.0"
-flake8 = ">=5.0.4"
 isort = ">=5.10.1"
 mypy = ">=0.981"
 pre-commit = ">=2.20.0"
@@ -38,10 +37,10 @@ pytest-cov = ">=4.0.0"
 tox = ">=3.26.0"
 pytest-asyncio = ">=0.19.0"
 types-aiofiles = ">=22.1.0"
-flake8-docstrings = ">=1.6.0"
+flake8 = ">=5.0.4"
 mkdocs = ">=1.2.4"
 mkdocs-material = ">=8.2.7"
-mkautodoc = ">=0.2.0"
+mkdocstrings = {version = ">=0.19.0", extras = ["python"]}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
