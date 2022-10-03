@@ -5,7 +5,7 @@ from httpx import Response
 
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import MeiliSearchApiError
-from meilisearch_python_async.index import Index
+from meilisearch_python_async.index import Index, _iso_to_date_time
 from meilisearch_python_async.models.settings import (
     Faceting,
     MeiliSearchSettings,
@@ -473,8 +473,8 @@ async def test_reset_faceting(empty_index, default_faceting):
     ],
 )
 def test_iso_to_date_time(iso_date, expected, test_client):
-    index = Index(test_client, "test")
-    converted = index._iso_to_date_time(iso_date)
+    Index(test_client, "test")
+    converted = _iso_to_date_time(iso_date)
 
     assert converted == expected
 
