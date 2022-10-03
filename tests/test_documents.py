@@ -9,7 +9,7 @@ from meilisearch_python_async.errors import (
     MeiliSearchApiError,
     MeiliSearchError,
 )
-from meilisearch_python_async.index import Index
+from meilisearch_python_async.index import _combine_documents, _load_documents_from_file
 from meilisearch_python_async.task import wait_for_task
 
 
@@ -914,7 +914,7 @@ async def test_load_documents_from_file_invalid_document(tmp_path):
         json.dump(doc, f)
 
     with pytest.raises(InvalidDocumentError):
-        await Index._load_documents_from_file(file_path)
+        await _load_documents_from_file(file_path)
 
 
 def test_combine_documents():
@@ -923,7 +923,7 @@ def test_combine_documents():
         [{"id": 3, "name": "Test 3"}],
     ]
 
-    combined = Index._combine_documents(docs)
+    combined = _combine_documents(docs)
 
     assert len(combined) == 3
     assert [1, 2, 3] == [x["id"] for x in combined]
