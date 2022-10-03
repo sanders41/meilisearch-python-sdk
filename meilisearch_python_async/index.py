@@ -314,6 +314,7 @@ class Index:
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
             crop_marker: Marker to display when the number of words excedes the `crop_length`.
                 Defaults to ...
+            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
 
         Returns:
 
