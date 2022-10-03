@@ -59,6 +59,20 @@ async def test_custom_search_with_empty_query(index_with_documents):
     assert response.query == ""
 
 
+async def test_custom_search_params_with_matching_strategy_all(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search("man loves", limit=5, matching_strategy="all")
+
+    assert len(response.hits) == 1
+
+
+async def test_custom_search_params_with_matching_strategy_last(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search("man loves", limit=5, matching_strategy="last")
+
+    assert len(response.hits) > 1
+
+
 async def test_custom_search_with_no_query(index_with_documents):
     index = await index_with_documents()
     response = await index.search("", limit=5)

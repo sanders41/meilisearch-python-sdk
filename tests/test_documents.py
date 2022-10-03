@@ -472,15 +472,16 @@ async def test_get_documents_offset_optional_params(index_with_documents):
 async def test_update_documents(index_with_documents, small_movies):
     index = await index_with_documents()
     response = await index.get_documents()
+    doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
     update = await index.update_documents([response.results[0]])
     await wait_for_task(index.http_client, update.task_uid)
-    response = await index.get_documents()
-    assert response.results[0]["title"] == "Some title"
+    response = await index.get_document(doc_id)
+    assert response["title"] == "Some title"
     update = await index.update_documents(small_movies)
     await wait_for_task(index.http_client, update.task_uid)
-    response = await index.get_documents()
-    assert response.results[0]["title"] != "Some title"
+    response = await index.get_document(doc_id)
+    assert response["title"] != "Some title"
 
 
 async def test_update_documents_with_primary_key(test_client, small_movies):
@@ -495,20 +496,21 @@ async def test_update_documents_with_primary_key(test_client, small_movies):
 async def test_update_documents_in_batches(batch_size, index_with_documents, small_movies):
     index = await index_with_documents()
     response = await index.get_documents()
+    doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
     update = await index.update_documents([response.results[0]])
     await wait_for_task(index.http_client, update.task_uid)
 
-    response = await index.get_documents()
-    assert response.results[0]["title"] == "Some title"
+    response = await index.get_document(doc_id)
+    assert response["title"] == "Some title"
     updates = await index.update_documents_in_batches(small_movies, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     for update in updates:
         await wait_for_task(index.http_client, update.task_uid)
 
-    response = await index.get_documents()
-    assert response.results[0]["title"] != "Some title"
+    response = await index.get_document(doc_id)
+    assert response["title"] != "Some title"
 
 
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
