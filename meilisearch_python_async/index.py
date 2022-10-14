@@ -446,7 +446,7 @@ class Index:
         Examples:
 
             >>> from meilisearch_python_async import Client
-            >>> >>> documents = [
+            >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
