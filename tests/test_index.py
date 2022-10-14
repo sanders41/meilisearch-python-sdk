@@ -8,6 +8,7 @@ from meilisearch_python_async.errors import MeiliSearchApiError
 from meilisearch_python_async.index import _iso_to_date_time
 from meilisearch_python_async.models.settings import (
     Faceting,
+    Pagination,
     MeiliSearchSettings,
     MinWordSizeForTypos,
     TypoTolerance,
@@ -23,6 +24,7 @@ def new_settings():
         sortable_attributes=["genre", "title"],
         typo_tolerance=TypoTolerance(enabled=False),
         faceting=Faceting(max_values_per_facet=123),
+        pagination=Pagination(max_total_hits=17),
     )
 
 
@@ -77,6 +79,11 @@ def filterable_attributes():
 
 
 @pytest.fixture
+def default_pagination():
+    return Pagination(max_total_hits=1000)
+
+
+@pytest.fixture
 def sortable_attributes():
     return ["genre", "title"]
 
@@ -117,7 +124,7 @@ async def test_get_stats(empty_index, small_movies):
     assert response.number_of_documents == 30
 
 
-async def test_get_settings_default(empty_index, default_ranking_rules, default_faceting):
+async def test_get_settings_default(empty_index, default_ranking_rules, default_faceting, default_pagination):
     index = await empty_index()
     response = await index.get_settings()
     assert response.ranking_rules == default_ranking_rules
@@ -129,6 +136,7 @@ async def test_get_settings_default(empty_index, default_ranking_rules, default_
     assert response.sortable_attributes == []
     assert response.typo_tolerance.enabled is True
     assert response.faceting == default_faceting
+    assert response.pagination == default_pagination
 
 
 async def test_update_settings(empty_index, new_settings):
@@ -148,6 +156,7 @@ async def test_update_settings(empty_index, new_settings):
     assert (
         response.faceting.max_values_per_facet == new_settings.faceting.max_values_per_facet == 123
     )
+    assert response.pagination == new_settings.pagination
 
 
 async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
@@ -164,6 +173,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.synonyms == {}
     assert response.sortable_attributes == new_settings.sortable_attributes
     assert response.typo_tolerance.enabled is False
+    assert response.pagination == new_settings.pagination
     response = await index.reset_settings()
     update = await wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
@@ -177,6 +187,7 @@ async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.sortable_attributes == []
     assert response.typo_tolerance.enabled is True
     assert response.faceting.max_values_per_facet == 100
+    assert response.pagination.max_total_hits == 1000
 
 
 async def test_get_ranking_rules_default(empty_index, default_ranking_rules):
@@ -295,6 +306,31 @@ async def test_reset_displayed_attributes(empty_index, displayed_attributes):
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_displayed_attributes()
     assert response == ["*"]
+
+
+async def test_get_pagination(empty_index):
+    index = await empty_index()
+    response = await index.get_pagination()
+    assert response.max_total_hits == 1000
+
+
+async def test_update_pagination(empty_index):
+    pagination = Pagination(max_total_hits=17)
+    index = await empty_index()
+    response = await index.update_pagination(pagination)
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_pagination()
+    assert pagination.dict() == pagination.dict()
+
+
+async def test_reset_pagination(empty_index, default_pagination):
+    index = await empty_index()
+    response = await index.update_pagination(Pagination(max_total_hits=17))
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.reset_pagination()
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_pagination()
+    assert response.dict() == default_pagination.dict()
 
 
 async def test_get_stop_words_default(empty_index):
