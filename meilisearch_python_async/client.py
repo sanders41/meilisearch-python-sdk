@@ -273,9 +273,9 @@ class Client:
 
         Examples:
 
-            from meilisearch_python_async import Client
-            async with Client("http://localhost.com", "masterKey") as client:
-                index = client.index("movies")
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
         """
         return Index(self.http_client, uid=uid)
 
