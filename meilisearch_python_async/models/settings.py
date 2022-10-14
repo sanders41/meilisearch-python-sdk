@@ -19,6 +19,10 @@ class Faceting(CamelBase):
     max_values_per_facet: int
 
 
+class Pagination(CamelBase):
+    max_total_hits: int
+
+
 class MeiliSearchSettings(CamelBase):
     synonyms: Optional[Dict[str, Any]] = None
     stop_words: Optional[List[str]] = None
@@ -30,3 +34,4 @@ class MeiliSearchSettings(CamelBase):
     sortable_attributes: Optional[List[str]] = None
     typo_tolerance: Optional[TypoTolerance] = None
     faceting: Optional[Faceting] = None
+    pagination: Optional[Pagination] = None

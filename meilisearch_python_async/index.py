@@ -17,7 +17,12 @@ from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchErr
 from meilisearch_python_async.models.documents import DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
-from meilisearch_python_async.models.settings import Faceting, MeiliSearchSettings, TypoTolerance
+from meilisearch_python_async.models.settings import (
+    Faceting,
+    MeiliSearchSettings,
+    Pagination,
+    TypoTolerance,
+)
 from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.task import wait_for_task
 
@@ -2105,6 +2110,79 @@ class Index:
             >>>     await index.reset_faceting()
         """
         url = f"{self._settings_url}/faceting"
+        response = await self._http_requests.delete(url)
+
+        return TaskInfo(**response.json())
+
+    async def get_pagination(self) -> Pagination:
+        """Get pagination settings for the index.
+
+        Returns:
+
+            Pagination for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     pagination_settings = await index.get_pagination()
+        """
+        url = f"{self._settings_url}/pagination"
+        response = await self._http_requests.get(url)
+
+        return Pagination(**response.json())
+
+    async def update_pagination(self, settings: Pagination) -> TaskInfo:
+        """Partially update the pagination settings for an index.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_async.models.settings import Pagination
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_pagination(settings=Pagination(max_total_hits=123))
+        """
+        url = f"{self._settings_url}/pagination"
+        response = await self._http_requests.patch(url, settings.dict(by_alias=True))
+
+        return TaskInfo(**response.json())
+
+    async def reset_pagination(self) -> TaskInfo:
+        """Reset an index's pagination settings to their default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_pagination()
+        """
+        url = f"{self._settings_url}/pagination"
         response = await self._http_requests.delete(url)
 
         return TaskInfo(**response.json())
