@@ -31,8 +31,8 @@ async def get_tasks(http_client: AsyncClient, index_id: str | None = None) -> li
 
     Examples:
 
-        >>> from meilisearch_async_client import Client
-        >>> from meilisearch_async_client.task import get_tasks
+        >>> from meilisearch_python_async import Client
+        >>> from meilisearch_python_async.task import get_tasks
         >>>
         >>> async with Client("http://localhost.com", "masterKey") as client:
         >>>     await get_tasks(client.http_client)
@@ -64,8 +64,8 @@ async def get_task(http_client: AsyncClient, task_id: int) -> TaskStatus:
 
     Examples:
 
-        >>> from meilisearch_async_client import Client
-        >>> from meilisearch_async_client.task import get_task
+        >>> from meilisearch_python_async import Client
+        >>> from meilisearch_python_async.task import get_task
         >>>
         >>> async with Client("http://localhost.com", "masterKey") as client:
         >>>     await get_task(client.http_client, 1244)
@@ -100,8 +100,8 @@ async def wait_for_task(
 
     Examples:
 
-        >>> from meilisearch_async_client import Client
-        >>> from meilisearch_async_client.task import wait_for_task
+        >>> from meilisearch_python_async import Client
+        >>> from meilisearch_python_async.task import wait_for_task
         >>> >>> documents = [
         >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
         >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
