@@ -8,9 +8,9 @@ from meilisearch_python_async.errors import MeiliSearchApiError
 from meilisearch_python_async.index import _iso_to_date_time
 from meilisearch_python_async.models.settings import (
     Faceting,
-    Pagination,
     MeiliSearchSettings,
     MinWordSizeForTypos,
+    Pagination,
     TypoTolerance,
 )
 from meilisearch_python_async.task import wait_for_task
@@ -124,7 +124,9 @@ async def test_get_stats(empty_index, small_movies):
     assert response.number_of_documents == 30
 
 
-async def test_get_settings_default(empty_index, default_ranking_rules, default_faceting, default_pagination):
+async def test_get_settings_default(
+    empty_index, default_ranking_rules, default_faceting, default_pagination
+):
     index = await empty_index()
     response = await index.get_settings()
     assert response.ranking_rules == default_ranking_rules
