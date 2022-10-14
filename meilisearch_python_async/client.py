@@ -72,7 +72,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     await client.create_dump()
         """
@@ -98,7 +98,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = await client.create_index("movies")
         """
@@ -122,7 +122,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     await client.delete_index_if_exists()
         """
@@ -165,7 +165,7 @@ class Client:
         Examples:
 
             >>> from datetime import datetime, timedelta
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>>
             >>> expires_at = datetime.utcnow() + timedelta(days=7)
             >>>
@@ -209,7 +209,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     indexes = await client.get_indexes()
         """
@@ -247,7 +247,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_index()
         """
@@ -273,7 +273,7 @@ class Client:
 
         Examples:
 
-            from meilisearch_async_client import Client
+            from meilisearch_python_async import Client
             async with Client("http://localhost.com", "masterKey") as client:
                 index = client.index("movies")
         """
@@ -294,7 +294,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     stats = await client.get_all_stats()
         """
@@ -321,7 +321,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_or_create_index("movies")
         """
@@ -352,7 +352,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> from meilissearch_async_client.models.client import KeyCreate
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     key_info = KeyCreate(
@@ -385,7 +385,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     await client.delete_key("abc123")
         """
@@ -406,7 +406,7 @@ class Client:
 
         Examples:
 
-            from meilisearch_async_client import Client
+            from meilisearch_python_async import Client
             async with Client("http://localhost.com", "masterKey") as client:
                 keys = await client.get_keys()
         """
@@ -431,7 +431,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     keys = await client.get_key("abc123")
         """
@@ -457,7 +457,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> from meilissearch_async_client.models.client import KeyUpdate
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     key_info = KeyUpdate(
@@ -490,7 +490,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_raw_index("movies")
         """
@@ -517,7 +517,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_raw_indexes()
         """
@@ -542,7 +542,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     version = await client.get_version()
         """
@@ -564,7 +564,7 @@ class Client:
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     health = await client.get_healths()
         """
