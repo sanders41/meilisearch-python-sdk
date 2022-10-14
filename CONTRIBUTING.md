@@ -143,36 +143,12 @@ You can view the current coverage level in the codecov badge on the
 [main github page](https://github.com/sanders41/meilisearch-python-async). You can run tests and see the
 code coverage.
 
-There are two way to run the tests.
+There are multiple way Meilisearch can be setup for testing. The examples below use docker, however
+installing and starting Meilisearch with any [installation](https://docs.meilisearch.com/learn/getting_started/quick_start.html#setup-and-installation)
+will work.
 
-#### With make
-
-If you have make installed you can run the tests with make. This option will automatically start
-Meilisearch in a Docker container before starting the tests and stop the contain with the tests
-are completed.
-
-First make sure you have the Meilisearch Docker image.
-
-```sh
-docker pull getmeili/meilisearch:latest
-```
-
-Then tests can be run with:
-
-```sh
-make test
-```
-
-If the tests are stopped before they complete, for example pressing `Ctrl + c`, the Docker container
-will be left running. If this happens you can stop it with:
-
-```sh
-make clean
-```
-
-#### Without make
-
-Before running the tests start a Docker container running Meilisearch.
+Before running the tests start a Docker container running Meilisearch, or start with the appropriate
+mething for how you installed Meilisearch if not using docker.
 
 ```sh
 docker pull getmeili/meilisearch:latest
@@ -197,6 +173,31 @@ poetry run tox
 
 Running tox before submitting a pull request can save your time because these tests will be run by
 Continuious Integraion when a pull request is submitted and will need to pass there before being accepted.
+
+#### With make
+
+If you have make installed you can run the tests with make. This option requires Docker and will
+automatically start Meilisearch in a Docker container before starting the tests and stop the contain
+with the tests are completed.
+
+First make sure you have the Meilisearch Docker image.
+
+```sh
+docker pull getmeili/meilisearch:latest
+```
+
+Then tests can be run with:
+
+```sh
+make test
+```
+
+If the tests are stopped before they complete, for example pressing `Ctrl + c`, the Docker container
+will be left running. If this happens you can stop it with:
+
+```sh
+make clean
+```
 
 ## Docs
 
