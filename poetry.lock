@@ -71,7 +71,7 @@ python-versions = "*"
 
 [[package]]
 name = "camel-converter"
-version = "1.0.7"
+version = "2.0.1"
 description = "Converts a string from snake case to camel case or camel case to snake case"
 category = "main"
 optional = false
@@ -903,8 +903,8 @@ cached-property = [
     {file = "cached_property-1.5.2-py2.py3-none-any.whl", hash = "sha256:df4f613cf7ad9a588cc381aaf4a512d26265ecebd5eb9e1ba12f1319eb85a6a0"},
 ]
 camel-converter = [
-    {file = "camel_converter-1.0.7-py3-none-any.whl", hash = "sha256:625b8b0da1e6262b991eb92c7f193198ba0f664a64d7ac4884ea604febdd0bd3"},
-    {file = "camel_converter-1.0.7.tar.gz", hash = "sha256:f3ff89d114af3ac278c553a41ebc346850e437b9cb4b140308c5419d1f1ed482"},
+    {file = "camel_converter-2.0.1-py3-none-any.whl", hash = "sha256:b0d0dd538156bcb8fd3b3d3a986204be20c21e5d66073deccf07d57dc201d5fd"},
+    {file = "camel_converter-2.0.1.tar.gz", hash = "sha256:d2810549874126c9c46f866567040e0449caf4887ac8dc309a970ad872cd6d84"},
 ]
 certifi = [
     {file = "certifi-2022.9.24-py3-none-any.whl", hash = "sha256:90c1a32f1d68f940488354e36370f6cca89f0f106db09518524c88d6ed83f382"},
