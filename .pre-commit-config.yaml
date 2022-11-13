@@ -20,7 +20,7 @@ repos:
       language_version: python3
       args: [--line-length=100]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.982
+    rev: v0.990
     hooks:
     - id: mypy
       additional_dependencies: [types-aiofiles]
@@ -30,3 +30,7 @@ repos:
     - id: flake8
       additional_dependencies: [flake8-print]
       args: ["--ignore=E203,E231,E501,D100,D101,D102,D103,D104,D105,D106,D107,D401"]
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.112
+    hooks:
+    - id: ruff
