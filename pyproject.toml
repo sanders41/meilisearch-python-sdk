@@ -38,10 +38,10 @@ pytest-cov = ">=4.0.0"
 tox = ">=3.26.0"
 pytest-asyncio = ">=0.19.0"
 types-aiofiles = ">=22.1.0"
-flake8 = ">=5.0.4"
 mkdocs = ">=1.2.4"
 mkdocs-material = ">=8.2.7"
 mkdocstrings = {version = ">=0.19.0", extras = ["python"]}
+ruff = "^0.0.114"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -85,3 +85,7 @@ disallow_untyped_defs = true
 [[tool.mypy.overrides]]
 module = ["tests.*"]
 disallow_untyped_defs = false
+
+[tool.ruff]
+select=["T201", "T203"]
+ignore=["E501", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
