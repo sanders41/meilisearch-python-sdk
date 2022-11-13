@@ -24,12 +24,6 @@ repos:
     hooks:
     - id: mypy
       additional_dependencies: [types-aiofiles]
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
-    hooks:
-    - id: flake8
-      additional_dependencies: [flake8-print]
-      args: ["--ignore=E203,E231,E501,D100,D101,D102,D103,D104,D105,D106,D107,D401"]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.112
     hooks:

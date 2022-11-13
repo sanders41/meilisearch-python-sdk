@@ -38,7 +38,6 @@ pytest-cov = ">=4.0.0"
 tox = ">=3.26.0"
 pytest-asyncio = ">=0.19.0"
 types-aiofiles = ">=22.1.0"
-flake8 = ">=5.0.4"
 mkdocs = ">=1.2.4"
 mkdocs-material = ">=8.2.7"
 mkdocstrings = {version = ">=0.19.0", extras = ["python"]}
