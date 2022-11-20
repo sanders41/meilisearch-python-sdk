@@ -25,6 +25,8 @@ async def cancel_tasks(
 ) -> TaskInfo:
     """Cancel a list of enqueued or processing tasks.
 
+    Defaults to cancelling all tasks.
+
     Args:
 
         uids: A list of task UIDs to cancel.
@@ -72,6 +74,11 @@ async def cancel_tasks(
         parameters["beforeStartedAt"] = str(before_started_at)
     if after_finished_at:
         parameters["afterFinishedAt"] = str(after_finished_at)
+
+    if not parameters:
+        # Cancel all tasks if no parmaeters provided
+        parameters["statuses"] = "enqueued,processing"
+
     url = f"tasks/cancel?{urlencode(parameters)}"
     response = await http_client.post(url)
 
