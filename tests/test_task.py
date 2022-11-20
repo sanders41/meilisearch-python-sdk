@@ -4,6 +4,18 @@ from meilisearch_python_async.errors import MeiliSearchTimeoutError
 from meilisearch_python_async.task import cancel_tasks, get_task, get_tasks, wait_for_task
 
 
+async def test_cancel_every_task(test_client):
+    task = await cancel_tasks(test_client.http_client, statuses=["enqueued", "processing"])
+    tasks = await get_tasks(test_client.http_client, types="taskCancelation")
+
+    assert task.task_uid is not None
+    assert task.index_uids is None
+    assert task.status in {"enqueued", "processing", "succeeded"}
+    assert task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
+
+
 async def test_cancel_tasks(test_client):
     task = await cancel_tasks(test_client.http_client, uids=["1", "2"])
     tasks = await get_tasks(test_client.http_client, types=["taskCancelation"])
@@ -16,12 +28,16 @@ async def test_cancel_tasks(test_client):
     assert "uids=1%2C2" in tasks[0].details["originalFilter"]
 
 
-async def test_cancel_every_task(test_client):
-    task = await cancel_tasks(test_client.http_client, statuses=["enqueued", "processing"])
+async def test_cancel_task_no_params(test_client):
+    task = await cancel_tasks(test_client.http_client)
     tasks = await get_tasks(test_client.http_client, types="taskCancelation")
 
     assert task.task_uid is not None
     assert task.index_uids is None
+    assert task.status in {"enqueued", "processing", "succeeded"}
+    assert task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
 
 
 async def test_get_tasks(empty_index, small_movies):
