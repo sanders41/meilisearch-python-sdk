@@ -208,6 +208,29 @@ async def test_custom_search_facet_filters_with_space(test_client):
     assert response.hits[0]["title"] == "The Hobbit"
 
 
+async def test_custom_search_params_with_pagination_parameters(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search("", hits_per_page=1, page=1)
+
+    assert len(response.hits) == 1
+    assert response.hits_per_page == 1
+    assert response.page == 1
+    assert response.total_pages is not None
+    assert response.total_hits is not None
+
+
+async def test_custom_search_params_with_pagination_parameters_at_zero(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search("", hits_per_page=0, page=0)
+
+    assert len(response.hits) == 0
+    assert response.hits_per_page == 0
+    assert response.page == 0
+    assert response.total_pages is not None
+    assert response.total_hits is not None
+    assert response.estimated_total_hits is None
+
+
 async def test_custom_search_params_with_many_params(index_with_documents):
     index = await index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
