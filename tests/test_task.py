@@ -1,7 +1,27 @@
 import pytest
 
 from meilisearch_python_async.errors import MeiliSearchTimeoutError
-from meilisearch_python_async.task import get_task, get_tasks, wait_for_task
+from meilisearch_python_async.task import cancel_tasks, get_task, get_tasks, wait_for_task
+
+
+async def test_cancel_tasks(test_client):
+    task = await cancel_tasks(test_client.http_client, uids=["1", "2"])
+    tasks = await get_tasks(test_client.http_client, types=["taskCancelation"])
+
+    assert task.task_uid is not None
+    assert task.index_uids is None
+    assert task.status in {"enqueued", "processing", "succeeded"}
+    assert task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert "uids=1%2C2" in tasks[0].details["originalFilter"]
+
+
+async def test_cancel_every_task(test_client):
+    task = await cancel_tasks(test_client.http_client, statuses=["enqueued", "processing"])
+    tasks = await get_tasks(test_client.http_client, types="taskCancelation")
+
+    assert task.task_uid is not None
+    assert task.index_uids is None
 
 
 async def test_get_tasks(empty_index, small_movies):
@@ -18,13 +38,13 @@ async def test_get_tasks(empty_index, small_movies):
 
 async def test_get_tasks_for_index(empty_index, small_movies):
     index = await empty_index()
-    tasks = await get_tasks(index.http_client, index.uid)
+    tasks = await get_tasks(index.http_client, index_ids=[index.uid])
     current_tasks = len(tasks)
     response = await index.add_documents(small_movies)
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.add_documents(small_movies)
     await wait_for_task(index.http_client, response.task_uid)
-    response = await get_tasks(index.http_client, index.uid)
+    response = await get_tasks(index.http_client, index_ids=[index.uid])
     assert len(response) >= current_tasks
 
 
