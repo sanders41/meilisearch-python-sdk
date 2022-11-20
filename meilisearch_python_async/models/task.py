@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
@@ -10,10 +10,12 @@ class TaskId(CamelBase):
 
 
 class TaskStatus(TaskId):
-    index_uid: Optional[str] = None
+    index_uids: Optional[List[str]] = None
     status: str
     task_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
     details: Optional[Dict[str, Any]]
+    error: Optional[Dict[str, Any]]
+    canceled_by: Optional[int]
     duration: Optional[str]
     enqueued_at: datetime
     started_at: Optional[datetime]
@@ -22,7 +24,7 @@ class TaskStatus(TaskId):
 
 class TaskInfo(CamelBase):
     task_uid: int
-    index_uid: Optional[str] = None
+    index_uids: Optional[List[str]] = None
     status: str
     task_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
     enqueued_at: datetime
