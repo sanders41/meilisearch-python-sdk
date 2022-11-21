@@ -4,38 +4,52 @@ from meilisearch_python_async.errors import MeiliSearchTimeoutError
 from meilisearch_python_async.task import cancel_tasks, get_task, get_tasks, wait_for_task
 
 
+@pytest.fixture
+async def create_tasks(empty_index, small_movies):
+    """Ensures there are some tasks present for testing."""
+    index = await empty_index()
+    await index.update_ranking_rules(["type", "exactness"])
+    await index.reset_ranking_rules()
+    await index.add_documents(small_movies)
+    await index.add_documents(small_movies)
+
+
+@pytest.mark.usefixtures("create_tasks")
 async def test_cancel_every_task(test_client):
     task = await cancel_tasks(test_client.http_client, statuses=["enqueued", "processing"])
+    await wait_for_task(test_client.http_client, task.task_uid)
+    completed_task = await get_task(test_client.http_client, task.task_uid)
     tasks = await get_tasks(test_client.http_client, types="taskCancelation")
 
-    assert task.task_uid is not None
-    assert task.index_uids is None
-    assert task.status in {"enqueued", "processing", "succeeded"}
-    assert task.task_type == "taskCancelation"
+    assert completed_task.index_uids is None
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
     assert tasks[0].details is not None
     assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
 
 
+@pytest.mark.usefixtures("create_tasks")
 async def test_cancel_tasks(test_client):
     task = await cancel_tasks(test_client.http_client, uids=["1", "2"])
-    tasks = await get_tasks(test_client.http_client, types=["taskCancelation"])
+    await wait_for_task(test_client.http_client, task.task_uid)
+    completed_task = await get_task(test_client.http_client, task.task_uid)
+    tasks = await get_tasks(test_client.http_client, types="taskCancelation")
 
-    assert task.task_uid is not None
-    assert task.index_uids is None
-    assert task.status in {"enqueued", "processing", "succeeded"}
-    assert task.task_type == "taskCancelation"
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
     assert tasks[0].details is not None
     assert "uids=1%2C2" in tasks[0].details["originalFilter"]
 
 
+@pytest.mark.usefixtures("create_tasks")
 async def test_cancel_task_no_params(test_client):
     task = await cancel_tasks(test_client.http_client)
+    await wait_for_task(test_client.http_client, task.task_uid)
+    completed_task = await get_task(test_client.http_client, task.task_uid)
     tasks = await get_tasks(test_client.http_client, types="taskCancelation")
 
-    assert task.task_uid is not None
-    assert task.index_uids is None
-    assert task.status in {"enqueued", "processing", "succeeded"}
-    assert task.task_type == "taskCancelation"
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
     assert tasks[0].details is not None
     assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
 
