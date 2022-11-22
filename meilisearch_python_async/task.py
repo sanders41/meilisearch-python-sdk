@@ -56,7 +56,6 @@ async def cancel_tasks(
         >>> async with Client("http://localhost.com", "masterKey") as client:
         >>>     await cancel_tasks(client.http_client, uids=[1, 2])
     """
-    # parameters = {"uids": uids, "indexUids": index_uids}
     parameters = {}
     if uids:
         parameters["uids"] = ",".join([str(x) for x in uids])
@@ -81,6 +80,79 @@ async def cancel_tasks(
 
     url = f"tasks/cancel?{urlencode(parameters)}"
     response = await http_client.post(url)
+
+    return TaskInfo(**response.json())
+
+
+async def delete_tasks(
+    http_client: AsyncClient,
+    *,
+    uids: list[str] | None = None,
+    index_uids: list[str] | None = None,
+    statuses: list[str] | None = None,
+    types: list[str] | None = None,
+    before_enqueued_at: datetime | None = None,
+    after_enqueueda_at: datetime | None = None,
+    before_started_at: datetime | None = None,
+    after_finished_at: datetime | None = None,
+) -> TaskInfo:
+    """Delete a list of tasks.
+
+    Defaults to deleting all tasks.
+
+    Args:
+
+        uids: A list of task UIDs to cancel.
+        index_uids: A list of index UIDs for which to cancel tasks.
+        statuses: A list of statuses to cancel.
+        types: A list of types to cancel.
+        before_enqueued_at: Cancel tasks that were enqueued before the specified date time.
+        after_enqueueda_at: Cancel tasks that were enqueued after the specified date time.
+        before_started_at: Cancel tasks that were started before the specified date time.
+        after_finished_at: Cancel tasks that were finished after the specified date time.
+
+    Returns:
+
+        The details of the task
+
+    Raises:
+
+        MeilisearchCommunicationError: If there was an error communicating with the server.
+        MeilisearchApiError: If the MeiliSearch API returned an error.
+        MeiliSearchTimeoutError: If the connection times out.
+
+    Examples:
+
+        >>> from meilisearch_python_async import Client
+        >>> from meilisearch_python_async.task import delete_tasks
+        >>>
+        >>> async with Client("http://localhost.com", "masterKey") as client:
+        >>>     await delete_tasks(client.http_client, uids=[1, 2])
+    """
+    parameters = {}
+    if uids:
+        parameters["uids"] = ",".join([str(x) for x in uids])
+    if index_uids:
+        parameters["indexUids"] = ",".join([str(x) for x in index_uids])
+    if statuses:
+        parameters["statuses"] = ",".join(statuses)
+    if types:
+        parameters["types"] = ",".join(types)
+    if before_enqueued_at:
+        parameters["beforeEnqueuedAt"] = str(before_enqueued_at)
+    if after_enqueueda_at:
+        parameters["afterEnqueuedAt"] = str(after_enqueueda_at)
+    if before_started_at:
+        parameters["beforeStartedAt"] = str(before_started_at)
+    if after_finished_at:
+        parameters["afterFinishedAt"] = str(after_finished_at)
+
+    if not parameters:
+        # delete all tasks if no parmaeters provided
+        parameters["statuses"] = "canceled,enqueued,failed,processing,succeeded"
+
+    url = f"tasks?{urlencode(parameters)}"
+    response = await http_client.delete(url)
 
     return TaskInfo(**response.json())
 
