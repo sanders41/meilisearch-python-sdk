@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 async def cancel_tasks(
-    http_client: AsyncClient,
+    client: AsyncClient | Client,
     *,
     uids: list[str] | None = None,
     index_uids: list[str] | None = None,
@@ -33,6 +33,7 @@ async def cancel_tasks(
 
     Args:
 
+        client: An httpx AsyncClient or meilisearch_python_async Client instance.
         uids: A list of task UIDs to cancel.
         index_uids: A list of index UIDs for which to cancel tasks.
         statuses: A list of statuses to cancel.
@@ -58,7 +59,7 @@ async def cancel_tasks(
         >>> from meilisearch_python_async.task import cancel_tasks
         >>>
         >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     await cancel_tasks(client.http_client, uids=[1, 2])
+        >>>     await cancel_tasks(client, uids=[1, 2])
     """
     parameters = {}
     if uids:
@@ -83,13 +84,14 @@ async def cancel_tasks(
         parameters["statuses"] = "enqueued,processing"
 
     url = f"tasks/cancel?{urlencode(parameters)}"
-    response = await http_client.post(url)
+    client_ = _get_client(client)
+    response = await client_.post(url)
 
     return TaskInfo(**response.json())
 
 
 async def delete_tasks(
-    http_client: AsyncClient,
+    client: AsyncClient | Client,
     *,
     uids: list[str] | None = None,
     index_uids: list[str] | None = None,
@@ -106,6 +108,7 @@ async def delete_tasks(
 
     Args:
 
+        client: An httpx AsyncClient or meilisearch_python_async Client instance.
         uids: A list of task UIDs to cancel.
         index_uids: A list of index UIDs for which to cancel tasks.
         statuses: A list of statuses to cancel.
@@ -131,7 +134,7 @@ async def delete_tasks(
         >>> from meilisearch_python_async.task import delete_tasks
         >>>
         >>> async with Client("http://localhost.com", "masterKey") as client:
-        >>>     await delete_tasks(client.http_client, uids=[1, 2])
+        >>>     await delete_tasks(client, uids=[1, 2])
     """
     parameters = {}
     if uids:
@@ -156,7 +159,8 @@ async def delete_tasks(
         parameters["statuses"] = "canceled,enqueued,failed,processing,succeeded"
 
     url = f"tasks?{urlencode(parameters)}"
-    response = await http_client.delete(url)
+    client_ = _get_client(client)
+    response = await client_.delete(url)
 
     return TaskInfo(**response.json())
 

@@ -22,10 +22,10 @@ async def create_tasks(empty_index, small_movies):
 
 @pytest.mark.usefixtures("create_tasks")
 async def test_cancel_statuses(test_client):
-    task = await cancel_tasks(test_client.http_client, statuses=["enqueued", "processing"])
-    await wait_for_task(test_client.http_client, task.task_uid)
-    completed_task = await get_task(test_client.http_client, task.task_uid)
-    tasks = await get_tasks(test_client.http_client, types="taskCancelation")
+    task = await cancel_tasks(test_client, statuses=["enqueued", "processing"])
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
 
     assert completed_task.index_uids is None
     assert completed_task.status == "succeeded"
@@ -36,10 +36,10 @@ async def test_cancel_statuses(test_client):
 
 @pytest.mark.usefixtures("create_tasks")
 async def test_cancel_tasks(test_client):
-    task = await cancel_tasks(test_client.http_client, uids=["1", "2"])
-    await wait_for_task(test_client.http_client, task.task_uid)
-    completed_task = await get_task(test_client.http_client, task.task_uid)
-    tasks = await get_tasks(test_client.http_client, types="taskCancelation")
+    task = await cancel_tasks(test_client, uids=["1", "2"])
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -49,10 +49,10 @@ async def test_cancel_tasks(test_client):
 
 @pytest.mark.usefixtures("create_tasks")
 async def test_cancel_task_no_params(test_client):
-    task = await cancel_tasks(test_client.http_client)
-    await wait_for_task(test_client.http_client, task.task_uid)
-    completed_task = await get_task(test_client.http_client, task.task_uid)
-    tasks = await get_tasks(test_client.http_client, types="taskCancelation")
+    task = await cancel_tasks(test_client)
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -62,10 +62,10 @@ async def test_cancel_task_no_params(test_client):
 
 @pytest.mark.usefixtures("create_tasks")
 async def test_delete_statuses(test_client):
-    task = await delete_tasks(test_client.http_client, statuses=["enqueued", "processing"])
-    await wait_for_task(test_client.http_client, task.task_uid)
-    deleted_tasks = await get_task(test_client.http_client, task.task_uid)
-    tasks = await get_tasks(test_client.http_client, types="taskDeletion")
+    task = await delete_tasks(test_client, statuses=["enqueued", "processing"])
+    await wait_for_task(test_client, task.task_uid)
+    deleted_tasks = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
 
     assert deleted_tasks.status == "succeeded"
     assert deleted_tasks.task_type == "taskDeletion"
@@ -75,10 +75,10 @@ async def test_delete_statuses(test_client):
 
 @pytest.mark.usefixtures("create_tasks")
 async def test_delete_tasks(test_client):
-    task = await delete_tasks(test_client.http_client, uids=["1", "2"])
-    await wait_for_task(test_client.http_client, task.task_uid)
-    completed_task = await get_task(test_client.http_client, task.task_uid)
-    tasks = await get_tasks(test_client.http_client, types="taskDeletion")
+    task = await delete_tasks(test_client, uids=["1", "2"])
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskDeletion"
@@ -88,10 +88,10 @@ async def test_delete_tasks(test_client):
 
 @pytest.mark.usefixtures("create_tasks")
 async def test_delete_no_params(test_client):
-    task = await delete_tasks(test_client.http_client)
-    await wait_for_task(test_client.http_client, task.task_uid)
-    deleted_tasks = await get_task(test_client.http_client, task.task_uid)
-    tasks = await get_tasks(test_client.http_client, types="taskDeletion")
+    task = await delete_tasks(test_client)
+    await wait_for_task(test_client, task.task_uid)
+    deleted_tasks = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
 
     assert deleted_tasks.status == "succeeded"
     assert deleted_tasks.task_type == "taskDeletion"
