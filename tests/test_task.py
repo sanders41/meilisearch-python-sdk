@@ -1,7 +1,13 @@
 import pytest
 
 from meilisearch_python_async.errors import MeiliSearchTimeoutError
-from meilisearch_python_async.task import cancel_tasks, get_task, get_tasks, wait_for_task
+from meilisearch_python_async.task import (
+    cancel_tasks,
+    delete_tasks,
+    get_task,
+    get_tasks,
+    wait_for_task,
+)
 
 
 @pytest.fixture
@@ -15,7 +21,7 @@ async def create_tasks(empty_index, small_movies):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_every_task(test_client):
+async def test_cancel_statuses(test_client):
     task = await cancel_tasks(test_client.http_client, statuses=["enqueued", "processing"])
     await wait_for_task(test_client.http_client, task.task_uid)
     completed_task = await get_task(test_client.http_client, task.task_uid)
@@ -52,6 +58,48 @@ async def test_cancel_task_no_params(test_client):
     assert completed_task.task_type == "taskCancelation"
     assert tasks[0].details is not None
     assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_statuses(test_client):
+    task = await delete_tasks(test_client.http_client, statuses=["enqueued", "processing"])
+    await wait_for_task(test_client.http_client, task.task_uid)
+    deleted_tasks = await get_task(test_client.http_client, task.task_uid)
+    tasks = await get_tasks(test_client.http_client, types="taskDeletion")
+
+    assert deleted_tasks.status == "succeeded"
+    assert deleted_tasks.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_tasks(test_client):
+    task = await delete_tasks(test_client.http_client, uids=["1", "2"])
+    await wait_for_task(test_client.http_client, task.task_uid)
+    completed_task = await get_task(test_client.http_client, task.task_uid)
+    tasks = await get_tasks(test_client.http_client, types="taskDeletion")
+
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert "uids=1%2C2" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_no_params(test_client):
+    task = await delete_tasks(test_client.http_client)
+    await wait_for_task(test_client.http_client, task.task_uid)
+    deleted_tasks = await get_task(test_client.http_client, task.task_uid)
+    tasks = await get_tasks(test_client.http_client, types="taskDeletion")
+
+    assert deleted_tasks.status == "succeeded"
+    assert deleted_tasks.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert (
+        "statuses=canceled%2Cenqueued%2Cfailed%2Cprocessing%2Csucceeded"
+        in tasks[0].details["originalFilter"]
+    )
 
 
 async def test_get_tasks(empty_index, small_movies):
