@@ -48,7 +48,7 @@ async def clear_indexes(test_client):
     if indexes:
         for index in indexes:
             response = await test_client.index(index.uid).delete()
-            await wait_for_task(test_client.http_client, response.task_uid)
+            await wait_for_task(test_client, response.task_uid)
 
 
 @pytest.fixture(scope="session")

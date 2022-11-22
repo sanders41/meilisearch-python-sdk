@@ -91,13 +91,13 @@ def sortable_attributes():
 @pytest.mark.usefixtures("indexes_sample")
 async def test_delete_index(test_client, index_uid, index_uid2):
     response = await test_client.index(uid=index_uid).delete()
-    await wait_for_task(test_client.http_client, response.task_uid)
+    await wait_for_task(test_client, response.task_uid)
 
     with pytest.raises(MeiliSearchApiError):
         await test_client.get_index(uid=index_uid)
 
     response = await test_client.index(uid=index_uid2).delete()
-    await wait_for_task(test_client.http_client, response.task_uid)
+    await wait_for_task(test_client, response.task_uid)
 
     with pytest.raises(MeiliSearchApiError):
         await test_client.get_index(uid=index_uid2)
