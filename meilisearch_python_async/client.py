@@ -570,3 +570,30 @@ class Client:
         """
         response = await self._http_requests.get("health")
         return Health(**response.json())
+
+    async def swap_indexes(self, indexes: list[tuple[str, str]]) -> TaskInfo:
+        """Swap two indexes.
+
+        Args:
+
+            indexes: A list of tuples, each tuple should contain the indexes to swap.
+
+        Returns:
+
+            The details of the task.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the MeiliSearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = await client.swap_indexes([("index_a", "index_b")])
+        """
+        processed_indexes = [{"indexes": x} for x in indexes]
+        response = await self._http_requests.post("swap-indexes", processed_indexes)
+
+        return TaskInfo(**response.json())

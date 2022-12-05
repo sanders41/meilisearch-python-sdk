@@ -375,3 +375,20 @@ async def test_connection_timeout(test_client, monkeypatch):
     monkeypatch.setattr(AsyncClient, "post", mock_error)
     with pytest.raises(MeiliSearchCommunicationError):
         await test_client.create_index("some_index")
+
+
+async def test_swap_indexes(test_client, empty_index):
+    index_a = await empty_index("index_a")
+    index_b = await empty_index("index_b")
+    task_a = await index_a.add_documents([{"id": 1, "title": "index_a"}])
+    task_b = await index_b.add_documents([{"id": 1, "title": "index_b"}])
+    await wait_for_task(index_a.http_client, task_a.task_uid)
+    await wait_for_task(index_b.http_client, task_b.task_uid)
+    swapTask = await test_client.swap_indexes([(index_a.uid, index_b.uid)])
+    task = await wait_for_task(index_a.http_client, swapTask.task_uid)
+    doc_a = await test_client.index(index_a.uid).get_document(1)
+    doc_b = await test_client.index(index_b.uid).get_document(1)
+
+    assert doc_a["title"] == index_b.uid
+    assert doc_b["title"] == index_a.uid
+    assert task.task_type == "indexSwap"
