@@ -296,6 +296,8 @@ class Index:
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
         matching_strategy: str = "all",
+        hits_per_page: int | None = None,
+        page: int | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -320,6 +322,8 @@ class Index:
             crop_marker: Marker to display when the number of words excedes the `crop_length`.
                 Defaults to ...
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
+            hits_per_page: Sets the number of results returned per page.
+            page: Sets the specific results page to fetch.
 
         Returns:
 
@@ -353,6 +357,8 @@ class Index:
             "highlightPostTag": highlight_post_tag,
             "cropMarker": crop_marker,
             "matchingStrategy": matching_strategy,
+            "hitsPerPage": hits_per_page,
+            "page": page,
         }
         url = f"{self._base_url_with_uid}/search"
         response = await self._http_requests.post(url, body=body)
