@@ -7,6 +7,7 @@ from typing import Any, Type
 
 import jwt
 from httpx import AsyncClient
+from httpx._types import VerifyTypes
 
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidRestriction, MeiliSearchApiError
@@ -28,7 +29,7 @@ class Client:
         api_key: str | None = None,
         *,
         timeout: int | None = None,
-        verify: bool = True,
+        verify: VerifyTypes = True,
     ) -> None:
         """Class initializer.
 
