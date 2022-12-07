@@ -22,7 +22,14 @@ from meilisearch_python_async.task import wait_for_task
 class Client:
     """The client to connect to the MeiliSearchApi."""
 
-    def __init__(self, url: str, api_key: str | None = None, *, timeout: int | None = None, verify: bool = True) -> None:
+    def __init__(
+        self,
+        url: str,
+        api_key: str | None = None,
+        *,
+        timeout: int | None = None,
+        verify: bool = True,
+    ) -> None:
         """Class initializer.
 
         Args:
@@ -37,7 +44,9 @@ class Client:
         else:
             headers = None
 
-        self.http_client = AsyncClient(base_url=url, timeout=timeout, headers=headers, verify=verify)
+        self.http_client = AsyncClient(
+            base_url=url, timeout=timeout, headers=headers, verify=verify
+        )
         self._http_requests = HttpRequests(self.http_client)
 
     async def __aenter__(self) -> Client:
