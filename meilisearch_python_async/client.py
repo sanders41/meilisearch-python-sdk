@@ -29,7 +29,7 @@ class Client:
         api_key: str | None = None,
         *,
         timeout: int | None = None,
-        verify: VerifyTypes = True,
+        verify: str | bool | SSLContext = True,
     ) -> None:
         """Class initializer.
 
