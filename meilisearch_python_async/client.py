@@ -39,6 +39,9 @@ class Client:
             api_key: The optional API key for MeiliSearch. Defaults to None.
             timeout: The amount of time in seconds that the client will wait for a response before
                 timing out. Defaults to None.
+            verify: SSL certificates (a.k.a CA bundle) used to
+                verify the identity of requested hosts. Either `True` (default CA bundle),
+                a path to an SSL certificate file, or `False` (disable verification)
         """
         if api_key:
             headers = {"Authorization": f"Bearer {api_key}"}
