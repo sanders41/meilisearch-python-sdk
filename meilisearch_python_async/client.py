@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from ssl import SSLContext
 from types import TracebackType
 from typing import Any, Type
 
@@ -22,7 +23,14 @@ from meilisearch_python_async.task import wait_for_task
 class Client:
     """The client to connect to the MeiliSearchApi."""
 
-    def __init__(self, url: str, api_key: str | None = None, *, timeout: int | None = None) -> None:
+    def __init__(
+        self,
+        url: str,
+        api_key: str | None = None,
+        *,
+        timeout: int | None = None,
+        verify: str | bool | SSLContext = True,
+    ) -> None:
         """Class initializer.
 
         Args:
@@ -31,13 +39,18 @@ class Client:
             api_key: The optional API key for MeiliSearch. Defaults to None.
             timeout: The amount of time in seconds that the client will wait for a response before
                 timing out. Defaults to None.
+            verify: SSL certificates (a.k.a CA bundle) used to
+                verify the identity of requested hosts. Either `True` (default CA bundle),
+                a path to an SSL certificate file, or `False` (disable verification)
         """
         if api_key:
             headers = {"Authorization": f"Bearer {api_key}"}
         else:
             headers = None
 
-        self.http_client = AsyncClient(base_url=url, timeout=timeout, headers=headers)
+        self.http_client = AsyncClient(
+            base_url=url, timeout=timeout, headers=headers, verify=verify
+        )
         self._http_requests = HttpRequests(self.http_client)
 
     async def __aenter__(self) -> Client:
