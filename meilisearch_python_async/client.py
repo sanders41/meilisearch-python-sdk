@@ -7,7 +7,7 @@ from typing import Any, Type
 
 import jwt
 from httpx import AsyncClient
-from httpx._types import VerifyTypes
+from ssl import SSLContext
 
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidRestriction, MeiliSearchApiError
