@@ -23,7 +23,7 @@ async def cancel_tasks(
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
-    after_enqueueda_at: datetime | None = None,
+    after_enqueued_at: datetime | None = None,
     before_started_at: datetime | None = None,
     after_finished_at: datetime | None = None,
 ) -> TaskInfo:
@@ -39,7 +39,7 @@ async def cancel_tasks(
         statuses: A list of statuses to cancel.
         types: A list of types to cancel.
         before_enqueued_at: Cancel tasks that were enqueued before the specified date time.
-        after_enqueueda_at: Cancel tasks that were enqueued after the specified date time.
+        after_enqueued_at: Cancel tasks that were enqueued after the specified date time.
         before_started_at: Cancel tasks that were started before the specified date time.
         after_finished_at: Cancel tasks that were finished after the specified date time.
 
@@ -71,13 +71,13 @@ async def cancel_tasks(
     if types:
         parameters["types"] = ",".join(types)
     if before_enqueued_at:
-        parameters["beforeEnqueuedAt"] = str(before_enqueued_at)
-    if after_enqueueda_at:
-        parameters["afterEnqueuedAt"] = str(after_enqueueda_at)
+        parameters["beforeEnqueuedAt"] = f"{before_enqueued_at.isoformat()}Z"
+    if after_enqueued_at:
+        parameters["afterEnqueuedAt"] = f"{after_enqueued_at.isoformat()}Z"
     if before_started_at:
-        parameters["beforeStartedAt"] = str(before_started_at)
+        parameters["beforeStartedAt"] = f"{before_started_at.isoformat()}Z"
     if after_finished_at:
-        parameters["afterFinishedAt"] = str(after_finished_at)
+        parameters["afterFinishedAt"] = f"{after_finished_at.isoformat()}Z"
 
     if not parameters:
         # Cancel all tasks if no parmaeters provided
@@ -98,7 +98,7 @@ async def delete_tasks(
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
-    after_enqueueda_at: datetime | None = None,
+    after_enqueued_at: datetime | None = None,
     before_started_at: datetime | None = None,
     after_finished_at: datetime | None = None,
 ) -> TaskInfo:
@@ -114,7 +114,7 @@ async def delete_tasks(
         statuses: A list of statuses to cancel.
         types: A list of types to cancel.
         before_enqueued_at: Cancel tasks that were enqueued before the specified date time.
-        after_enqueueda_at: Cancel tasks that were enqueued after the specified date time.
+        after_enqueued_at: Cancel tasks that were enqueued after the specified date time.
         before_started_at: Cancel tasks that were started before the specified date time.
         after_finished_at: Cancel tasks that were finished after the specified date time.
 
@@ -146,13 +146,13 @@ async def delete_tasks(
     if types:
         parameters["types"] = ",".join(types)
     if before_enqueued_at:
-        parameters["beforeEnqueuedAt"] = str(before_enqueued_at)
-    if after_enqueueda_at:
-        parameters["afterEnqueuedAt"] = str(after_enqueueda_at)
+        parameters["beforeEnqueuedAt"] = f"{before_enqueued_at.isoformat()}Z"
+    if after_enqueued_at:
+        parameters["afterEnqueuedAt"] = f"{after_enqueued_at.isoformat()}Z"
     if before_started_at:
-        parameters["beforeStartedAt"] = str(before_started_at)
+        parameters["beforeStartedAt"] = f"{before_started_at.isoformat()}Z"
     if after_finished_at:
-        parameters["afterFinishedAt"] = str(after_finished_at)
+        parameters["afterFinishedAt"] = f"{after_finished_at.isoformat()}Z"
 
     if not parameters:
         # delete all tasks if no parmaeters provided
