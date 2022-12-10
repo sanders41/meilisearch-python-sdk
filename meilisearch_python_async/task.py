@@ -114,7 +114,7 @@ async def delete_tasks(
         statuses: A list of statuses to cancel.
         types: A list of types to cancel.
         before_enqueued_at: Cancel tasks that were enqueued before the specified date time.
-        after_enqueueda_at: Cancel tasks that were enqueued after the specified date time.
+        after_enqueued_at: Cancel tasks that were enqueued after the specified date time.
         before_started_at: Cancel tasks that were started before the specified date time.
         after_finished_at: Cancel tasks that were finished after the specified date time.
 
