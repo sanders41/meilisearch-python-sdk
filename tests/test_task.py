@@ -1,3 +1,6 @@
+from datetime import datetime
+from urllib.parse import quote_plus
+
 import pytest
 
 from meilisearch_python_async.errors import MeiliSearchTimeoutError
@@ -35,7 +38,7 @@ async def test_cancel_statuses(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_tasks(test_client):
+async def test_cancel_tasks_uids(test_client):
     task = await cancel_tasks(test_client, uids=["1", "2"])
     await wait_for_task(test_client, task.task_uid)
     completed_task = await get_task(test_client, task.task_uid)
@@ -45,6 +48,92 @@ async def test_cancel_tasks(test_client):
     assert completed_task.task_type == "taskCancelation"
     assert tasks[0].details is not None
     assert "uids=1%2C2" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_cancel_tasks_index_uids(test_client):
+    task = await cancel_tasks(test_client, index_uids=["1"])
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
+
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert "indexUids=1" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_cancel_tasks_types(test_client):
+    task = await cancel_tasks(test_client, types=["taskDeletion"])
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
+
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert "types=taskDeletion" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_cancel_tasks_before_enqueued_at(test_client):
+    before = datetime.now()
+    task = await cancel_tasks(test_client, before_enqueued_at=before)
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
+
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert (
+        f"beforeEnqueuedAt={quote_plus(before.isoformat())}Z" in tasks[0].details["originalFilter"]
+    )
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_cancel_tasks_after_enqueued_at(test_client):
+    after = datetime.now()
+    task = await cancel_tasks(test_client, after_enqueued_at=after)
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
+
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert f"afterEnqueuedAt={quote_plus(after.isoformat())}Z" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_cancel_tasks_before_started_at(test_client):
+    before = datetime.now()
+    task = await cancel_tasks(test_client, before_started_at=before)
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
+
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert (
+        f"beforeStartedAt={quote_plus(before.isoformat())}Z" in tasks[0].details["originalFilter"]
+    )
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_cancel_tasks_after_finished_at(test_client):
+    after = datetime.now()
+    task = await cancel_tasks(test_client, after_finished_at=after)
+    await wait_for_task(test_client, task.task_uid)
+    completed_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskCancelation")
+
+    assert completed_task.status == "succeeded"
+    assert completed_task.task_type == "taskCancelation"
+    assert tasks[0].details is not None
+    assert f"afterFinishedAt={quote_plus(after.isoformat())}Z" in tasks[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -84,6 +173,92 @@ async def test_delete_tasks(test_client):
     assert completed_task.task_type == "taskDeletion"
     assert tasks[0].details is not None
     assert "uids=1%2C2" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_tasks_index_uids(test_client):
+    task = await delete_tasks(test_client, index_uids=["1"])
+    await wait_for_task(test_client, task.task_uid)
+    deleted_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
+
+    assert deleted_task.status == "succeeded"
+    assert deleted_task.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert "indexUids=1" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_tasks_types(test_client):
+    task = await delete_tasks(test_client, types=["taskDeletion"])
+    await wait_for_task(test_client, task.task_uid)
+    deleted_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
+
+    assert deleted_task.status == "succeeded"
+    assert deleted_task.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert "types=taskDeletion" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_tasks_before_enqueued_at(test_client):
+    before = datetime.now()
+    task = await delete_tasks(test_client, before_enqueued_at=before)
+    await wait_for_task(test_client, task.task_uid)
+    deleted_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
+
+    assert deleted_task.status == "succeeded"
+    assert deleted_task.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert (
+        f"beforeEnqueuedAt={quote_plus(before.isoformat())}Z" in tasks[0].details["originalFilter"]
+    )
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_tasks_after_enqueued_at(test_client):
+    after = datetime.now()
+    task = await delete_tasks(test_client, after_enqueued_at=after)
+    await wait_for_task(test_client, task.task_uid)
+    deleted_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
+
+    assert deleted_task.status == "succeeded"
+    assert deleted_task.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert f"afterEnqueuedAt={quote_plus(after.isoformat())}Z" in tasks[0].details["originalFilter"]
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_tasks_before_started_at(test_client):
+    before = datetime.now()
+    task = await delete_tasks(test_client, before_started_at=before)
+    await wait_for_task(test_client, task.task_uid)
+    deleted_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
+
+    assert deleted_task.status == "succeeded"
+    assert deleted_task.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert (
+        f"beforeStartedAt={quote_plus(before.isoformat())}Z" in tasks[0].details["originalFilter"]
+    )
+
+
+@pytest.mark.usefixtures("create_tasks")
+async def test_delete_tasks_after_finished_at(test_client):
+    after = datetime.now()
+    task = await delete_tasks(test_client, after_finished_at=after)
+    await wait_for_task(test_client, task.task_uid)
+    deleted_task = await get_task(test_client, task.task_uid)
+    tasks = await get_tasks(test_client, types="taskDeletion")
+
+    assert deleted_task.status == "succeeded"
+    assert deleted_task.task_type == "taskDeletion"
+    assert tasks[0].details is not None
+    assert f"afterFinishedAt={quote_plus(after.isoformat())}Z" in tasks[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
