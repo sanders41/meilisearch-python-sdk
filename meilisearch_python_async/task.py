@@ -86,6 +86,7 @@ async def cancel_tasks(
     url = f"tasks/cancel?{urlencode(parameters)}"
     client_ = _get_client(client)
     response = await client_.post(url)
+    response.raise_for_status()
 
     return TaskInfo(**response.json())
 
@@ -161,6 +162,7 @@ async def delete_tasks(
     url = f"tasks?{urlencode(parameters)}"
     client_ = _get_client(client)
     response = await client_.delete(url)
+    response.raise_for_status()
 
     return TaskInfo(**response.json())
 
@@ -204,6 +206,7 @@ async def get_tasks(
         url = f"{url}&types={formatted_types}" if "?" in url else f"{url}?types={formatted_types}"
     client_ = _get_client(client)
     response = await client_.get(url)
+    response.raise_for_status()
 
     return [TaskStatus(**x) for x in response.json()["results"]]
 
@@ -236,6 +239,7 @@ async def get_task(client: AsyncClient | Client, task_id: int) -> TaskStatus:
     """
     client_ = _get_client(client)
     response = await client_.get(f"tasks/{task_id}")
+    response.raise_for_status()
 
     return TaskStatus(**response.json())
 
@@ -287,6 +291,7 @@ async def wait_for_task(
     elapsed_time = 0.0
     while elapsed_time < timeout_in_ms:
         response = await http_requests.get(url)
+        response.raise_for_status()
         status = TaskStatus(**response.json())
         if status.status in ("succeeded", "failed"):
             return status
