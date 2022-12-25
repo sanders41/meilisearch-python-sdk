@@ -16,7 +16,7 @@ jobs:
         python-version: 3.9
     - name: Get full Python version
       id: full-python-version
-      run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
+      run: echo version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))") >> $GITHUB_OUTPUT
     - name: Install Poetry and add to path
       run: |
         curl -sSL https://install.python-poetry.org/install-poetry.py | python -
