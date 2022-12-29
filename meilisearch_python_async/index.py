@@ -91,7 +91,6 @@ class Index:
         """
         url = f"{self._base_url_with_uid}"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
         return TaskInfo(**response.json())
 
     async def delete_if_exists(self) -> bool:
@@ -276,7 +275,6 @@ class Index:
         """
         url = f"{self._stats_url}"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return IndexStats(**response.json())
 
@@ -364,7 +362,6 @@ class Index:
         }
         url = f"{self._base_url_with_uid}/search"
         response = await self._http_requests.post(url, body=body)
-        response.raise_for_status()
 
         return SearchResults(**response.json())
 
@@ -393,7 +390,6 @@ class Index:
         """
         url = f"{self._documents_url}/{document_id}"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return response.json()
 
@@ -436,7 +432,6 @@ class Index:
 
         url = f"{self._documents_url}?{urlencode(parameters)}"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return DocumentsInfo(**response.json())
 
@@ -477,7 +472,6 @@ class Index:
             url = f"{url}?{formatted_primary_key}"
 
         response = await self._http_requests.post(url, documents)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -808,7 +802,6 @@ class Index:
             data = await f.read()
 
         response = await self._http_requests.post(url, body=data, content_type=content_type)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -849,7 +842,6 @@ class Index:
             url = f"{url}?{formatted_primary_key}"
 
         response = await self._http_requests.put(url, documents)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1177,7 +1169,6 @@ class Index:
             data = await f.read()
 
         response = await self._http_requests.put(url, body=data, content_type=content_type)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1206,7 +1197,6 @@ class Index:
         """
         url = f"{self._documents_url}/{document_id}"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1235,7 +1225,6 @@ class Index:
         """
         url = f"{self._documents_url}/delete-batch"
         response = await self._http_requests.post(url, ids)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1260,7 +1249,6 @@ class Index:
         """
         url = f"{self._documents_url}"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1285,7 +1273,6 @@ class Index:
         """
         url = f"{self._settings_url}"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return MeiliSearchSettings(**response.json())
 
@@ -1336,7 +1323,6 @@ class Index:
 
         url = f"{self._settings_url}"
         response = await self._http_requests.patch(url, body_dict)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1361,7 +1347,6 @@ class Index:
         """
         url = f"{self._settings_url}"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1386,7 +1371,6 @@ class Index:
         """
         url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return response.json()
 
@@ -1425,7 +1409,6 @@ class Index:
         """
         url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.put(url, ranking_rules)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1450,7 +1433,6 @@ class Index:
         """
         url = f"{self._settings_url}/ranking-rules"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1476,7 +1458,6 @@ class Index:
         """
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         if not response.json():
             None
@@ -1508,7 +1489,6 @@ class Index:
         """
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.put(url, body)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1533,7 +1513,6 @@ class Index:
         """
         url = f"{self._settings_url}/distinct-attribute"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1558,7 +1537,6 @@ class Index:
         """
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return response.json()
 
@@ -1587,7 +1565,6 @@ class Index:
         """
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.put(url, body)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1612,7 +1589,6 @@ class Index:
         """
         url = f"{self._settings_url}/searchable-attributes"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1637,7 +1613,6 @@ class Index:
         """
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return response.json()
 
@@ -1668,7 +1643,6 @@ class Index:
         """
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.put(url, body)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1693,7 +1667,6 @@ class Index:
         """
         url = f"{self._settings_url}/displayed-attributes"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1718,7 +1691,6 @@ class Index:
         """
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         if not response.json():
             return None
@@ -1750,7 +1722,6 @@ class Index:
         """
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.put(url, body)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1775,7 +1746,6 @@ class Index:
         """
         url = f"{self._settings_url}/stop-words"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1800,7 +1770,6 @@ class Index:
         """
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         if not response.json():
             return None
@@ -1834,7 +1803,6 @@ class Index:
         """
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.put(url, body)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1859,7 +1827,6 @@ class Index:
         """
         url = f"{self._settings_url}/synonyms"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1884,7 +1851,6 @@ class Index:
         """
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         if not response.json():
             return None
@@ -1916,7 +1882,6 @@ class Index:
         """
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.put(url, body)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1941,7 +1906,6 @@ class Index:
         """
         url = f"{self._settings_url}/filterable-attributes"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -1966,7 +1930,6 @@ class Index:
         """
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return response.json()
 
@@ -1991,7 +1954,6 @@ class Index:
         """
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.put(url, sortable_attributes)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -2016,7 +1978,6 @@ class Index:
         """
         url = f"{self._settings_url}/sortable-attributes"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -2041,7 +2002,6 @@ class Index:
         """
         url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return TypoTolerance(**response.json())
 
@@ -2067,7 +2027,6 @@ class Index:
         """
         url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -2092,7 +2051,6 @@ class Index:
         """
         url = f"{self._settings_url}/typo-tolerance"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -2117,7 +2075,6 @@ class Index:
         """
         url = f"{self._settings_url}/faceting"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return Faceting(**response.json())
 
@@ -2142,7 +2099,6 @@ class Index:
         """
         url = f"{self._settings_url}/faceting"
         response = await self._http_requests.patch(url, faceting.dict(by_alias=True))
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -2167,7 +2123,6 @@ class Index:
         """
         url = f"{self._settings_url}/faceting"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -2192,7 +2147,6 @@ class Index:
         """
         url = f"{self._settings_url}/pagination"
         response = await self._http_requests.get(url)
-        response.raise_for_status()
 
         return Pagination(**response.json())
 
@@ -2218,7 +2172,6 @@ class Index:
         """
         url = f"{self._settings_url}/pagination"
         response = await self._http_requests.patch(url, settings.dict(by_alias=True))
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -2243,7 +2196,6 @@ class Index:
         """
         url = f"{self._settings_url}/pagination"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 

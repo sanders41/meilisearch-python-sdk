@@ -90,7 +90,6 @@ class Client:
             >>>     await client.create_dump()
         """
         response = await self._http_requests.post("dumps")
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
 
@@ -143,7 +142,6 @@ class Client:
         """
         url = f"indexes/{uid}"
         response = await self._http_requests.delete(url)
-        response.raise_for_status()
         status = await wait_for_task(self.http_client, response.json()["taskUid"])
         if status.status == "succeeded":
             return True
@@ -230,7 +228,6 @@ class Client:
             >>>     indexes = await client.get_indexes()
         """
         response = await self._http_requests.get("indexes")
-        response.raise_for_status()
 
         if not response.json()["results"]:
             return None
@@ -316,7 +313,6 @@ class Client:
             >>>     stats = await client.get_all_stats()
         """
         response = await self._http_requests.get("stats")
-        response.raise_for_status()
 
         return ClientStats(**response.json())
 
@@ -384,7 +380,6 @@ class Client:
         # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
         # but can when converting to a json string.
         response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))
-        response.raise_for_status()
 
         return Key(**response.json())
 
@@ -432,7 +427,6 @@ class Client:
                 keys = await client.get_keys()
         """
         response = await self._http_requests.get("keys")
-        response.raise_for_status()
 
         return KeySearch(**response.json())
 
@@ -459,7 +453,6 @@ class Client:
             >>>     keys = await client.get_key("abc123")
         """
         response = await self._http_requests.get(f"keys/{key}")
-        response.raise_for_status()
 
         return Key(**response.json())
 
@@ -495,7 +488,6 @@ class Client:
         # but can when converting to a json string.
         payload = {k: v for k, v in json.loads(key.json(by_alias=True)).items() if v is not None}
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
-        response.raise_for_status()
 
         return Key(**response.json())
 
@@ -526,8 +518,6 @@ class Client:
         if response.status_code == 404:
             return None
 
-        response.raise_for_status()
-
         return IndexInfo(**response.json())
 
     async def get_raw_indexes(self) -> list[IndexInfo] | None:
@@ -551,7 +541,6 @@ class Client:
             >>>     index = await client.get_raw_indexes()
         """
         response = await self._http_requests.get("indexes")
-        response.raise_for_status()
 
         if not response.json()["results"]:
             return None
@@ -577,7 +566,6 @@ class Client:
             >>>     version = await client.get_version()
         """
         response = await self._http_requests.get("version")
-        response.raise_for_status()
 
         return Version(**response.json())
 
@@ -600,7 +588,6 @@ class Client:
             >>>     health = await client.get_healths()
         """
         response = await self._http_requests.get("health")
-        response.raise_for_status()
 
         return Health(**response.json())
 
@@ -628,6 +615,5 @@ class Client:
         """
         processed_indexes = [{"indexes": x} for x in indexes]
         response = await self._http_requests.post("swap-indexes", processed_indexes)
-        response.raise_for_status()
 
         return TaskInfo(**response.json())
