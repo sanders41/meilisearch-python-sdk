@@ -61,23 +61,16 @@ async def cancel_tasks(
         >>> async with Client("http://localhost.com", "masterKey") as client:
         >>>     await cancel_tasks(client, uids=[1, 2])
     """
-    parameters = {}
-    if uids:
-        parameters["uids"] = ",".join([str(x) for x in uids])
-    if index_uids:
-        parameters["indexUids"] = ",".join([str(x) for x in index_uids])
-    if statuses:
-        parameters["statuses"] = ",".join(statuses)
-    if types:
-        parameters["types"] = ",".join(types)
-    if before_enqueued_at:
-        parameters["beforeEnqueuedAt"] = f"{before_enqueued_at.isoformat()}Z"
-    if after_enqueued_at:
-        parameters["afterEnqueuedAt"] = f"{after_enqueued_at.isoformat()}Z"
-    if before_started_at:
-        parameters["beforeStartedAt"] = f"{before_started_at.isoformat()}Z"
-    if after_finished_at:
-        parameters["afterFinishedAt"] = f"{after_finished_at.isoformat()}Z"
+    parameters = _process_params(
+        uids,
+        index_uids,
+        statuses,
+        types,
+        before_enqueued_at,
+        after_enqueued_at,
+        before_started_at,
+        after_finished_at,
+    )
 
     if not parameters:
         # Cancel all tasks if no parmaeters provided
@@ -137,23 +130,16 @@ async def delete_tasks(
         >>> async with Client("http://localhost.com", "masterKey") as client:
         >>>     await delete_tasks(client, uids=[1, 2])
     """
-    parameters = {}
-    if uids:
-        parameters["uids"] = ",".join([str(x) for x in uids])
-    if index_uids:
-        parameters["indexUids"] = ",".join([str(x) for x in index_uids])
-    if statuses:
-        parameters["statuses"] = ",".join(statuses)
-    if types:
-        parameters["types"] = ",".join(types)
-    if before_enqueued_at:
-        parameters["beforeEnqueuedAt"] = f"{before_enqueued_at.isoformat()}Z"
-    if after_enqueued_at:
-        parameters["afterEnqueuedAt"] = f"{after_enqueued_at.isoformat()}Z"
-    if before_started_at:
-        parameters["beforeStartedAt"] = f"{before_started_at.isoformat()}Z"
-    if after_finished_at:
-        parameters["afterFinishedAt"] = f"{after_finished_at.isoformat()}Z"
+    parameters = _process_params(
+        uids,
+        index_uids,
+        statuses,
+        types,
+        before_enqueued_at,
+        after_enqueued_at,
+        before_started_at,
+        after_finished_at,
+    )
 
     if not parameters:
         # delete all tasks if no parmaeters provided
@@ -308,3 +294,34 @@ def _get_client(client: AsyncClient | Client) -> AsyncClient:
         return client
 
     return client.http_client
+
+
+def _process_params(
+    uids: list[str] | None = None,
+    index_uids: list[str] | None = None,
+    statuses: list[str] | None = None,
+    types: list[str] | None = None,
+    before_enqueued_at: datetime | None = None,
+    after_enqueued_at: datetime | None = None,
+    before_started_at: datetime | None = None,
+    after_finished_at: datetime | None = None,
+) -> dict[str, str]:
+    parameters = {}
+    if uids:
+        parameters["uids"] = ",".join([str(x) for x in uids])
+    if index_uids:
+        parameters["indexUids"] = ",".join([str(x) for x in index_uids])
+    if statuses:
+        parameters["statuses"] = ",".join(statuses)
+    if types:
+        parameters["types"] = ",".join(types)
+    if before_enqueued_at:
+        parameters["beforeEnqueuedAt"] = f"{before_enqueued_at.isoformat()}Z"
+    if after_enqueued_at:
+        parameters["afterEnqueuedAt"] = f"{after_enqueued_at.isoformat()}Z"
+    if before_started_at:
+        parameters["beforeStartedAt"] = f"{before_started_at.isoformat()}Z"
+    if after_finished_at:
+        parameters["afterFinishedAt"] = f"{after_finished_at.isoformat()}Z"
+
+    return parameters
