@@ -13,13 +13,13 @@ import aiofiles
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import InvalidDocumentError, MeiliSearchError
+from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_async.models.documents import DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
 from meilisearch_python_async.models.settings import (
     Faceting,
-    MeiliSearchSettings,
+    MeilisearchSettings,
     Pagination,
     TypoTolerance,
 )
@@ -80,7 +80,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -103,7 +103,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -133,7 +133,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -160,7 +160,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -192,7 +192,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -227,7 +227,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -264,7 +264,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -332,7 +332,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -379,7 +379,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -412,7 +412,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
 
         Examples:
@@ -453,7 +453,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -495,7 +495,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -539,9 +539,9 @@ class Index:
         Raises:
 
             InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
-            MeiliSearchError: If the file path is not valid
+            MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -579,7 +579,7 @@ class Index:
         _raise_on_no_documents(add_documents, document_type, directory_path)
 
         if len(add_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # Send the first document on its own before starting the gather. Otherwise Meilisearch
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = [await add_documents.pop()]
             responses = await gather(*add_documents)
@@ -620,9 +620,9 @@ class Index:
         Raises:
 
             InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
-            MeiliSearchError: If the file path is not valid
+            MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -666,7 +666,7 @@ class Index:
         _raise_on_no_documents(add_documents, document_type, directory_path)
 
         if len(add_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # Send the first document on its own before starting the gather. Otherwise Meilisearch
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await add_documents.pop()
             responses_gather = await gather(*add_documents)
@@ -694,9 +694,9 @@ class Index:
         Raises:
 
             InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
-            MeiliSearchError: If the file path is not valid
+            MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -731,9 +731,9 @@ class Index:
         Raises:
 
             InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
-            MeiliSearchError: If the file path is not valid
+            MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -753,14 +753,14 @@ class Index:
     async def add_documents_from_raw_file(
         self, file_path: Path | str, primary_key: str | None = None
     ) -> TaskInfo:
-        """Directly send csv or ndjson files to MeiliSearch without pre-processing.
+        """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
-        The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
+        The can reduce RAM usage from Meilisearch during indexing, but does not include the option
         for batching.
 
         Args:
 
-            file_path: The path to the file to send to MeiliSearch. Only csv and ndjson files are
+            file_path: The path to the file to send to Meilisearch. Only csv and ndjson files are
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
@@ -772,9 +772,9 @@ class Index:
         Raises:
 
             ValueError: If the file is not a csv or ndjson file.
-            MeiliSearchError: If the file path is not valid
+            MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -787,7 +787,7 @@ class Index:
         """
         upload_path = Path(file_path) if isinstance(file_path, str) else file_path
         if not upload_path.exists():
-            raise MeiliSearchError("No file found at the specified path")
+            raise MeilisearchError("No file found at the specified path")
 
         if upload_path.suffix not in (".csv", ".ndjson"):
             raise ValueError("Only csv and ndjson files can be sent as binary files")
@@ -823,7 +823,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -867,7 +867,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -911,9 +911,9 @@ class Index:
         Raises:
 
             InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
-            MeiliSearchError: If the file path is not valid
+            MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -950,7 +950,7 @@ class Index:
         _raise_on_no_documents(update_documents, document_type, directory_path)
 
         if len(update_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # Send the first document on its own before starting the gather. Otherwise Meilisearch
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = [await update_documents.pop()]
             responses = await gather(*update_documents)
@@ -991,9 +991,9 @@ class Index:
         Raises:
 
             InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
-            MeiliSearchError: If the file path is not valid
+            MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1037,7 +1037,7 @@ class Index:
         _raise_on_no_documents(update_documents, document_type, directory_path)
 
         if len(update_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise MeiliSearch
+            # Send the first document on its own before starting the gather. Otherwise Meilisearch
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await update_documents.pop()
             responses_gather = await gather(*update_documents)
@@ -1065,7 +1065,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1100,7 +1100,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1120,14 +1120,14 @@ class Index:
     async def update_documents_from_raw_file(
         self, file_path: Path | str, primary_key: str | None = None
     ) -> TaskInfo:
-        """Directly send csv or ndjson files to MeiliSearch without pre-processing.
+        """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
-        The can reduce RAM usage from MeiliSearch during indexing, but does not include the option
+        The can reduce RAM usage from Meilisearch during indexing, but does not include the option
         for batching.
 
         Args:
 
-            file_path: The path to the file to send to MeiliSearch. Only csv and ndjson files are
+            file_path: The path to the file to send to Meilisearch. Only csv and ndjson files are
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
@@ -1139,9 +1139,9 @@ class Index:
         Raises:
 
             ValueError: If the file is not a csv or ndjson file.
-            MeiliSearchError: If the file path is not valid
+            MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1154,7 +1154,7 @@ class Index:
         """
         upload_path = Path(file_path) if isinstance(file_path, str) else file_path
         if not upload_path.exists():
-            raise MeiliSearchError("No file found at the specified path")
+            raise MeilisearchError("No file found at the specified path")
 
         if upload_path.suffix not in (".csv", ".ndjson"):
             raise ValueError("Only csv and ndjson files can be sent as binary files")
@@ -1185,8 +1185,8 @@ class Index:
 
         Raises:
 
-            MeiliSearchCommunicationError: If there was an error communicating with the server.
-            MeiliSearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1214,7 +1214,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1238,7 +1238,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1252,7 +1252,7 @@ class Index:
 
         return TaskInfo(**response.json())
 
-    async def get_settings(self) -> MeiliSearchSettings:
+    async def get_settings(self) -> MeilisearchSettings:
         """Get settings of the index.
 
         Returns:
@@ -1262,7 +1262,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1274,9 +1274,9 @@ class Index:
         url = f"{self._settings_url}"
         response = await self._http_requests.get(url)
 
-        return MeiliSearchSettings(**response.json())
+        return MeilisearchSettings(**response.json())
 
-    async def update_settings(self, body: MeiliSearchSettings) -> TaskInfo:
+    async def update_settings(self, body: MeilisearchSettings) -> TaskInfo:
         """Update settings of the index.
 
         Args:
@@ -1290,13 +1290,13 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
             >>> from meilisearch_python_async import Client
-            >>> from meilisearch_python_async import MeiliSearchSettings
-            >>> new_settings = MeiliSearchSettings(
+            >>> from meilisearch_python_async import MeilisearchSettings
+            >>> new_settings = MeilisearchSettings(
             >>>     synonyms={"wolverine": ["xmen", "logan"], "logan": ["wolverine"]},
             >>>     stop_words=["the", "a", "an"],
             >>>     ranking_rules=[
@@ -1336,7 +1336,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1360,7 +1360,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1388,7 +1388,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1422,7 +1422,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1447,7 +1447,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1478,7 +1478,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1502,7 +1502,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1526,7 +1526,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1554,7 +1554,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1578,7 +1578,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1602,7 +1602,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1630,7 +1630,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1656,7 +1656,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1680,7 +1680,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1711,7 +1711,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1735,7 +1735,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1759,7 +1759,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1790,7 +1790,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1816,7 +1816,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1840,7 +1840,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1871,7 +1871,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1895,7 +1895,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1919,7 +1919,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1943,7 +1943,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1967,7 +1967,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -1991,7 +1991,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2015,7 +2015,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2040,7 +2040,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2064,7 +2064,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2088,7 +2088,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2112,7 +2112,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2136,7 +2136,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2160,7 +2160,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2185,7 +2185,7 @@ class Index:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -2210,7 +2210,7 @@ def _raise_on_no_documents(
     documents: list[Any], document_type: str, directory_path: str | Path
 ) -> None:
     if not documents:
-        raise MeiliSearchError(f"No {document_type} files found in {directory_path}")
+        raise MeilisearchError(f"No {document_type} files found in {directory_path}")
 
 
 def _combine_documents(documents: list[list[Any]]) -> list[Any]:
@@ -2220,7 +2220,7 @@ def _combine_documents(documents: list[list[Any]]) -> list[Any]:
 def _iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:
     """Handle conversion of iso string to datetime.
 
-    The microseconds from MeiliSearch are sometimes too long for python to convert so this
+    The microseconds from Meilisearch are sometimes too long for python to convert so this
     strips off the last digits to shorten it when that happens.
     """
     if not iso_date:
@@ -2261,11 +2261,11 @@ async def _load_documents_from_file(
         documents = await loop.run_in_executor(None, partial(json.loads, data))
 
         if not isinstance(documents, list):
-            raise InvalidDocumentError("MeiliSearch requires documents to be in a list")
+            raise InvalidDocumentError("Meilisearch requires documents to be in a list")
 
         return documents
 
 
 def _validate_file_type(file_path: Path) -> None:
     if file_path.suffix not in (".json", ".csv", ".ndjson"):
-        raise MeiliSearchError("File must be a json, ndjson, or csv file")
+        raise MeilisearchError("File must be a json, ndjson, or csv file")

@@ -4,11 +4,11 @@ import pytest
 from httpx import Response
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import MeiliSearchApiError
+from meilisearch_python_async.errors import MeilisearchApiError
 from meilisearch_python_async.index import _iso_to_date_time
 from meilisearch_python_async.models.settings import (
     Faceting,
-    MeiliSearchSettings,
+    MeilisearchSettings,
     MinWordSizeForTypos,
     Pagination,
     TypoTolerance,
@@ -18,7 +18,7 @@ from meilisearch_python_async.task import wait_for_task
 
 @pytest.fixture
 def new_settings():
-    return MeiliSearchSettings(
+    return MeilisearchSettings(
         ranking_rules=["typo", "words"],
         searchable_attributes=["title", "overview"],
         sortable_attributes=["genre", "title"],
@@ -93,13 +93,13 @@ async def test_delete_index(test_client, index_uid, index_uid2):
     response = await test_client.index(uid=index_uid).delete()
     await wait_for_task(test_client, response.task_uid)
 
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_index(uid=index_uid)
 
     response = await test_client.index(uid=index_uid2).delete()
     await wait_for_task(test_client, response.task_uid)
 
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_index(uid=index_uid2)
 
     indexes = await test_client.get_indexes()
@@ -541,12 +541,12 @@ async def test_delete_if_exists(test_client, index_uid):
     assert await test_client.get_index(uid=index_uid)
     deleted = await test_client.index(index_uid).delete_if_exists()
     assert deleted is True
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_index(uid=index_uid)
 
 
 async def test_delete_if_exists_no_delete(test_client):
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_index(uid="none")
 
     deleted = await test_client.index("none").delete_if_exists()
@@ -556,10 +556,10 @@ async def test_delete_if_exists_no_delete(test_client):
 @pytest.mark.usefixtures("indexes_sample")
 async def test_delete_if_exists_error(test_client, index_uid, monkeypatch):
     async def mock_response(*args, **kwargs):
-        raise MeiliSearchApiError("test", Response(status_code=404))
+        raise MeilisearchApiError("test", Response(status_code=404))
 
     monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.index(index_uid).delete_if_exists()
 
 
@@ -568,12 +568,12 @@ async def test_delete_index_if_exists(test_client, index_uid):
     assert await test_client.get_index(uid=index_uid)
     deleted = await test_client.delete_index_if_exists(index_uid)
     assert deleted is True
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_index(uid=index_uid)
 
 
 async def test_delete_index_if_exists_no_delete(test_client):
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_index(uid="none")
 
     deleted = await test_client.delete_index_if_exists("none")
@@ -583,8 +583,8 @@ async def test_delete_index_if_exists_no_delete(test_client):
 @pytest.mark.usefixtures("indexes_sample")
 async def test_delete_index_if_exists_error(test_client, index_uid, monkeypatch):
     async def mock_response(*args, **kwargs):
-        raise MeiliSearchApiError("test", Response(status_code=404))
+        raise MeilisearchApiError("test", Response(status_code=404))
 
     monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.delete_index_if_exists(index_uid)

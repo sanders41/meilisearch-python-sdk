@@ -3,7 +3,7 @@ from urllib.parse import quote_plus
 
 import pytest
 
-from meilisearch_python_async.errors import MeiliSearchTimeoutError
+from meilisearch_python_async.errors import MeilisearchTimeoutError
 from meilisearch_python_async.task import (
     cancel_tasks,
     delete_tasks,
@@ -318,7 +318,7 @@ async def test_wait_for_task(empty_index, small_movies):
 
 async def test_wait_for_pending_update_time_out(empty_index, small_movies):
     index = await empty_index()
-    with pytest.raises(MeiliSearchTimeoutError):
+    with pytest.raises(MeilisearchTimeoutError):
         response = await index.add_documents(small_movies)
         await wait_for_task(index.http_client, response.task_uid, timeout_in_ms=1, interval_in_ms=1)
 
