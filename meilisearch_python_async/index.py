@@ -538,7 +538,7 @@ class Index:
 
         Raises:
 
-            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -619,7 +619,7 @@ class Index:
 
         Raises:
 
-            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -693,7 +693,7 @@ class Index:
 
         Raises:
 
-            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -730,7 +730,7 @@ class Index:
 
         Raises:
 
-            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -910,7 +910,7 @@ class Index:
 
         Raises:
 
-            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -990,7 +990,7 @@ class Index:
 
         Raises:
 
-            InvalidDocumentError: If the docucment is not a valid format for MeiliSarch.
+            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
