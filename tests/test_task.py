@@ -17,7 +17,7 @@ from meilisearch_python_async.task import (
 async def create_tasks(empty_index, small_movies):
     """Ensures there are some tasks present for testing."""
     index = await empty_index()
-    await index.update_ranking_rules(["type", "exactness"])
+    await index.update_ranking_rules(["typo", "exactness"])
     await index.reset_ranking_rules()
     await index.add_documents(small_movies)
     await index.add_documents(small_movies)

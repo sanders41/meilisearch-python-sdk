@@ -486,7 +486,11 @@ class Client:
         """
         # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
         # but can when converting to a json string.
-        payload = {k: v for k, v in json.loads(key.json(by_alias=True)).items() if v is not None}
+        payload = {
+            k: v
+            for k, v in json.loads(key.json(by_alias=True)).items()
+            if v is not None and k != "key"
+        }
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
