@@ -436,7 +436,7 @@ class Index:
         return DocumentsInfo(**response.json())
 
     async def add_documents(
-        self, documents: list[dict], primary_key: str | None = None
+        self, documents: list[dict[str, Any]], primary_key: str | None = None
     ) -> TaskInfo:
         """Add documents to the index.
 
@@ -476,7 +476,11 @@ class Index:
         return TaskInfo(**response.json())
 
     async def add_documents_in_batches(
-        self, documents: list[dict], *, batch_size: int = 1000, primary_key: str | None = None
+        self,
+        documents: list[dict[str, Any]],
+        *,
+        batch_size: int = 1000,
+        primary_key: str | None = None,
     ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
@@ -806,7 +810,7 @@ class Index:
         return TaskInfo(**response.json())
 
     async def update_documents(
-        self, documents: list[dict], primary_key: str | None = None
+        self, documents: list[dict[str, Any]], primary_key: str | None = None
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -846,7 +850,11 @@ class Index:
         return TaskInfo(**response.json())
 
     async def update_documents_in_batches(
-        self, documents: list[dict], *, batch_size: int = 1000, primary_key: str | None = None
+        self,
+        documents: list[dict[str, Any]],
+        *,
+        batch_size: int = 1000,
+        primary_key: str | None = None,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
 
