@@ -6,8 +6,8 @@ import pytest
 
 from meilisearch_python_async.errors import (
     InvalidDocumentError,
-    MeiliSearchApiError,
-    MeiliSearchError,
+    MeilisearchApiError,
+    MeilisearchError,
 )
 from meilisearch_python_async.index import _combine_documents, _load_documents_from_file
 from meilisearch_python_async.task import wait_for_task
@@ -168,7 +168,7 @@ async def test_add_documents_from_directory_no_documents(combine_documents, test
     with open(tmp_path / "test.txt", "w") as f:
         f.write("nothing")
 
-    with pytest.raises(MeiliSearchError):
+    with pytest.raises(MeilisearchError):
         index = test_client.index("movies")
         await index.add_documents_from_directory(tmp_path, combine_documents=combine_documents)
 
@@ -307,7 +307,7 @@ async def test_add_documents_raw_file_ndjson(
 
 
 async def test_add_documents_raw_file_not_found_error(test_client, tmp_path):
-    with pytest.raises(MeiliSearchError):
+    with pytest.raises(MeilisearchError):
         index = test_client.index("movies")
         await index.add_documents_from_raw_file(tmp_path / "file.csv")
 
@@ -341,7 +341,7 @@ async def test_add_documents_from_file_ndjson(
 async def test_add_documents_from_file_invalid_extension(test_client):
     index = test_client.index("movies")
 
-    with pytest.raises(MeiliSearchError):
+    with pytest.raises(MeilisearchError):
         await index.add_documents_from_file("test.bad")
 
 
@@ -435,7 +435,7 @@ async def test_add_documents_from_file_in_batches_ndjson(
 async def test_add_documents_from_file_in_batches_invalid_extension(test_client):
     index = test_client.index("movies")
 
-    with pytest.raises(MeiliSearchError):
+    with pytest.raises(MeilisearchError):
         await index.add_documents_from_file_in_batches("test.bad")
 
 
@@ -446,7 +446,7 @@ async def test_get_document(index_with_documents):
 
 
 async def test_get_document_inexistent(empty_index):
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         index = await empty_index()
         await index.get_document("123")
 
@@ -736,7 +736,7 @@ async def test_update_documents_from_file_with_primary_key(test_client, small_mo
 async def test_update_documents_from_file_invalid_extension(test_client):
     index = test_client.index("movies")
 
-    with pytest.raises(MeiliSearchError):
+    with pytest.raises(MeilisearchError):
         await index.update_documents_from_file("test.bad")
 
 
@@ -821,7 +821,7 @@ async def test_update_documents_from_file_in_batches_ndjson(
 async def test_update_documents_from_file_in_batches_invalid_extension(test_client):
     index = test_client.index("movies")
 
-    with pytest.raises(MeiliSearchError):
+    with pytest.raises(MeilisearchError):
         await index.update_documents_from_file_in_batches("test.bad")
 
 
@@ -868,7 +868,7 @@ async def test_update_documents_raw_file_ndjson(
 
 
 async def test_update_documents_raw_file_not_found_error(test_client, tmp_path):
-    with pytest.raises(MeiliSearchError):
+    with pytest.raises(MeilisearchError):
         index = test_client.index("movies")
         await index.update_documents_from_raw_file(tmp_path / "file.csv")
 
@@ -887,7 +887,7 @@ async def test_delete_document(index_with_documents):
     index = await index_with_documents()
     response = await index.delete_document("500682")
     await wait_for_task(index.http_client, response.task_uid)
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await index.get_document("500682")
 
 

@@ -2,7 +2,7 @@ from httpx import Response
 
 
 class InvalidDocumentError(Exception):
-    """Error for documents that are not in a valid format for MeiliSearch."""
+    """Error for documents that are not in a valid format for Meilisearch."""
 
     pass
 
@@ -11,19 +11,19 @@ class InvalidRestriction(Exception):
     pass
 
 
-class MeiliSearchError(Exception):
-    """Generic class for MeiliSearch error handling."""
+class MeilisearchError(Exception):
+    """Generic class for Meilisearch error handling."""
 
     def __init__(self, message: str) -> None:
         self.message = message
         super().__init__(self.message)
 
     def __str__(self) -> str:
-        return f"MeiliSearchError. Error message: {self.message}."
+        return f"MeilisearchError. Error message: {self.message}."
 
 
-class MeiliSearchApiError(MeiliSearchError):
-    """Error sent by MeiliSearch API."""
+class MeilisearchApiError(MeilisearchError):
+    """Error sent by Meilisearch API."""
 
     def __init__(self, error: str, response: Response) -> None:
         self.status_code = response.status_code
@@ -41,21 +41,21 @@ class MeiliSearchApiError(MeiliSearchError):
         super().__init__(self.message)
 
     def __str__(self) -> str:
-        return f"MeiliSearchApiError.{self.code}{self.message}{self.error_type}{self.link}"
+        return f"MeilisearchApiError.{self.code}{self.message}{self.error_type}{self.link}"
 
 
-class MeiliSearchCommunicationError(MeiliSearchError):
-    """Error when connecting to MeiliSearch."""
-
-    def __str__(self) -> str:
-        return f"MeiliSearchCommunicationError, {self.message}"
-
-
-class MeiliSearchTimeoutError(MeiliSearchError):
-    """Error when MeiliSearch operation takes longer than expected."""
+class MeilisearchCommunicationError(MeilisearchError):
+    """Error when connecting to Meilisearch."""
 
     def __str__(self) -> str:
-        return f"MeiliSearchTimeoutError, {self.message}"
+        return f"MeilisearchCommunicationError, {self.message}"
+
+
+class MeilisearchTimeoutError(MeilisearchError):
+    """Error when Meilisearch operation takes longer than expected."""
+
+    def __str__(self) -> str:
+        return f"MeilisearchTimeoutError, {self.message}"
 
 
 class PayloadTooLarge(Exception):

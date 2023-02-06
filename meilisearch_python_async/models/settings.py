@@ -23,7 +23,7 @@ class Pagination(CamelBase):
     max_total_hits: int
 
 
-class MeiliSearchSettings(CamelBase):
+class MeilisearchSettings(CamelBase):
     synonyms: Optional[Dict[str, Any]] = None
     stop_words: Optional[List[str]] = None
     ranking_rules: Optional[List[str]] = None

@@ -12,9 +12,9 @@ from httpx import (
 )
 
 from meilisearch_python_async.errors import (
-    MeiliSearchApiError,
-    MeiliSearchCommunicationError,
-    MeiliSearchError,
+    MeilisearchApiError,
+    MeilisearchCommunicationError,
+    MeilisearchError,
 )
 
 
@@ -45,13 +45,13 @@ class HttpRequests:
             return response
 
         except (ConnectError, ConnectTimeout, RemoteProtocolError) as err:
-            raise MeiliSearchCommunicationError(str(err)) from err
+            raise MeilisearchCommunicationError(str(err)) from err
         except HTTPError as err:
             if "response" in locals():
-                raise MeiliSearchApiError(str(err), response) from err
+                raise MeilisearchApiError(str(err), response) from err
             else:
                 # Fail safe just in case error happens before response is created
-                raise MeiliSearchError(str(err))  # pragma: no cover
+                raise MeilisearchError(str(err))  # pragma: no cover
 
     async def get(self, path: str) -> Response:
         return await self._send_request(self.http_client.get, path)

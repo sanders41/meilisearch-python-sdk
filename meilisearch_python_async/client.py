@@ -10,7 +10,7 @@ import jwt
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import InvalidRestriction, MeiliSearchApiError
+from meilisearch_python_async.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeySearch, KeyUpdate
 from meilisearch_python_async.models.health import Health
@@ -21,7 +21,7 @@ from meilisearch_python_async.task import wait_for_task
 
 
 class Client:
-    """The client to connect to the MeiliSearchApi."""
+    """The client to connect to the MeilisearchApi."""
 
     def __init__(
         self,
@@ -35,8 +35,8 @@ class Client:
 
         Args:
 
-            url: The url to the MeiliSearch API (ex: http://localhost:7700)
-            api_key: The optional API key for MeiliSearch. Defaults to None.
+            url: The url to the Meilisearch API (ex: http://localhost:7700)
+            api_key: The optional API key for Meilisearch. Defaults to None.
             timeout: The amount of time in seconds that the client will wait for a response before
                 timing out. Defaults to None.
             verify: SSL certificates (a.k.a CA bundle) used to
@@ -72,7 +72,7 @@ class Client:
         await self.http_client.aclose()
 
     async def create_dump(self) -> TaskInfo:
-        """Trigger the creation of a MeiliSearch dump.
+        """Trigger the creation of a Meilisearch dump.
 
         Returns:
 
@@ -81,7 +81,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -108,7 +108,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -132,7 +132,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -219,7 +219,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -257,7 +257,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -283,7 +283,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -304,7 +304,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -331,8 +331,8 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.MeiliSearchTimeoutError: If the connection times out.
-            MeiliSearchTimeoutError: If the connection times out.
+            MeilisearchApiError: If the Meilisearch API returned an error.MeilisearchTimeoutError: If the connection times out.
+            MeilisearchTimeoutError: If the connection times out.
 
         Examples:
 
@@ -342,7 +342,7 @@ class Client:
         """
         try:
             index_instance = await self.get_index(uid)
-        except MeiliSearchApiError as err:
+        except MeilisearchApiError as err:
             if "index_not_found" not in err.code:
                 raise
             index_instance = await self.create_index(uid, primary_key)
@@ -363,7 +363,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -397,7 +397,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -409,7 +409,7 @@ class Client:
         return response.status_code
 
     async def get_keys(self) -> KeySearch:
-        """Gets the MeiliSearch API keys.
+        """Gets the Meilisearch API keys.
 
         Returns:
 
@@ -418,7 +418,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -444,7 +444,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -471,7 +471,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -486,7 +486,11 @@ class Client:
         """
         # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
         # but can when converting to a json string.
-        payload = {k: v for k, v in json.loads(key.json(by_alias=True)).items() if v is not None}
+        payload = {
+            k: v
+            for k, v in json.loads(key.json(by_alias=True)).items()
+            if v is not None and k != "key"
+        }
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
@@ -505,7 +509,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -532,7 +536,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -548,16 +552,16 @@ class Client:
         return [IndexInfo(**x) for x in response.json()["results"]]
 
     async def get_version(self) -> Version:
-        """Get the MeiliSearch version.
+        """Get the Meilisearch version.
 
         Returns:
 
-            Information about the version of MeiliSearch.
+            Information about the version of Meilisearch.
 
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -570,16 +574,16 @@ class Client:
         return Version(**response.json())
 
     async def health(self) -> Health:
-        """Get health of the MeiliSearch server.
+        """Get health of the Meilisearch server.
 
         Returns:
 
-            The status of the MeiliSearch server.
+            The status of the Meilisearch server.
 
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 
@@ -605,7 +609,7 @@ class Client:
         Raises:
 
             MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the MeiliSearch API returned an error.
+            MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples:
 

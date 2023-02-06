@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "meilisearch-python-async"
-version = "0.29.2"
+version = "1.0.0"
 description = "A Python async client for the Meilisearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
@@ -10,6 +10,7 @@ homepage = "https://github.com/sanders41/meilisearch-python-async"
 documentation = "https://meilisearch-python-async.paulsanders.dev"
 keywords = ["meilisearch", "async", "python"]
 classifiers=[
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",

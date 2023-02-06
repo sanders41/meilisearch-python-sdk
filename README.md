@@ -125,10 +125,6 @@ SearchResults(
 
 See our [docs](https://meilisearch-python-async.paulsanders.dev) for the full documentation.
 
-## Compatibility with Meilisearch
-
-This package only guarantees the compatibility with [version v0.30 of Meilisearch](https://github.com/meilisearch/MeiliSearch/releases/tag/v0.30.0).
-
 ## Contributing
 
 Contributions to this project are welcome. If you are interesting in contributing please see our [contributing guide](CONTRIBUTING.md)

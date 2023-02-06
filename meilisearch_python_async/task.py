@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import MeiliSearchTimeoutError
+from meilisearch_python_async.errors import MeilisearchTimeoutError
 from meilisearch_python_async.models.task import TaskInfo, TaskStatus
 
 if TYPE_CHECKING:
@@ -50,8 +50,8 @@ async def cancel_tasks(
     Raises:
 
         MeilisearchCommunicationError: If there was an error communicating with the server.
-        MeilisearchApiError: If the MeiliSearch API returned an error.
-        MeiliSearchTimeoutError: If the connection times out.
+        MeilisearchApiError: If the Meilisearch API returned an error.
+        MeilisearchTimeoutError: If the connection times out.
 
     Examples:
 
@@ -118,8 +118,8 @@ async def delete_tasks(
     Raises:
 
         MeilisearchCommunicationError: If there was an error communicating with the server.
-        MeilisearchApiError: If the MeiliSearch API returned an error.
-        MeiliSearchTimeoutError: If the connection times out.
+        MeilisearchApiError: If the Meilisearch API returned an error.
+        MeilisearchTimeoutError: If the connection times out.
 
     Examples:
 
@@ -173,8 +173,8 @@ async def get_tasks(
     Raises:
 
         MeilisearchCommunicationError: If there was an error communicating with the server.
-        MeilisearchApiError: If the MeiliSearch API returned an error.
-        MeiliSearchTimeoutError: If the connection times out.
+        MeilisearchApiError: If the Meilisearch API returned an error.
+        MeilisearchTimeoutError: If the connection times out.
 
     Examples:
 
@@ -209,8 +209,8 @@ async def get_task(client: AsyncClient | Client, task_id: int) -> TaskStatus:
     Raises:
 
         MeilisearchCommunicationError: If there was an error communicating with the server.
-        MeilisearchApiError: If the MeiliSearch API returned an error.
-        MeiliSearchTimeoutError: If the connection times out.
+        MeilisearchApiError: If the Meilisearch API returned an error.
+        MeilisearchTimeoutError: If the connection times out.
 
     Examples:
 
@@ -233,14 +233,14 @@ async def wait_for_task(
     timeout_in_ms: int = 5000,
     interval_in_ms: int = 50,
 ) -> TaskStatus:
-    """Wait until MeiliSearch processes a task, and get its status.
+    """Wait until Meilisearch processes a task, and get its status.
 
     Args:
 
         client: An httpx AsyncClient or meilisearch_python_async Client instance.
         task_id: Identifier of the task to retrieve.
         timeout_in_ms: Amount of time in milliseconds to wait before raising a
-            MeiliSearchTimeoutError. Defaults to 5000.
+            MeilisearchTimeoutError. Defaults to 5000.
         interval_in_ms: Time interval in miliseconds to sleep between requests. Defaults to 50.
 
     Returns:
@@ -250,8 +250,8 @@ async def wait_for_task(
     Raises:
 
         MeilisearchCommunicationError: If there was an error communicating with the server.
-        MeilisearchApiError: If the MeiliSearch API returned an error.
-        MeiliSearchTimeoutError: If the connection times out.
+        MeilisearchApiError: If the Meilisearch API returned an error.
+        MeilisearchTimeoutError: If the connection times out.
 
     Examples:
 
@@ -279,7 +279,7 @@ async def wait_for_task(
         await sleep(interval_in_ms / 1000)
         time_delta = datetime.now() - start_time
         elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
-    raise MeiliSearchTimeoutError(
+    raise MeilisearchTimeoutError(
         f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
     )
 

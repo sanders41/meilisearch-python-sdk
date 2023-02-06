@@ -1,1 +1,3 @@
-from meilisearch_python_async.client import Client as Client  # noqa: F401
+from meilisearch_python_async.client import Client
+
+__all__ = ["Client"]

@@ -1,7 +1,7 @@
 # Pydantic usage
 
 This package uses [Pydantic](https://pydantic-docs.helpmanual.io/) to serialize/deserialize the JSON
-from MeiliSearch into Python objects wherever possible, and in the process converts the camelCaseNames
+from Meilisearch into Python objects wherever possible, and in the process converts the camelCaseNames
 from JSON into more Pythonic snake_case_names.
 
 In some instances it is not possible to return the data as an object because the structure will be

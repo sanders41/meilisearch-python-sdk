@@ -11,8 +11,8 @@ from httpx import AsyncClient, ConnectError, ConnectTimeout, RemoteProtocolError
 from meilisearch_python_async.client import Client
 from meilisearch_python_async.errors import (
     InvalidRestriction,
-    MeiliSearchApiError,
-    MeiliSearchCommunicationError,
+    MeilisearchApiError,
+    MeilisearchCommunicationError,
 )
 from meilisearch_python_async.models.client import KeyCreate, KeyUpdate
 from meilisearch_python_async.models.index import IndexInfo
@@ -43,7 +43,7 @@ async def test_key(test_client):
 
     try:
         await test_client.delete_key(key.key)
-    except MeiliSearchApiError:
+    except MeilisearchApiError:
         pass
 
 
@@ -57,7 +57,7 @@ async def test_key_info(test_client):
         keys = await test_client.get_keys()
         key = next(x for x in keys.results if x.description == key_info.description)
         await test_client.delete_key(key.key)
-    except MeiliSearchApiError:
+    except MeilisearchApiError:
         pass
 
 
@@ -177,7 +177,7 @@ async def test_get_index(test_client, index_uid):
 
 
 async def test_get_index_not_found(test_client):
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_index("test")
 
 
@@ -214,16 +214,16 @@ async def test_get_or_create_index_communication_error(test_client, monkeypatch)
 
     monkeypatch.setattr(AsyncClient, "get", mock_get_response)
     monkeypatch.setattr(AsyncClient, "post", mock_post_response)
-    with pytest.raises(MeiliSearchCommunicationError):
+    with pytest.raises(MeilisearchCommunicationError):
         await test_client.get_or_create_index("test")
 
 
 async def test_get_or_create_index_api_error(test_client, monkeypatch):
     async def mock_response(*args, **kwargs):
-        raise MeiliSearchApiError("test", Response(status_code=404))
+        raise MeilisearchApiError("test", Response(status_code=404))
 
     monkeypatch.setattr(Client, "get_index", mock_response)
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_or_create_index("test")
 
 
@@ -295,7 +295,7 @@ async def test_delete_key(test_key, test_client):
     result = await test_client.delete_key(test_key.key)
     assert result == 204
 
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         await test_client.get_key(test_key.key)
 
 
@@ -342,19 +342,19 @@ async def test_create_dump(test_client, index_with_documents):
 
 
 async def test_no_master_key(base_url):
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         async with Client(base_url) as client:
             await client.create_index("some_index")
 
 
 async def test_bad_master_key(base_url, master_key):
-    with pytest.raises(MeiliSearchApiError):
+    with pytest.raises(MeilisearchApiError):
         async with Client(base_url) as client:
             await client.create_index("some_index", f"{master_key}bad")
 
 
 async def test_communication_error(master_key):
-    with pytest.raises(MeiliSearchCommunicationError):
+    with pytest.raises(MeilisearchCommunicationError):
         async with Client("http://wrongurl:1234", master_key, timeout=1) as client:
             await client.create_index("some_index")
 
@@ -364,7 +364,7 @@ async def test_remote_protocol_error(test_client, monkeypatch):
         raise RemoteProtocolError("error", request=args[0])
 
     monkeypatch.setattr(AsyncClient, "post", mock_error)
-    with pytest.raises(MeiliSearchCommunicationError):
+    with pytest.raises(MeilisearchCommunicationError):
         await test_client.create_index("some_index")
 
 
@@ -373,7 +373,7 @@ async def test_connection_timeout(test_client, monkeypatch):
         raise ConnectTimeout("error")
 
     monkeypatch.setattr(AsyncClient, "post", mock_error)
-    with pytest.raises(MeiliSearchCommunicationError):
+    with pytest.raises(MeilisearchCommunicationError):
         await test_client.create_index("some_index")
 
 
