@@ -4,9 +4,11 @@ exclude-labels:
   - 'dependencies'
   - 'skip-changelog'
 version-resolver:
-  minor:
+  major:
     labels:
       - 'breaking-change'
+  minor:
+    labels:
       - 'enhancement'
       - 'feature'
   default: patch
