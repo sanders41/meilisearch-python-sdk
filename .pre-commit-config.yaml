@@ -23,7 +23,7 @@ repos:
     rev: v1.1.1
     hooks:
     - id: mypy
-      additional_dependencies: [types-aiofiles]
+      additional_dependencies: [pydantic, types-aiofiles]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.257
     hooks:
