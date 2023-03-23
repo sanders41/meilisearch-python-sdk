@@ -84,11 +84,12 @@ asyncio_mode = "auto"
 [tool.mypy]
 check_untyped_defs = true
 disallow_untyped_defs = true
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]
 disallow_untyped_defs = false
 
 [tool.ruff]
-select=["E", "F", "T201", "T203"]
-ignore=["E501"]
+select = ["E", "F", "T201", "T203"]
+ignore = ["E501"]

@@ -125,8 +125,10 @@ def small_movies_path():
 
 
 @pytest.fixture
-async def empty_index(test_client):
-    async def index_maker(index_name=INDEX_UID):
+async def empty_index(test_client, index_uid=None):
+    index_name = index_uid if index_uid else INDEX_UID
+
+    async def index_maker(index_name=index_name):
         return await test_client.create_index(uid=index_name)
 
     return index_maker

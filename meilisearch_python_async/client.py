@@ -15,6 +15,7 @@ from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeySearch, KeyUpdate
 from meilisearch_python_async.models.health import Health
 from meilisearch_python_async.models.index import IndexInfo
+from meilisearch_python_async.models.search import SearchParams, SearchResults
 from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.models.version import Version
 from meilisearch_python_async.task import wait_for_task
@@ -494,6 +495,40 @@ class Client:
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
+
+    async def multi_search(self, queries: list[SearchParams]) -> list[SearchResults]:
+        """Multi-index search.
+
+        Args:
+
+            queries: List of SearchParameters
+
+        Returns:
+
+            Results of the search
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_async.models.search import SearchParams
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     queries = [
+            >>>         SearchParams(index_uid="my_first_index", query"Some search"),
+            >>>         SearchParams(index_uid="my_second_index", query="Another search")
+            >>>     ]
+            >>>     search_results = await client.search(queries)
+        """
+        url = "multi-search"
+        response = await self._http_requests.post(
+            url, body={"queries": [x.dict(by_alias=True) for x in queries]}
+        )
+
+        return [SearchResults(**x) for x in response.json()["results"]]
 
     async def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an Index instance.
