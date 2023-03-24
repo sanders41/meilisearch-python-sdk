@@ -109,6 +109,18 @@ def small_movies_csv_path(small_movies, tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
+def small_movies_csv_path_semicolon_delimiter(small_movies, tmp_path_factory):
+    file_path = tmp_path_factory.mktemp("csv") / "small_movies.csv"
+    with open(file_path, "w") as f:
+        field_names = list(small_movies[0].keys())
+        writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL, delimiter=";")
+        writer.writeheader()
+        writer.writerows(small_movies)
+
+    return file_path
+
+
+@pytest.fixture(scope="session")
 def small_movies_ndjson_path(small_movies, tmp_path_factory):
     file_path = tmp_path_factory.mktemp("ndjson") / "small_movies.ndjson"
     nd_json = [json.dumps(x) for x in small_movies]

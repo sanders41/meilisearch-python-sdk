@@ -521,6 +521,7 @@ class Index:
         *,
         primary_key: str | None = None,
         document_type: str = "json",
+        csv_delimiter: str | None = None,
         combine_documents: bool = True,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index.
@@ -533,6 +534,8 @@ class Index:
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row contining
                 the field names, and ever for should have a title.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
 
@@ -562,7 +565,7 @@ class Index:
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _load_documents_from_file(path)
+                    documents = await _load_documents_from_file(path, csv_delimiter)
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -577,7 +580,7 @@ class Index:
         add_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = await _load_documents_from_file(path)
+                documents = await _load_documents_from_file(path, csv_delimiter)
                 add_documents.append(self.add_documents(documents, primary_key))
 
         _raise_on_no_documents(add_documents, document_type, directory_path)
@@ -600,6 +603,7 @@ class Index:
         batch_size: int = 1000,
         primary_key: str | None = None,
         document_type: str = "json",
+        csv_delimiter: str | None = None,
         combine_documents: bool = True,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index in batches.
@@ -614,6 +618,8 @@ class Index:
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row contining
                 the field names, and ever for should have a title.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
 
@@ -643,7 +649,7 @@ class Index:
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _load_documents_from_file(path)
+                    documents = await _load_documents_from_file(path, csv_delimiter=csv_delimiter)
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -660,7 +666,7 @@ class Index:
         add_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = await _load_documents_from_file(path)
+                documents = await _load_documents_from_file(path, csv_delimiter)
                 add_documents.append(
                     self.add_documents_in_batches(
                         documents, batch_size=batch_size, primary_key=primary_key
@@ -716,7 +722,12 @@ class Index:
         return await self.add_documents(documents, primary_key=primary_key)
 
     async def add_documents_from_file_in_batches(
-        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
+        self,
+        file_path: Path | str,
+        *,
+        batch_size: int = 1000,
+        primary_key: str | None = None,
+        csv_delimiter: str | None = None,
     ) -> list[TaskInfo]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -727,6 +738,8 @@ class Index:
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
 
         Returns:
 
@@ -748,14 +761,18 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.add_documents_from_file_in_batches(file_path)
         """
-        documents = await _load_documents_from_file(file_path)
+        documents = await _load_documents_from_file(file_path, csv_delimiter)
 
         return await self.add_documents_in_batches(
             documents, batch_size=batch_size, primary_key=primary_key
         )
 
     async def add_documents_from_raw_file(
-        self, file_path: Path | str, primary_key: str | None = None
+        self,
+        file_path: Path | str,
+        primary_key: str | None = None,
+        *,
+        csv_delimiter: str | None = None,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -768,6 +785,8 @@ class Index:
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
 
         Returns:
 
@@ -775,7 +794,8 @@ class Index:
 
         Raises:
 
-            ValueError: If the file is not a csv or ndjson file.
+            ValueError: If the file is not a csv or ndjson file, or if a csv_delimiter is sent for
+                a non-csv file.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -796,11 +816,28 @@ class Index:
         if upload_path.suffix not in (".csv", ".ndjson"):
             raise ValueError("Only csv and ndjson files can be sent as binary files")
 
+        if csv_delimiter and upload_path.suffix != ".csv":
+            raise ValueError("A csv_delimiter can only be used with csv files")
+
+        if (
+            csv_delimiter
+            and len(csv_delimiter) != 1
+            or csv_delimiter
+            and not csv_delimiter.isascii()
+        ):
+            raise ValueError("csv_delimiter must be a single ascii character")
+
         content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
         url = self._documents_url
+        parameters = {}
+
         if primary_key:
-            formatted_primary_key = urlencode({"primaryKey": primary_key})
-            url = f"{url}?{formatted_primary_key}"
+            parameters["primaryKey"] = primary_key
+        if csv_delimiter:
+            parameters["csvDelimiter"] = csv_delimiter
+
+        if parameters:
+            url = f"{url}?{urlencode(parameters)}"
 
         async with aiofiles.open(upload_path, "r") as f:
             data = await f.read()
@@ -897,6 +934,7 @@ class Index:
         *,
         primary_key: str | None = None,
         document_type: str = "json",
+        csv_delimiter: str | None = None,
         combine_documents: bool = True,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
@@ -909,6 +947,8 @@ class Index:
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row contining
                 the field names, and ever for should have a title.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
 
@@ -938,7 +978,7 @@ class Index:
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _load_documents_from_file(path)
+                    documents = await _load_documents_from_file(path, csv_delimiter)
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -952,7 +992,7 @@ class Index:
         update_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = await _load_documents_from_file(path)
+                documents = await _load_documents_from_file(path, csv_delimiter)
                 update_documents.append(self.update_documents(documents, primary_key))
 
         _raise_on_no_documents(update_documents, document_type, directory_path)
@@ -975,6 +1015,7 @@ class Index:
         batch_size: int = 1000,
         primary_key: str | None = None,
         document_type: str = "json",
+        csv_delimiter: str | None = None,
         combine_documents: bool = True,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
@@ -989,6 +1030,8 @@ class Index:
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row contining
                 the field names, and ever for should have a title.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
 
@@ -1018,7 +1061,7 @@ class Index:
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _load_documents_from_file(path)
+                    documents = await _load_documents_from_file(path, csv_delimiter)
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -1035,7 +1078,7 @@ class Index:
         update_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = await _load_documents_from_file(path)
+                documents = await _load_documents_from_file(path, csv_delimiter)
                 update_documents.append(
                     self.update_documents_in_batches(
                         documents, batch_size=batch_size, primary_key=primary_key
@@ -1056,7 +1099,10 @@ class Index:
         return responses
 
     async def update_documents_from_file(
-        self, file_path: Path | str, primary_key: str | None = None
+        self,
+        file_path: Path | str,
+        primary_key: str | None = None,
+        csv_delimiter: str | None = None,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
 
@@ -1065,6 +1111,8 @@ class Index:
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
 
         Returns:
 
@@ -1084,7 +1132,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.update_documents_from_file(file_path)
         """
-        documents = await _load_documents_from_file(file_path)
+        documents = await _load_documents_from_file(file_path, csv_delimiter)
 
         return await self.update_documents(documents, primary_key=primary_key)
 
@@ -1126,7 +1174,10 @@ class Index:
         )
 
     async def update_documents_from_raw_file(
-        self, file_path: Path | str, primary_key: str | None = None
+        self,
+        file_path: Path | str,
+        primary_key: str | None = None,
+        csv_delimiter: str | None = None,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -1139,6 +1190,8 @@ class Index:
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
 
         Returns:
 
@@ -1146,7 +1199,8 @@ class Index:
 
         Raises:
 
-            ValueError: If the file is not a csv or ndjson file.
+            ValueError: If the file is not a csv or ndjson file, or if a csv_delimiter is sent for
+                a non-csv file.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -1167,11 +1221,31 @@ class Index:
         if upload_path.suffix not in (".csv", ".ndjson"):
             raise ValueError("Only csv and ndjson files can be sent as binary files")
 
+        if upload_path.suffix not in (".csv", ".ndjson"):
+            raise ValueError("Only csv and ndjson files can be sent as binary files")
+
+        if csv_delimiter and upload_path.suffix != ".csv":
+            raise ValueError("A csv_delimiter can only be used with csv files")
+
+        if (
+            csv_delimiter
+            and len(csv_delimiter) != 1
+            or csv_delimiter
+            and not csv_delimiter.isascii()
+        ):
+            raise ValueError("csv_delimiter must be a single ascii character")
+
         content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
         url = self._documents_url
+        parameters = {}
+
         if primary_key:
-            formatted_primary_key = urlencode({"primaryKey": primary_key})
-            url = f"{url}?{formatted_primary_key}"
+            parameters["primaryKey"] = primary_key
+        if csv_delimiter:
+            parameters["csvDelimiter"] = csv_delimiter
+
+        if parameters:
+            url = f"{url}?{urlencode(parameters)}"
 
         async with aiofiles.open(upload_path, "r") as f:
             data = await f.read()
@@ -2248,6 +2322,7 @@ def _iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:
 
 async def _load_documents_from_file(
     file_path: Path | str,
+    csv_delimiter: str | None = None,
 ) -> list[dict[Any, Any]]:
     if isinstance(file_path, str):
         file_path = Path(file_path)
@@ -2256,8 +2331,20 @@ async def _load_documents_from_file(
     await loop.run_in_executor(None, partial(_validate_file_type, file_path))
 
     if file_path.suffix == ".csv":
+        if (
+            csv_delimiter
+            and len(csv_delimiter) != 1
+            or csv_delimiter
+            and not csv_delimiter.isascii()
+        ):
+            raise ValueError("csv_delimiter must be a single ascii character")
         with open(file_path, mode="r") as f:
-            documents = await loop.run_in_executor(None, partial(DictReader, f))
+            if csv_delimiter:
+                documents = await loop.run_in_executor(
+                    None, partial(DictReader, f, delimiter=csv_delimiter)
+                )
+            else:
+                documents = await loop.run_in_executor(None, partial(DictReader, f))
             return list(documents)
 
     if file_path.suffix == ".ndjson":
