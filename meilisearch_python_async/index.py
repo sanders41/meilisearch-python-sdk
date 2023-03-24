@@ -1221,9 +1221,6 @@ class Index:
         if upload_path.suffix not in (".csv", ".ndjson"):
             raise ValueError("Only csv and ndjson files can be sent as binary files")
 
-        if upload_path.suffix not in (".csv", ".ndjson"):
-            raise ValueError("Only csv and ndjson files can be sent as binary files")
-
         if csv_delimiter and upload_path.suffix != ".csv":
             raise ValueError("A csv_delimiter can only be used with csv files")
 
