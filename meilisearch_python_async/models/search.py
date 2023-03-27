@@ -26,7 +26,6 @@ class SearchParams(CamelBase):
 
 
 class SearchResults(CamelBase):
-    index_uid: Optional[str]
     hits: List[Dict[str, Any]]
     offset: Optional[int]
     limit: Optional[int]
@@ -38,3 +37,7 @@ class SearchResults(CamelBase):
     total_hits: Optional[int]
     page: Optional[int]
     hits_per_page: Optional[int]
+
+
+class SearchResultsWithUID(SearchResults):
+    index_uid: str

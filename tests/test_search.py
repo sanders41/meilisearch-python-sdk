@@ -313,6 +313,7 @@ async def test_multi_search(test_client, index_with_documents, empty_index):
             SearchParams(index_uid="test", query=""),
         ]
     )
+
     assert response[0].index_uid == index.uid
     assert response[0].hits[0]["id"] == "166428"
     assert "_formatted" not in response[0].hits[0]
