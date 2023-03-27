@@ -12,10 +12,16 @@ from httpx import AsyncClient
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_async.index import Index
-from meilisearch_python_async.models.client import ClientStats, Key, KeyCreate, KeySearch, KeyUpdate
+from meilisearch_python_async.models.client import (
+    ClientStats,
+    Key,
+    KeyCreate,
+    KeySearch,
+    KeyUpdate,
+)
 from meilisearch_python_async.models.health import Health
 from meilisearch_python_async.models.index import IndexInfo
-from meilisearch_python_async.models.search import SearchParams, SearchResults
+from meilisearch_python_async.models.search import SearchParams, SearchResultsWithUID
 from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.models.version import Version
 from meilisearch_python_async.task import wait_for_task
@@ -496,7 +502,7 @@ class Client:
 
         return Key(**response.json())
 
-    async def multi_search(self, queries: list[SearchParams]) -> list[SearchResults]:
+    async def multi_search(self, queries: list[SearchParams]) -> list[SearchResultsWithUID]:
         """Multi-index search.
 
         Args:
@@ -528,7 +534,7 @@ class Client:
             url, body={"queries": [x.dict(by_alias=True) for x in queries]}
         )
 
-        return [SearchResults(**x) for x in response.json()["results"]]
+        return [SearchResultsWithUID(**x) for x in response.json()["results"]]
 
     async def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an Index instance.
