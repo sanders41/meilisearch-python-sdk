@@ -30,7 +30,7 @@ class SearchResults(CamelBase):
     offset: Optional[int]
     limit: Optional[int]
     estimated_total_hits: Optional[int]
-    processing_time_ms: float
+    processing_time_ms: int
     query: str
     facet_distribution: Optional[Dict[str, Any]] = None
     total_pages: Optional[int]
