@@ -109,6 +109,18 @@ def small_movies_csv_path(small_movies, tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
+def small_movies_csv_path_semicolon_delimiter(small_movies, tmp_path_factory):
+    file_path = tmp_path_factory.mktemp("csv") / "small_movies.csv"
+    with open(file_path, "w") as f:
+        field_names = list(small_movies[0].keys())
+        writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL, delimiter=";")
+        writer.writeheader()
+        writer.writerows(small_movies)
+
+    return file_path
+
+
+@pytest.fixture(scope="session")
 def small_movies_ndjson_path(small_movies, tmp_path_factory):
     file_path = tmp_path_factory.mktemp("ndjson") / "small_movies.ndjson"
     nd_json = [json.dumps(x) for x in small_movies]
@@ -125,8 +137,10 @@ def small_movies_path():
 
 
 @pytest.fixture
-async def empty_index(test_client):
-    async def index_maker(index_name=INDEX_UID):
+async def empty_index(test_client, index_uid=None):
+    index_name = index_uid if index_uid else INDEX_UID
+
+    async def index_maker(index_name=index_name):
         return await test_client.create_index(uid=index_name)
 
     return index_maker

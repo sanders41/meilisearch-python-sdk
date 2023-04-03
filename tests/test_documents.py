@@ -45,6 +45,15 @@ def add_csv_file(file_path, num_movies=50, id_start=0):
         writer.writerows(movies)
 
 
+def add_csv_file_semicolon_delimiter(file_path, num_movies=50, id_start=0):
+    with open(file_path, "w") as f:
+        movies = generate_test_movies(num_movies, id_start)
+        field_names = list(movies[0].keys())
+        writer = csv.DictWriter(f, fieldnames=field_names, delimiter=";")
+        writer.writeheader()
+        writer.writerows(movies)
+
+
 def add_ndjson_file(file_path, num_movies=50, id_start=0):
     movies = [json.dumps(x) for x in generate_test_movies(num_movies, id_start)]
     with open(file_path, "w") as f:
@@ -147,6 +156,24 @@ async def test_add_documents_from_directory_csv_path(
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
+async def test_add_documents_from_directory_csv_path_with_delimiter(
+    path_type, combine_documents, test_client, tmp_path
+):
+    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 50, 0)
+    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 50, 51)
+    index = test_client.index("movies")
+    path = str(tmp_path) if path_type == "str" else tmp_path
+    responses = await index.add_documents_from_directory(
+        path, combine_documents=combine_documents, document_type="csv", csv_delimiter=";"
+    )
+    for response in responses:
+        await wait_for_task(index.http_client, response.task_uid)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
+
+
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_ndjson(
     path_type, combine_documents, test_client, tmp_path
 ):
@@ -171,6 +198,16 @@ async def test_add_documents_from_directory_no_documents(combine_documents, test
     with pytest.raises(MeilisearchError):
         index = test_client.index("movies")
         await index.add_documents_from_directory(tmp_path, combine_documents=combine_documents)
+
+
+@pytest.mark.parametrize("delimiter", [";;", "😀"])
+async def test_add_documents_from_directory_csv_delimiter_invalid(delimiter, test_client, tmp_path):
+    add_csv_file(tmp_path / "test1.csv", 1, 0)
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.add_documents_from_directory(
+            tmp_path, document_type="csv", csv_delimiter=delimiter
+        )
 
 
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
@@ -295,6 +332,29 @@ async def test_add_documents_raw_file_csv(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
 @pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_add_documents_raw_file_csv_delimiter(
+    path_type,
+    primary_key,
+    expected_primary_key,
+    test_client,
+    small_movies_csv_path_semicolon_delimiter,
+):
+    index = test_client.index("movies")
+    path = (
+        str(small_movies_csv_path_semicolon_delimiter)
+        if path_type == "str"
+        else small_movies_csv_path_semicolon_delimiter
+    )
+    response = await index.add_documents_from_raw_file(path, primary_key, csv_delimiter=";")
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert await index.get_primary_key() == expected_primary_key
+    assert update.status == "succeeded"
+
+
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+@pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_raw_file_ndjson(
     path_type, primary_key, expected_primary_key, test_client, small_movies_ndjson_path
 ):
@@ -320,6 +380,23 @@ async def test_add_document_raw_file_extension_error(test_client, tmp_path):
     with pytest.raises(ValueError):
         index = test_client.index("movies")
         await index.add_documents_from_raw_file(file_path)
+
+
+async def test_add_documents_raw_file_csv_delimiter_non_csv_error(
+    test_client, small_movies_ndjson_path
+):
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.add_documents_from_raw_file(small_movies_ndjson_path, csv_delimiter=";")
+
+
+@pytest.mark.parametrize("delimiter", [";;", "😀"])
+async def test_add_documents_raw_file_csv_delimiter_invalid(
+    delimiter, test_client, small_movies_csv_path
+):
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.add_documents_from_raw_file(small_movies_csv_path, csv_delimiter=delimiter)
 
 
 @pytest.mark.parametrize(
@@ -401,6 +478,50 @@ async def test_add_documents_from_file_in_batches_csv(
         assert update.status == "succeeded"
 
     assert await index.get_primary_key() == expected_primary_key
+
+
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize(
+    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+)
+@pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_add_documents_from_file_in_batches_csv_with_delimiter(
+    path_type,
+    batch_size,
+    primary_key,
+    expected_primary_key,
+    test_client,
+    small_movies_csv_path_semicolon_delimiter,
+    small_movies,
+):
+    index = test_client.index("movies")
+    path = (
+        str(small_movies_csv_path_semicolon_delimiter)
+        if path_type == "str"
+        else small_movies_csv_path_semicolon_delimiter
+    )
+    response = await index.add_documents_from_file_in_batches(
+        path, batch_size=batch_size, primary_key=primary_key, csv_delimiter=";"
+    )
+
+    assert ceil(len(small_movies) / batch_size) == len(response)
+
+    for r in response:
+        update = await wait_for_task(index.http_client, r.task_uid)
+        assert update.status == "succeeded"
+
+    assert await index.get_primary_key() == expected_primary_key
+
+
+@pytest.mark.parametrize("delimiter", [";;", "😀"])
+async def test_add_documents_from_file_in_batches_csv_with_delimiter_invalid(
+    delimiter, test_client, small_movies_csv_path
+):
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.add_documents_from_file_in_batches(
+            small_movies_csv_path, csv_delimiter=delimiter
+        )
 
 
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
@@ -577,6 +698,36 @@ async def test_update_documents_from_directory_csv(
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
+async def test_update_documents_from_directory_csv_with_delimiter(
+    path_type, combine_documents, test_client, tmp_path
+):
+    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 50, 0)
+    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 50, 51)
+    index = test_client.index("movies")
+    path = str(tmp_path) if path_type == "str" else tmp_path
+    responses = await index.update_documents_from_directory(
+        path, combine_documents=combine_documents, document_type="csv", csv_delimiter=";"
+    )
+    for response in responses:
+        await wait_for_task(index.http_client, response.task_uid)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
+
+
+@pytest.mark.parametrize("delimiter", [";;", "😀"])
+async def test_update_documents_from_directory_csv_delimiter_invalid(
+    delimiter, test_client, tmp_path
+):
+    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 1, 0)
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.update_documents_from_directory(
+            tmp_path, document_type="csv", csv_delimiter=delimiter
+        )
+
+
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_ndjson(
     path_type, combine_documents, test_client, tmp_path
 ):
@@ -647,6 +798,42 @@ async def test_update_documents_from_directory_in_batchs_csv(
 @pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
+async def test_update_documents_from_directory_in_batchs_csv_delimiter(
+    path_type, combine_documents, batch_size, test_client, tmp_path
+):
+    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 50, 0)
+    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 50, 51)
+    index = test_client.index("movies")
+    path = str(tmp_path) if path_type == "str" else tmp_path
+    responses = await index.update_documents_from_directory_in_batches(
+        path,
+        batch_size=batch_size,
+        combine_documents=combine_documents,
+        document_type="csv",
+        csv_delimiter=";",
+    )
+
+    for response in responses:
+        await wait_for_task(index.http_client, response.task_uid)
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 100
+
+
+@pytest.mark.parametrize("delimiter", [";;", "😀"])
+async def test_update_documents_from_directory_in_batches_csv_delimiter_invalid(
+    delimiter, test_client, tmp_path
+):
+    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 1, 0)
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.update_documents_from_directory_in_batches(
+            tmp_path, document_type="csv", csv_delimiter=delimiter
+        )
+
+
+@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_in_batchs_ndjson(
     path_type, combine_documents, batch_size, test_client, tmp_path
 ):
@@ -702,6 +889,42 @@ async def test_update_documents_from_file_csv(
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
+
+
+@pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_update_documents_from_file_csv_with_delimiter(
+    path_type, test_client, small_movies, small_movies_csv_path_semicolon_delimiter
+):
+    small_movies[0]["title"] = "Some title"
+    movie_id = small_movies[0]["id"]
+    index = test_client.index("movies")
+    response = await index.add_documents(small_movies)
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    got_title = filter(lambda x: x["id"] == movie_id, response.results)
+    assert list(got_title)[0]["title"] == "Some title"
+    path = (
+        str(small_movies_csv_path_semicolon_delimiter)
+        if path_type == "str"
+        else small_movies_csv_path_semicolon_delimiter
+    )
+    update = await index.update_documents_from_file(path, csv_delimiter=";")
+    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    assert update.status == "succeeded"
+    response = await index.get_documents()
+    assert response.results[0]["title"] != "Some title"
+
+
+@pytest.mark.parametrize("delimiter", [";;", "😀"])
+async def test_update_documents_from_file_csv_delimiter_invalid(
+    delimiter, test_client, tmp_path, small_movies_csv_path_semicolon_delimiter
+):
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.update_documents_from_file(
+            small_movies_csv_path_semicolon_delimiter, csv_delimiter=delimiter
+        )
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
@@ -844,6 +1067,50 @@ async def test_update_documents_raw_file_csv(
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
+
+
+@pytest.mark.parametrize("path_type", ["path", "str"])
+async def test_update_documents_raw_file_csv_with_delimiter(
+    path_type, test_client, small_movies_csv_path_semicolon_delimiter, small_movies
+):
+    small_movies[0]["title"] = "Some title"
+    movie_id = small_movies[0]["id"]
+    index = test_client.index("movies")
+    response = await index.add_documents(small_movies)
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    got_title = filter(lambda x: x["id"] == movie_id, response.results)
+    assert list(got_title)[0]["title"] == "Some title"
+    path = (
+        str(small_movies_csv_path_semicolon_delimiter)
+        if path_type == "str"
+        else small_movies_csv_path_semicolon_delimiter
+    )
+    update = await index.update_documents_from_raw_file(path, primary_key="id", csv_delimiter=";")
+    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    assert update.status == "succeeded"
+    response = await index.get_documents()
+    assert response.results[0]["title"] != "Some title"
+
+
+async def test_update_documents_from_raw_file_csv_delimiter_non_csv(
+    test_client, small_movies_ndjson_path
+):
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.update_documents_from_raw_file(small_movies_ndjson_path, csv_delimiter=";")
+
+
+@pytest.mark.parametrize("delimiter", [";;", "😀"])
+async def test_update_documents_from_raw_file_csv_delimiter_invalid(
+    delimiter, test_client, small_movies_csv_path_semicolon_delimiter
+):
+    index = test_client.index("movies")
+    with pytest.raises(ValueError):
+        await index.update_documents_from_raw_file(
+            small_movies_csv_path_semicolon_delimiter, csv_delimiter=delimiter
+        )
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])

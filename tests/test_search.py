@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 import pytest
 
 from meilisearch_python_async import Client
+from meilisearch_python_async.errors import MeilisearchApiError
+from meilisearch_python_async.models.search import SearchParams
 from meilisearch_python_async.task import wait_for_task
 
 
@@ -300,3 +302,35 @@ async def test_search_with_tenant_token_and_expire_date(
         response = await index.search("How to Train Your Dragon")
 
     assert response.hits[0]["id"] == "166428"
+
+
+async def test_multi_search(test_client, index_with_documents, empty_index):
+    index = await index_with_documents()
+    await empty_index("test")
+    response = await test_client.multi_search(
+        [
+            SearchParams(index_uid=index.uid, query="How to Train Your Dragon"),
+            SearchParams(index_uid="test", query=""),
+        ]
+    )
+
+    assert response[0].index_uid == index.uid
+    assert response[0].hits[0]["id"] == "166428"
+    assert "_formatted" not in response[0].hits[0]
+    assert response[1].index_uid == "test"
+
+
+async def test_multi_search_one_index(test_client, index_with_documents):
+    index = await index_with_documents()
+    response = await test_client.multi_search(
+        [SearchParams(index_uid=index.uid, query="How to Train Your Dragon")]
+    )
+    assert response[0].hits[0]["id"] == "166428"
+    assert "_formatted" not in response[0].hits[0]
+
+
+async def test_multi_search_no_index(test_client):
+    with pytest.raises(MeilisearchApiError):
+        await test_client.multi_search(
+            [SearchParams(index_uid="bad", query="How to Train Your Dragon")]
+        )
