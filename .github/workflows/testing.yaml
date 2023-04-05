@@ -116,4 +116,5 @@ jobs:
       run: poetry install
     - name: Test Docs Build
       run: |
+        token: ${{ secrets.CODECOV_TOKEN }}
         poetry run mkdocs build --strict
