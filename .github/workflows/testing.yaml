@@ -84,6 +84,7 @@ jobs:
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
 
   docs:
@@ -116,5 +117,4 @@ jobs:
       run: poetry install
     - name: Test Docs Build
       run: |
-        token: ${{ secrets.CODECOV_TOKEN }}
         poetry run mkdocs build --strict
