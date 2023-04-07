@@ -30,7 +30,7 @@ async def test_cancel_statuses(test_client):
     completed_task = await get_task(test_client, task.task_uid)
     tasks = await get_tasks(test_client, types="taskCancelation")
 
-    assert completed_task.index_uids is None
+    assert completed_task.index_uid is None
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
     assert tasks[0].details is not None
@@ -53,6 +53,7 @@ async def test_cancel_tasks_uids(test_client):
 @pytest.mark.usefixtures("create_tasks")
 async def test_cancel_tasks_index_uids(test_client):
     task = await cancel_tasks(test_client, index_uids=["1"])
+
     await wait_for_task(test_client, task.task_uid)
     completed_task = await get_task(test_client, task.task_uid)
     tasks = await get_tasks(test_client, types="taskCancelation")
@@ -299,6 +300,9 @@ async def test_get_tasks_for_index(empty_index, small_movies):
     await wait_for_task(index.http_client, response.task_uid)
     response = await get_tasks(index.http_client, index_ids=[index.uid])
     assert len(response) >= current_tasks
+    uid = set([x.index_uid for x in response])
+    assert len(uid) == 1
+    assert next(iter(uid)) == index.uid
 
 
 async def test_get_task(empty_index, small_movies):
