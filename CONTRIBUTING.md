@@ -72,22 +72,20 @@ git checkout main
 git pull upstream main --ff-only
 ```
 
-### Code Standards and tests (isort, ruff, black, mypy, pytest, tox, and pre-commit)
+### Code Standards and tests (ruff, black, mypy, pytest, tox, and pre-commit)
 
-meilisearch-python-async uses [isort](https://pycqa.github.io/isort/),
-[ruff](https://github.com/charliermarsh/ruff), [Black](https://github.com/psf/black), and [mypy](https://mypy.readthedocs.io/en/stable/) to ensure consistant code formmating.
+meilisearch-python-async uses [ruff](https://github.com/charliermarsh/ruff),
+[Black](https://github.com/psf/black), and [mypy](https://mypy.readthedocs.io/en/stable/) to ensure
+consistant code formmating.
 
 You can run linting on your code at any time with:
 
 ```sh
-# Run isort
-poetry run isort meilisearch_python_async tests
-
 # Run black
 poetry run black meilisearch_python_async tests
 
 # Run ruff
-poetry run ruff meilisearch_python_async tests
+poetry run ruff check .
 
 # Run mypy
 poetry run mypy meilisearch_python_async
