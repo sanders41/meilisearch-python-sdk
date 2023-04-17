@@ -230,7 +230,7 @@ async def wait_for_task(
     client: AsyncClient | Client,
     task_id: int,
     *,
-    timeout_in_ms: int = 5000,
+    timeout_in_ms: int | None = 5000,
     interval_in_ms: int = 50,
 ) -> TaskStatus:
     """Wait until Meilisearch processes a task, and get its status.
@@ -240,7 +240,8 @@ async def wait_for_task(
         client: An httpx AsyncClient or meilisearch_python_async Client instance.
         task_id: Identifier of the task to retrieve.
         timeout_in_ms: Amount of time in milliseconds to wait before raising a
-            MeilisearchTimeoutError. Defaults to 5000.
+            MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
+            if the `None` option is used the wait time could be very long. Defaults to 5000.
         interval_in_ms: Time interval in miliseconds to sleep between requests. Defaults to 50.
 
     Returns:
@@ -271,17 +272,28 @@ async def wait_for_task(
     http_requests = HttpRequests(client_)
     start_time = datetime.now()
     elapsed_time = 0.0
-    while elapsed_time < timeout_in_ms:
-        response = await http_requests.get(url)
-        status = TaskStatus(**response.json())
-        if status.status in ("succeeded", "failed"):
-            return status
-        await sleep(interval_in_ms / 1000)
-        time_delta = datetime.now() - start_time
-        elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
-    raise MeilisearchTimeoutError(
-        f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
-    )
+
+    if timeout_in_ms:
+        while elapsed_time < timeout_in_ms:
+            response = await http_requests.get(url)
+            status = TaskStatus(**response.json())
+            if status.status in ("succeeded", "failed"):
+                return status
+            await sleep(interval_in_ms / 1000)
+            time_delta = datetime.now() - start_time
+            elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
+        raise MeilisearchTimeoutError(
+            f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
+        )
+    else:
+        while True:
+            response = await http_requests.get(url)
+            status = TaskStatus(**response.json())
+            if status.status in ("succeeded", "failed"):
+                return status
+            await sleep(interval_in_ms / 1000)
+            time_delta = datetime.now() - start_time
+            elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
 
 
 def _get_client(client: AsyncClient | Client) -> AsyncClient:
