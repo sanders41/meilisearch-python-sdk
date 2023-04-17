@@ -320,6 +320,13 @@ async def test_wait_for_task(empty_index, small_movies):
     assert update.status == "succeeded"
 
 
+async def test_wait_for_task_no_timeout(empty_index, small_movies):
+    index = await empty_index()
+    response = await index.add_documents(small_movies)
+    update = await wait_for_task(index.http_client, response.task_uid, timeout_in_ms=None)
+    assert update.status == "succeeded"
+
+
 async def test_wait_for_pending_update_time_out(empty_index, small_movies):
     index = await empty_index()
     with pytest.raises(MeilisearchTimeoutError):
