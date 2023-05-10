@@ -279,10 +279,10 @@ async def test_search_with_tenant_token(
     test_client, index_with_documents, base_url, index_uid, default_search_key
 ):
     token = test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
-    await index_with_documents()
+    index_docs = await index_with_documents()
 
     async with Client(base_url, token) as client:
-        index = client.index(index_uid)
+        index = client.index(index_docs.uid)
         response = await index.search("How to Train Your Dragon")
 
     assert response.hits[0]["id"] == "166428"
@@ -295,29 +295,29 @@ async def test_search_with_tenant_token_and_expire_date(
     token = test_client.generate_tenant_token(
         search_rules=["*"], api_key=default_search_key, expires_at=expires_at
     )
-    await index_with_documents()
+    index_docs = await index_with_documents()
 
     async with Client(base_url, token) as client:
-        index = client.index(index_uid)
+        index = client.index(index_docs.uid)
         response = await index.search("How to Train Your Dragon")
 
     assert response.hits[0]["id"] == "166428"
 
 
 async def test_multi_search(test_client, index_with_documents, empty_index):
-    index = await index_with_documents()
-    await empty_index("test")
+    index1 = await index_with_documents()
+    index2 = await empty_index()
     response = await test_client.multi_search(
         [
-            SearchParams(index_uid=index.uid, query="How to Train Your Dragon"),
-            SearchParams(index_uid="test", query=""),
+            SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
+            SearchParams(index_uid=index2.uid, query=""),
         ]
     )
 
-    assert response[0].index_uid == index.uid
+    assert response[0].index_uid == index1.uid
     assert response[0].hits[0]["id"] == "166428"
     assert "_formatted" not in response[0].hits[0]
-    assert response[1].index_uid == "test"
+    assert response[1].index_uid == index2.uid
 
 
 async def test_multi_search_one_index(test_client, index_with_documents):

@@ -330,7 +330,7 @@ async def test_get_version(test_client):
 
 
 async def test_create_dump(test_client, index_with_documents):
-    index = await index_with_documents("indexUID-dump-creation")
+    index = await index_with_documents()
 
     response = await test_client.create_dump()
 
@@ -378,10 +378,10 @@ async def test_connection_timeout(test_client, monkeypatch):
 
 
 async def test_swap_indexes(test_client, empty_index):
-    index_a = await empty_index("index_a")
-    index_b = await empty_index("index_b")
-    task_a = await index_a.add_documents([{"id": 1, "title": "index_a"}])
-    task_b = await index_b.add_documents([{"id": 1, "title": "index_b"}])
+    index_a = await empty_index()
+    index_b = await empty_index()
+    task_a = await index_a.add_documents([{"id": 1, "title": index_a.uid}])
+    task_b = await index_b.add_documents([{"id": 1, "title": index_b.uid}])
     await wait_for_task(index_a.http_client, task_a.task_uid)
     await wait_for_task(index_b.http_client, task_b.task_uid)
     swapTask = await test_client.swap_indexes([(index_a.uid, index_b.uid)])

@@ -2,6 +2,7 @@ import asyncio
 import csv
 import json
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 
@@ -137,19 +138,17 @@ def small_movies_path():
 
 
 @pytest.fixture
-async def empty_index(test_client, index_uid=None):
-    index_name = index_uid if index_uid else INDEX_UID
-
-    async def index_maker(index_name=index_name):
-        return await test_client.create_index(uid=index_name)
+async def empty_index(test_client):
+    async def index_maker():
+        return await test_client.create_index(uid=str(uuid4()))
 
     return index_maker
 
 
 @pytest.fixture
-async def index_with_documents(empty_index, small_movies, index_uid):
-    async def index_maker(index_name=index_uid, documents=small_movies):
-        index = await empty_index(index_name)
+async def index_with_documents(empty_index, small_movies):
+    async def index_maker(documents=small_movies):
+        index = await empty_index()
         response = await index.add_documents(documents)
         await wait_for_task(index.http_client, response.task_uid)
         return index
