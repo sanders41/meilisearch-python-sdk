@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import Any, Callable
 
 from httpx import (
@@ -11,6 +12,7 @@ from httpx import (
     Response,
 )
 
+from meilisearch_python_async._version import get_version
 from meilisearch_python_async.errors import (
     MeilisearchApiError,
     MeilisearchCommunicationError,
@@ -27,19 +29,18 @@ class HttpRequests:
         http_method: Callable,
         path: str,
         body: Any | None = None,
-        content_type: str = "applicaiton/json",
+        content_type: str = "applicaton/json",
     ) -> Response:
+        headers = {"user-agent": user_agent()}
         try:
             if not body:
                 response = await http_method(path)
             elif content_type != "application/json":
-                response = await http_method(
-                    path, content=body, headers={"Content-Type": content_type}
-                )
+                headers["Content-Type"] = content_type
+                response = await http_method(path, content=body, headers=headers)
             else:
-                response = await http_method(
-                    path, json=body, headers={"Content-Type": content_type}
-                )
+                headers["Content-Type"] = content_type
+                response = await http_method(path, json=body, headers=headers)
 
             response.raise_for_status()
             return response
@@ -73,3 +74,8 @@ class HttpRequests:
 
     async def delete(self, path: str, body: dict | None = None) -> Response:
         return await self._send_request(self.http_client.delete, path, body)
+
+
+@lru_cache(maxsize=1)
+def user_agent() -> str:
+    return f"Meilisearch Python Async (v{get_version()})"
