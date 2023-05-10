@@ -12,7 +12,7 @@ from httpx import (
     Response,
 )
 
-from meilisearch_python_async._version import get_version
+from meilisearch_python_async._version import VERSION
 from meilisearch_python_async.errors import (
     MeilisearchApiError,
     MeilisearchCommunicationError,
@@ -78,4 +78,4 @@ class HttpRequests:
 
 @lru_cache(maxsize=1)
 def user_agent() -> str:
-    return f"Meilisearch Python Async (v{get_version()})"
+    return f"Meilisearch Python Async (v{VERSION})"
