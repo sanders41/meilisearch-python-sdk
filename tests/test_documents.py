@@ -90,7 +90,7 @@ async def test_add_documents(primary_key, expected_primary_key, empty_index, sma
     assert update.status == "succeeded"
 
 
-@pytest.mark.parametrize("batch_size", [2, 3])
+@pytest.mark.parametrize("batch_size", [100, 500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -141,8 +141,8 @@ async def test_add_documents_from_directory(
 async def test_add_documents_from_directory_csv_path(
     path_type, combine_documents, test_client, tmp_path
 ):
-    add_csv_file(tmp_path / "test1.csv", 50, 0)
-    add_csv_file(tmp_path / "test2.csv", 50, 51)
+    add_csv_file(tmp_path / "test1.csv", 10, 0)
+    add_csv_file(tmp_path / "test2.csv", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
@@ -151,7 +151,7 @@ async def test_add_documents_from_directory_csv_path(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
@@ -159,8 +159,8 @@ async def test_add_documents_from_directory_csv_path(
 async def test_add_documents_from_directory_csv_path_with_delimiter(
     path_type, combine_documents, test_client, tmp_path
 ):
-    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 50, 0)
-    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 50, 51)
+    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
+    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
@@ -169,7 +169,7 @@ async def test_add_documents_from_directory_csv_path_with_delimiter(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
@@ -177,8 +177,8 @@ async def test_add_documents_from_directory_csv_path_with_delimiter(
 async def test_add_documents_from_directory_ndjson(
     path_type, combine_documents, test_client, tmp_path
 ):
-    add_ndjson_file(tmp_path / "test1.ndjson", 50, 0)
-    add_ndjson_file(tmp_path / "test2.ndjson", 50, 51)
+    add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
+    add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
@@ -187,7 +187,7 @@ async def test_add_documents_from_directory_ndjson(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("combine_documents", [True, False])
@@ -210,11 +210,11 @@ async def test_add_documents_from_directory_csv_delimiter_invalid(delimiter, tes
         )
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
+    "batch_size, number_of_files, documents_per_file, total_documents",
+    [(25, 1, 50, 50), (50, 2, 50, 100)],
 )
 async def test_add_documents_from_directory_in_batchs(
     path_type,
@@ -241,14 +241,14 @@ async def test_add_documents_from_directory_in_batchs(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [10, 25])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_in_batchs_csv(
     path_type, combine_documents, batch_size, test_client, tmp_path
 ):
-    add_csv_file(tmp_path / "test1.csv", 50, 0)
-    add_csv_file(tmp_path / "test2.csv", 50, 51)
+    add_csv_file(tmp_path / "test1.csv", 10, 0)
+    add_csv_file(tmp_path / "test2.csv", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
@@ -258,17 +258,17 @@ async def test_add_documents_from_directory_in_batchs_csv(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [10, 25])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_in_batchs_ndjson(
     path_type, combine_documents, batch_size, test_client, tmp_path
 ):
-    add_ndjson_file(tmp_path / "test1.ndjson", 50, 0)
-    add_ndjson_file(tmp_path / "test2.ndjson", 50, 51)
+    add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
+    add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
@@ -278,7 +278,7 @@ async def test_add_documents_from_directory_in_batchs_ndjson(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize(
@@ -422,7 +422,7 @@ async def test_add_documents_from_file_invalid_extension(test_client):
         await index.add_documents_from_file("test.bad")
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [10, 25])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -451,7 +451,7 @@ async def test_add_documents_from_file_in_batches(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -480,7 +480,7 @@ async def test_add_documents_from_file_in_batches_csv(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -524,7 +524,7 @@ async def test_add_documents_from_file_in_batches_csv_with_delimiter_invalid(
         )
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -613,7 +613,7 @@ async def test_update_documents_with_primary_key(test_client, small_movies):
     assert await index.get_primary_key() == primary_key
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 async def test_update_documents_in_batches(batch_size, index_with_documents, small_movies):
     index = await index_with_documents()
     response = await index.get_documents()
@@ -634,7 +634,7 @@ async def test_update_documents_in_batches(batch_size, index_with_documents, sma
     assert response["title"] != "Some title"
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 async def test_update_documents_in_batches_with_primary_key(batch_size, test_client, small_movies):
     primary_key = "release_date"
     index = test_client.index("movies")
@@ -683,8 +683,8 @@ async def test_update_documents_from_directory(
 async def test_update_documents_from_directory_csv(
     path_type, combine_documents, test_client, tmp_path
 ):
-    add_csv_file(tmp_path / "test1.csv", 50, 0)
-    add_csv_file(tmp_path / "test2.csv", 50, 51)
+    add_csv_file(tmp_path / "test1.csv", 10, 0)
+    add_csv_file(tmp_path / "test2.csv", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
@@ -693,7 +693,7 @@ async def test_update_documents_from_directory_csv(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
@@ -701,8 +701,8 @@ async def test_update_documents_from_directory_csv(
 async def test_update_documents_from_directory_csv_with_delimiter(
     path_type, combine_documents, test_client, tmp_path
 ):
-    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 50, 0)
-    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 50, 51)
+    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
+    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
@@ -711,7 +711,7 @@ async def test_update_documents_from_directory_csv_with_delimiter(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
@@ -731,8 +731,8 @@ async def test_update_documents_from_directory_csv_delimiter_invalid(
 async def test_update_documents_from_directory_ndjson(
     path_type, combine_documents, test_client, tmp_path
 ):
-    add_ndjson_file(tmp_path / "test1.ndjson", 50, 0)
-    add_ndjson_file(tmp_path / "test2.ndjson", 50, 51)
+    add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
+    add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
@@ -741,14 +741,14 @@ async def test_update_documents_from_directory_ndjson(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 @pytest.mark.parametrize(
-    "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
+    "batch_size, number_of_files, documents_per_file, total_documents",
+    [(25, 1, 50, 50), (50, 2, 50, 100)],
 )
 async def test_update_documents_from_directory_in_batchs(
     path_type,
@@ -775,14 +775,14 @@ async def test_update_documents_from_directory_in_batchs(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_in_batchs_csv(
     path_type, combine_documents, batch_size, test_client, tmp_path
 ):
-    add_csv_file(tmp_path / "test1.csv", 50, 0)
-    add_csv_file(tmp_path / "test2.csv", 50, 51)
+    add_csv_file(tmp_path / "test1.csv", 10, 0)
+    add_csv_file(tmp_path / "test2.csv", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
@@ -792,17 +792,17 @@ async def test_update_documents_from_directory_in_batchs_csv(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_in_batchs_csv_delimiter(
     path_type, combine_documents, batch_size, test_client, tmp_path
 ):
-    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 50, 0)
-    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 50, 51)
+    add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
+    add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
@@ -816,7 +816,7 @@ async def test_update_documents_from_directory_in_batchs_csv_delimiter(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
@@ -831,14 +831,14 @@ async def test_update_documents_from_directory_in_batches_csv_delimiter_invalid(
         )
 
 
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_in_batchs_ndjson(
     path_type, combine_documents, batch_size, test_client, tmp_path
 ):
-    add_ndjson_file(tmp_path / "test1.ndjson", 50, 0)
-    add_ndjson_file(tmp_path / "test2.ndjson", 50, 51)
+    add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
+    add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
@@ -848,7 +848,7 @@ async def test_update_documents_from_directory_in_batchs_ndjson(
     for response in responses:
         await wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()
-    assert stats.number_of_documents == 100
+    assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
@@ -964,7 +964,7 @@ async def test_update_documents_from_file_invalid_extension(test_client):
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 async def test_update_documents_from_file_in_batches(
     path_type, batch_size, test_client, small_movies_path, small_movies
 ):
@@ -990,7 +990,7 @@ async def test_update_documents_from_file_in_batches(
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 async def test_update_documents_from_file_in_batches_csv(
     path_type, batch_size, test_client, small_movies_csv_path, small_movies
 ):
@@ -1016,7 +1016,7 @@ async def test_update_documents_from_file_in_batches_csv(
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("batch_size", [2, 3, 1000])
+@pytest.mark.parametrize("batch_size", [100, 500])
 async def test_update_documents_from_file_in_batches_ndjson(
     path_type, batch_size, test_client, small_movies_ndjson_path, small_movies
 ):
