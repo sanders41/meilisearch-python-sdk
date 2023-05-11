@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from asyncio import sleep
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import jwt
@@ -122,7 +122,7 @@ async def test_generate_tenant_token_default_key(test_client, default_search_key
 
 async def test_generate_tenant_token_default_key_expires(test_client, default_search_key):
     search_rules: dict[str, Any] = {"test": "value"}
-    expires_at = datetime.utcnow() + timedelta(days=1)
+    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     expected: dict[str, Any] = {"searchRules": search_rules}
     expected["apiKeyUid"] = default_search_key.uid
     expected["exp"] = int(datetime.timestamp(expires_at))
@@ -134,7 +134,7 @@ async def test_generate_tenant_token_default_key_expires(test_client, default_se
 
 async def test_generate_tenant_token_default_key_expires_past(test_client, default_search_key):
     search_rules: dict[str, Any] = {"test": "value"}
-    expires_at = datetime.utcnow() + timedelta(days=-1)
+    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=-1)
     with pytest.raises(ValueError):
         test_client.generate_tenant_token(
             search_rules, api_key=default_search_key, expires_at=expires_at
@@ -272,7 +272,7 @@ async def test_health(test_client):
 
 
 async def test_create_key(test_key_info, test_client):
-    expires_at = datetime.utcnow() + timedelta(days=2)
+    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=2)
     test_key_info.expires_at = expires_at
     key = await test_client.create_key(test_key_info)
 
