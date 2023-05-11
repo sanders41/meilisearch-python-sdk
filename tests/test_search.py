@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -291,7 +291,7 @@ async def test_search_with_tenant_token(
 async def test_search_with_tenant_token_and_expire_date(
     test_client, index_with_documents, base_url, index_uid, default_search_key
 ):
-    expires_at = datetime.utcnow() + timedelta(days=1)
+    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     token = test_client.generate_tenant_token(
         search_rules=["*"], api_key=default_search_key, expires_at=expires_at
     )

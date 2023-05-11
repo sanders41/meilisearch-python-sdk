@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from ssl import SSLContext
 from types import TracebackType
 from typing import Any, Type
@@ -185,10 +185,10 @@ class Client:
 
         Examples:
 
-            >>> from datetime import datetime, timedelta
+            >>> from datetime import datetime, timedelta, timezone
             >>> from meilisearch_python_async import Client
             >>>
-            >>> expires_at = datetime.utcnow() + timedelta(days=7)
+            >>> expires_at = datetime.now(tz=timezone.utc) + timedelta(days=7)
             >>>
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     token = client.generate_tenant_token(
@@ -209,7 +209,7 @@ class Client:
 
         payload["apiKeyUid"] = api_key.uid
         if expires_at:
-            if expires_at <= datetime.utcnow():
+            if expires_at <= datetime.now(tz=timezone.utc):
                 raise ValueError("expires_at must be a time in the future")
 
             payload["exp"] = int(datetime.timestamp(expires_at))
