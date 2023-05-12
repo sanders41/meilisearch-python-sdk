@@ -72,7 +72,7 @@ git checkout main
 git pull upstream main --ff-only
 ```
 
-### Code Standards and tests (ruff, black, mypy, pytest, tox, and pre-commit)
+### Code Standards and tests (ruff, black, mypy, pytest, and pre-commit)
 
 meilisearch-python-async uses [ruff](https://github.com/charliermarsh/ruff),
 [Black](https://github.com/psf/black), and [mypy](https://mypy.readthedocs.io/en/stable/) to ensure
@@ -136,8 +136,10 @@ Type hints on files in the tests directory are optional.
 
 ### Testing
 
-This project uses [pytest](https://docs.pytest.org/en/stable/) and [tox](https://tox.readthedocs.io/en/latest/) for testing. Please ensure that any additions/changes you make to the code have tests to go along with them. Code coverage should not drop blow it's current level with any pull requests you make, if it does the pull request will not be accepted.
-You can view the current coverage level in the codecov badge on the
+This project uses [pytest](https://docs.pytest.org/en/stable/) for testing. Please ensure that any
+additions/changes you make to the code have tests to go along with them. Code coverage should not
+drop blow it's current level with any pull requests you make, if it does the pull request will not
+be accepted. You can view the current coverage level in the codecov badge on the
 [main github page](https://github.com/sanders41/meilisearch-python-async). You can run tests and see the
 code coverage.
 
@@ -161,16 +163,6 @@ poetry run pytest
 
 In additon to mainting the coverage percentage please ensure that all
 tests are passing before submitting a pull request.
-
-tox can be used to run both linting, and run the tests in all versions of Python meilisearch-python-async
-supports. Note that you will need to have all the verions of Python installed for this to work.
-
-```sh
-poetry run tox
-```
-
-Running tox before submitting a pull request can save your time because these tests will be run by
-Continuious Integraion when a pull request is submitted and will need to pass there before being accepted.
 
 #### With make
 
