@@ -26,3 +26,12 @@
 
 @stop-meilisearch:
   docker compose down
+
+@build-docs:
+  mkdocs build --strict
+
+@serve-docs:
+  mkdocs serve
+
+@install:
+  poetry install

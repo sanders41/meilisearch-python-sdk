@@ -164,30 +164,24 @@ poetry run pytest
 In additon to mainting the coverage percentage please ensure that all
 tests are passing before submitting a pull request.
 
-#### With make
+#### just
+If you have [just](https://github.com/casey/just) installed it can be used for testing and linting.
 
-If you have make installed you can run the tests with make. This option requires Docker and will
-automatically start Meilisearch in a Docker container before starting the tests and stop the contain
-with the tests are completed.
-
-First make sure you have the Meilisearch Docker image.
+To run linting:
 
 ```sh
-docker pull getmeili/meilisearch:latest
+just lint
 ```
 
-Then tests can be run with:
+Using just to run the tests will start Meilisearch in a Docker container, run the tests, then stop
+the container.
 
 ```sh
-make test
+just test
 ```
 
-If the tests are stopped before they complete, for example pressing `Ctrl + c`, the Docker container
-will be left running. If this happens you can stop it with:
 
-```sh
-make clean
-```
+To see a full list of `just` commands run `just --list`
 
 ## Docs
 
