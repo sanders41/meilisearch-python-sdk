@@ -14,7 +14,7 @@ from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
-from meilisearch_python_async.models.documents import DocumentsInfo
+from meilisearch_python_async.models.documents import DocumentDeleteFilter, DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
 from meilisearch_python_async.models.settings import (
@@ -1306,6 +1306,71 @@ class Index:
         response = await self._http_requests.post(url, ids)
 
         return TaskInfo(**response.json())
+
+    async def delete_documents_by_filter(self, filter: DocumentDeleteFilter) -> TaskInfo:
+        """Delete documents from the index by filter.
+
+        Args:
+
+            filter: The filter value information.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_async.models.documents import DocumentDeleteFilter
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.delete_documents_by_filter(DocumentDeleteFilter(field="genre", filter="horor"))
+        """
+        url = f"{self._documents_url}/delete"
+        response = await self._http_requests.post(
+            url, body={"filter": f"{filter.field}={filter.filter}"}
+        )
+
+        return TaskInfo(**response.json())
+
+    async def delete_documents_in_batches_by_filter(
+        self, filters: list[DocumentDeleteFilter]
+    ) -> list[TaskInfo]:
+        """Delete batches of documents from the index by filter.
+
+        Args:
+
+            filter: A list of filter value information.
+
+        Returns:
+
+            The a list of details of the task statuses.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>> from meilisearch_python_async.models.documents import DocumentDeleteFilter
+            >>>     index = client.index("movies")
+            >>>     await index.delete_documents_in_batches_by_filter(
+            >>>         [
+            >>>             DocumentDeleteFilter(field="genre", filter="horor"),
+            >>>             DocumentDeleteFilter(field="release_date", filter="1520035200"),
+            >>>         ]
+            >>>     )
+        """
+        tasks = [self.delete_documents_by_filter(filter) for filter in filters]
+        return await gather(*tasks)
 
     async def delete_all_documents(self) -> TaskInfo:
         """Delete all documents from the index.

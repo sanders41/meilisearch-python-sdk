@@ -8,3 +8,8 @@ class DocumentsInfo(CamelBase):
     offset: int
     limit: int
     total: int
+
+
+class DocumentDeleteFilter(CamelBase):
+    field: str
+    filter: str
