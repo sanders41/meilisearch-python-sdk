@@ -10,6 +10,7 @@ from meilisearch_python_async.errors import (
     MeilisearchError,
 )
 from meilisearch_python_async.index import _combine_documents, _load_documents_from_file
+from meilisearch_python_async.models.documents import DocumentDeleteFilter
 from meilisearch_python_async.task import wait_for_task
 
 
@@ -1166,6 +1167,47 @@ async def test_delete_documents(index_with_documents):
     documents = await index.get_documents()
     ids = [x["id"] for x in documents.results]
     assert to_delete not in ids
+
+
+async def test_delete_documents_by_filter(index_with_documents):
+    index = await index_with_documents()
+    await index.update_filterable_attributes(["genre"])
+    response = await index.get_documents()
+    assert "action" in ([x.get("genre") for x in response.results])
+    response = await index.delete_documents_by_filter(
+        DocumentDeleteFilter(field="genre", filter="action")
+    )
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents()
+    genres = [x.get("genre") for x in response.results]
+    assert "action" not in genres
+    assert "cartoon" in genres
+
+
+async def test_delete_documents_in_batches_by_filter(index_with_documents):
+    index = await index_with_documents()
+    await index.update_filterable_attributes(["genre", "release_date"])
+    response = await index.get_documents()
+    assert "action" in [x.get("genre") for x in response.results]
+    assert 1520035200 in [x.get("release_date") for x in response.results]
+    response = await index.delete_documents_in_batches_by_filter(
+        [
+            DocumentDeleteFilter(field="genre", filter="action"),
+            DocumentDeleteFilter(
+                field="release_date",
+                filter="1520035200",
+            ),
+        ]
+    )
+    for task in response:
+        await wait_for_task(index.http_client, task.task_uid)
+    response = await index.get_documents()
+    genres = [x.get("genre") for x in response.results]
+    release_dates = [x.get("release_date") for x in response.results]
+    assert "action" not in genres
+    assert "cartoon" in genres
+    assert len(release_dates) > 0
+    assert 1520035200 not in release_dates
 
 
 async def test_delete_all_documents(index_with_documents):
