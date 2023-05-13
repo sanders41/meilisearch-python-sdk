@@ -10,7 +10,7 @@ from meilisearch_python_async.errors import (
     MeilisearchError,
 )
 from meilisearch_python_async.index import _combine_documents, _load_documents_from_file
-from meilisearch_python_async.models.documents import DocumentDeleteFilter
+from meilisearch_python_async.models.documents import DocumentFilter
 from meilisearch_python_async.task import wait_for_task
 
 
@@ -589,6 +589,16 @@ async def test_get_documents_offset_optional_params(index_with_documents):
     assert len(response_offset_limit.results) == 3
     assert response_offset_limit.results[0]["title"] == response.results[1]["title"]
     assert response_offset_limit.results[0]["overview"] == response.results[1]["overview"]
+
+
+async def test_get_documents_filter(index_with_documents):
+    index = await index_with_documents()
+    response = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents(filter=DocumentFilter(field="genre", filter="action"))
+    genres = set([x["genre"] for x in response.results])
+    assert len(genres) == 1
+    assert next(iter(genres)) == "action"
 
 
 async def test_update_documents(index_with_documents, small_movies):
@@ -1171,11 +1181,12 @@ async def test_delete_documents(index_with_documents):
 
 async def test_delete_documents_by_filter(index_with_documents):
     index = await index_with_documents()
-    await index.update_filterable_attributes(["genre"])
+    response = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     assert "action" in ([x.get("genre") for x in response.results])
     response = await index.delete_documents_by_filter(
-        DocumentDeleteFilter(field="genre", filter="action")
+        DocumentFilter(field="genre", filter="action")
     )
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
@@ -1186,14 +1197,15 @@ async def test_delete_documents_by_filter(index_with_documents):
 
 async def test_delete_documents_in_batches_by_filter(index_with_documents):
     index = await index_with_documents()
-    await index.update_filterable_attributes(["genre", "release_date"])
+    response = await index.update_filterable_attributes(["genre", "release_date"])
+    await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     assert "action" in [x.get("genre") for x in response.results]
     assert 1520035200 in [x.get("release_date") for x in response.results]
     response = await index.delete_documents_in_batches_by_filter(
         [
-            DocumentDeleteFilter(field="genre", filter="action"),
-            DocumentDeleteFilter(
+            DocumentFilter(field="genre", filter="action"),
+            DocumentFilter(
                 field="release_date",
                 filter="1520035200",
             ),
