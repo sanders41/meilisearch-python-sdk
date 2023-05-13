@@ -1345,7 +1345,7 @@ class Index:
 
         Args:
 
-            filter: A list of filter value information.
+            filters: A list of filter value information.
 
         Returns:
 
