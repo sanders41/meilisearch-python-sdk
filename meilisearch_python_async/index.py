@@ -14,7 +14,7 @@ from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
-from meilisearch_python_async.models.documents import DocumentDeleteFilter, DocumentsInfo
+from meilisearch_python_async.models.documents import DocumentFilter, DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
 from meilisearch_python_async.models.settings import (
@@ -394,7 +394,12 @@ class Index:
         return response.json()
 
     async def get_documents(
-        self, *, offset: int = 0, limit: int = 20, fields: list[str] | None = None
+        self,
+        *,
+        offset: int = 0,
+        limit: int = 20,
+        fields: list[str] | None = None,
+        filter: DocumentFilter | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -404,6 +409,7 @@ class Index:
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
                 attributes are retrieved. Defaults to None.
+            filter: Filter value information. Defaults to None.
 
         Returns:
 
@@ -429,6 +435,9 @@ class Index:
 
         if fields:
             parameters["fields"] = ",".join(fields)
+
+        if filter:
+            parameters["filter"] = f"{filter.field}={filter.filter}"
 
         url = f"{self._documents_url}?{urlencode(parameters)}"
         response = await self._http_requests.get(url)
@@ -1307,7 +1316,7 @@ class Index:
 
         return TaskInfo(**response.json())
 
-    async def delete_documents_by_filter(self, filter: DocumentDeleteFilter) -> TaskInfo:
+    async def delete_documents_by_filter(self, filter: DocumentFilter) -> TaskInfo:
         """Delete documents from the index by filter.
 
         Args:
@@ -1339,7 +1348,7 @@ class Index:
         return TaskInfo(**response.json())
 
     async def delete_documents_in_batches_by_filter(
-        self, filters: list[DocumentDeleteFilter]
+        self, filters: list[DocumentFilter]
     ) -> list[TaskInfo]:
         """Delete batches of documents from the index by filter.
 
