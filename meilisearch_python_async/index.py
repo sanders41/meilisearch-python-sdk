@@ -409,7 +409,8 @@ class Index:
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
                 attributes are retrieved. Defaults to None.
-            filter: Filter value information. Defaults to None.
+            filter: Filter value information. Defaults to None. Note: This parameter can only be
+                used with Meilisearch >= v1.2.0
 
         Returns:
 
