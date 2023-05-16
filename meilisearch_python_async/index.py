@@ -443,10 +443,10 @@ class Index:
 
             return DocumentsInfo(**response.json())
 
-        parameters["fields"] = fields
+        if fields:
+            parameters["fields"] = fields
 
-        if filter:
-            parameters["filter"] = filter
+        parameters["filter"] = filter
 
         url = f"{self._documents_url}/fetch"
         response = await self._http_requests.post(url, body=parameters)
