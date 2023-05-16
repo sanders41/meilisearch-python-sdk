@@ -10,7 +10,6 @@ from meilisearch_python_async.errors import (
     MeilisearchError,
 )
 from meilisearch_python_async.index import _combine_documents, _load_documents_from_file
-from meilisearch_python_async.models.documents import DocumentFilter
 from meilisearch_python_async.task import wait_for_task
 
 
@@ -595,7 +594,7 @@ async def test_get_documents_filter(index_with_documents):
     index = await index_with_documents()
     response = await index.update_filterable_attributes(["genre"])
     await wait_for_task(index.http_client, response.task_uid)
-    response = await index.get_documents(filter=DocumentFilter(field="genre", filter="action"))
+    response = await index.get_documents(filter="genre=action")
     genres = set([x["genre"] for x in response.results])
     assert len(genres) == 1
     assert next(iter(genres)) == "action"
@@ -1185,9 +1184,7 @@ async def test_delete_documents_by_filter(index_with_documents):
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     assert "action" in ([x.get("genre") for x in response.results])
-    response = await index.delete_documents_by_filter(
-        DocumentFilter(field="genre", filter="action")
-    )
+    response = await index.delete_documents_by_filter("genre=action")
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     genres = [x.get("genre") for x in response.results]
@@ -1203,13 +1200,7 @@ async def test_delete_documents_in_batches_by_filter(index_with_documents):
     assert "action" in [x.get("genre") for x in response.results]
     assert 1520035200 in [x.get("release_date") for x in response.results]
     response = await index.delete_documents_in_batches_by_filter(
-        [
-            DocumentFilter(field="genre", filter="action"),
-            DocumentFilter(
-                field="release_date",
-                filter="1520035200",
-            ),
-        ]
+        ["genre=action", "release_date=1520035200"]
     )
     for task in response:
         await wait_for_task(index.http_client, task.task_uid)
