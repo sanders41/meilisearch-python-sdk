@@ -14,7 +14,7 @@ from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
-from meilisearch_python_async.models.documents import DocumentFilter, DocumentsInfo
+from meilisearch_python_async.models.documents import DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
 from meilisearch_python_async.models.search import SearchResults
 from meilisearch_python_async.models.settings import (
@@ -399,7 +399,7 @@ class Index:
         offset: int = 0,
         limit: int = 20,
         fields: list[str] | None = None,
-        filter: DocumentFilter | None = None,
+        filter: str | list[str | list[str]] | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -434,14 +434,22 @@ class Index:
             "limit": limit,
         }
 
-        if fields:
-            parameters["fields"] = ",".join(fields)
+        if not filter:
+            if fields:
+                parameters["fields"] = ",".join(fields)
+
+            url = f"{self._documents_url}?{urlencode(parameters)}"
+            response = await self._http_requests.get(url)
+
+            return DocumentsInfo(**response.json())
+
+        parameters["fields"] = fields
 
         if filter:
-            parameters["filter"] = f"{filter.field}={filter.filter}"
+            parameters["filter"] = filter
 
-        url = f"{self._documents_url}?{urlencode(parameters)}"
-        response = await self._http_requests.get(url)
+        url = f"{self._documents_url}/fetch"
+        response = await self._http_requests.post(url, body=parameters)
 
         return DocumentsInfo(**response.json())
 
@@ -1317,7 +1325,7 @@ class Index:
 
         return TaskInfo(**response.json())
 
-    async def delete_documents_by_filter(self, filter: DocumentFilter) -> TaskInfo:
+    async def delete_documents_by_filter(self, filter: str | list[str | list[str]]) -> TaskInfo:
         """Delete documents from the index by filter.
 
         Args:
@@ -1336,20 +1344,17 @@ class Index:
         Examples:
 
             >>> from meilisearch_python_async import Client
-            >>> from meilisearch_python_async.models.documents import DocumentDeleteFilter
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
-            >>>     await index.delete_documents_by_filter(DocumentDeleteFilter(field="genre", filter="horor"))
+            >>>     await index.delete_documents_by_filter("genre=horor"))
         """
         url = f"{self._documents_url}/delete"
-        response = await self._http_requests.post(
-            url, body={"filter": f"{filter.field}={filter.filter}"}
-        )
+        response = await self._http_requests.post(url, body={"filter": filter})
 
         return TaskInfo(**response.json())
 
     async def delete_documents_in_batches_by_filter(
-        self, filters: list[DocumentFilter]
+        self, filters: list[str | list[str | list[str]]]
     ) -> list[TaskInfo]:
         """Delete batches of documents from the index by filter.
 
@@ -1370,12 +1375,11 @@ class Index:
 
             >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
-            >>> from meilisearch_python_async.models.documents import DocumentDeleteFilter
             >>>     index = client.index("movies")
             >>>     await index.delete_documents_in_batches_by_filter(
             >>>         [
-            >>>             DocumentDeleteFilter(field="genre", filter="horor"),
-            >>>             DocumentDeleteFilter(field="release_date", filter="1520035200"),
+            >>>             "genre=horor"),
+            >>>             "release_date=1520035200"),
             >>>         ]
             >>>     )
         """
