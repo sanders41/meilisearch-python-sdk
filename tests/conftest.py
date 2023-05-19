@@ -47,9 +47,8 @@ async def clear_indexes(test_client):
     yield
     indexes = await test_client.get_indexes()
     if indexes:
-        for index in indexes:
-            response = await test_client.index(index.uid).delete()
-            await wait_for_task(test_client, response.task_uid)
+        tasks = await asyncio.gather(*[test_client.index(x.uid).delete() for x in indexes])
+        await asyncio.gather(*[wait_for_task(test_client, x.task_uid) for x in tasks])
 
 
 @pytest.fixture(scope="session")
