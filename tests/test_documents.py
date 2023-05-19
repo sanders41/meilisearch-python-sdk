@@ -1,3 +1,4 @@
+import asyncio
 import csv
 import json
 from math import ceil
@@ -103,10 +104,8 @@ async def test_add_documents_in_batches(
     )
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    for r in response:
-        update = await wait_for_task(index.http_client, r.task_uid)
-        assert update.status == "succeeded"
-
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
 
@@ -130,8 +129,7 @@ async def test_add_documents_from_directory(
     index = test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(path, combine_documents=combine_documents)
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -148,8 +146,7 @@ async def test_add_documents_from_directory_csv_path(
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv"
     )
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -166,8 +163,7 @@ async def test_add_documents_from_directory_csv_path_with_delimiter(
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", csv_delimiter=";"
     )
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -184,8 +180,7 @@ async def test_add_documents_from_directory_ndjson(
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson"
     )
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -235,8 +230,7 @@ async def test_add_documents_from_directory_in_batchs(
         path, batch_size=batch_size, combine_documents=combine_documents
     )
 
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -255,8 +249,7 @@ async def test_add_documents_from_directory_in_batchs_csv(
         path, batch_size=batch_size, combine_documents=combine_documents, document_type="csv"
     )
 
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -275,8 +268,7 @@ async def test_add_documents_from_directory_in_batchs_ndjson(
         path, batch_size=batch_size, combine_documents=combine_documents, document_type="ndjson"
     )
 
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -444,10 +436,8 @@ async def test_add_documents_from_file_in_batches(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    for r in response:
-        update = await wait_for_task(index.http_client, r.task_uid)
-        assert update.status == "succeeded"
-
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
 
@@ -473,10 +463,8 @@ async def test_add_documents_from_file_in_batches_csv(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    for r in response:
-        update = await wait_for_task(index.http_client, r.task_uid)
-        assert update.status == "succeeded"
-
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
 
@@ -506,10 +494,8 @@ async def test_add_documents_from_file_in_batches_csv_with_delimiter(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    for r in response:
-        update = await wait_for_task(index.http_client, r.task_uid)
-        assert update.status == "succeeded"
-
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
 
@@ -546,10 +532,8 @@ async def test_add_documents_from_file_in_batches_ndjson(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    for r in response:
-        update = await wait_for_task(index.http_client, r.task_uid)
-        assert update.status == "succeeded"
-
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
 
@@ -627,8 +611,7 @@ async def test_update_documents_in_batches(batch_size, index_with_documents, sma
     updates = await index.update_documents_in_batches(small_movies, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    for update in updates:
-        await wait_for_task(index.http_client, update.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])
 
     response = await index.get_document(doc_id)
     assert response["title"] != "Some title"
@@ -643,10 +626,8 @@ async def test_update_documents_in_batches_with_primary_key(batch_size, test_cli
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    for update in updates:
-        update_status = await wait_for_task(index.http_client, update.task_uid)
-        assert update_status.status == "succeeded"
-
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])
+    assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == primary_key
 
 
@@ -672,8 +653,7 @@ async def test_update_documents_from_directory(
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents
     )
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -690,8 +670,7 @@ async def test_update_documents_from_directory_csv(
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv"
     )
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -708,8 +687,7 @@ async def test_update_documents_from_directory_csv_with_delimiter(
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", csv_delimiter=";"
     )
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -738,8 +716,7 @@ async def test_update_documents_from_directory_ndjson(
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson"
     )
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -769,8 +746,7 @@ async def test_update_documents_from_directory_in_batchs(
         path, batch_size=batch_size, combine_documents=combine_documents
     )
 
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -789,8 +765,7 @@ async def test_update_documents_from_directory_in_batchs_csv(
         path, batch_size=batch_size, combine_documents=combine_documents, document_type="csv"
     )
 
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -813,8 +788,7 @@ async def test_update_documents_from_directory_in_batchs_csv_delimiter(
         csv_delimiter=";",
     )
 
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -845,8 +819,7 @@ async def test_update_documents_from_directory_in_batchs_ndjson(
         path, batch_size=batch_size, combine_documents=combine_documents, document_type="ndjson"
     )
 
-    for response in responses:
-        await wait_for_task(index.http_client, response.task_uid)
+    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -918,7 +891,7 @@ async def test_update_documents_from_file_csv_with_delimiter(
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
 async def test_update_documents_from_file_csv_delimiter_invalid(
-    delimiter, test_client, tmp_path, small_movies_csv_path_semicolon_delimiter
+    delimiter, test_client, small_movies_csv_path_semicolon_delimiter
 ):
     index = test_client.index("movies")
     with pytest.raises(ValueError):
@@ -972,7 +945,7 @@ async def test_update_documents_from_file_in_batches(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    await wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -981,9 +954,8 @@ async def test_update_documents_from_file_in_batches(
     updates = await index.update_documents_from_file_in_batches(path, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    for update in updates:
-        update_status = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
-        assert update_status.status == "succeeded"
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])
+    assert {"succeeded"} == {x.status for x in tasks}
 
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -998,7 +970,7 @@ async def test_update_documents_from_file_in_batches_csv(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    await wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1007,9 +979,8 @@ async def test_update_documents_from_file_in_batches_csv(
     updates = await index.update_documents_from_file_in_batches(path, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    for update in updates:
-        update_status = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
-        assert update_status.status == "succeeded"
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])
+    assert {"succeeded"} == {x.status for x in tasks}
 
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1024,7 +995,7 @@ async def test_update_documents_from_file_in_batches_ndjson(
     movie_id = small_movies[0]["id"]
     index = test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    await wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1033,9 +1004,8 @@ async def test_update_documents_from_file_in_batches_ndjson(
     updates = await index.update_documents_from_file_in_batches(path, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    for update in updates:
-        update_status = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
-        assert update_status.status == "succeeded"
+    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])  # type: ignore
+    assert {"succeeded"} == {x.status for x in tasks}
 
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
