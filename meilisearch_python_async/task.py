@@ -292,8 +292,6 @@ async def wait_for_task(
             if status.status in ("succeeded", "failed"):
                 return status
             await sleep(interval_in_ms / 1000)
-            time_delta = datetime.now() - start_time
-            elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
 
 
 def _get_client(client: AsyncClient | Client) -> AsyncClient:

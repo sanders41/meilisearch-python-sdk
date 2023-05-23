@@ -149,7 +149,9 @@ class Client:
         """
         url = f"indexes/{uid}"
         response = await self._http_requests.delete(url)
-        status = await wait_for_task(self.http_client, response.json()["taskUid"])
+        status = await wait_for_task(
+            self.http_client, response.json()["taskUid"], timeout_in_ms=100000
+        )
         if status.status == "succeeded":
             return True
         return False

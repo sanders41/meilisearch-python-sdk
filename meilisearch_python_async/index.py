@@ -113,7 +113,7 @@ class Index:
             >>>     await index.delete_if_exists()
         """
         response = await self.delete()
-        status = await wait_for_task(self.http_client, response.task_uid)
+        status = await wait_for_task(self.http_client, response.task_uid, timeout_in_ms=100000)
         if status.status == "succeeded":
             return True
 
