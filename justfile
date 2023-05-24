@@ -35,3 +35,6 @@
 
 @install:
   poetry install
+
+@benchmark: start-meilisearch-detached && stop-meilisearch
+  -poetry run python benchmark/run_benchmark.py
