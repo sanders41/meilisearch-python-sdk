@@ -135,13 +135,13 @@ This test compares how long it takes to send 1 million documents in batches of 1
 Meilisearch server for indexing (lower is better). The time does not take into account how long
 Meilisearch takes to index the documents since that is outside of the library functionality.
 
-![Add Documents in Batches](https:/raw.githubusercontent.com/sanders41/meilisearch-python-async/main/assets/add_in_batches.png)
+![Add Documents in Batches](https://raw.githubusercontent.com/sanders41/meilisearch-python-async/main/assets/add_in_batches.png)
 
 ### Muiltiple Searches
 
 This test compares how long it takes to complete 1000 searches (lower is better)
 
-![Multiple Searches](https:/raw.githubusercontent.com/sanders41/meilisearch-python-async/main/assets/searches.png)
+![Multiple Searches](https://raw.githubusercontent.com/sanders41/meilisearch-python-async/main/assets/searches.png)
 
 ## Documentation
 
