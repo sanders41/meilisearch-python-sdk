@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timezone
 from ssl import SSLContext
 from types import TracebackType
-from typing import Any, Type
+from typing import Any
 
 import jwt
 from httpx import AsyncClient
@@ -65,8 +65,8 @@ class Client:
 
     async def __aexit__(
         self,
-        et: Type[BaseException] | None,
-        ev: Type[BaseException] | None,
+        et: type[BaseException] | None,
+        ev: type[BaseException] | None,
         traceback: TracebackType | None,
     ) -> None:
         await self.aclose()
