@@ -92,7 +92,7 @@ async def indexes_sample(test_client):
 
 @pytest.fixture(scope="session")
 def small_movies():
-    with open(SMALL_MOVIES_PATH, "r") as movie_file:
+    with open(SMALL_MOVIES_PATH) as movie_file:
         yield json.loads(movie_file.read())
 
 
