@@ -78,7 +78,7 @@ jobs:
       run: poetry install
     - name: MeiliSearch (latest version) setup with Docker
       # run: docker run --rm -d -p 7700:7700 getmeili/meilisearch:latest meilisearch --no-analytics --master-key=masterKey
-      run: docker run --rm -d -p 7700:7700 getmeili/meilisearch:v1.2.0-rc.3 meilisearch --no-analytics --master-key=masterKey
+      run: docker run --rm -d -p 7700:7700 getmeili/meilisearch:v1.2.0-rc.4 meilisearch --no-analytics --master-key=masterKey
     - name: Test with pytest
       run: |
         poetry run pytest --cov=meilisearch_python_async --cov-report=xml
