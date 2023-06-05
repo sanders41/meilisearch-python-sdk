@@ -574,6 +574,26 @@ async def test_get_documents_offset_optional_params(index_with_documents):
     assert response_offset_limit.results[0]["overview"] == response.results[1]["overview"]
 
 
+async def test_get_documents_filter(index_with_documents):
+    index = await index_with_documents()
+    response = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents(filter="genre=action")
+    genres = set([x["genre"] for x in response.results])
+    assert len(genres) == 1
+    assert next(iter(genres)) == "action"
+
+
+async def test_get_documents_filter_with_fields(index_with_documents):
+    index = await index_with_documents()
+    response = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents(fields=["genre"], filter="genre=action")
+    genres = set([x["genre"] for x in response.results])
+    assert len(genres) == 1
+    assert next(iter(genres)) == "action"
+
+
 async def test_update_documents(index_with_documents, small_movies):
     index = await index_with_documents()
     response = await index.get_documents()
@@ -1136,6 +1156,41 @@ async def test_delete_documents(index_with_documents):
     documents = await index.get_documents()
     ids = [x["id"] for x in documents.results]
     assert to_delete not in ids
+
+
+async def test_delete_documents_by_filter(index_with_documents):
+    index = await index_with_documents()
+    response = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents()
+    assert "action" in ([x.get("genre") for x in response.results])
+    response = await index.delete_documents_by_filter("genre=action")
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents()
+    genres = [x.get("genre") for x in response.results]
+    assert "action" not in genres
+    assert "cartoon" in genres
+
+
+async def test_delete_documents_in_batches_by_filter(index_with_documents):
+    index = await index_with_documents()
+    response = await index.update_filterable_attributes(["genre", "release_date"])
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents()
+    assert "action" in [x.get("genre") for x in response.results]
+    assert 1520035200 in [x.get("release_date") for x in response.results]
+    response = await index.delete_documents_in_batches_by_filter(
+        ["genre=action", "release_date=1520035200"]
+    )
+    for task in response:
+        await wait_for_task(index.http_client, task.task_uid)
+    response = await index.get_documents()
+    genres = [x.get("genre") for x in response.results]
+    release_dates = [x.get("release_date") for x in response.results]
+    assert "action" not in genres
+    assert "cartoon" in genres
+    assert len(release_dates) > 0
+    assert 1520035200 not in release_dates
 
 
 async def test_delete_all_documents(index_with_documents):

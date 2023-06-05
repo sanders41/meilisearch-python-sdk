@@ -394,7 +394,12 @@ class Index:
         return response.json()
 
     async def get_documents(
-        self, *, offset: int = 0, limit: int = 20, fields: list[str] | None = None
+        self,
+        *,
+        offset: int = 0,
+        limit: int = 20,
+        fields: list[str] | None = None,
+        filter: str | list[str | list[str]] | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -404,6 +409,8 @@ class Index:
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
                 attributes are retrieved. Defaults to None.
+            filter: Filter value information. Defaults to None. Note: This parameter can only be
+                used with Meilisearch >= v1.2.0
 
         Returns:
 
@@ -427,11 +434,22 @@ class Index:
             "limit": limit,
         }
 
-        if fields:
-            parameters["fields"] = ",".join(fields)
+        if not filter:
+            if fields:
+                parameters["fields"] = ",".join(fields)
 
-        url = f"{self._documents_url}?{urlencode(parameters)}"
-        response = await self._http_requests.get(url)
+            url = f"{self._documents_url}?{urlencode(parameters)}"
+            response = await self._http_requests.get(url)
+
+            return DocumentsInfo(**response.json())
+
+        if fields:
+            parameters["fields"] = fields
+
+        parameters["filter"] = filter
+
+        url = f"{self._documents_url}/fetch"
+        response = await self._http_requests.post(url, body=parameters)
 
         return DocumentsInfo(**response.json())
 
@@ -1306,6 +1324,67 @@ class Index:
         response = await self._http_requests.post(url, ids)
 
         return TaskInfo(**response.json())
+
+    async def delete_documents_by_filter(self, filter: str | list[str | list[str]]) -> TaskInfo:
+        """Delete documents from the index by filter.
+
+        Args:
+
+            filter: The filter value information.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.delete_documents_by_filter("genre=horor"))
+        """
+        url = f"{self._documents_url}/delete"
+        response = await self._http_requests.post(url, body={"filter": filter})
+
+        return TaskInfo(**response.json())
+
+    async def delete_documents_in_batches_by_filter(
+        self, filters: list[str | list[str | list[str]]]
+    ) -> list[TaskInfo]:
+        """Delete batches of documents from the index by filter.
+
+        Args:
+
+            filters: A list of filter value information.
+
+        Returns:
+
+            The a list of details of the task statuses.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.delete_documents_in_batches_by_filter(
+            >>>         [
+            >>>             "genre=horor"),
+            >>>             "release_date=1520035200"),
+            >>>         ]
+            >>>     )
+        """
+        tasks = [self.delete_documents_by_filter(filter) for filter in filters]
+        return await gather(*tasks)
 
     async def delete_all_documents(self) -> TaskInfo:
         """Delete all documents from the index.
