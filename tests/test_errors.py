@@ -4,6 +4,7 @@ from meilisearch_python_async.errors import (
     MeilisearchApiError,
     MeilisearchCommunicationError,
     MeilisearchError,
+    MeilisearchTaskFailedError,
     MeilisearchTimeoutError,
 )
 
@@ -25,6 +26,13 @@ def test_meilisearch_communication_error():
 def test_meilisearch_error():
     expected = "test message"
     got = MeilisearchError(expected)
+
+    assert expected in str(got)
+
+
+def test_meilisearch_task_failed_error():
+    expected = "test message"
+    got = MeilisearchTaskFailedError(expected)
 
     assert expected in str(got)
 

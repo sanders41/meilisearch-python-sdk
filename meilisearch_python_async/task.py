@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async.errors import MeilisearchTimeoutError
+from meilisearch_python_async.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
 from meilisearch_python_async.models.task import TaskInfo, TaskStatus
 
 if TYPE_CHECKING:
@@ -232,6 +232,7 @@ async def wait_for_task(
     *,
     timeout_in_ms: int | None = 5000,
     interval_in_ms: int = 50,
+    raise_for_status: bool = False,
 ) -> TaskStatus:
     """Wait until Meilisearch processes a task, and get its status.
 
@@ -243,6 +244,8 @@ async def wait_for_task(
             MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
             if the `None` option is used the wait time could be very long. Defaults to 5000.
         interval_in_ms: Time interval in miliseconds to sleep between requests. Defaults to 50.
+        raise_for_status: When set to `True` a MeilisearchTaskFailedError will be raised if a task
+            has a failed status. Defaults to False.
 
     Returns:
 
@@ -253,6 +256,7 @@ async def wait_for_task(
         MeilisearchCommunicationError: If there was an error communicating with the server.
         MeilisearchApiError: If the Meilisearch API returned an error.
         MeilisearchTimeoutError: If the connection times out.
+        MeilisearchTaskFailedError: If `raise_for_status` is `True` and a task has a failed status.
 
     Examples:
 
@@ -278,6 +282,8 @@ async def wait_for_task(
             response = await http_requests.get(url)
             status = TaskStatus(**response.json())
             if status.status in ("succeeded", "failed"):
+                if raise_for_status and status.status == "failed":
+                    raise MeilisearchTaskFailedError(f"Task {task_id} failed")
                 return status
             await sleep(interval_in_ms / 1000)
             time_delta = datetime.now() - start_time

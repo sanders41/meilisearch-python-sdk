@@ -51,6 +51,13 @@ class MeilisearchCommunicationError(MeilisearchError):
         return f"MeilisearchCommunicationError, {self.message}"
 
 
+class MeilisearchTaskFailedError(MeilisearchError):
+    """Error when a task is in the failed status."""
+
+    def __str__(self) -> str:
+        return f"MeilisearchTaskFailedError, {self.message}"
+
+
 class MeilisearchTimeoutError(MeilisearchError):
     """Error when Meilisearch operation takes longer than expected."""
 

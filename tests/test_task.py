@@ -1,9 +1,11 @@
 from datetime import datetime
 from urllib.parse import quote_plus
 
+import httpx
 import pytest
+from httpx import AsyncClient
 
-from meilisearch_python_async.errors import MeilisearchTimeoutError
+from meilisearch_python_async.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
 from meilisearch_python_async.task import (
     cancel_tasks,
     delete_tasks,
@@ -336,3 +338,38 @@ async def test_wait_for_pending_update_time_out(empty_index, small_movies):
     await wait_for_task(  # Make sure the indexing finishes so subsequent tests don't have issues.
         index.http_client, response.task_uid
     )
+
+
+async def test_wait_for_task_raise_for_status_true(empty_index, small_movies):
+    index = await empty_index()
+    response = await index.add_documents(small_movies)
+    update = await wait_for_task(index.http_client, response.task_uid, raise_for_status=True)
+    assert update.status == "succeeded"
+
+
+async def test_wait_for_task_raise_for_status_false(
+    empty_index, small_movies, base_url, monkeypatch
+):
+    async def mock_get_response(*args, **kwargs):
+        task = {
+            "uid": args[1].split("/")[1],
+            "index_uid": "7defe207-8165-4b69-8170-471456e295e0",
+            "status": "failed",
+            "task_type": "indexDeletion",
+            "details": {"deletedDocuments": 30},
+            "error": None,
+            "canceled_by": None,
+            "duration": "PT0.002765250S",
+            "enqueued_at": "2023-06-09T01:03:48.311936656Z",
+            "started_at": "2023-06-09T01:03:48.314143377Z",
+            "finished_at": "2023-06-09T01:03:48.316536088Z",
+        }
+        return httpx.Response(
+            200, json=task, request=httpx.Request("get", url=f"{base_url}/{args[1]}")
+        )
+
+    index = await empty_index()
+    response = await index.add_documents(small_movies)
+    monkeypatch.setattr(AsyncClient, "get", mock_get_response)
+    with pytest.raises(MeilisearchTaskFailedError):
+        await wait_for_task(index.http_client, response.task_uid, raise_for_status=True)
