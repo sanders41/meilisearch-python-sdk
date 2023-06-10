@@ -1,13 +1,14 @@
+import sys
 from pathlib import Path
 
 from meilisearch_python_async import __version__
 from meilisearch_python_async._http_requests import user_agent
 from meilisearch_python_async._version import VERSION
 
-try:
-    import tomli as tomllib  # type: ignore
-except ModuleNotFoundError:
-    import tomllib  # type: ignore
+if sys.version_info < (3, 11):
+    import tomli as tomllib
+else:
+    import tomllib
 
 
 def test_versions_match():
