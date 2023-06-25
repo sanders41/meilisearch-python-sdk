@@ -12,7 +12,6 @@ keywords = ["meilisearch", "async", "python"]
 classifiers=[
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -24,7 +23,7 @@ classifiers=[
 include = ["meilisearch_python_async/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 httpx = ">=0.17"
 pydantic = ">=1.8"
 aiofiles = ">=0.7"
@@ -92,5 +91,5 @@ disallow_untyped_defs = false
 select=["E", "F", "UP", "I001", "T201", "T203"]
 ignore=["E501"]
 line-length = 100
-target-version = "py37"
+target-version = "py38"
 fix = true
