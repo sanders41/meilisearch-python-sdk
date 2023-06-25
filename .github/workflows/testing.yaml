@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: install Just
+      uses: taiki-e/install-action@just
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -36,10 +38,9 @@ jobs:
       shell: bash
       run: timeout 10s poetry run pip --version || rm -rf .venv
     - name: Install Dependencies
-      run: poetry install
+      run: just install
     - name: mypy check
-      run: |
-        poetry run mypy .
+      run: just mypy
 
   testing:
     strategy:
@@ -49,6 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: install Just
+      uses: taiki-e/install-action@just
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -75,12 +78,9 @@ jobs:
       shell: bash
       run: timeout 10s poetry run pip --version || rm -rf .venv
     - name: Install Dependencies
-      run: poetry install
-    - name: MeiliSearch (latest version) setup with Docker
-      run: docker run --rm -d -p 7700:7700 getmeili/meilisearch:latest meilisearch --no-analytics --master-key=masterKey
+      run: just install
     - name: Test with pytest
-      run: |
-        poetry run pytest --cov=meilisearch_python_async --cov-report=xml
+      run: just test-ci
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
@@ -91,6 +91,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: install Just
+      uses: taiki-e/install-action@just
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -114,7 +116,6 @@ jobs:
         key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install Dependencies
       if: steps.poetry-cache.outputs.cache-hit != 'true'
-      run: poetry install
+      run: just install
     - name: Test Docs Build
-      run: |
-        poetry run mkdocs build --strict
+      run: just build-docs
