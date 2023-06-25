@@ -11,7 +11,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: 3.11
     - name: Install Poetry and add to path
       run: |
         curl -sSL https://install.python-poetry.org/install-poetry.py | python -
