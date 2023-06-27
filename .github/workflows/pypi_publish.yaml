@@ -12,10 +12,10 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: 3.11
-    - name: Install Poetry and add to path
+    - name: Install Poetry
       run: |
-        curl -sSL https://install.python-poetry.org/install-poetry.py | python -
-        echo "${HOME}/.local/bin" >> $GITHUB_PATH
+        pip install pipx
+        pipx install poetry
     - name: Install Dependencies
       run: |
         poetry install
