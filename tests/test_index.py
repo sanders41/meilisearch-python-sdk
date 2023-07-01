@@ -1,11 +1,8 @@
-from datetime import datetime
-
 import pytest
 from httpx import Response
 
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import MeilisearchApiError
-from meilisearch_python_async.index import _iso_to_date_time
 from meilisearch_python_async.models.settings import (
     Faceting,
     MeilisearchSettings,
@@ -322,7 +319,7 @@ async def test_update_pagination(empty_index):
     response = await index.update_pagination(pagination)
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_pagination()
-    assert pagination.dict() == pagination.dict()
+    assert pagination.model_dump() == pagination.model_dump()
 
 
 async def test_reset_pagination(empty_index, default_pagination):
@@ -332,7 +329,7 @@ async def test_reset_pagination(empty_index, default_pagination):
     response = await index.reset_pagination()
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_pagination()
-    assert response.dict() == default_pagination.dict()
+    assert response.model_dump() == default_pagination.model_dump()
 
 
 async def test_get_stop_words_default(empty_index):
@@ -464,7 +461,7 @@ async def test_update_typo_tolerance(empty_index):
     response = await index.update_typo_tolerance(typo_tolerance)
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_typo_tolerance()
-    assert response.dict() == typo_tolerance.dict()
+    assert response.model_dump() == typo_tolerance.model_dump()
 
 
 async def test_reset_typo_tolerance(empty_index):
@@ -489,7 +486,7 @@ async def test_update_faceting(empty_index):
     response = await index.update_faceting(faceting)
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_faceting()
-    assert response.dict() == faceting.dict()
+    assert response.model_dump() == faceting.model_dump()
 
 
 async def test_reset_faceting(empty_index, default_faceting):
@@ -499,21 +496,7 @@ async def test_reset_faceting(empty_index, default_faceting):
     response = await index.reset_faceting()
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_faceting()
-    assert response.dict() == default_faceting.dict()
-
-
-@pytest.mark.parametrize(
-    "iso_date, expected",
-    [
-        ("2021-05-11T03:12:22.563960100Z", datetime(2021, 5, 11, 3, 12, 22, 563960)),
-        (datetime(2021, 5, 11, 3, 12, 22, 563960), datetime(2021, 5, 11, 3, 12, 22, 563960)),
-        (None, None),
-    ],
-)
-def test_iso_to_date_time(iso_date, expected):
-    converted = _iso_to_date_time(iso_date)
-
-    assert converted == expected
+    assert response.model_dump() == default_faceting.model_dump()
 
 
 async def test_str(empty_index):

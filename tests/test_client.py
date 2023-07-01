@@ -36,7 +36,6 @@ async def remove_default_search_key(default_search_key, test_client):
 @pytest.fixture
 async def test_key(test_client):
     key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
-
     key = await test_client.create_key(key_info)
 
     yield key

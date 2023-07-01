@@ -10,6 +10,7 @@ import jwt
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
+from meilisearch_python_async._utils import is_pydantic_2
 from meilisearch_python_async.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.client import (
@@ -388,7 +389,10 @@ class Client:
         """
         # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
         # but can when converting to a json string.
-        response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))
+        if is_pydantic_2:
+            response = await self._http_requests.post("keys", json.loads(key.model_dump_json(by_alias=True)))  # type: ignore[attr-defined]
+        else:  # pragma: no cover
+            response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
 
         return Key(**response.json())
 
@@ -495,11 +499,18 @@ class Client:
         """
         # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
         # but can when converting to a json string.
-        payload = {
-            k: v
-            for k, v in json.loads(key.json(by_alias=True)).items()
-            if v is not None and k != "key"
-        }
+        if is_pydantic_2:
+            payload = {  # type: ignore[attr-defined]
+                k: v
+                for k, v in json.loads(key.model_dump_json(by_alias=True)).items()
+                if v is not None and k != "key"
+            }
+        else:  # pragma: no cover
+            payload = {  # type: ignore[attr-defined]
+                k: v
+                for k, v in json.loads(key.json(by_alias=True)).items()
+                if v is not None and k != "key"
+            }
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
@@ -532,9 +543,14 @@ class Client:
             >>>     search_results = await client.search(queries)
         """
         url = "multi-search"
-        response = await self._http_requests.post(
-            url, body={"queries": [x.dict(by_alias=True) for x in queries]}
-        )
+        if is_pydantic_2:
+            response = await self._http_requests.post(
+                url, body={"queries": [x.model_dump(by_alias=True) for x in queries]}  # type: ignore[attr-defined]
+            )
+        else:  # pragma: no cover
+            response = await self._http_requests.post(
+                url, body={"queries": [x.dict(by_alias=True) for x in queries]}  # type: ignore[attr-defined]
+            )
 
         return [SearchResultsWithUID(**x) for x in response.json()["results"]]
 
