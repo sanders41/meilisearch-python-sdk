@@ -1478,7 +1478,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.update_settings(new_settings)
         """
-        if is_pydantic_2:
+        if is_pydantic_2():
             body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
         else:  # pragma: no cover
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
@@ -2189,7 +2189,7 @@ class Index:
         """
         url = f"{self._settings_url}/typo-tolerance"
 
-        if is_pydantic_2:
+        if is_pydantic_2():
             response = await self._http_requests.patch(url, typo_tolerance.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
             response = await self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))  # type: ignore[attr-defined]
@@ -2265,7 +2265,7 @@ class Index:
         """
         url = f"{self._settings_url}/faceting"
 
-        if is_pydantic_2:
+        if is_pydantic_2():
             response = await self._http_requests.patch(url, faceting.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
             response = await self._http_requests.patch(url, faceting.dict(by_alias=True))  # type: ignore[attr-defined]
@@ -2342,7 +2342,7 @@ class Index:
         """
         url = f"{self._settings_url}/pagination"
 
-        if is_pydantic_2:
+        if is_pydantic_2():
             response = await self._http_requests.patch(url, settings.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
             response = await self._http_requests.patch(url, settings.dict(by_alias=True))  # type: ignore[attr-defined]

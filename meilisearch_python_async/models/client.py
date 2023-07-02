@@ -13,7 +13,7 @@ class ClientStats(CamelBase):
     last_update: Optional[datetime] = None
     indexes: Optional[Dict[str, IndexStats]] = None
 
-    if is_pydantic_2:
+    if is_pydantic_2():
 
         @pydantic.field_validator("last_update", mode="before")  # type: ignore[attr-defined]
         @classmethod
@@ -36,7 +36,7 @@ class _KeyBase(CamelBase):
     indexes: List[str]
     expires_at: Optional[datetime] = None
 
-    if is_pydantic_2:
+    if is_pydantic_2():
         model_config = pydantic.ConfigDict(ser_json_timedelta="iso8601")  # type: ignore[typeddict-unknown-key]
 
         @pydantic.field_validator("expires_at", mode="before")  # type: ignore[attr-defined]
@@ -62,7 +62,7 @@ class Key(_KeyBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    if is_pydantic_2:
+    if is_pydantic_2():
 
         @pydantic.field_validator("created_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
@@ -104,7 +104,7 @@ class KeyCreate(CamelBase):
     indexes: List[str]
     expires_at: Optional[datetime] = None
 
-    if is_pydantic_2:
+    if is_pydantic_2():
         model_config = pydantic.ConfigDict(ser_json_timedelta="iso8601")  # type: ignore[typeddict-unknown-key]
 
     else:  # pragma: no cover
@@ -123,7 +123,7 @@ class KeyUpdate(CamelBase):
     indexes: Optional[List[str]] = None
     expires_at: Optional[datetime] = None
 
-    if is_pydantic_2:
+    if is_pydantic_2():
         model_config = pydantic.ConfigDict(ser_json_timedelta="iso8601")  # type: ignore[typeddict-unknown-key]
 
     else:  # pragma: no cover
