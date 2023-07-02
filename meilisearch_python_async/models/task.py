@@ -26,7 +26,7 @@ class TaskStatus(TaskId):
 
     if is_pydantic_2:
 
-        @pydantic.field_validator("enqueued_at", mode="before")
+        @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
         def validate_enqueued_at(cls, v: str) -> datetime:
             converted = iso_to_date_time(v)
@@ -36,12 +36,12 @@ class TaskStatus(TaskId):
 
             return converted
 
-        @pydantic.field_validator("started_at", mode="before")
+        @pydantic.field_validator("started_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
         def validate_started_at(cls, v: str) -> Union[datetime, None]:
             return iso_to_date_time(v)
 
-        @pydantic.field_validator("finished_at", mode="before")
+        @pydantic.field_validator("finished_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
         def validate_finished_at(cls, v: str) -> Union[datetime, None]:
             return iso_to_date_time(v)
@@ -78,7 +78,7 @@ class TaskInfo(CamelBase):
 
     if is_pydantic_2:
 
-        @pydantic.field_validator("enqueued_at", mode="before")
+        @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
         def validate_enqueued_at(cls, v: str) -> datetime:
             converted = iso_to_date_time(v)

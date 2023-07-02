@@ -18,7 +18,7 @@ class IndexInfo(IndexBase):
 
     if is_pydantic_2:
 
-        @pydantic.field_validator("created_at", mode="before")
+        @pydantic.field_validator("created_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
         def validate_created_at(cls, v: str) -> datetime:
             converted = iso_to_date_time(v)
@@ -28,7 +28,7 @@ class IndexInfo(IndexBase):
 
             return converted
 
-        @pydantic.field_validator("updated_at", mode="before")
+        @pydantic.field_validator("updated_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
         def validate_updated_at(cls, v: str) -> datetime:
             converted = iso_to_date_time(v)
