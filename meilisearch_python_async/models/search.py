@@ -27,16 +27,16 @@ class SearchParams(CamelBase):
 
 class SearchResults(CamelBase):
     hits: List[Dict[str, Any]]
-    offset: Optional[int]
-    limit: Optional[int]
-    estimated_total_hits: Optional[int]
+    offset: Optional[int] = None
+    limit: Optional[int] = None
+    estimated_total_hits: Optional[int] = None
     processing_time_ms: int
     query: str
     facet_distribution: Optional[Dict[str, Any]] = None
-    total_pages: Optional[int]
-    total_hits: Optional[int]
-    page: Optional[int]
-    hits_per_page: Optional[int]
+    total_pages: Optional[int] = None
+    total_hits: Optional[int] = None
+    page: Optional[int] = None
+    hits_per_page: Optional[int] = None
 
 
 class SearchResultsWithUID(SearchResults):

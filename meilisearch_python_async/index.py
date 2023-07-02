@@ -13,6 +13,7 @@ import aiofiles
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
+from meilisearch_python_async._utils import is_pydantic_2, iso_to_date_time
 from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_async.models.documents import DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
@@ -54,8 +55,8 @@ class Index:
         """
         self.uid = uid
         self.primary_key = primary_key
-        self.created_at: datetime | None = _iso_to_date_time(created_at)
-        self.updated_at: datetime | None = _iso_to_date_time(updated_at)
+        self.created_at: datetime | None = iso_to_date_time(created_at)
+        self.updated_at: datetime | None = iso_to_date_time(updated_at)
         self._base_url = "indexes/"
         self._base_url_with_uid = f"{self._base_url}{self.uid}"
         self._documents_url = f"{self._base_url_with_uid}/documents"
@@ -175,10 +176,10 @@ class Index:
         self.primary_key = index_dict["primaryKey"]
         loop = get_running_loop()
         self.created_at = await loop.run_in_executor(
-            None, partial(_iso_to_date_time, index_dict["createdAt"])
+            None, partial(iso_to_date_time, index_dict["createdAt"])
         )
         self.updated_at = await loop.run_in_executor(
-            None, partial(_iso_to_date_time, index_dict["updatedAt"])
+            None, partial(iso_to_date_time, index_dict["updatedAt"])
         )
         return self
 
@@ -1477,7 +1478,10 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.update_settings(new_settings)
         """
-        body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}
+        if is_pydantic_2:
+            body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
+        else:  # pragma: no cover
+            body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
         url = f"{self._settings_url}"
         response = await self._http_requests.patch(url, body_dict)
@@ -2184,7 +2188,11 @@ class Index:
             >>>     await index.update_typo_tolerance()
         """
         url = f"{self._settings_url}/typo-tolerance"
-        response = await self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))
+
+        if is_pydantic_2:
+            response = await self._http_requests.patch(url, typo_tolerance.model_dump(by_alias=True))  # type: ignore[attr-defined]
+        else:  # pragma: no cover
+            response = await self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -2256,7 +2264,11 @@ class Index:
             >>>     await index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
         url = f"{self._settings_url}/faceting"
-        response = await self._http_requests.patch(url, faceting.dict(by_alias=True))
+
+        if is_pydantic_2:
+            response = await self._http_requests.patch(url, faceting.model_dump(by_alias=True))  # type: ignore[attr-defined]
+        else:  # pragma: no cover
+            response = await self._http_requests.patch(url, faceting.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -2329,7 +2341,11 @@ class Index:
             >>>     await index.update_pagination(settings=Pagination(max_total_hits=123))
         """
         url = f"{self._settings_url}/pagination"
-        response = await self._http_requests.patch(url, settings.dict(by_alias=True))
+
+        if is_pydantic_2:
+            response = await self._http_requests.patch(url, settings.model_dump(by_alias=True))  # type: ignore[attr-defined]
+        else:  # pragma: no cover
+            response = await self._http_requests.patch(url, settings.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -2373,27 +2389,6 @@ def _raise_on_no_documents(
 
 def _combine_documents(documents: list[list[Any]]) -> list[Any]:
     return [x for y in documents for x in y]
-
-
-def _iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:
-    """Handle conversion of iso string to datetime.
-
-    The microseconds from Meilisearch are sometimes too long for python to convert so this
-    strips off the last digits to shorten it when that happens.
-    """
-    if not iso_date:
-        return None
-
-    if isinstance(iso_date, datetime):
-        return iso_date
-
-    try:
-        return datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-    except ValueError:
-        split = iso_date.split(".")
-        reduce = len(split[1]) - 6
-        reduced = f"{split[0]}.{split[1][:-reduce]}Z"
-        return datetime.strptime(reduced, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 async def _load_documents_from_file(
