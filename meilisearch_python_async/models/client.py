@@ -37,9 +37,9 @@ class _KeyBase(CamelBase):
     expires_at: Optional[datetime] = None
 
     if is_pydantic_2:
-        model_config = pydantic.ConfigDict(ser_json_timedelta="iso8601")  # type: ignore[typeddict-unknown-ke]
+        model_config = pydantic.ConfigDict(ser_json_timedelta="iso8601")  # type: ignore[typeddict-unknown-key]
 
-        @pydantic.field_validator("expires_at", mode="before")  # type: ignore[attr=defined]
+        @pydantic.field_validator("expires_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
         def validate_expires_at(cls, v: str) -> Union[datetime, None]:
             return iso_to_date_time(v)
