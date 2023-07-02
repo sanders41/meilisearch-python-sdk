@@ -24,7 +24,7 @@ class TaskStatus(TaskId):
     started_at: Optional[datetime]
     finished_at: Optional[datetime]
 
-    if is_pydantic_2:
+    if is_pydantic_2():
 
         @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
@@ -76,7 +76,7 @@ class TaskInfo(CamelBase):
     task_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
     enqueued_at: datetime
 
-    if is_pydantic_2:
+    if is_pydantic_2():
 
         @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
         @classmethod

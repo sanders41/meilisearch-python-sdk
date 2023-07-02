@@ -389,7 +389,7 @@ class Client:
         """
         # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
         # but can when converting to a json string.
-        if is_pydantic_2:
+        if is_pydantic_2():
             response = await self._http_requests.post("keys", json.loads(key.model_dump_json(by_alias=True)))  # type: ignore[attr-defined]
         else:  # pragma: no cover
             response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
@@ -499,7 +499,7 @@ class Client:
         """
         # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
         # but can when converting to a json string.
-        if is_pydantic_2:
+        if is_pydantic_2():
             payload = {  # type: ignore[attr-defined]
                 k: v
                 for k, v in json.loads(key.model_dump_json(by_alias=True)).items()
@@ -543,7 +543,7 @@ class Client:
             >>>     search_results = await client.search(queries)
         """
         url = "multi-search"
-        if is_pydantic_2:
+        if is_pydantic_2():
             response = await self._http_requests.post(
                 url, body={"queries": [x.model_dump(by_alias=True) for x in queries]}  # type: ignore[attr-defined]
             )

@@ -16,7 +16,7 @@ class IndexInfo(IndexBase):
     created_at: datetime
     updated_at: datetime
 
-    if is_pydantic_2:
+    if is_pydantic_2():
 
         @pydantic.field_validator("created_at", mode="before")  # type: ignore[attr-defined]
         @classmethod
