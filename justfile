@@ -19,7 +19,7 @@
   -poetry run pytest
 
 @test-ci: start-meilisearch-detached && stop-meilisearch
-    poetry run pytest --cov=meilisearch_python_async --cov-report=xml
+  poetry run pytest --cov=meilisearch_python_async --cov-report=xml
 
 @start-meilisearch:
   docker compose up
