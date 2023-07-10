@@ -299,6 +299,7 @@ class Index:
         matching_strategy: str = "all",
         hits_per_page: int | None = None,
         page: int | None = None,
+        vector: list[float] | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -325,6 +326,12 @@ class Index:
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
             hits_per_page: Sets the number of results returned per page.
             page: Sets the specific results page to fetch.
+            vector: List of vectors for vector search. Defaults to None. Note: This parameter can only be
+                used with Meilisearch >= v1.3.0, and is experimental in Meilisearchv1.3.0. In order
+                to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
+                sending a PATCH request to /experimental-features with { "vectorStore": true }.
+                Because this feature is experimental it may be removed or updated causing breaking
+                changes in this library without a major version bump so use with caution.
 
         Returns:
 
@@ -342,7 +349,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     search_results = await index.search("Tron")
         """
-        body = {
+        body: dict[str, Any] = {
             "q": query,
             "offset": offset,
             "limit": limit,
@@ -361,6 +368,10 @@ class Index:
             "hitsPerPage": hits_per_page,
             "page": page,
         }
+
+        if vector:
+            body["vector"] = vector
+
         url = f"{self._base_url_with_uid}/search"
         response = await self._http_requests.post(url, body=body)
 

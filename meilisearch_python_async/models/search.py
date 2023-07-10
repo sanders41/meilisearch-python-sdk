@@ -37,6 +37,7 @@ class SearchResults(CamelBase):
     total_hits: Optional[int] = None
     page: Optional[int] = None
     hits_per_page: Optional[int] = None
+    vector: Optional[List[float]] = None
 
 
 class SearchResultsWithUID(SearchResults):
