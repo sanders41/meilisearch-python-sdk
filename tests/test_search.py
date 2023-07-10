@@ -276,7 +276,7 @@ async def test_search_sort(sort, titles, index_with_documents):
 
 
 async def test_search_with_tenant_token(
-    test_client, index_with_documents, base_url, index_uid, default_search_key
+    test_client, index_with_documents, base_url, default_search_key
 ):
     token = test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     index_docs = await index_with_documents()
@@ -289,7 +289,7 @@ async def test_search_with_tenant_token(
 
 
 async def test_search_with_tenant_token_and_expire_date(
-    test_client, index_with_documents, base_url, index_uid, default_search_key
+    test_client, index_with_documents, base_url, default_search_key
 ):
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     token = test_client.generate_tenant_token(
@@ -332,5 +332,13 @@ async def test_multi_search_one_index(test_client, index_with_documents):
 async def test_multi_search_no_index(test_client):
     with pytest.raises(MeilisearchApiError):
         await test_client.multi_search(
-            [SearchParams(index_uid="bad", query="How to Train Your Dragon")]
+            [SearchParams(index_uid="bad", query="How to Train Your Dragon")],
         )
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_vector_search(index_with_documents_and_vectors):
+    index = await index_with_documents_and_vectors()
+    response = await index.search("How to Train Your Dragon", vector=[0.1, 0.2])
+    assert response.hits[0]["id"] == "287947"
+    assert response.vector == [0.1, 0.2]
