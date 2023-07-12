@@ -37,6 +37,8 @@ def iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:
         return datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")
     except ValueError:
         split = iso_date.split(".")
+        if len(split) < 2:
+            raise
         reduce = len(split[1]) - 6
         reduced = f"{split[0]}.{split[1][:-reduce]}Z"
         return datetime.strptime(reduced, "%Y-%m-%dT%H:%M:%S.%fZ")

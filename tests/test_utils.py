@@ -21,3 +21,8 @@ def test_iso_to_date_time(iso_date, expected):
     converted = iso_to_date_time(iso_date)
 
     assert converted == expected
+
+
+def test_iso_to_date_time_invalid_format():
+    with pytest.raises(ValueError):
+        iso_to_date_time("2023-07-13T23:37:20Z")
