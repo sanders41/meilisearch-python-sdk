@@ -387,8 +387,6 @@ class Client:
             >>>     )
             >>>     keys = await client.create_key(key_info)
         """
-        # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
-        # but can when converting to a json string.
         if is_pydantic_2():
             response = await self._http_requests.post("keys", json.loads(key.model_dump_json(by_alias=True)))  # type: ignore[attr-defined]
         else:  # pragma: no cover

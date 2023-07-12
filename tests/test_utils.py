@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -14,6 +14,10 @@ def test_is_pydantic_2():
     [
         ("2021-05-11T03:12:22.563960100Z", datetime(2021, 5, 11, 3, 12, 22, 563960)),
         (datetime(2021, 5, 11, 3, 12, 22, 563960), datetime(2021, 5, 11, 3, 12, 22, 563960)),
+        (
+            datetime(2023, 7, 12, 1, 40, 11, 993699, tzinfo=timezone.utc),
+            datetime(2023, 7, 12, 1, 40, 11, 993699, tzinfo=timezone.utc),
+        ),
         (None, None),
     ],
 )
