@@ -350,6 +350,13 @@ async def test_attributes_to_search_on_search_no_match(index_with_documents):
     assert response.hits == []
 
 
+async def test_display_ranking_rules_serach(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search("How to Train Your Dragon", show_ranking_score=True)
+    assert response.hits[0]["id"] == "166428"
+    assert "_rankingScore" in response.hits[0]
+
+
 @pytest.mark.usefixtures("enable_vector_search")
 async def test_vector_search(index_with_documents_and_vectors):
     index = await index_with_documents_and_vectors()

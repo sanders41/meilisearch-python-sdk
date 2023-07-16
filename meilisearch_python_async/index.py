@@ -300,6 +300,7 @@ class Index:
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
+        show_ranking_score: bool = False,
         vector: list[float] | None = None,
     ) -> SearchResults:
         """Search the index.
@@ -329,6 +330,8 @@ class Index:
             page: Sets the specific results page to fetch.
             attributes_to_search_on: List of field names. Allow search over a subser of searchable
                 attributes without modifying the index settings. Defaults to None.
+            show_ranking_score: If set to True the ranking details for each document will be
+                returned with each document in the search. Defaults to False.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can only be
                 used with Meilisearch >= v1.3.0, and is experimental in Meilisearchv1.3.0. In order
                 to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
@@ -371,6 +374,7 @@ class Index:
             "hitsPerPage": hits_per_page,
             "page": page,
             "attributesToSearchOn": attributes_to_search_on,
+            "showRankingScore": show_ranking_score,
         }
 
         if vector:

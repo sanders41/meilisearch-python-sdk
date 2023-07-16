@@ -23,6 +23,9 @@ class SearchParams(CamelBase):
     matching_strategy: str = "all"
     hits_per_page: Optional[int] = None
     page: Optional[int] = None
+    attributes_to_search_on: Optional[List[str]] = None
+    show_ranking_score: bool = False
+    vector: Optional[List[float]] = None
 
 
 class SearchResults(CamelBase):
