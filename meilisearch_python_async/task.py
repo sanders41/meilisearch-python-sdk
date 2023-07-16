@@ -9,7 +9,7 @@ from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
 from meilisearch_python_async.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
-from meilisearch_python_async.models.task import TaskInfo, TaskStatus
+from meilisearch_python_async.models.task import TaskInfo, TaskResult, TaskStatus
 
 if TYPE_CHECKING:
     from meilisearch_python_async.client import Client  # pragma: no cover
@@ -156,7 +156,7 @@ async def get_tasks(
     *,
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
-) -> list[TaskStatus]:
+) -> TaskStatus:
     """Get multiple tasks.
 
     Args:
@@ -168,7 +168,7 @@ async def get_tasks(
 
     Returns:
 
-        A list of all tasks.
+        Task statuses.
 
     Raises:
 
@@ -191,10 +191,10 @@ async def get_tasks(
     client_ = _get_client(client)
     response = await client_.get(url)
 
-    return [TaskStatus(**x) for x in response.json()["results"]]
+    return TaskStatus(**response.json())
 
 
-async def get_task(client: AsyncClient | Client, task_id: int) -> TaskStatus:
+async def get_task(client: AsyncClient | Client, task_id: int) -> TaskResult:
     """Get a single task from it's task id.
 
     Args:
@@ -204,7 +204,7 @@ async def get_task(client: AsyncClient | Client, task_id: int) -> TaskStatus:
 
     Returns:
 
-        A list of all tasks.
+        Results of a task.
 
     Raises:
 
@@ -223,7 +223,7 @@ async def get_task(client: AsyncClient | Client, task_id: int) -> TaskStatus:
     client_ = _get_client(client)
     response = await client_.get(f"tasks/{task_id}")
 
-    return TaskStatus(**response.json())
+    return TaskResult(**response.json())
 
 
 async def wait_for_task(
@@ -233,7 +233,7 @@ async def wait_for_task(
     timeout_in_ms: int | None = 5000,
     interval_in_ms: int = 50,
     raise_for_status: bool = False,
-) -> TaskStatus:
+) -> TaskResult:
     """Wait until Meilisearch processes a task, and get its status.
 
     Args:
@@ -280,7 +280,7 @@ async def wait_for_task(
     if timeout_in_ms:
         while elapsed_time < timeout_in_ms:
             response = await http_requests.get(url)
-            status = TaskStatus(**response.json())
+            status = TaskResult(**response.json())
             if status.status in ("succeeded", "failed"):
                 if raise_for_status and status.status == "failed":
                     raise MeilisearchTaskFailedError(f"Task {task_id} failed")
@@ -294,7 +294,7 @@ async def wait_for_task(
     else:
         while True:
             response = await http_requests.get(url)
-            status = TaskStatus(**response.json())
+            status = TaskResult(**response.json())
             if status.status in ("succeeded", "failed"):
                 return status
             await sleep(interval_in_ms / 1000)
