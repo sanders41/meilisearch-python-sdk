@@ -1,6 +1,9 @@
 from typing import Any, Dict, List, Optional
 
+import pydantic
 from camel_converter.pydantic_base import CamelBase
+
+from meilisearch_python_async._utils import is_pydantic_2
 
 
 class MinWordSizeForTypos(CamelBase):
@@ -17,6 +20,35 @@ class TypoTolerance(CamelBase):
 
 class Faceting(CamelBase):
     max_values_per_facet: int
+    sort_facet_values_by: Optional[Dict[str, str]] = None
+
+    if is_pydantic_2():
+
+        @pydantic.field_validator("sort_facet_values_by")  # type: ignore[attr-defined]
+        @classmethod
+        def validate_facet_order(cls, v: Optional[Dict[str, str]]) -> Optional[Dict[str, str]]:
+            if not v:  # pragma: no cover
+                return None
+
+            for _, value in v.items():
+                if value not in ("alpha", "count"):
+                    raise ValueError('facet_order must be either "alpha" or "count"')
+
+            return v
+
+    else:  # pragma: no cover
+
+        @pydantic.validator("sort_facet_values_by")  # type: ignore[attr-defined]
+        @classmethod
+        def validate_facet_order(cls, v: Optional[Dict[str, str]]) -> Optional[Dict[str, str]]:
+            if not v:
+                return None
+
+            for _, value in v.items():
+                if value not in ("alpha", "count"):
+                    raise ValueError('facet_order must be either "alpha" or "count"')
+
+            return v
 
 
 class Pagination(CamelBase):

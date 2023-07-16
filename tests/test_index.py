@@ -32,7 +32,7 @@ def default_ranking_rules():
 
 @pytest.fixture
 def default_faceting():
-    return Faceting(max_values_per_facet=100)
+    return Faceting(max_values_per_facet=100, sort_facet_values_by={"*": "alpha"})
 
 
 @pytest.fixture
@@ -486,7 +486,50 @@ async def test_update_faceting(empty_index):
     response = await index.update_faceting(faceting)
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_faceting()
-    assert response.model_dump() == faceting.model_dump()
+    expected = faceting.model_dump()
+    expected["sort_facet_values_by"] = {"*": "alpha"}
+    assert response.model_dump() == expected
+
+
+@pytest.mark.parametrize(
+    "index_name, facet_order, max_values_per_facet, expected",
+    [
+        ("*", "alpha", 17, {"max_values_per_facet": 17, "sort_facet_values_by": {"*": "alpha"}}),
+        ("*", "count", 41, {"max_values_per_facet": 41, "sort_facet_values_by": {"*": "count"}}),
+        (
+            "movies",
+            "alpha",
+            42,
+            {"max_values_per_facet": 42, "sort_facet_values_by": {"*": "alpha", "movies": "alpha"}},
+        ),
+        (
+            "movies",
+            "alpha",
+            73,
+            {"max_values_per_facet": 73, "sort_facet_values_by": {"*": "alpha", "movies": "alpha"}},
+        ),
+    ],
+)
+async def test_update_faceting_sort_facet_values(
+    index_name, facet_order, max_values_per_facet, expected, empty_index
+):
+    faceting = Faceting(
+        max_values_per_facet=max_values_per_facet,
+        sort_facet_values_by={index_name: facet_order},
+    )
+    index = await empty_index()
+    response = await index.update_faceting(faceting)
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_faceting()
+    assert response.model_dump() == expected
+
+
+async def test_update_faceting_sort_facet_values_invalid_sort_type():
+    with pytest.raises(ValueError):
+        Faceting(
+            max_values_per_facet=2,
+            sort_facet_values_by={"*": "bad"},
+        )
 
 
 async def test_reset_faceting(empty_index, default_faceting):
