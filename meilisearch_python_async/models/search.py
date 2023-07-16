@@ -25,6 +25,7 @@ class SearchParams(CamelBase):
     page: Optional[int] = None
     attributes_to_search_on: Optional[List[str]] = None
     show_ranking_score: bool = False
+    show_ranking_score_details: bool = False
     vector: Optional[List[float]] = None
 
 
