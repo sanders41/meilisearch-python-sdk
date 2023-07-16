@@ -299,6 +299,7 @@ class Index:
         matching_strategy: str = "all",
         hits_per_page: int | None = None,
         page: int | None = None,
+        attributes_to_search_on: list[str] | None = None,
         vector: list[float] | None = None,
     ) -> SearchResults:
         """Search the index.
@@ -326,6 +327,8 @@ class Index:
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
             hits_per_page: Sets the number of results returned per page.
             page: Sets the specific results page to fetch.
+            attributes_to_search_on: List of field names. Allow search over a subser of searchable
+                attributes without modifying the index settings. Defaults to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can only be
                 used with Meilisearch >= v1.3.0, and is experimental in Meilisearchv1.3.0. In order
                 to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
@@ -367,6 +370,7 @@ class Index:
             "matchingStrategy": matching_strategy,
             "hitsPerPage": hits_per_page,
             "page": page,
+            "attributesToSearchOn": attributes_to_search_on,
         }
 
         if vector:
