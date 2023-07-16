@@ -35,8 +35,8 @@ async def test_cancel_statuses(test_client):
     assert completed_task.index_uid is None
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
-    assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "statuses=enqueued%2Cprocessing" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -48,8 +48,8 @@ async def test_cancel_tasks_uids(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
-    assert "uids=1%2C2" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "uids=1%2C2" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -62,8 +62,8 @@ async def test_cancel_tasks_index_uids(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
-    assert "indexUids=1" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "indexUids=1" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -75,8 +75,8 @@ async def test_cancel_tasks_types(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
-    assert "types=taskDeletion" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "types=taskDeletion" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -89,9 +89,10 @@ async def test_cancel_tasks_before_enqueued_at(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
+    assert tasks.results[0].details is not None
     assert (
-        f"beforeEnqueuedAt={quote_plus(before.isoformat())}Z" in tasks[0].details["originalFilter"]
+        f"beforeEnqueuedAt={quote_plus(before.isoformat())}Z"
+        in tasks.results[0].details["originalFilter"]
     )
 
 
@@ -105,8 +106,11 @@ async def test_cancel_tasks_after_enqueued_at(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
-    assert f"afterEnqueuedAt={quote_plus(after.isoformat())}Z" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert (
+        f"afterEnqueuedAt={quote_plus(after.isoformat())}Z"
+        in tasks.results[0].details["originalFilter"]
+    )
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -119,9 +123,10 @@ async def test_cancel_tasks_before_started_at(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
+    assert tasks.results[0].details is not None
     assert (
-        f"beforeStartedAt={quote_plus(before.isoformat())}Z" in tasks[0].details["originalFilter"]
+        f"beforeStartedAt={quote_plus(before.isoformat())}Z"
+        in tasks.results[0].details["originalFilter"]
     )
 
 
@@ -135,8 +140,11 @@ async def test_cancel_tasks_after_finished_at(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
-    assert f"afterFinishedAt={quote_plus(after.isoformat())}Z" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert (
+        f"afterFinishedAt={quote_plus(after.isoformat())}Z"
+        in tasks.results[0].details["originalFilter"]
+    )
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -148,8 +156,8 @@ async def test_cancel_task_no_params(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
-    assert tasks[0].details is not None
-    assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "statuses=enqueued%2Cprocessing" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -161,8 +169,8 @@ async def test_delete_statuses(test_client):
 
     assert deleted_tasks.status == "succeeded"
     assert deleted_tasks.task_type == "taskDeletion"
-    assert tasks[0].details is not None
-    assert "statuses=enqueued%2Cprocessing" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "statuses=enqueued%2Cprocessing" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -174,8 +182,8 @@ async def test_delete_tasks(test_client):
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskDeletion"
-    assert tasks[0].details is not None
-    assert "uids=1%2C2" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "uids=1%2C2" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -187,8 +195,8 @@ async def test_delete_tasks_index_uids(test_client):
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
-    assert tasks[0].details is not None
-    assert "indexUids=1" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "indexUids=1" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -200,8 +208,8 @@ async def test_delete_tasks_types(test_client):
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
-    assert tasks[0].details is not None
-    assert "types=taskDeletion" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert "types=taskDeletion" in tasks.results[0].details["originalFilter"]
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -214,9 +222,10 @@ async def test_delete_tasks_before_enqueued_at(test_client):
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
-    assert tasks[0].details is not None
+    assert tasks.results[0].details is not None
     assert (
-        f"beforeEnqueuedAt={quote_plus(before.isoformat())}Z" in tasks[0].details["originalFilter"]
+        f"beforeEnqueuedAt={quote_plus(before.isoformat())}Z"
+        in tasks.results[0].details["originalFilter"]
     )
 
 
@@ -230,8 +239,11 @@ async def test_delete_tasks_after_enqueued_at(test_client):
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
-    assert tasks[0].details is not None
-    assert f"afterEnqueuedAt={quote_plus(after.isoformat())}Z" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert (
+        f"afterEnqueuedAt={quote_plus(after.isoformat())}Z"
+        in tasks.results[0].details["originalFilter"]
+    )
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -244,9 +256,10 @@ async def test_delete_tasks_before_started_at(test_client):
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
-    assert tasks[0].details is not None
+    assert tasks.results[0].details is not None
     assert (
-        f"beforeStartedAt={quote_plus(before.isoformat())}Z" in tasks[0].details["originalFilter"]
+        f"beforeStartedAt={quote_plus(before.isoformat())}Z"
+        in tasks.results[0].details["originalFilter"]
     )
 
 
@@ -260,8 +273,11 @@ async def test_delete_tasks_after_finished_at(test_client):
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
-    assert tasks[0].details is not None
-    assert f"afterFinishedAt={quote_plus(after.isoformat())}Z" in tasks[0].details["originalFilter"]
+    assert tasks.results[0].details is not None
+    assert (
+        f"afterFinishedAt={quote_plus(after.isoformat())}Z"
+        in tasks.results[0].details["originalFilter"]
+    )
 
 
 @pytest.mark.usefixtures("create_tasks")
@@ -273,36 +289,36 @@ async def test_delete_no_params(test_client):
 
     assert deleted_tasks.status == "succeeded"
     assert deleted_tasks.task_type == "taskDeletion"
-    assert tasks[0].details is not None
+    assert tasks.results[0].details is not None
     assert (
         "statuses=canceled%2Cenqueued%2Cfailed%2Cprocessing%2Csucceeded"
-        in tasks[0].details["originalFilter"]
+        in tasks.results[0].details["originalFilter"]
     )
 
 
 async def test_get_tasks(empty_index, small_movies):
     index = await empty_index()
     tasks = await get_tasks(index.http_client)
-    current_tasks = len(tasks)
+    current_tasks = len(tasks.results)
     response = await index.add_documents(small_movies)
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.add_documents(small_movies)
     await wait_for_task(index.http_client, response.task_uid)
     response = await get_tasks(index.http_client)
-    assert len(response) >= current_tasks
+    assert len(response.results) >= current_tasks
 
 
 async def test_get_tasks_for_index(empty_index, small_movies):
     index = await empty_index()
     tasks = await get_tasks(index.http_client, index_ids=[index.uid])
-    current_tasks = len(tasks)
+    current_tasks = len(tasks.results)
     response = await index.add_documents(small_movies)
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.add_documents(small_movies)
     await wait_for_task(index.http_client, response.task_uid)
     response = await get_tasks(index.http_client, index_ids=[index.uid])
-    assert len(response) >= current_tasks
-    uid = set([x.index_uid for x in response])
+    assert len(response.results) >= current_tasks
+    uid = set([x.index_uid for x in response.results])
     assert len(uid) == 1
     assert next(iter(uid)) == index.uid
 
