@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
@@ -12,17 +12,17 @@ class TaskId(CamelBase):
     uid: int
 
 
-class TaskStatus(TaskId):
+class TaskResult(TaskId):
     index_uid: Optional[str] = None
     status: str
     task_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
-    details: Optional[Dict[str, Any]]
-    error: Optional[Dict[str, Any]]
-    canceled_by: Optional[int]
-    duration: Optional[str]
+    details: Optional[Dict[str, Any]] = None
+    error: Optional[Dict[str, Any]] = None
+    canceled_by: Optional[int] = None
+    duration: Optional[str] = None
     enqueued_at: datetime
-    started_at: Optional[datetime]
-    finished_at: Optional[datetime]
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
 
     if is_pydantic_2():
 
@@ -67,6 +67,14 @@ class TaskStatus(TaskId):
         @classmethod
         def validate_finished_at(cls, v: str) -> Union[datetime, None]:
             return iso_to_date_time(v)
+
+
+class TaskStatus(CamelBase):
+    results: List[TaskResult]
+    total: int
+    limit: int
+    from_: int = Field(..., alias="from")
+    next: Optional[int] = None
 
 
 class TaskInfo(CamelBase):
