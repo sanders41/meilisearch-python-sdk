@@ -179,6 +179,16 @@ async def default_search_key(test_client):
 
 
 @pytest.fixture
+async def enable_score_details():
+    async with AsyncClient(
+        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
+    ) as client:
+        await client.patch("/experimental-features", json={"scoreDetails": True})
+        yield
+        await client.patch("/experimental-features", json={"scoreDetails": False})
+
+
+@pytest.fixture
 async def enable_vector_search():
     async with AsyncClient(
         base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}

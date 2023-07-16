@@ -301,6 +301,7 @@ class Index:
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
+        show_ranking_score_details: bool = False,
         vector: list[float] | None = None,
     ) -> SearchResults:
         """Search the index.
@@ -328,16 +329,24 @@ class Index:
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
             hits_per_page: Sets the number of results returned per page.
             page: Sets the specific results page to fetch.
-            attributes_to_search_on: List of field names. Allow search over a subser of searchable
+            attributes_to_search_on: List of field names. Allow search over a subset of searchable
                 attributes without modifying the index settings. Defaults to None.
-            show_ranking_score: If set to True the ranking details for each document will be
-                returned with each document in the search. Defaults to False.
-            vector: List of vectors for vector search. Defaults to None. Note: This parameter can only be
-                used with Meilisearch >= v1.3.0, and is experimental in Meilisearchv1.3.0. In order
+            show_ranking_score: If set to True the ranking score will be returned with each document
+                in the search. Defaults to False.
+            show_ranking_score_details: If set to True the ranking details will be returned with
+                each document in the search. Defaults to False. Note: This parameter can only be
+                used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0. In order
                 to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
-                sending a PATCH request to /experimental-features with { "vectorStore": true }.
+                sending a PATCH request to /experimental-features with { "scoreDetails": true }.
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution.
+            vector: List of vectors for vector search. Defaults to None. Note: This parameter can
+                only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
+                In order to use this feature in Meilisearch v1.3.0 you first need to enable the
+                feature by sending a PATCH request to /experimental-features with
+                { "vectorStore": true }. Because this feature is experimental it may be removed or
+                updated causing breaking changes in this library without a major version bump so use
+                with caution.
 
         Returns:
 
@@ -376,6 +385,9 @@ class Index:
             "attributesToSearchOn": attributes_to_search_on,
             "showRankingScore": show_ranking_score,
         }
+
+        if show_ranking_score_details:
+            body["showRankingScoreDetails"] = show_ranking_score_details
 
         if vector:
             body["vector"] = vector
