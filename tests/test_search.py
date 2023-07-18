@@ -371,3 +371,35 @@ async def test_vector_search(index_with_documents_and_vectors):
     response = await index.search("How to Train Your Dragon", vector=[0.1, 0.2])
     assert response.hits[0]["id"] == "287947"
     assert response.vector == [0.1, 0.2]
+
+
+async def test_basic_facet_search(index_with_documents):
+    index = await index_with_documents()
+    update = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
+    )
+    assert response.facet_hits[0].value == "cartoon"
+    assert response.facet_hits[0].count == 1
+
+
+async def test_basic_facet_search_not_found(index_with_documents):
+    index = await index_with_documents()
+    update = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon", facet_name="genre", facet_query="horror"
+    )
+    assert response.facet_hits == []
+
+
+async def test_custom_facet_search(index_with_documents):
+    index = await index_with_documents()
+    update = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "Dragon", facet_name="genre", facet_query="cartoon", attributes_to_highlight=["title"]
+    )
+    assert response.facet_hits[0].value == "cartoon"
+    assert response.facet_hits[0].count == 1

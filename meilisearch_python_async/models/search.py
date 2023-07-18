@@ -4,6 +4,17 @@ from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
 
 
+class FacetHits(CamelBase):
+    value: str
+    count: int
+
+
+class FacetSearchResults(CamelBase):
+    facet_hits: List[FacetHits]
+    facet_query: str
+    processing_time_ms: int
+
+
 class SearchParams(CamelBase):
     index_uid: str
     query: Optional[str] = Field(None, alias="q")
