@@ -53,7 +53,13 @@ class _KeyBase(CamelBase):
 
         class Config:
             json_encoders = {
-                datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                datetime: lambda v: None
+                if not v
+                else (
+                    f"{str(v).split('+')[0].replace(' ', 'T')}Z"
+                    if "+" in str(v)
+                    else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                )
             }
 
 
@@ -111,7 +117,13 @@ class KeyCreate(CamelBase):
 
         class Config:
             json_encoders = {
-                datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                datetime: lambda v: None
+                if not v
+                else (
+                    f"{str(v).split('+')[0].replace(' ', 'T')}Z"
+                    if "+" in str(v)
+                    else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                )
             }
 
 
@@ -130,7 +142,13 @@ class KeyUpdate(CamelBase):
 
         class Config:
             json_encoders = {
-                datetime: lambda v: None if not v else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                datetime: lambda v: None
+                if not v
+                else (
+                    f"{str(v).split('+')[0].replace(' ', 'T')}Z"
+                    if "+" in str(v)
+                    else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                )
             }
 
 
