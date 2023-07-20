@@ -278,7 +278,7 @@ async def test_create_key(test_key_info, test_client):
     assert key.description == test_key_info.description
     assert key.actions == test_key_info.actions
     assert key.indexes == test_key_info.indexes
-    assert key.expires_at.date() == expires_at.date()
+    assert key.expires_at == expires_at.replace(tzinfo=None)
 
 
 async def test_create_key_no_expires(test_key_info, test_client):
