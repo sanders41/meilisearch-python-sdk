@@ -58,7 +58,7 @@ class _KeyBase(CamelBase):
                 else (
                     f"{str(v).split('+')[0].replace(' ', 'T')}Z"
                     if "+" in str(v)
-                    else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                    else f"{str(v).replace(' ', 'T')}Z"
                 )
             }
 
@@ -122,7 +122,7 @@ class KeyCreate(CamelBase):
                 else (
                     f"{str(v).split('+')[0].replace(' ', 'T')}Z"
                     if "+" in str(v)
-                    else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                    else f"{str(v).replace(' ', 'T')}Z"
                 )
             }
 
@@ -147,7 +147,7 @@ class KeyUpdate(CamelBase):
                 else (
                     f"{str(v).split('+')[0].replace(' ', 'T')}Z"
                     if "+" in str(v)
-                    else f"{str(v).split('.')[0].replace(' ', 'T')}Z"
+                    else f"{str(v).replace(' ', 'T')}Z"
                 )
             }
 
