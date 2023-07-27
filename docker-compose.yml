@@ -2,7 +2,7 @@ version: "3"
 
 services:
   meilisearch:
-    image: getmeili/meilisearch:v1.3.0-rc.3
+    image: getmeili/meilisearch:v1.3.0-rc.4
     ports:
       - "7700:7700"
     environment:
