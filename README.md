@@ -149,4 +149,4 @@ See our [docs](https://meilisearch-python-async.paulsanders.dev) for the full do
 
 ## Contributing
 
-Contributions to this project are welcome. If you are interesting in contributing please see our [contributing guide](CONTRIBUTING.md)
+Contributions to this project are welcome. If you are interested in contributing please see our [contributing guide](CONTRIBUTING.md)
