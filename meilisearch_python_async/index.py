@@ -90,7 +90,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.delete()
         """
-        url = f"{self._base_url_with_uid}"
+        url = self._base_url_with_uid
         response = await self._http_requests.delete(url)
         return TaskInfo(**response.json())
 
@@ -144,7 +144,7 @@ class Index:
             >>>     updated_index = await index.update()
         """
         payload = {"primaryKey": primary_key}
-        url = f"{self._base_url_with_uid}"
+        url = self._base_url_with_uid
         response = await self._http_requests.patch(url, payload)
         await wait_for_task(self.http_client, response.json()["taskUid"], timeout_in_ms=100000)
         index_response = await self._http_requests.get(f"{url}")
@@ -170,7 +170,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     index_info = await index.fetch_info()
         """
-        url = f"{self._base_url_with_uid}"
+        url = self._base_url_with_uid
         response = await self._http_requests.get(url)
         index_dict = response.json()
         self.primary_key = index_dict["primaryKey"]
@@ -274,7 +274,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     stats = await index.get_stats()
         """
-        url = f"{self._stats_url}"
+        url = self._stats_url
         response = await self._http_requests.get(url)
 
         return IndexStats(**response.json())
@@ -636,7 +636,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.add_documents(documents)
         """
-        url = f"{self._documents_url}"
+        url = self._documents_url
         if primary_key:
             formatted_primary_key = urlencode({"primaryKey": primary_key})
             url = f"{url}?{formatted_primary_key}"
@@ -1047,7 +1047,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.update_documents(documents)
         """
-        url = f"{self._documents_url}"
+        url = self._documents_url
         if primary_key:
             formatted_primary_key = urlencode({"primaryKey": primary_key})
             url = f"{url}?{formatted_primary_key}"
@@ -1557,7 +1557,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.delete_all_document()
         """
-        url = f"{self._documents_url}"
+        url = self._documents_url
         response = await self._http_requests.delete(url)
 
         return TaskInfo(**response.json())
@@ -1581,7 +1581,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     settings = await index.get_settings()
         """
-        url = f"{self._settings_url}"
+        url = self._settings_url
         response = await self._http_requests.get(url)
 
         return MeilisearchSettings(**response.json())
@@ -1634,7 +1634,7 @@ class Index:
         else:  # pragma: no cover
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
-        url = f"{self._settings_url}"
+        url = self._settings_url
         response = await self._http_requests.patch(url, body_dict)
 
         return TaskInfo(**response.json())
@@ -1658,7 +1658,7 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.reset_settings()
         """
-        url = f"{self._settings_url}"
+        url = self._settings_url
         response = await self._http_requests.delete(url)
 
         return TaskInfo(**response.json())

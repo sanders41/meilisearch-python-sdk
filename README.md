@@ -143,10 +143,16 @@ This test compares how long it takes to complete 1000 searches (lower is better)
 
 ![Multiple Searches](https://raw.githubusercontent.com/sanders41/meilisearch-python-async/main/assets/searches.png)
 
+### Independent testing
+
+[Prashanth Rao](https://github.com/prrao87) did some independent testing and found this async client
+to be ~30 faster than the sync client. You can find a good write-up of how he tested and the results
+in his [blog post](https://thedataquarry.com/posts/meilisearch-async/).
+
 ## Documentation
 
 See our [docs](https://meilisearch-python-async.paulsanders.dev) for the full documentation.
 
 ## Contributing
 
-Contributions to this project are welcome. If you are interesting in contributing please see our [contributing guide](CONTRIBUTING.md)
+Contributions to this project are welcome. If you are interested in contributing please see our [contributing guide](CONTRIBUTING.md)
