@@ -71,6 +71,7 @@ class TaskResult(TaskId):
 
 class TaskStatus(CamelBase):
     results: List[TaskResult]
+    total: int
     limit: int
     from_: int = Field(..., alias="from")
     next: Optional[int] = None

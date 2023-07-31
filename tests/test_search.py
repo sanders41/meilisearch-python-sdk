@@ -276,7 +276,7 @@ async def test_search_sort(sort, titles, index_with_documents):
 
 
 async def test_search_with_tenant_token(
-    test_client, index_with_documents, base_url, index_uid, default_search_key
+    test_client, index_with_documents, base_url, default_search_key
 ):
     token = test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     index_docs = await index_with_documents()
@@ -289,7 +289,7 @@ async def test_search_with_tenant_token(
 
 
 async def test_search_with_tenant_token_and_expire_date(
-    test_client, index_with_documents, base_url, index_uid, default_search_key
+    test_client, index_with_documents, base_url, default_search_key
 ):
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     token = test_client.generate_tenant_token(
@@ -332,5 +332,74 @@ async def test_multi_search_one_index(test_client, index_with_documents):
 async def test_multi_search_no_index(test_client):
     with pytest.raises(MeilisearchApiError):
         await test_client.multi_search(
-            [SearchParams(index_uid="bad", query="How to Train Your Dragon")]
+            [SearchParams(index_uid="bad", query="How to Train Your Dragon")],
         )
+
+
+async def test_attributes_to_search_on_search(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search(
+        "How to Train Your Dragon", attributes_to_search_on=["title", "overview"]
+    )
+    assert response.hits[0]["id"] == "166428"
+
+
+async def test_attributes_to_search_on_search_no_match(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search("How to Train Your Dragon", attributes_to_search_on=["id"])
+    assert response.hits == []
+
+
+async def test_show_ranking_score_serach(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search("How to Train Your Dragon", show_ranking_score=True)
+    assert response.hits[0]["id"] == "166428"
+    assert "_rankingScore" in response.hits[0]
+
+
+@pytest.mark.usefixtures("enable_score_details")
+async def test_show_ranking_details_serach(index_with_documents):
+    index = await index_with_documents()
+    response = await index.search("How to Train Your Dragon", show_ranking_score_details=True)
+    assert response.hits[0]["id"] == "166428"
+    assert "_rankingScoreDetails" in response.hits[0]
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_vector_search(index_with_documents_and_vectors):
+    index = await index_with_documents_and_vectors()
+    response = await index.search("How to Train Your Dragon", vector=[0.1, 0.2])
+    assert response.hits[0]["id"] == "287947"
+    assert response.vector == [0.1, 0.2]
+
+
+async def test_basic_facet_search(index_with_documents):
+    index = await index_with_documents()
+    update = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
+    )
+    assert response.facet_hits[0].value == "cartoon"
+    assert response.facet_hits[0].count == 1
+
+
+async def test_basic_facet_search_not_found(index_with_documents):
+    index = await index_with_documents()
+    update = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon", facet_name="genre", facet_query="horror"
+    )
+    assert response.facet_hits == []
+
+
+async def test_custom_facet_search(index_with_documents):
+    index = await index_with_documents()
+    update = await index.update_filterable_attributes(["genre"])
+    await wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "Dragon", facet_name="genre", facet_query="cartoon", attributes_to_highlight=["title"]
+    )
+    assert response.facet_hits[0].value == "cartoon"
+    assert response.facet_hits[0].count == 1

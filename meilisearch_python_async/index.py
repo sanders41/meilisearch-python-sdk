@@ -17,7 +17,7 @@ from meilisearch_python_async._utils import is_pydantic_2, iso_to_date_time
 from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_async.models.documents import DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
-from meilisearch_python_async.models.search import SearchResults
+from meilisearch_python_async.models.search import FacetSearchResults, SearchResults
 from meilisearch_python_async.models.settings import (
     Faceting,
     MeilisearchSettings,
@@ -299,6 +299,10 @@ class Index:
         matching_strategy: str = "all",
         hits_per_page: int | None = None,
         page: int | None = None,
+        attributes_to_search_on: list[str] | None = None,
+        show_ranking_score: bool = False,
+        show_ranking_score_details: bool = False,
+        vector: list[float] | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -325,6 +329,24 @@ class Index:
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
             hits_per_page: Sets the number of results returned per page.
             page: Sets the specific results page to fetch.
+            attributes_to_search_on: List of field names. Allow search over a subset of searchable
+                attributes without modifying the index settings. Defaults to None.
+            show_ranking_score: If set to True the ranking score will be returned with each document
+                in the search. Defaults to False.
+            show_ranking_score_details: If set to True the ranking details will be returned with
+                each document in the search. Defaults to False. Note: This parameter can only be
+                used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0. In order
+                to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
+                sending a PATCH request to /experimental-features with { "scoreDetails": true }.
+                Because this feature is experimental it may be removed or updated causing breaking
+                changes in this library without a major version bump so use with caution.
+            vector: List of vectors for vector search. Defaults to None. Note: This parameter can
+                only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
+                In order to use this feature in Meilisearch v1.3.0 you first need to enable the
+                feature by sending a PATCH request to /experimental-features with
+                { "vectorStore": true }. Because this feature is experimental it may be removed or
+                updated causing breaking changes in this library without a major version bump so use
+                with caution.
 
         Returns:
 
@@ -342,29 +364,158 @@ class Index:
             >>>     index = client.index("movies")
             >>>     search_results = await index.search("Tron")
         """
-        body = {
-            "q": query,
-            "offset": offset,
-            "limit": limit,
-            "filter": filter,
-            "facets": facets,
-            "attributesToRetrieve": attributes_to_retrieve,
-            "attributesToCrop": attributes_to_crop,
-            "cropLength": crop_length,
-            "attributesToHighlight": attributes_to_highlight,
-            "sort": sort,
-            "showMatchesPosition": show_matches_position,
-            "highlightPreTag": highlight_pre_tag,
-            "highlightPostTag": highlight_post_tag,
-            "cropMarker": crop_marker,
-            "matchingStrategy": matching_strategy,
-            "hitsPerPage": hits_per_page,
-            "page": page,
-        }
+        body = _process_search_parameters(
+            q=query,
+            offset=offset,
+            limit=limit,
+            filter=filter,
+            facets=facets,
+            attributes_to_retrieve=attributes_to_retrieve,
+            attributes_to_crop=attributes_to_crop,
+            crop_length=crop_length,
+            attributes_to_highlight=attributes_to_highlight,
+            sort=sort,
+            show_matches_position=show_matches_position,
+            highlight_pre_tag=highlight_pre_tag,
+            highlight_post_tag=highlight_post_tag,
+            crop_marker=crop_marker,
+            matching_strategy=matching_strategy,
+            hits_per_page=hits_per_page,
+            page=page,
+            attributes_to_search_on=attributes_to_search_on,
+            show_ranking_score=show_ranking_score,
+            show_ranking_score_details=show_ranking_score_details,
+            vector=vector,
+        )
+
         url = f"{self._base_url_with_uid}/search"
         response = await self._http_requests.post(url, body=body)
 
         return SearchResults(**response.json())
+
+    async def facet_search(
+        self,
+        query: str | None = None,
+        *,
+        facet_name: str,
+        facet_query: str,
+        offset: int = 0,
+        limit: int = 20,
+        filter: str | list[str | list[str]] | None = None,
+        facets: list[str] | None = None,
+        attributes_to_retrieve: list[str] = ["*"],
+        attributes_to_crop: list[str] | None = None,
+        crop_length: int = 200,
+        attributes_to_highlight: list[str] | None = None,
+        sort: list[str] | None = None,
+        show_matches_position: bool = False,
+        highlight_pre_tag: str = "<em>",
+        highlight_post_tag: str = "</em>",
+        crop_marker: str = "...",
+        matching_strategy: str = "all",
+        hits_per_page: int | None = None,
+        page: int | None = None,
+        attributes_to_search_on: list[str] | None = None,
+        show_ranking_score: bool = False,
+        show_ranking_score_details: bool = False,
+        vector: list[float] | None = None,
+    ) -> FacetSearchResults:
+        """Search the index.
+
+        Args:
+
+            query: String containing the word(s) to search
+            facet_name: The name of the facet to search
+            facet_query: The facet search value
+            offset: Number of documents to skip. Defaults to 0.
+            limit: Maximum number of documents returned. Defaults to 20.
+            filter: Filter queries by an attribute value. Defaults to None.
+            facets: Facets for which to retrieve the matching count. Defaults to None.
+            attributes_to_retrieve: Attributes to display in the returned documents.
+                Defaults to ["*"].
+            attributes_to_crop: Attributes whose values have to be cropped. Defaults to None.
+            crop_length: The maximun number of words to display. Defaults to 200.
+            attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
+                Defaults to None.
+            sort: Attributes by which to sort the results. Defaults to None.
+            show_matches_position: Defines whether an object that contains information about the matches should be
+                returned or not. Defaults to False.
+            highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
+            highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
+            crop_marker: Marker to display when the number of words excedes the `crop_length`.
+                Defaults to ...
+            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
+            hits_per_page: Sets the number of results returned per page.
+            page: Sets the specific results page to fetch.
+            attributes_to_search_on: List of field names. Allow search over a subset of searchable
+                attributes without modifying the index settings. Defaults to None.
+            show_ranking_score: If set to True the ranking score will be returned with each document
+                in the search. Defaults to False.
+            show_ranking_score_details: If set to True the ranking details will be returned with
+                each document in the search. Defaults to False. Note: This parameter can only be
+                used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0. In order
+                to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
+                sending a PATCH request to /experimental-features with { "scoreDetails": true }.
+                Because this feature is experimental it may be removed or updated causing breaking
+                changes in this library without a major version bump so use with caution.
+            vector: List of vectors for vector search. Defaults to None. Note: This parameter can
+                only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
+                In order to use this feature in Meilisearch v1.3.0 you first need to enable the
+                feature by sending a PATCH request to /experimental-features with
+                { "vectorStore": true }. Because this feature is experimental it may be removed or
+                updated causing breaking changes in this library without a major version bump so use
+                with caution.
+
+        Returns:
+
+            Results of the search
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_results = await index.search(
+            >>>         "Tron",
+            >>>         facet_name="genre",
+            >>>         facet_query="Sci-fi"
+            >>>     )
+        """
+        body = _process_search_parameters(
+            q=query,
+            facet_name=facet_name,
+            facet_query=facet_query,
+            offset=offset,
+            limit=limit,
+            filter=filter,
+            facets=facets,
+            attributes_to_retrieve=attributes_to_retrieve,
+            attributes_to_crop=attributes_to_crop,
+            crop_length=crop_length,
+            attributes_to_highlight=attributes_to_highlight,
+            sort=sort,
+            show_matches_position=show_matches_position,
+            highlight_pre_tag=highlight_pre_tag,
+            highlight_post_tag=highlight_post_tag,
+            crop_marker=crop_marker,
+            matching_strategy=matching_strategy,
+            hits_per_page=hits_per_page,
+            page=page,
+            attributes_to_search_on=attributes_to_search_on,
+            show_ranking_score=show_ranking_score,
+            show_ranking_score_details=show_ranking_score_details,
+            vector=vector,
+        )
+
+        url = f"{self._base_url_with_uid}/facet-search"
+        response = await self._http_requests.post(url, body=body)
+
+        return FacetSearchResults(**response.json())
 
     async def get_document(self, document_id: str) -> dict[str, Any]:
         """Get one document with given document identifier.
@@ -2430,6 +2581,69 @@ async def _load_documents_from_file(
             raise InvalidDocumentError("Meilisearch requires documents to be in a list")
 
         return documents
+
+
+def _process_search_parameters(
+    *,
+    q: str | None = None,
+    facet_name: str | None = None,
+    facet_query: str | None = None,
+    offset: int = 0,
+    limit: int = 20,
+    filter: str | list[str | list[str]] | None = None,
+    facets: list[str] | None = None,
+    attributes_to_retrieve: list[str] = ["*"],
+    attributes_to_crop: list[str] | None = None,
+    crop_length: int = 200,
+    attributes_to_highlight: list[str] | None = None,
+    sort: list[str] | None = None,
+    show_matches_position: bool = False,
+    highlight_pre_tag: str = "<em>",
+    highlight_post_tag: str = "</em>",
+    crop_marker: str = "...",
+    matching_strategy: str = "all",
+    hits_per_page: int | None = None,
+    page: int | None = None,
+    attributes_to_search_on: list[str] | None = None,
+    show_ranking_score: bool = False,
+    show_ranking_score_details: bool = False,
+    vector: list[float] | None = None,
+) -> dict[str, Any]:
+    body: dict[str, Any] = {
+        "q": q,
+        "offset": offset,
+        "limit": limit,
+        "filter": filter,
+        "facets": facets,
+        "attributesToRetrieve": attributes_to_retrieve,
+        "attributesToCrop": attributes_to_crop,
+        "cropLength": crop_length,
+        "attributesToHighlight": attributes_to_highlight,
+        "sort": sort,
+        "showMatchesPosition": show_matches_position,
+        "highlightPreTag": highlight_pre_tag,
+        "highlightPostTag": highlight_post_tag,
+        "cropMarker": crop_marker,
+        "matchingStrategy": matching_strategy,
+        "hitsPerPage": hits_per_page,
+        "page": page,
+        "attributesToSearchOn": attributes_to_search_on,
+        "showRankingScore": show_ranking_score,
+    }
+
+    if facet_name:
+        body["facetName"] = facet_name
+
+    if facet_query:
+        body["facetQuery"] = facet_query
+
+    if show_ranking_score_details:
+        body["showRankingScoreDetails"] = show_ranking_score_details
+
+    if vector:
+        body["vector"] = vector
+
+    return body
 
 
 def _validate_file_type(file_path: Path) -> None:

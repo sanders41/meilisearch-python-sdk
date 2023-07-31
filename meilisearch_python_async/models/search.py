@@ -4,6 +4,17 @@ from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
 
 
+class FacetHits(CamelBase):
+    value: str
+    count: int
+
+
+class FacetSearchResults(CamelBase):
+    facet_hits: List[FacetHits]
+    facet_query: str
+    processing_time_ms: int
+
+
 class SearchParams(CamelBase):
     index_uid: str
     query: Optional[str] = Field(None, alias="q")
@@ -23,6 +34,10 @@ class SearchParams(CamelBase):
     matching_strategy: str = "all"
     hits_per_page: Optional[int] = None
     page: Optional[int] = None
+    attributes_to_search_on: Optional[List[str]] = None
+    show_ranking_score: bool = False
+    show_ranking_score_details: bool = False
+    vector: Optional[List[float]] = None
 
 
 class SearchResults(CamelBase):
@@ -37,6 +52,7 @@ class SearchResults(CamelBase):
     total_hits: Optional[int] = None
     page: Optional[int] = None
     hits_per_page: Optional[int] = None
+    vector: Optional[List[float]] = None
 
 
 class SearchResultsWithUID(SearchResults):

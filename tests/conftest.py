@@ -5,6 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from httpx import AsyncClient
 
 from meilisearch_python_async.client import Client
 from meilisearch_python_async.task import wait_for_task
@@ -156,9 +157,42 @@ async def index_with_documents(empty_index, small_movies):
 
 
 @pytest.fixture
+async def index_with_documents_and_vectors(empty_index, small_movies):
+    small_movies[0]["_vectors"] = [0.1, 0.2]
+
+    async def index_maker(documents=small_movies):
+        index = await empty_index()
+        response = await index.add_documents(documents)
+        await wait_for_task(index.http_client, response.task_uid)
+        return index
+
+    return index_maker
+
+
+@pytest.fixture
 async def default_search_key(test_client):
     keys = await test_client.get_keys()
 
     for key in keys.results:
         if key.actions == ["search"]:
             return key
+
+
+@pytest.fixture
+async def enable_score_details():
+    async with AsyncClient(
+        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
+    ) as client:
+        await client.patch("/experimental-features", json={"scoreDetails": True})
+        yield
+        await client.patch("/experimental-features", json={"scoreDetails": False})
+
+
+@pytest.fixture
+async def enable_vector_search():
+    async with AsyncClient(
+        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
+    ) as client:
+        await client.patch("/experimental-features", json={"vectorStore": True})
+        yield
+        await client.patch("/experimental-features", json={"vectorStore": False})
