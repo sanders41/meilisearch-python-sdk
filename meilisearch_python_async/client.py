@@ -7,6 +7,7 @@ from types import TracebackType
 from typing import Any
 
 import jwt
+from aiocache import cached
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
@@ -513,6 +514,7 @@ class Client:
 
         return Key(**response.json())
 
+    @cached(ttl=20)
     async def multi_search(self, queries: list[SearchParams]) -> list[SearchResultsWithUID]:
         """Multi-index search.
 
