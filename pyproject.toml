@@ -24,25 +24,26 @@ include = ["meilisearch_python_async/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-httpx = ">=0.17"
-pydantic = ">=1.8"
+aiocache = ">=0.12.1"
 aiofiles = ">=0.7"
 camel-converter = ">=1.0.0"
+httpx = ">=0.17"
+pydantic = ">=1.8"
 PyJWT = ">=2.3.0"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=22.8.0"
+mkdocs = ">=1.2.4"
+mkdocs-material = ">=8.2.7"
+mkdocstrings = {version = ">=0.19.0", extras = ["python"]}
 mypy = ">=0.981"
 pre-commit = ">=2.20.0"
 pytest = ">=7.1.3"
 pytest-cov = ">=4.0.0"
 pytest-asyncio = ">=0.19.0"
-types-aiofiles = ">=22.1.0"
-mkdocs = ">=1.2.4"
-mkdocs-material = ">=8.2.7"
-mkdocstrings = {version = ">=0.19.0", extras = ["python"]}
 ruff = ">=0.0.259"
 tomli = {version = ">=2.0.1", python = "<3.11"}
+types-aiofiles = ">=22.1.0"
 
 [tool.poetry.group.benchmark.dependencies]
 meilisearch = ">=0.26.0"
@@ -86,6 +87,10 @@ plugins = ["pydantic.mypy"]
 [[tool.mypy.overrides]]
 module = ["tests.*"]
 disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["aiocache.*"]
+ignore_missing_imports = true
 
 [tool.ruff]
 select=["E", "F", "UP", "I001", "T201", "T203"]
