@@ -296,6 +296,8 @@ async def wait_for_task(
             response = await http_requests.get(url)
             status = TaskResult(**response.json())
             if status.status in ("succeeded", "failed"):
+                if raise_for_status and status.status == "failed":
+                    raise MeilisearchTaskFailedError(f"Task {task_id} failed")
                 return status
             await sleep(interval_in_ms / 1000)
 
