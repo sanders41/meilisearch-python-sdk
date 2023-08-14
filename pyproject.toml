@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "meilisearch-python-async"
-version = "1.6.1"
+version = "1.6.2"
 description = "A Python async client for the Meilisearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
@@ -24,7 +24,6 @@ include = ["meilisearch_python_async/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-aiocache = ">=0.12.1"
 aiofiles = ">=0.7"
 camel-converter = ">=1.0.0"
 httpx = ">=0.17"
