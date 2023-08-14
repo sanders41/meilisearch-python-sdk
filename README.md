@@ -146,7 +146,7 @@ This test compares how long it takes to complete 1000 searches (lower is better)
 ### Independent testing
 
 [Prashanth Rao](https://github.com/prrao87) did some independent testing and found this async client
-to be ~30 faster than the sync client. You can find a good write-up of how he tested and the results
+to be ~30% faster than the sync client for data ingestion. You can find a good write-up of the results how he tested them
 in his [blog post](https://thedataquarry.com/posts/meilisearch-async/).
 
 ## Documentation
