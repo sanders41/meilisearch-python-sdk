@@ -10,7 +10,6 @@ from typing import Any, Generator
 from urllib.parse import urlencode
 
 import aiofiles
-from aiocache import cached
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
@@ -280,7 +279,6 @@ class Index:
 
         return IndexStats(**response.json())
 
-    @cached(ttl=20)
     async def search(
         self,
         query: str | None = None,
@@ -395,7 +393,6 @@ class Index:
 
         return SearchResults(**response.json())
 
-    @cached(ttl=20)
     async def facet_search(
         self,
         query: str | None = None,
