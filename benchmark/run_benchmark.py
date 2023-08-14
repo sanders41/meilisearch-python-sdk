@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import random
 from copy import deepcopy
 from pathlib import Path
 from statistics import fmean
@@ -23,8 +24,8 @@ def generate_data(add_records: int = 1000000) -> list[dict[str, Any]]:
 
     Defaults to creating a json file with 1000000 documents.
     """
-    small_moves = Path().absolute() / "datasets/small_movies.json"
-    with open(small_moves) as f:
+    small_movies = Path().absolute() / "datasets/small_movies.json"
+    with open(small_movies) as f:
         data = json.load(f)
 
     updated = deepcopy(data)
@@ -44,6 +45,26 @@ def generate_data(add_records: int = 1000000) -> list[dict[str, Any]]:
             select = 0
 
     return updated
+
+
+def create_search_samples() -> list[str]:
+    """Generate a random sample of movie names for running the search benchmark.
+
+    The samples are generated with repetition, as we have just 30 movies in the dataset.
+    """
+    small_movies = Path().absolute() / "datasets/small_movies.json"
+    data = []
+    with open(small_movies) as f:
+        data = json.load(f)
+
+    # We want to search on titles of movies
+    movie_names = [movie["title"] for movie in data]
+    # Also consider lower case movie names for variety
+    movie_names_lower = [movie.lower() for movie in movie_names]
+    # Sample from both lists with repetition
+    movies_for_sampling = movie_names + movie_names_lower
+    movies_sampled = random.choices(movies_for_sampling, k=1000)
+    return movies_sampled
 
 
 async def benchmark_async_add_document_in_batches(
@@ -83,14 +104,14 @@ async def run_async_batch_add_benchmark(data: list[dict[str, Any]]) -> list[floa
     return times
 
 
-async def run_async_search_benchmark() -> list[float]:
+async def run_async_search_benchmark(movies_sampled: list[str]) -> list[float]:
     times = []
     for _ in track(range(10), description="Running async multi function benchmark..."):
         async with AsyncClient("http://127.0.0.1:7700", "masterKey") as client:
             index = client.index("movies")
             searches = []
-            for _ in range(1000):
-                searches.append(index.search("the"))
+            for movie in movies_sampled:
+                searches.append(index.search(movie))
 
             start = time()
             await asyncio.gather(*searches)
@@ -127,14 +148,14 @@ def run_sync_batch_add_benchmark(data: list[dict[str, Any]]) -> list[float]:
     return times
 
 
-def run_sync_search_benchmark() -> list[float]:
+def run_sync_search_benchmark(movies_sampled: list[str]) -> list[float]:
     client = Client("http://127.0.0.1:7700", "masterKey")
     index = client.index("movies")
     times = []
     for _ in track(range(10), description="Running sync multi function benchmark..."):
         start = time()
-        for _ in range(1000):
-            index.search("the")
+        for movie in movies_sampled:
+            index.search(movie)
         end = time()
         times.append(end - start)
 
@@ -153,8 +174,9 @@ async def main() -> None:
     print(sync_add_batches_mean)  # noqa: T201
 
     await setup_index(data)
-    async_search = await run_async_search_benchmark()
-    sync_search = run_sync_search_benchmark()
+    movies_sampled = create_search_samples()
+    async_search = await run_async_search_benchmark(movies_sampled)
+    sync_search = run_sync_search_benchmark(movies_sampled)
 
     async_search_mean = fmean(async_search)
     sync_search_mean = fmean(sync_search)
@@ -164,4 +186,7 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    # Set the seed to 0 so that the same data is generated each time
+    random.seed(0)
+
     asyncio.run(main())
