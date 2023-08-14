@@ -173,7 +173,7 @@ async def main() -> None:
     print(async_add_batches_mean)  # noqa: T201
     print(sync_add_batches_mean)  # noqa: T201
 
-    # await setup_index(data)
+    await setup_index(data)
     movies_sampled = create_search_samples()
     async_search = await run_async_search_benchmark(movies_sampled)
     sync_search = run_sync_search_benchmark(movies_sampled)
