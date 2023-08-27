@@ -682,11 +682,11 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.add_documents_in_batches(documents)
         """
-        if not use_task_groups():  # pragma: no cover
+        if not use_task_groups():
             batches = [self.add_documents(x, primary_key) for x in _batch(documents, batch_size)]
             return await asyncio.gather(*batches)
 
-        async with asyncio.TaskGroup() as tg:
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
                 tg.create_task(self.add_documents(x, primary_key))
                 for x in _batch(documents, batch_size)
@@ -756,7 +756,7 @@ class Index:
 
             return [response]
 
-        if not use_task_groups():  # pragma: no cover
+        if not use_task_groups():
             add_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
@@ -777,7 +777,7 @@ class Index:
 
             return responses
 
-        async with asyncio.TaskGroup() as tg:
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = []
             all_results = []
             for i, path in enumerate(directory.iterdir()):
@@ -1122,11 +1122,11 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.update_documents_in_batches(documents)
         """
-        if not use_task_groups:  # pragma: no cover
+        if not use_task_groups():
             batches = [self.update_documents(x, primary_key) for x in _batch(documents, batch_size)]
             return await asyncio.gather(*batches)
 
-        async with asyncio.TaskGroup() as tg:
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
                 tg.create_task(self.update_documents(x, primary_key))
                 for x in _batch(documents, batch_size)
@@ -1194,7 +1194,7 @@ class Index:
             response = await self.update_documents(combined, primary_key)
             return [response]
 
-        if not use_task_groups():  # pragma: no cover
+        if not use_task_groups():
             update_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
@@ -1214,7 +1214,7 @@ class Index:
 
             return responses
 
-        async with asyncio.TaskGroup() as tg:
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = []
             results = []
             for i, path in enumerate(directory.iterdir()):
@@ -1294,7 +1294,7 @@ class Index:
                 combined, batch_size=batch_size, primary_key=primary_key
             )
 
-        if not use_task_groups():  # pragma: no cover
+        if not use_task_groups():
             responses: list[TaskInfo] = []
 
             update_documents = []
@@ -1320,7 +1320,7 @@ class Index:
 
             return responses
 
-        async with asyncio.TaskGroup() as tg:
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             results = []
             tasks = []
             for i, path in enumerate(directory.iterdir()):
@@ -1610,11 +1610,11 @@ class Index:
             >>>         ]
             >>>     )
         """
-        if not use_task_groups:  # pragma: no cover
+        if not use_task_groups():
             tasks = [self.delete_documents_by_filter(filter) for filter in filters]
             return await asyncio.gather(*tasks)
 
-        async with asyncio.TaskGroup() as tg:
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tg_tasks = [
                 tg.create_task(self.delete_documents_by_filter(filter)) for filter in filters
             ]
