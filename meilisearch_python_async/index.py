@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import asyncio
 import json
-from asyncio import gather, get_running_loop
 from csv import DictReader
 from datetime import datetime
 from functools import partial
@@ -13,7 +13,7 @@ import aiofiles
 from httpx import AsyncClient
 
 from meilisearch_python_async._http_requests import HttpRequests
-from meilisearch_python_async._utils import is_pydantic_2, iso_to_date_time
+from meilisearch_python_async._utils import is_pydantic_2, iso_to_date_time, use_task_groups
 from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_async.models.documents import DocumentsInfo
 from meilisearch_python_async.models.index import IndexStats
@@ -174,7 +174,7 @@ class Index:
         response = await self._http_requests.get(url)
         index_dict = response.json()
         self.primary_key = index_dict["primaryKey"]
-        loop = get_running_loop()
+        loop = asyncio.get_running_loop()
         self.created_at = await loop.run_in_executor(
             None, partial(iso_to_date_time, index_dict["createdAt"])
         )
@@ -682,8 +682,17 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.add_documents_in_batches(documents)
         """
-        batches = [self.add_documents(x, primary_key) for x in _batch(documents, batch_size)]
-        return await gather(*batches)
+        if not use_task_groups():
+            batches = [self.add_documents(x, primary_key) for x in _batch(documents, batch_size)]
+            return await asyncio.gather(*batches)
+
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            tasks = [
+                tg.create_task(self.add_documents(x, primary_key))
+                for x in _batch(documents, batch_size)
+            ]
+
+        return [x.result() for x in tasks]
 
     async def add_documents_from_directory(
         self,
@@ -740,31 +749,49 @@ class Index:
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
 
-            loop = get_running_loop()
+            loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
             response = await self.add_documents(combined, primary_key)
 
             return [response]
 
-        add_documents = []
-        for path in directory.iterdir():
-            if path.suffix == f".{document_type}":
-                documents = await _load_documents_from_file(path, csv_delimiter)
-                add_documents.append(self.add_documents(documents, primary_key))
+        if not use_task_groups():
+            add_documents = []
+            for path in directory.iterdir():
+                if path.suffix == f".{document_type}":
+                    documents = await _load_documents_from_file(path, csv_delimiter)
+                    add_documents.append(self.add_documents(documents, primary_key))
 
-        _raise_on_no_documents(add_documents, document_type, directory_path)
+            _raise_on_no_documents(add_documents, document_type, directory_path)
 
-        if len(add_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise Meilisearch
-            # returns an error because it thinks all entries are trying to create the same index.
-            first_response = [await add_documents.pop()]
-            responses = await gather(*add_documents)
-            responses = [*first_response, *responses]
-        else:
-            responses = [await add_documents[0]]
+            if len(add_documents) > 1:
+                # Send the first document on its own before starting the gather. Otherwise Meilisearch
+                # returns an error because it thinks all entries are trying to create the same index.
+                first_response = [await add_documents.pop()]
 
-        return responses
+                responses = await asyncio.gather(*add_documents)
+                responses = [*first_response, *responses]
+            else:
+                responses = [await add_documents[0]]
+
+            return responses
+
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            tasks = []
+            all_results = []
+            for i, path in enumerate(directory.iterdir()):
+                if path.suffix == f".{document_type}":
+                    documents = await _load_documents_from_file(path, csv_delimiter)
+                    if i == 0:
+                        all_results = [await self.add_documents(documents)]
+                    else:
+                        tasks.append(tg.create_task(self.add_documents(documents, primary_key)))
+
+        results = [x.result() for x in tasks]
+        all_results = [*all_results, *results]
+        _raise_on_no_documents(all_results, document_type, directory_path)
+        return all_results
 
     async def add_documents_from_directory_in_batches(
         self,
@@ -824,7 +851,7 @@ class Index:
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
 
-            loop = get_running_loop()
+            loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
             return await self.add_documents_in_batches(
@@ -849,7 +876,7 @@ class Index:
             # Send the first document on its own before starting the gather. Otherwise Meilisearch
             # returns an error because it thinks all entries are trying to create the same index.
             first_response = await add_documents.pop()
-            responses_gather = await gather(*add_documents)
+            responses_gather = await asyncio.gather(*add_documents)
             responses = [*first_response, *[x for y in responses_gather for x in y]]
         else:
             responses = await add_documents[0]
@@ -1095,8 +1122,16 @@ class Index:
             >>>     index = client.index("movies")
             >>>     await index.update_documents_in_batches(documents)
         """
-        batches = [self.update_documents(x, primary_key) for x in _batch(documents, batch_size)]
-        return await gather(*batches)
+        if not use_task_groups():
+            batches = [self.update_documents(x, primary_key) for x in _batch(documents, batch_size)]
+            return await asyncio.gather(*batches)
+
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            tasks = [
+                tg.create_task(self.update_documents(x, primary_key))
+                for x in _batch(documents, batch_size)
+            ]
+        return [x.result() for x in tasks]
 
     async def update_documents_from_directory(
         self,
@@ -1153,30 +1188,46 @@ class Index:
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
 
-            loop = get_running_loop()
+            loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
             response = await self.update_documents(combined, primary_key)
             return [response]
 
-        update_documents = []
-        for path in directory.iterdir():
-            if path.suffix == f".{document_type}":
-                documents = await _load_documents_from_file(path, csv_delimiter)
-                update_documents.append(self.update_documents(documents, primary_key))
+        if not use_task_groups():
+            update_documents = []
+            for path in directory.iterdir():
+                if path.suffix == f".{document_type}":
+                    documents = await _load_documents_from_file(path, csv_delimiter)
+                    update_documents.append(self.update_documents(documents, primary_key))
 
-        _raise_on_no_documents(update_documents, document_type, directory_path)
+            _raise_on_no_documents(update_documents, document_type, directory_path)
 
-        if len(update_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise Meilisearch
-            # returns an error because it thinks all entries are trying to create the same index.
-            first_response = [await update_documents.pop()]
-            responses = await gather(*update_documents)
-            responses = [*first_response, *responses]
-        else:
-            responses = [await update_documents[0]]
+            if len(update_documents) > 1:
+                # Send the first document on its own before starting the gather. Otherwise Meilisearch
+                # returns an error because it thinks all entries are trying to create the same index.
+                first_response = [await update_documents.pop()]
+                responses = await asyncio.gather(*update_documents)
+                responses = [*first_response, *responses]
+            else:
+                responses = [await update_documents[0]]
 
-        return responses
+            return responses
+
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            tasks = []
+            results = []
+            for i, path in enumerate(directory.iterdir()):
+                if path.suffix == f".{document_type}":
+                    documents = await _load_documents_from_file(path, csv_delimiter)
+                    if i == 0:
+                        results = [await self.update_documents(documents, primary_key)]
+                    else:
+                        tasks.append(tg.create_task(self.update_documents(documents, primary_key)))
+
+        results = [*results, *[x.result() for x in tasks]]
+        _raise_on_no_documents(results, document_type, directory_path)
+        return results
 
     async def update_documents_from_directory_in_batches(
         self,
@@ -1236,37 +1287,61 @@ class Index:
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
 
-            loop = get_running_loop()
+            loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
             return await self.update_documents_in_batches(
                 combined, batch_size=batch_size, primary_key=primary_key
             )
 
-        responses: list[TaskInfo] = []
+        if not use_task_groups():
+            responses: list[TaskInfo] = []
 
-        update_documents = []
-        for path in directory.iterdir():
-            if path.suffix == f".{document_type}":
-                documents = await _load_documents_from_file(path, csv_delimiter)
-                update_documents.append(
-                    self.update_documents_in_batches(
-                        documents, batch_size=batch_size, primary_key=primary_key
+            update_documents = []
+            for path in directory.iterdir():
+                if path.suffix == f".{document_type}":
+                    documents = await _load_documents_from_file(path, csv_delimiter)
+                    update_documents.append(
+                        self.update_documents_in_batches(
+                            documents, batch_size=batch_size, primary_key=primary_key
+                        )
                     )
-                )
 
-        _raise_on_no_documents(update_documents, document_type, directory_path)
+            _raise_on_no_documents(update_documents, document_type, directory_path)
 
-        if len(update_documents) > 1:
-            # Send the first document on its own before starting the gather. Otherwise Meilisearch
-            # returns an error because it thinks all entries are trying to create the same index.
-            first_response = await update_documents.pop()
-            responses_gather = await gather(*update_documents)
-            responses = [*first_response, *[x for y in responses_gather for x in y]]
-        else:
-            responses = await update_documents[0]
+            if len(update_documents) > 1:
+                # Send the first document on its own before starting the gather. Otherwise Meilisearch
+                # returns an error because it thinks all entries are trying to create the same index.
+                first_response = await update_documents.pop()
+                responses_gather = await asyncio.gather(*update_documents)
+                responses = [*first_response, *[x for y in responses_gather for x in y]]
+            else:
+                responses = await update_documents[0]
 
-        return responses
+            return responses
+
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            results = []
+            tasks = []
+            for i, path in enumerate(directory.iterdir()):
+                if path.suffix == f".{document_type}":
+                    documents = await _load_documents_from_file(path, csv_delimiter)
+                    if i == 0:
+                        results = await self.update_documents_in_batches(
+                            documents, batch_size=batch_size, primary_key=primary_key
+                        )
+                    else:
+                        tasks.append(
+                            tg.create_task(
+                                self.update_documents_in_batches(
+                                    documents, batch_size=batch_size, primary_key=primary_key
+                                )
+                            )
+                        )
+
+        results = [*results, *[x for y in tasks for x in y.result()]]
+        _raise_on_no_documents(results, document_type, directory_path)
+        return results
 
     async def update_documents_from_file(
         self,
@@ -1535,8 +1610,16 @@ class Index:
             >>>         ]
             >>>     )
         """
-        tasks = [self.delete_documents_by_filter(filter) for filter in filters]
-        return await gather(*tasks)
+        if not use_task_groups():
+            tasks = [self.delete_documents_by_filter(filter) for filter in filters]
+            return await asyncio.gather(*tasks)
+
+        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            tg_tasks = [
+                tg.create_task(self.delete_documents_by_filter(filter)) for filter in filters
+            ]
+
+        return [x.result() for x in tg_tasks]
 
     async def delete_all_documents(self) -> TaskInfo:
         """Delete all documents from the index.
@@ -2549,7 +2632,7 @@ async def _load_documents_from_file(
     if isinstance(file_path, str):
         file_path = Path(file_path)
 
-    loop = get_running_loop()
+    loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, partial(_validate_file_type, file_path))
 
     if file_path.suffix == ".csv":
