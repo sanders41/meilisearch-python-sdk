@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from datetime import datetime
 from functools import lru_cache
 
@@ -42,3 +43,8 @@ def iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:
         reduce = len(split[1]) - 6
         reduced = f"{split[0]}.{split[1][:-reduce]}Z"
         return datetime.strptime(reduced, "%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+@lru_cache(maxsize=1)
+def use_task_groups() -> bool:
+    return True if sys.version_info >= (3, 11) else False
