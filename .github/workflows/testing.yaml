@@ -9,7 +9,7 @@ jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: install Just
       uses: taiki-e/install-action@just
     - name: Set up Python
@@ -49,7 +49,7 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: install Just
       uses: taiki-e/install-action@just
     - name: Set up Python ${{ matrix.python-version }}
@@ -90,7 +90,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: install Just
       uses: taiki-e/install-action@just
     - name: Set up Python
