@@ -69,3 +69,4 @@ class MeilisearchSettings(CamelBase):
     pagination: Optional[Pagination] = None
     separator_tokens: Optional[List[str]] = None
     non_separator_tokens: Optional[List[str]] = None
+    dictionary: Optional[List[str]] = None

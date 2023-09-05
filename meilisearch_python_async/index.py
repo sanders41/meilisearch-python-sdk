@@ -2332,6 +2332,10 @@ class Index:
     async def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskInfo:
         """Get sortable attributes of the Index.
 
+        Args:
+
+            sortable_attributes: List of attributes for searching.
+
         Returns:
 
             The details of the task status.
@@ -2403,6 +2407,10 @@ class Index:
 
     async def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskInfo:
         """Update typo tolerance.
+
+        Args:
+
+            typo_tolerance: Typo tolerance settings.
 
         Returns:
 
@@ -2481,6 +2489,10 @@ class Index:
     async def update_faceting(self, faceting: Faceting) -> TaskInfo:
         """Partially update the faceting settings for an index.
 
+        Args:
+
+            faceting: Faceting values.
+
         Returns:
 
             Task to track the action.
@@ -2556,6 +2568,10 @@ class Index:
 
     async def update_pagination(self, settings: Pagination) -> TaskInfo:
         """Partially update the pagination settings for an index.
+
+        Args:
+
+            settings: settings for pagination.
 
         Returns:
 
@@ -2634,6 +2650,10 @@ class Index:
     async def update_separator_tokens(self, separator_tokens: list[str]) -> TaskInfo:
         """Update the separator tokens settings for an index.
 
+        Args:
+
+            separator_tokens: List of separator tokens.
+
         Returns:
 
             Task to track the action.
@@ -2648,7 +2668,7 @@ class Index:
             >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
-            >>>     await index.update_separator_tokens(settings=["|", "/")
+            >>>     await index.update_separator_tokens(separator_tokenes=["|", "/")
         """
         url = f"{self._settings_url}/separator-tokens"
         response = await self._http_requests.put(url, separator_tokens)
@@ -2706,6 +2726,10 @@ class Index:
     async def update_non_separator_tokens(self, non_separator_tokens: list[str]) -> TaskInfo:
         """Update the non-separator tokens settings for an index.
 
+        Args:
+
+            non_separator_tokens: List of non-separator tokens.
+
         Returns:
 
             Task to track the action.
@@ -2720,7 +2744,7 @@ class Index:
             >>> from meilisearch_python_async import Client
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
-            >>>     await index.update_non_separator_tokens(settings=["@", "#")
+            >>>     await index.update_non_separator_tokens(non_separator_tokens=["@", "#")
         """
         url = f"{self._settings_url}/non-separator-tokens"
         response = await self._http_requests.put(url, non_separator_tokens)
@@ -2747,6 +2771,82 @@ class Index:
             >>>     await index.reset_non_separator_tokens()
         """
         url = f"{self._settings_url}/non-separator-tokens"
+        response = await self._http_requests.delete(url)
+
+        return TaskInfo(**response.json())
+
+    async def get_word_dictionary(self) -> list[str]:
+        """Get word dictionary settings for the index.
+
+        Returns:
+
+            Word dictionary for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     word_dictionary = await index.get_word_dictionary()
+        """
+        url = f"{self._settings_url}/dictionary"
+        response = await self._http_requests.get(url)
+
+        return response.json()
+
+    async def update_word_dictionary(self, dictionary: list[str]) -> TaskInfo:
+        """Update the word dictionary settings for an index.
+
+        Args:
+
+            dictionary: List of dictionary values.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_word_dictionary(dictionary=["S.O.S", "S.O")
+        """
+        url = f"{self._settings_url}/dictionary"
+        response = await self._http_requests.put(url, dictionary)
+
+        return TaskInfo(**response.json())
+
+    async def reset_word_dictionary(self) -> TaskInfo:
+        """Reset an index's word dictionary settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_word_dictionary()
+        """
+        url = f"{self._settings_url}/dictionary"
         response = await self._http_requests.delete(url)
 
         return TaskInfo(**response.json())

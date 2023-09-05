@@ -24,6 +24,7 @@ def new_settings():
         pagination=Pagination(max_total_hits=17),
         separator_tokens=["&sep", "/", "|"],
         non_separator_tokens=["#", "@"],
+        dictionary=["S.O", "S.O.S"],
     )
 
 
@@ -140,6 +141,7 @@ async def test_get_settings_default(
     assert response.pagination == default_pagination
     assert response.separator_tokens == []
     assert response.non_separator_tokens == []
+    assert response.dictionary == []
 
 
 async def test_update_settings(empty_index, new_settings):
@@ -162,6 +164,7 @@ async def test_update_settings(empty_index, new_settings):
     assert response.pagination == new_settings.pagination
     assert response.separator_tokens == new_settings.separator_tokens
     assert response.non_separator_tokens == new_settings.non_separator_tokens
+    assert response.dictionary == new_settings.dictionary
 
 
 async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
@@ -395,6 +398,36 @@ async def test_reset_non_separator_tokens(empty_index):
     update = await wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
     response = await index.get_non_separator_tokens()
+    assert response == []
+
+
+async def test_get_word_dictionary(empty_index):
+    index = await empty_index()
+    response = await index.get_word_dictionary()
+    assert response == []
+
+
+async def test_update_word_dictionary(empty_index):
+    index = await empty_index()
+    expected = ["S.O", "S.O.S"]
+    response = await index.update_word_dictionary(expected)
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_word_dictionary()
+    assert response == expected
+
+
+async def test_reset_word_dictionary(empty_index):
+    index = await empty_index()
+    expected = ["S.O", "S.O.S"]
+    response = await index.update_word_dictionary(expected)
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_word_dictionary()
+    assert response == expected
+    response = await index.reset_word_dictionary()
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_word_dictionary()
     assert response == []
 
 
