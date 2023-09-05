@@ -22,6 +22,8 @@ def new_settings():
         typo_tolerance=TypoTolerance(enabled=False),
         faceting=Faceting(max_values_per_facet=123),
         pagination=Pagination(max_total_hits=17),
+        separator_tokens=["&sep", "/", "|"],
+        non_separator_tokens=["#", "@"],
     )
 
 
@@ -136,6 +138,8 @@ async def test_get_settings_default(
     assert response.typo_tolerance.enabled is True
     assert response.faceting == default_faceting
     assert response.pagination == default_pagination
+    assert response.separator_tokens == []
+    assert response.non_separator_tokens == []
 
 
 async def test_update_settings(empty_index, new_settings):
@@ -156,6 +160,8 @@ async def test_update_settings(empty_index, new_settings):
         response.faceting.max_values_per_facet == new_settings.faceting.max_values_per_facet == 123
     )
     assert response.pagination == new_settings.pagination
+    assert response.separator_tokens == new_settings.separator_tokens
+    assert response.non_separator_tokens == new_settings.non_separator_tokens
 
 
 async def test_reset_settings(empty_index, new_settings, default_ranking_rules):
@@ -330,6 +336,66 @@ async def test_reset_pagination(empty_index, default_pagination):
     await wait_for_task(index.http_client, response.task_uid)
     response = await index.get_pagination()
     assert response.model_dump() == default_pagination.model_dump()
+
+
+async def test_get_separator_tokens(empty_index):
+    index = await empty_index()
+    response = await index.get_separator_tokens()
+    assert response == []
+
+
+async def test_update_separator_tokens(empty_index):
+    index = await empty_index()
+    expected = ["/", "|"]
+    response = await index.update_separator_tokens(expected)
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_separator_tokens()
+    assert response == expected
+
+
+async def test_reset_separator_tokens(empty_index):
+    index = await empty_index()
+    expected = ["/", "|"]
+    response = await index.update_separator_tokens(expected)
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_separator_tokens()
+    assert response == expected
+    response = await index.reset_separator_tokens()
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_separator_tokens()
+    assert response == []
+
+
+async def test_get_non_separator_tokens(empty_index):
+    index = await empty_index()
+    response = await index.get_non_separator_tokens()
+    assert response == []
+
+
+async def test_update_non_separator_tokens(empty_index):
+    index = await empty_index()
+    expected = ["#", "@"]
+    response = await index.update_non_separator_tokens(expected)
+    await wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_non_separator_tokens()
+    assert response == expected
+
+
+async def test_reset_non_separator_tokens(empty_index):
+    index = await empty_index()
+    expected = ["#", "@"]
+    response = await index.update_non_separator_tokens(expected)
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_non_separator_tokens()
+    assert response == expected
+    response = await index.reset_non_separator_tokens()
+    update = await wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_non_separator_tokens()
+    assert response == []
 
 
 async def test_get_stop_words_default(empty_index):
