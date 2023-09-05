@@ -67,3 +67,5 @@ class MeilisearchSettings(CamelBase):
     typo_tolerance: Optional[TypoTolerance] = None
     faceting: Optional[Faceting] = None
     pagination: Optional[Pagination] = None
+    separator_tokens: Optional[List[str]] = None
+    non_separator_tokens: Optional[List[str]] = None

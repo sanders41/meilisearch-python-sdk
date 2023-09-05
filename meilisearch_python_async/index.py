@@ -2607,6 +2607,150 @@ class Index:
 
         return TaskInfo(**response.json())
 
+    async def get_separator_tokens(self) -> list[str]:
+        """Get separator token settings for the index.
+
+        Returns:
+
+            Separator tokens for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     separator_token_settings = await index.get_separator_tokens()
+        """
+        url = f"{self._settings_url}/separator-tokens"
+        response = await self._http_requests.get(url)
+
+        return response.json()
+
+    async def update_separator_tokens(self, separator_tokens: list[str]) -> TaskInfo:
+        """Update the separator tokens settings for an index.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_separator_tokens(settings=["|", "/")
+        """
+        url = f"{self._settings_url}/separator-tokens"
+        response = await self._http_requests.put(url, separator_tokens)
+
+        return TaskInfo(**response.json())
+
+    async def reset_separator_tokens(self) -> TaskInfo:
+        """Reset an index's separator tokens settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_separator_tokens()
+        """
+        url = f"{self._settings_url}/separator-tokens"
+        response = await self._http_requests.delete(url)
+
+        return TaskInfo(**response.json())
+
+    async def get_non_separator_tokens(self) -> list[str]:
+        """Get non-separator token settings for the index.
+
+        Returns:
+
+            Non-separator tokens for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     non_separator_token_settings = await index.get_non_separator_tokens()
+        """
+        url = f"{self._settings_url}/non-separator-tokens"
+        response = await self._http_requests.get(url)
+
+        return response.json()
+
+    async def update_non_separator_tokens(self, non_separator_tokens: list[str]) -> TaskInfo:
+        """Update the non-separator tokens settings for an index.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_non_separator_tokens(settings=["@", "#")
+        """
+        url = f"{self._settings_url}/non-separator-tokens"
+        response = await self._http_requests.put(url, non_separator_tokens)
+
+        return TaskInfo(**response.json())
+
+    async def reset_non_separator_tokens(self) -> TaskInfo:
+        """Reset an index's non-separator tokens settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_non_separator_tokens()
+        """
+        url = f"{self._settings_url}/non-separator-tokens"
+        response = await self._http_requests.delete(url)
+
+        return TaskInfo(**response.json())
+
 
 def _batch(documents: list[dict], batch_size: int) -> Generator[list[dict], None, None]:
     total_len = len(documents)
