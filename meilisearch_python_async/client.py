@@ -219,8 +219,16 @@ class Client:
 
         return jwt.encode(payload, api_key.key, algorithm="HS256")
 
-    async def get_indexes(self) -> list[Index] | None:
+    async def get_indexes(
+        self, *, offset: int | None = None, limit: int | None = None
+    ) -> list[Index] | None:
         """Get all indexes.
+        Args:
+
+            offset: Number of indexes to skip. The default of None will use the Meilisearch
+                default.
+            limit: Number of indexes to return. The default of None will use the Meilisearch
+                default.
 
         Returns:
 
@@ -237,7 +245,16 @@ class Client:
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     indexes = await client.get_indexes()
         """
-        response = await self._http_requests.get("indexes")
+        if offset is not None and limit is not None:
+            url = f"indexes?offset={offset}&limit={limit}"
+        elif offset is not None:
+            url = f"indexes?offset={offset}"
+        elif limit is not None:
+            url = f"indexes?limit={limit}"
+        else:
+            url = "indexes"
+
+        response = await self._http_requests.get(url)
 
         if not response.json()["results"]:
             return None
