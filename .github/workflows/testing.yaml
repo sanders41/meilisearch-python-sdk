@@ -21,6 +21,7 @@ jobs:
       run: echo version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))") >> $GITHUB_OUTPUT
     - name: Install Poetry
       run: |
+        pip install -U pip
         pip install pipx
         pipx install poetry
     - name: Configure poetry
@@ -61,6 +62,7 @@ jobs:
       run: echo version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))") >> $GITHUB_OUTPUT
     - name: Install Poetry
       run: |
+        pip install -U pip
         pip install pipx
         pipx install poetry
     - name: Configure poetry
@@ -102,6 +104,7 @@ jobs:
       run: echo version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))") >> $GITHUB_OUTPUT
     - name: Install Poetry
       run: |
+        pip install -U pip
         pip install pipx
         pipx install poetry
     - name: Configure poetry
