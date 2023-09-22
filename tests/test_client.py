@@ -276,6 +276,24 @@ async def test_get_raw_indexes(test_client, index_uid, index_uid2):
     assert len(response) == 2
 
 
+@pytest.mark.usefixtures("indexes_sample")
+async def test_get_raw_indexes_offset_and_limit(test_client):
+    response = await test_client.get_raw_indexes(offset=1, limit=1)
+    assert len(response) == 1
+
+
+@pytest.mark.usefixtures("indexes_sample")
+async def test_get_raw_indexes_offset(test_client):
+    response = await test_client.get_raw_indexes(offset=1)
+    assert len(response) >= 1 and len(response) <= 20
+
+
+@pytest.mark.usefixtures("indexes_sample")
+async def test_get_raw_indexes_limit(test_client):
+    response = await test_client.get_raw_indexes(limit=1)
+    assert len(response) == 1
+
+
 async def test_get_raw_indexes_none(test_client):
     response = await test_client.get_raw_indexes()
 
