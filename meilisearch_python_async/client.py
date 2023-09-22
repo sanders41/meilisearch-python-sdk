@@ -598,8 +598,16 @@ class Client:
 
         return IndexInfo(**response.json())
 
-    async def get_raw_indexes(self) -> list[IndexInfo] | None:
+    async def get_raw_indexes(
+        self, *, offset: int | None = None, limit: int | None = None
+    ) -> list[IndexInfo] | None:
         """Gets all the indexes.
+        Args:
+
+            offset: Number of indexes to skip. The default of None will use the Meilisearch
+                default.
+            limit: Number of indexes to return. The default of None will use the Meilisearch
+                default.
 
         Returns all the index information rather than an Index instance.
 
@@ -618,7 +626,15 @@ class Client:
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_raw_indexes()
         """
-        response = await self._http_requests.get("indexes")
+        if offset is not None and limit is not None:
+            url = f"indexes?offset={offset}&limit={limit}"
+        elif offset is not None:
+            url = f"indexes?offset={offset}"
+        elif limit is not None:
+            url = f"indexes?limit={limit}"
+        else:
+            url = "indexes"
+        response = await self._http_requests.get(url)
 
         if not response.json()["results"]:
             return None
