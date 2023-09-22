@@ -339,6 +339,21 @@ async def test_get_keys(test_client):
     assert len(response.results) == 2
 
 
+async def test_get_keys_offset_and_limit(test_client):
+    response = await test_client.get_keys(offset=1, limit=1)
+    assert len(response.results) == 1
+
+
+async def test_get_keys_offset(test_client):
+    response = await test_client.get_keys(offset=1)
+    assert len(response.results) >= 1 and len(response.results) <= 20
+
+
+async def test_get_keys_limit(test_client):
+    response = await test_client.get_keys(limit=1)
+    assert len(response.results) == 1
+
+
 async def test_get_key(test_key, test_client):
     key = await test_client.get_key(test_key.key)
     assert key.description == test_key.description
