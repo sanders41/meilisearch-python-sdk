@@ -436,8 +436,14 @@ class Client:
         response = await self._http_requests.delete(f"keys/{key}")
         return response.status_code
 
-    async def get_keys(self) -> KeySearch:
+    async def get_keys(self, *, offset: int | None = None, limit: int | None = None) -> KeySearch:
         """Gets the Meilisearch API keys.
+        Args:
+
+            offset: Number of indexes to skip. The default of None will use the Meilisearch
+                default.
+            limit: Number of indexes to return. The default of None will use the Meilisearch
+                default.
 
         Returns:
 
@@ -454,7 +460,15 @@ class Client:
             async with Client("http://localhost.com", "masterKey") as client:
                 keys = await client.get_keys()
         """
-        response = await self._http_requests.get("keys")
+        if offset is not None and limit is not None:
+            url = f"keys?offset={offset}&limit={limit}"
+        elif offset is not None:
+            url = f"keys?offset={offset}"
+        elif limit is not None:
+            url = f"keys?limit={limit}"
+        else:
+            url = "keys"
+        response = await self._http_requests.get(url)
 
         return KeySearch(**response.json())
 
