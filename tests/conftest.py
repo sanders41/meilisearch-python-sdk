@@ -5,10 +5,10 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient as HttpxAsyncClient
 
-from meilisearch_python_async.client import Client
-from meilisearch_python_async.task import wait_for_task
+from meilisearch_python_async import AsyncClient
+from meilisearch_python_async.task import async_wait_for_task
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"
@@ -37,19 +37,19 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def test_client():
-    async with Client(BASE_URL, MASTER_KEY) as client:
+async def async_test_client():
+    async with AsyncClient(BASE_URL, MASTER_KEY) as client:
         yield client
 
 
 @pytest.fixture(autouse=True)
-async def clear_indexes(test_client):
+async def clear_indexes(async_test_client):
     """Auto-clears the indexes after each test function run."""
     yield
-    indexes = await test_client.get_indexes()
+    indexes = await async_test_client.get_indexes()
     if indexes:
-        tasks = await asyncio.gather(*[test_client.index(x.uid).delete() for x in indexes])
-        await asyncio.gather(*[wait_for_task(test_client, x.task_uid) for x in tasks])
+        tasks = await asyncio.gather(*[async_test_client.index(x.uid).delete() for x in indexes])
+        await asyncio.gather(*[async_wait_for_task(async_test_client, x.task_uid) for x in tasks])
 
 
 @pytest.fixture(scope="session")
@@ -83,10 +83,10 @@ def index_uid4():
 
 
 @pytest.fixture
-async def indexes_sample(test_client):
+async def indexes_sample(async_test_client):
     indexes = []
     for index_args in INDEX_FIXTURE:
-        index = await test_client.create_index(**index_args)
+        index = await async_test_client.create_index(**index_args)
         indexes.append(index)
     yield indexes
 
@@ -138,9 +138,9 @@ def small_movies_path():
 
 
 @pytest.fixture
-async def empty_index(test_client):
+async def empty_index(async_test_client):
     async def index_maker():
-        return await test_client.create_index(uid=str(uuid4()))
+        return await async_test_client.create_index(uid=str(uuid4()))
 
     return index_maker
 
@@ -150,7 +150,7 @@ async def index_with_documents(empty_index, small_movies):
     async def index_maker(documents=small_movies):
         index = await empty_index()
         response = await index.add_documents(documents)
-        await wait_for_task(index.http_client, response.task_uid)
+        await async_wait_for_task(index.http_client, response.task_uid)
         return index
 
     return index_maker
@@ -163,15 +163,15 @@ async def index_with_documents_and_vectors(empty_index, small_movies):
     async def index_maker(documents=small_movies):
         index = await empty_index()
         response = await index.add_documents(documents)
-        await wait_for_task(index.http_client, response.task_uid)
+        await async_wait_for_task(index.http_client, response.task_uid)
         return index
 
     return index_maker
 
 
 @pytest.fixture
-async def default_search_key(test_client):
-    keys = await test_client.get_keys()
+async def default_search_key(async_test_client):
+    keys = await async_test_client.get_keys()
 
     for key in keys.results:
         if key.actions == ["search"]:
@@ -180,7 +180,7 @@ async def default_search_key(test_client):
 
 @pytest.fixture
 async def enable_score_details():
-    async with AsyncClient(
+    async with HttpxAsyncClient(
         base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
     ) as client:
         await client.patch("/experimental-features", json={"scoreDetails": True})
@@ -190,7 +190,7 @@ async def enable_score_details():
 
 @pytest.fixture
 async def enable_vector_search():
-    async with AsyncClient(
+    async with HttpxAsyncClient(
         base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
     ) as client:
         await client.patch("/experimental-features", json={"vectorStore": True})

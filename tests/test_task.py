@@ -7,11 +7,11 @@ from httpx import AsyncClient
 
 from meilisearch_python_async.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
 from meilisearch_python_async.task import (
-    cancel_tasks,
-    delete_tasks,
-    get_task,
-    get_tasks,
-    wait_for_task,
+    async_cancel_tasks,
+    async_delete_tasks,
+    async_get_task,
+    async_get_tasks,
+    async_wait_for_task,
 )
 
 
@@ -26,11 +26,11 @@ async def create_tasks(empty_index, small_movies):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_statuses(test_client):
-    task = await cancel_tasks(test_client, statuses=["enqueued", "processing"])
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+async def test_cancel_statuses(async_test_client):
+    task = await async_cancel_tasks(async_test_client, statuses=["enqueued", "processing"])
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.index_uid is None
     assert completed_task.status == "succeeded"
@@ -40,11 +40,11 @@ async def test_cancel_statuses(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_tasks_uids(test_client):
-    task = await cancel_tasks(test_client, uids=["1", "2"])
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+async def test_async_cancel_tasks_uids(async_test_client):
+    task = await async_cancel_tasks(async_test_client, uids=["1", "2"])
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -53,12 +53,12 @@ async def test_cancel_tasks_uids(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_tasks_index_uids(test_client):
-    task = await cancel_tasks(test_client, index_uids=["1"])
+async def test_async_cancel_tasks_index_uids(async_test_client):
+    task = await async_cancel_tasks(async_test_client, index_uids=["1"])
 
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -67,11 +67,11 @@ async def test_cancel_tasks_index_uids(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_tasks_types(test_client):
-    task = await cancel_tasks(test_client, types=["taskDeletion"])
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+async def test_async_cancel_tasks_types(async_test_client):
+    task = await async_cancel_tasks(async_test_client, types=["taskDeletion"])
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -80,12 +80,12 @@ async def test_cancel_tasks_types(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_tasks_before_enqueued_at(test_client):
+async def test_async_cancel_tasks_before_enqueued_at(async_test_client):
     before = datetime.now()
-    task = await cancel_tasks(test_client, before_enqueued_at=before)
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+    task = await async_cancel_tasks(async_test_client, before_enqueued_at=before)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -97,12 +97,12 @@ async def test_cancel_tasks_before_enqueued_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_tasks_after_enqueued_at(test_client):
+async def test_async_cancel_tasks_after_enqueued_at(async_test_client):
     after = datetime.now()
-    task = await cancel_tasks(test_client, after_enqueued_at=after)
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+    task = await async_cancel_tasks(async_test_client, after_enqueued_at=after)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -114,12 +114,12 @@ async def test_cancel_tasks_after_enqueued_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_tasks_before_started_at(test_client):
+async def test_async_cancel_tasks_before_started_at(async_test_client):
     before = datetime.now()
-    task = await cancel_tasks(test_client, before_started_at=before)
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+    task = await async_cancel_tasks(async_test_client, before_started_at=before)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -131,12 +131,12 @@ async def test_cancel_tasks_before_started_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_tasks_after_finished_at(test_client):
+async def test_async_cancel_tasks_after_finished_at(async_test_client):
     after = datetime.now()
-    task = await cancel_tasks(test_client, after_finished_at=after)
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+    task = await async_cancel_tasks(async_test_client, after_finished_at=after)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -148,11 +148,11 @@ async def test_cancel_tasks_after_finished_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_task_no_params(test_client):
-    task = await cancel_tasks(test_client)
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskCancelation")
+async def test_cancel_task_no_params(async_test_client):
+    task = await async_cancel_tasks(async_test_client)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -161,11 +161,11 @@ async def test_cancel_task_no_params(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_statuses(test_client):
-    task = await delete_tasks(test_client, statuses=["enqueued", "processing"])
-    await wait_for_task(test_client, task.task_uid)
-    deleted_tasks = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+async def test_delete_statuses(async_test_client):
+    task = await async_delete_tasks(async_test_client, statuses=["enqueued", "processing"])
+    await async_wait_for_task(async_test_client, task.task_uid)
+    deleted_tasks = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert deleted_tasks.status == "succeeded"
     assert deleted_tasks.task_type == "taskDeletion"
@@ -174,11 +174,11 @@ async def test_delete_statuses(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_tasks(test_client):
-    task = await delete_tasks(test_client, uids=["1", "2"])
-    await wait_for_task(test_client, task.task_uid)
-    completed_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+async def test_async_delete_tasks(async_test_client):
+    task = await async_delete_tasks(async_test_client, uids=["1", "2"])
+    await async_wait_for_task(async_test_client, task.task_uid)
+    completed_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskDeletion"
@@ -187,11 +187,11 @@ async def test_delete_tasks(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_tasks_index_uids(test_client):
-    task = await delete_tasks(test_client, index_uids=["1"])
-    await wait_for_task(test_client, task.task_uid)
-    deleted_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+async def test_async_delete_tasks_index_uids(async_test_client):
+    task = await async_delete_tasks(async_test_client, index_uids=["1"])
+    await async_wait_for_task(async_test_client, task.task_uid)
+    deleted_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -200,11 +200,11 @@ async def test_delete_tasks_index_uids(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_tasks_types(test_client):
-    task = await delete_tasks(test_client, types=["taskDeletion"])
-    await wait_for_task(test_client, task.task_uid)
-    deleted_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+async def test_async_delete_tasks_types(async_test_client):
+    task = await async_delete_tasks(async_test_client, types=["taskDeletion"])
+    await async_wait_for_task(async_test_client, task.task_uid)
+    deleted_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -213,12 +213,12 @@ async def test_delete_tasks_types(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_tasks_before_enqueued_at(test_client):
+async def test_async_delete_tasks_before_enqueued_at(async_test_client):
     before = datetime.now()
-    task = await delete_tasks(test_client, before_enqueued_at=before)
-    await wait_for_task(test_client, task.task_uid)
-    deleted_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+    task = await async_delete_tasks(async_test_client, before_enqueued_at=before)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    deleted_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -230,12 +230,12 @@ async def test_delete_tasks_before_enqueued_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_tasks_after_enqueued_at(test_client):
+async def test_async_delete_tasks_after_enqueued_at(async_test_client):
     after = datetime.now()
-    task = await delete_tasks(test_client, after_enqueued_at=after)
-    await wait_for_task(test_client, task.task_uid)
-    deleted_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+    task = await async_delete_tasks(async_test_client, after_enqueued_at=after)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    deleted_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -247,12 +247,12 @@ async def test_delete_tasks_after_enqueued_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_tasks_before_started_at(test_client):
+async def test_async_delete_tasks_before_started_at(async_test_client):
     before = datetime.now()
-    task = await delete_tasks(test_client, before_started_at=before)
-    await wait_for_task(test_client, task.task_uid)
-    deleted_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+    task = await async_delete_tasks(async_test_client, before_started_at=before)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    deleted_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -264,12 +264,12 @@ async def test_delete_tasks_before_started_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_tasks_after_finished_at(test_client):
+async def test_async_delete_tasks_after_finished_at(async_test_client):
     after = datetime.now()
-    task = await delete_tasks(test_client, after_finished_at=after)
-    await wait_for_task(test_client, task.task_uid)
-    deleted_task = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+    task = await async_delete_tasks(async_test_client, after_finished_at=after)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    deleted_task = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -281,11 +281,11 @@ async def test_delete_tasks_after_finished_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_delete_no_params(test_client):
-    task = await delete_tasks(test_client)
-    await wait_for_task(test_client, task.task_uid)
-    deleted_tasks = await get_task(test_client, task.task_uid)
-    tasks = await get_tasks(test_client, types="taskDeletion")
+async def test_delete_no_params(async_test_client):
+    task = await async_delete_tasks(async_test_client)
+    await async_wait_for_task(async_test_client, task.task_uid)
+    deleted_tasks = await async_get_task(async_test_client, task.task_uid)
+    tasks = await async_get_tasks(async_test_client, types="taskDeletion")
 
     assert deleted_tasks.status == "succeeded"
     assert deleted_tasks.task_type == "taskDeletion"
@@ -296,52 +296,52 @@ async def test_delete_no_params(test_client):
     )
 
 
-async def test_get_tasks(empty_index, small_movies):
+async def test_async_get_tasks(empty_index, small_movies):
     index = await empty_index()
-    tasks = await get_tasks(index.http_client)
+    tasks = await async_get_tasks(index.http_client)
     current_tasks = len(tasks.results)
     response = await index.add_documents(small_movies)
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.add_documents(small_movies)
-    await wait_for_task(index.http_client, response.task_uid)
-    response = await get_tasks(index.http_client)
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await async_get_tasks(index.http_client)
     assert len(response.results) >= current_tasks
 
 
-async def test_get_tasks_for_index(empty_index, small_movies):
+async def test_async_get_tasks_for_index(empty_index, small_movies):
     index = await empty_index()
-    tasks = await get_tasks(index.http_client, index_ids=[index.uid])
+    tasks = await async_get_tasks(index.http_client, index_ids=[index.uid])
     current_tasks = len(tasks.results)
     response = await index.add_documents(small_movies)
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.add_documents(small_movies)
-    await wait_for_task(index.http_client, response.task_uid)
-    response = await get_tasks(index.http_client, index_ids=[index.uid])
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await async_get_tasks(index.http_client, index_ids=[index.uid])
     assert len(response.results) >= current_tasks
     uid = set([x.index_uid for x in response.results])
     assert len(uid) == 1
     assert next(iter(uid)) == index.uid
 
 
-async def test_get_task(empty_index, small_movies):
+async def test_async_get_task(empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies)
-    await wait_for_task(index.http_client, response.task_uid)
-    update = await get_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_get_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
 
 
-async def test_wait_for_task(empty_index, small_movies):
+async def test_async_wait_for_task(empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
 
 
-async def test_wait_for_task_no_timeout(empty_index, small_movies):
+async def test_async_wait_for_task_no_timeout(empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid, timeout_in_ms=None)
+    update = await async_wait_for_task(index.http_client, response.task_uid, timeout_in_ms=None)
     assert update.status == "succeeded"
 
 
@@ -349,21 +349,23 @@ async def test_wait_for_pending_update_time_out(empty_index, small_movies):
     index = await empty_index()
     with pytest.raises(MeilisearchTimeoutError):
         response = await index.add_documents(small_movies)
-        await wait_for_task(index.http_client, response.task_uid, timeout_in_ms=1, interval_in_ms=1)
+        await async_wait_for_task(
+            index.http_client, response.task_uid, timeout_in_ms=1, interval_in_ms=1
+        )
 
-    await wait_for_task(  # Make sure the indexing finishes so subsequent tests don't have issues.
+    await async_wait_for_task(  # Make sure the indexing finishes so subsequent tests don't have issues.
         index.http_client, response.task_uid
     )
 
 
-async def test_wait_for_task_raise_for_status_true(empty_index, small_movies):
+async def test_async_wait_for_task_raise_for_status_true(empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid, raise_for_status=True)
+    update = await async_wait_for_task(index.http_client, response.task_uid, raise_for_status=True)
     assert update.status == "succeeded"
 
 
-async def test_wait_for_task_raise_for_status_true_no_timeout(
+async def test_async_wait_for_task_raise_for_status_true_no_timeout(
     empty_index, small_movies, base_url, monkeypatch
 ):
     async def mock_get_response(*args, **kwargs):
@@ -389,12 +391,12 @@ async def test_wait_for_task_raise_for_status_true_no_timeout(
     response = await index.add_documents(small_movies)
     monkeypatch.setattr(AsyncClient, "get", mock_get_response)
     with pytest.raises(MeilisearchTaskFailedError):
-        await wait_for_task(
+        await async_wait_for_task(
             index.http_client, response.task_uid, raise_for_status=True, timeout_in_ms=None
         )
 
 
-async def test_wait_for_task_raise_for_status_false(
+async def test_async_wait_for_task_raise_for_status_false(
     empty_index, small_movies, base_url, monkeypatch
 ):
     async def mock_get_response(*args, **kwargs):
@@ -419,4 +421,4 @@ async def test_wait_for_task_raise_for_status_false(
     response = await index.add_documents(small_movies)
     monkeypatch.setattr(AsyncClient, "get", mock_get_response)
     with pytest.raises(MeilisearchTaskFailedError):
-        await wait_for_task(index.http_client, response.task_uid, raise_for_status=True)
+        await async_wait_for_task(index.http_client, response.task_uid, raise_for_status=True)

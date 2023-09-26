@@ -7,12 +7,13 @@ from types import TracebackType
 from typing import Any
 
 import jwt
-from httpx import AsyncClient
+from httpx import AsyncClient as HttpxAsyncClient
+from httpx import Client as HttpxClient
 
-from meilisearch_python_async._http_requests import HttpRequests
+from meilisearch_python_async._http_requests import AsyncHttpRequests, HttpRequests
+from meilisearch_python_async._index import AsyncIndex
 from meilisearch_python_async._utils import is_pydantic_2
 from meilisearch_python_async.errors import InvalidRestriction, MeilisearchApiError
-from meilisearch_python_async.index import Index
 from meilisearch_python_async.models.client import (
     ClientStats,
     Key,
@@ -25,137 +26,19 @@ from meilisearch_python_async.models.index import IndexInfo
 from meilisearch_python_async.models.search import SearchParams, SearchResultsWithUID
 from meilisearch_python_async.models.task import TaskInfo
 from meilisearch_python_async.models.version import Version
-from meilisearch_python_async.task import wait_for_task
+from meilisearch_python_async.task import async_wait_for_task
 
 
-class Client:
-    """The client to connect to the MeilisearchApi."""
-
+class BaseClient:
     def __init__(
         self,
-        url: str,
         api_key: str | None = None,
-        *,
-        timeout: int | None = None,
-        verify: str | bool | SSLContext = True,
     ) -> None:
-        """Class initializer.
-
-        Args:
-
-            url: The url to the Meilisearch API (ex: http://localhost:7700)
-            api_key: The optional API key for Meilisearch. Defaults to None.
-            timeout: The amount of time in seconds that the client will wait for a response before
-                timing out. Defaults to None.
-            verify: SSL certificates (a.k.a CA bundle) used to
-                verify the identity of requested hosts. Either `True` (default CA bundle),
-                a path to an SSL certificate file, or `False` (disable verification)
-        """
+        self._headers: dict[str, str] | None
         if api_key:
-            headers = {"Authorization": f"Bearer {api_key}"}
+            self._headers = {"Authorization": f"Bearer {api_key}"}
         else:
-            headers = None
-
-        self.http_client = AsyncClient(
-            base_url=url, timeout=timeout, headers=headers, verify=verify
-        )
-        self._http_requests = HttpRequests(self.http_client)
-
-    async def __aenter__(self) -> Client:
-        return self
-
-    async def __aexit__(
-        self,
-        et: type[BaseException] | None,
-        ev: type[BaseException] | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        await self.aclose()
-
-    async def aclose(self) -> None:
-        """Closes the client.
-
-        This only needs to be used if the client was not created with a context manager.
-        """
-        await self.http_client.aclose()
-
-    async def create_dump(self) -> TaskInfo:
-        """Trigger the creation of a Meilisearch dump.
-
-        Returns:
-
-            The details of the task.
-
-        Raises:
-
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the Meilisearch API returned an error.
-
-        Examples:
-
-            >>> from meilisearch_python_async import Client
-            >>> async with Client("http://localhost.com", "masterKey") as client:
-            >>>     await client.create_dump()
-        """
-        response = await self._http_requests.post("dumps")
-
-        return TaskInfo(**response.json())
-
-    async def create_index(self, uid: str, primary_key: str | None = None) -> Index:
-        """Creates a new index.
-
-        Args:
-
-            uid: The index's unique identifier.
-            primary_key: The primary key of the documents. Defaults to None.
-
-        Returns:
-
-            An instance of Index containing the information of the newly created index.
-
-        Raises:
-
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the Meilisearch API returned an error.
-
-        Examples:
-
-            >>> from meilisearch_python_async import Client
-            >>> async with Client("http://localhost.com", "masterKey") as client:
-            >>>     index = await client.create_index("movies")
-        """
-        return await Index.create(self.http_client, uid, primary_key)
-
-    async def delete_index_if_exists(self, uid: str) -> bool:
-        """Deletes an index if it already exists.
-
-        Args:
-
-            uid: The index's unique identifier.
-
-        Returns:
-
-            True if an index was deleted for False if not.
-
-        Raises:
-
-            MeilisearchCommunicationError: If there was an error communicating with the server.
-            MeilisearchApiError: If the Meilisearch API returned an error.
-
-        Examples:
-
-            >>> from meilisearch_python_async import Client
-            >>> async with Client("http://localhost.com", "masterKey") as client:
-            >>>     await client.delete_index_if_exists()
-        """
-        url = f"indexes/{uid}"
-        response = await self._http_requests.delete(url)
-        status = await wait_for_task(
-            self.http_client, response.json()["taskUid"], timeout_in_ms=100000
-        )
-        if status.status == "succeeded":
-            return True
-        return False
+            self._headers = None
 
     def generate_tenant_token(
         self,
@@ -219,9 +102,167 @@ class Client:
 
         return jwt.encode(payload, api_key.key, algorithm="HS256")
 
+
+class Client(BaseClient):
+    """client to connect to the Meilisearch API."""
+
+    def __init__(
+        self,
+        url: str,
+        api_key: str | None = None,
+        *,
+        timeout: int | None = None,
+        verify: str | bool | SSLContext = True,
+    ) -> None:
+        """Class initializer.
+
+        Args:
+
+            url: The url to the Meilisearch API (ex: http://localhost:7700)
+            api_key: The optional API key for Meilisearch. Defaults to None.
+            timeout: The amount of time in seconds that the client will wait for a response before
+                timing out. Defaults to None.
+            verify: SSL certificates (a.k.a CA bundle) used to
+                verify the identity of requested hosts. Either `True` (default CA bundle),
+                a path to an SSL certificate file, or `False` (disable verification)
+        """
+        super().__init__(api_key)
+
+        self.http_client = HttpxClient(
+            base_url=url, timeout=timeout, headers=self._headers, verify=verify
+        )
+        self._http_requests = HttpRequests(self.http_client)
+
+
+class AsyncClient(BaseClient):
+    """Async client to connect to the Meilisearch API."""
+
+    def __init__(
+        self,
+        url: str,
+        api_key: str | None = None,
+        *,
+        timeout: int | None = None,
+        verify: str | bool | SSLContext = True,
+    ) -> None:
+        """Class initializer.
+
+        Args:
+
+            url: The url to the Meilisearch API (ex: http://localhost:7700)
+            api_key: The optional API key for Meilisearch. Defaults to None.
+            timeout: The amount of time in seconds that the client will wait for a response before
+                timing out. Defaults to None.
+            verify: SSL certificates (a.k.a CA bundle) used to
+                verify the identity of requested hosts. Either `True` (default CA bundle),
+                a path to an SSL certificate file, or `False` (disable verification)
+        """
+        super().__init__(api_key)
+
+        self.http_client = HttpxAsyncClient(
+            base_url=url, timeout=timeout, headers=self._headers, verify=verify
+        )
+        self._http_requests = AsyncHttpRequests(self.http_client)
+
+    async def __aenter__(self) -> AsyncClient:
+        return self
+
+    async def __aexit__(
+        self,
+        et: type[BaseException] | None,
+        ev: type[BaseException] | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        await self.aclose()
+
+    async def aclose(self) -> None:
+        """Closes the client.
+
+        This only needs to be used if the client was not created with a context manager.
+        """
+        await self.http_client.aclose()
+
+    async def create_dump(self) -> TaskInfo:
+        """Trigger the creation of a Meilisearch dump.
+
+        Returns:
+
+            The details of the task.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     await client.create_dump()
+        """
+        response = await self._http_requests.post("dumps")
+
+        return TaskInfo(**response.json())
+
+    async def create_index(self, uid: str, primary_key: str | None = None) -> AsyncIndex:
+        """Creates a new index.
+
+        Args:
+
+            uid: The index's unique identifier.
+            primary_key: The primary key of the documents. Defaults to None.
+
+        Returns:
+
+            An instance of AsyncIndex containing the information of the newly created index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = await client.create_index("movies")
+        """
+        return await AsyncIndex.create(self.http_client, uid, primary_key)
+
+    async def delete_index_if_exists(self, uid: str) -> bool:
+        """Deletes an index if it already exists.
+
+        Args:
+
+            uid: The index's unique identifier.
+
+        Returns:
+
+            True if an index was deleted for False if not.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_async import Client
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     await client.delete_index_if_exists()
+        """
+        url = f"indexes/{uid}"
+        response = await self._http_requests.delete(url)
+        status = await async_wait_for_task(
+            self.http_client, response.json()["taskUid"], timeout_in_ms=100000
+        )
+        if status.status == "succeeded":
+            return True
+        return False
+
     async def get_indexes(
         self, *, offset: int | None = None, limit: int | None = None
-    ) -> list[Index] | None:
+    ) -> list[AsyncIndex] | None:
         """Get all indexes.
         Args:
 
@@ -245,22 +286,14 @@ class Client:
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     indexes = await client.get_indexes()
         """
-        if offset is not None and limit is not None:
-            url = f"indexes?offset={offset}&limit={limit}"
-        elif offset is not None:
-            url = f"indexes?offset={offset}"
-        elif limit is not None:
-            url = f"indexes?limit={limit}"
-        else:
-            url = "indexes"
-
+        url = _build_offset_limit_url("indexes", offset, limit)
         response = await self._http_requests.get(url)
 
         if not response.json()["results"]:
             return None
 
         return [
-            Index(
+            AsyncIndex(
                 http_client=self.http_client,
                 uid=x["uid"],
                 primary_key=x["primaryKey"],
@@ -270,7 +303,7 @@ class Client:
             for x in response.json()["results"]
         ]
 
-    async def get_index(self, uid: str) -> Index:
+    async def get_index(self, uid: str) -> AsyncIndex:
         """Gets a single index based on the uid of the index.
 
         Args:
@@ -279,7 +312,7 @@ class Client:
 
         Returns:
 
-            An Index instance containing the information of the fetched index.
+            An AsyncIndex instance containing the information of the fetched index.
 
         Raises:
 
@@ -292,9 +325,9 @@ class Client:
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_index()
         """
-        return await Index(self.http_client, uid).fetch_info()
+        return await AsyncIndex(self.http_client, uid).fetch_info()
 
-    def index(self, uid: str) -> Index:
+    def index(self, uid: str) -> AsyncIndex:
         """Create a local reference to an index identified by UID, without making an HTTP call.
 
         Because no network call is made this method is not awaitable.
@@ -305,7 +338,7 @@ class Client:
 
         Returns:
 
-            An Index instance.
+            An AsyncIndex instance.
 
         Raises:
 
@@ -318,7 +351,7 @@ class Client:
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
         """
-        return Index(self.http_client, uid=uid)
+        return AsyncIndex(self.http_client, uid=uid)
 
     async def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.
@@ -343,7 +376,7 @@ class Client:
 
         return ClientStats(**response.json())
 
-    async def get_or_create_index(self, uid: str, primary_key: str | None = None) -> Index:
+    async def get_or_create_index(self, uid: str, primary_key: str | None = None) -> AsyncIndex:
         """Get an index, or create it if it doesn't exist.
 
         Args:
@@ -353,7 +386,7 @@ class Client:
 
         Returns:
 
-            An instance of Index containing the information of the retrieved or newly created index.
+            An instance of AsyncIndex containing the information of the retrieved or newly created index.
 
         Raises:
 
@@ -460,14 +493,7 @@ class Client:
             async with Client("http://localhost.com", "masterKey") as client:
                 keys = await client.get_keys()
         """
-        if offset is not None and limit is not None:
-            url = f"keys?offset={offset}&limit={limit}"
-        elif offset is not None:
-            url = f"keys?offset={offset}"
-        elif limit is not None:
-            url = f"keys?limit={limit}"
-        else:
-            url = "keys"
+        url = _build_offset_limit_url("keys", offset, limit)
         response = await self._http_requests.get(url)
 
         return KeySearch(**response.json())
@@ -526,20 +552,7 @@ class Client:
             >>>     )
             >>>     keys = await client.update_key(key_info)
         """
-        # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
-        # but can when converting to a json string.
-        if is_pydantic_2():
-            payload = {  # type: ignore[attr-defined]
-                k: v
-                for k, v in json.loads(key.model_dump_json(by_alias=True)).items()
-                if v is not None and k != "key"
-            }
-        else:  # pragma: no cover
-            payload = {  # type: ignore[attr-defined]
-                k: v
-                for k, v in json.loads(key.json(by_alias=True)).items()
-                if v is not None and k != "key"
-            }
+        payload = _build_update_key_payload(key)
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
@@ -584,7 +597,7 @@ class Client:
         return [SearchResultsWithUID(**x) for x in response.json()["results"]]
 
     async def get_raw_index(self, uid: str) -> IndexInfo | None:
-        """Gets the index and returns all the index information rather than an Index instance.
+        """Gets the index and returns all the index information rather than an AsyncIndex instance.
 
         Args:
 
@@ -592,7 +605,7 @@ class Client:
 
         Returns:
 
-            Index information rather than an Index instance.
+            Index information rather than an AsyncIndex instance.
 
         Raises:
 
@@ -623,11 +636,11 @@ class Client:
             limit: Number of indexes to return. The default of None will use the Meilisearch
                 default.
 
-        Returns all the index information rather than an Index instance.
+        Returns all the index information rather than an AsyncIndex instance.
 
         Returns:
 
-            A list of the Index information rather than an Index instances.
+            A list of the Index information rather than an AsyncIndex instances.
 
         Raises:
 
@@ -640,14 +653,7 @@ class Client:
             >>> async with Client("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_raw_indexes()
         """
-        if offset is not None and limit is not None:
-            url = f"indexes?offset={offset}&limit={limit}"
-        elif offset is not None:
-            url = f"indexes?offset={offset}"
-        elif limit is not None:
-            url = f"indexes?limit={limit}"
-        else:
-            url = "indexes"
+        url = _build_offset_limit_url("indexes", offset, limit)
         response = await self._http_requests.get(url)
 
         if not response.json()["results"]:
@@ -725,3 +731,31 @@ class Client:
         response = await self._http_requests.post("swap-indexes", processed_indexes)
 
         return TaskInfo(**response.json())
+
+
+def _build_offset_limit_url(base: str, offset: int | None, limit: int | None) -> str:
+    if offset is not None and limit is not None:
+        return f"{base}?offset={offset}&limit={limit}"
+    elif offset is not None:
+        return f"{base}?offset={offset}"
+    elif limit is not None:
+        return f"{base}?limit={limit}"
+
+    return base
+
+
+def _build_update_key_payload(key: KeyUpdate) -> dict[str, Any]:
+    # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
+    # but can when converting to a json string.
+    if is_pydantic_2():
+        return {  # type: ignore[attr-defined]
+            k: v
+            for k, v in json.loads(key.model_dump_json(by_alias=True)).items()
+            if v is not None and k != "key"
+        }
+    else:  # pragma: no cover
+        return {  # type: ignore[attr-defined]
+            k: v
+            for k, v in json.loads(key.json(by_alias=True)).items()
+            if v is not None and k != "key"
+        }

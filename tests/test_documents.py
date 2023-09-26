@@ -5,13 +5,13 @@ from math import ceil
 
 import pytest
 
+from meilisearch_python_async._index import _async_load_documents_from_file, _combine_documents
 from meilisearch_python_async.errors import (
     InvalidDocumentError,
     MeilisearchApiError,
     MeilisearchError,
 )
-from meilisearch_python_async.index import _combine_documents, _load_documents_from_file
-from meilisearch_python_async.task import wait_for_task
+from meilisearch_python_async.task import async_wait_for_task
 
 
 def generate_test_movies(num_movies=50, id_start=0):
@@ -86,7 +86,7 @@ async def test_get_documents_default(empty_index):
 async def test_add_documents(primary_key, expected_primary_key, empty_index, small_movies):
     index = await empty_index()
     response = await index.add_documents(small_movies, primary_key)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -104,7 +104,9 @@ async def test_add_documents_in_batches(
     )
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in response]
+    )
     assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
@@ -120,16 +122,16 @@ async def test_add_documents_from_directory(
     number_of_files,
     documents_per_file,
     total_documents,
-    test_client,
+    async_test_client,
     tmp_path,
 ):
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(path, combine_documents=combine_documents)
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -137,16 +139,16 @@ async def test_add_documents_from_directory(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_csv_path(
-    path_type, combine_documents, test_client, tmp_path
+    path_type, combine_documents, async_test_client, tmp_path
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv"
     )
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -154,16 +156,16 @@ async def test_add_documents_from_directory_csv_path(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_csv_path_with_delimiter(
-    path_type, combine_documents, test_client, tmp_path
+    path_type, combine_documents, async_test_client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", csv_delimiter=";"
     )
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -171,34 +173,38 @@ async def test_add_documents_from_directory_csv_path_with_delimiter(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_ndjson(
-    path_type, combine_documents, test_client, tmp_path
+    path_type, combine_documents, async_test_client, tmp_path
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson"
     )
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("combine_documents", [True, False])
-async def test_add_documents_from_directory_no_documents(combine_documents, test_client, tmp_path):
+async def test_add_documents_from_directory_no_documents(
+    combine_documents, async_test_client, tmp_path
+):
     with open(tmp_path / "test.txt", "w") as f:
         f.write("nothing")
 
     with pytest.raises(MeilisearchError):
-        index = test_client.index("movies")
+        index = async_test_client.index("movies")
         await index.add_documents_from_directory(tmp_path, combine_documents=combine_documents)
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
-async def test_add_documents_from_directory_csv_delimiter_invalid(delimiter, test_client, tmp_path):
+async def test_add_documents_from_directory_csv_delimiter_invalid(
+    delimiter, async_test_client, tmp_path
+):
     add_csv_file(tmp_path / "test1.csv", 1, 0)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.add_documents_from_directory(
             tmp_path, document_type="csv", csv_delimiter=delimiter
@@ -218,19 +224,19 @@ async def test_add_documents_from_directory_in_batchs(
     number_of_files,
     documents_per_file,
     total_documents,
-    test_client,
+    async_test_client,
     tmp_path,
 ):
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents
     )
 
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -239,17 +245,17 @@ async def test_add_documents_from_directory_in_batchs(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_in_batchs_csv(
-    path_type, combine_documents, batch_size, test_client, tmp_path
+    path_type, combine_documents, batch_size, async_test_client, tmp_path
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents, document_type="csv"
     )
 
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -258,17 +264,17 @@ async def test_add_documents_from_directory_in_batchs_csv(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_add_documents_from_directory_in_batchs_ndjson(
-    path_type, combine_documents, batch_size, test_client, tmp_path
+    path_type, combine_documents, batch_size, async_test_client, tmp_path
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents, document_type="ndjson"
     )
 
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -278,13 +284,13 @@ async def test_add_documents_from_directory_in_batchs_ndjson(
 )
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_from_file(
-    path_type, primary_key, expected_primary_key, test_client, small_movies_path
+    path_type, primary_key, expected_primary_key, async_test_client, small_movies_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = await index.add_documents_from_file(path, primary_key)
 
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -294,13 +300,13 @@ async def test_add_documents_from_file(
 )
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_from_file_csv(
-    path_type, primary_key, expected_primary_key, test_client, small_movies_csv_path
+    path_type, primary_key, expected_primary_key, async_test_client, small_movies_csv_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = await index.add_documents_from_file(path, primary_key)
 
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -310,12 +316,12 @@ async def test_add_documents_from_file_csv(
 )
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_raw_file_csv(
-    path_type, primary_key, expected_primary_key, test_client, small_movies_csv_path
+    path_type, primary_key, expected_primary_key, async_test_client, small_movies_csv_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = await index.add_documents_from_raw_file(path, primary_key)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -328,17 +334,17 @@ async def test_add_documents_raw_file_csv_delimiter(
     path_type,
     primary_key,
     expected_primary_key,
-    test_client,
+    async_test_client,
     small_movies_csv_path_semicolon_delimiter,
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = (
         str(small_movies_csv_path_semicolon_delimiter)
         if path_type == "str"
         else small_movies_csv_path_semicolon_delimiter
     )
     response = await index.add_documents_from_raw_file(path, primary_key, csv_delimiter=";")
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -348,45 +354,45 @@ async def test_add_documents_raw_file_csv_delimiter(
 )
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_raw_file_ndjson(
-    path_type, primary_key, expected_primary_key, test_client, small_movies_ndjson_path
+    path_type, primary_key, expected_primary_key, async_test_client, small_movies_ndjson_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = await index.add_documents_from_raw_file(path, primary_key)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
 
-async def test_add_documents_raw_file_not_found_error(test_client, tmp_path):
+async def test_add_documents_raw_file_not_found_error(async_test_client, tmp_path):
     with pytest.raises(MeilisearchError):
-        index = test_client.index("movies")
+        index = async_test_client.index("movies")
         await index.add_documents_from_raw_file(tmp_path / "file.csv")
 
 
-async def test_add_document_raw_file_extension_error(test_client, tmp_path):
+async def test_add_document_raw_file_extension_error(async_test_client, tmp_path):
     file_path = tmp_path / "file.bad"
     with open(file_path, "w") as f:
         f.write("test")
 
     with pytest.raises(ValueError):
-        index = test_client.index("movies")
+        index = async_test_client.index("movies")
         await index.add_documents_from_raw_file(file_path)
 
 
 async def test_add_documents_raw_file_csv_delimiter_non_csv_error(
-    test_client, small_movies_ndjson_path
+    async_test_client, small_movies_ndjson_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.add_documents_from_raw_file(small_movies_ndjson_path, csv_delimiter=";")
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
 async def test_add_documents_raw_file_csv_delimiter_invalid(
-    delimiter, test_client, small_movies_csv_path
+    delimiter, async_test_client, small_movies_csv_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.add_documents_from_raw_file(small_movies_csv_path, csv_delimiter=delimiter)
 
@@ -396,19 +402,19 @@ async def test_add_documents_raw_file_csv_delimiter_invalid(
 )
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_add_documents_from_file_ndjson(
-    path_type, primary_key, expected_primary_key, test_client, small_movies_ndjson_path
+    path_type, primary_key, expected_primary_key, async_test_client, small_movies_ndjson_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = await index.add_documents_from_file(path, primary_key)
 
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
 
-async def test_add_documents_from_file_invalid_extension(test_client):
-    index = test_client.index("movies")
+async def test_add_documents_from_file_invalid_extension(async_test_client):
+    index = async_test_client.index("movies")
 
     with pytest.raises(MeilisearchError):
         await index.add_documents_from_file("test.bad")
@@ -424,11 +430,11 @@ async def test_add_documents_from_file_in_batches(
     batch_size,
     primary_key,
     expected_primary_key,
-    test_client,
+    async_test_client,
     small_movies_path,
     small_movies,
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = await index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key
@@ -436,7 +442,9 @@ async def test_add_documents_from_file_in_batches(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in response]
+    )
     assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
@@ -451,11 +459,11 @@ async def test_add_documents_from_file_in_batches_csv(
     batch_size,
     primary_key,
     expected_primary_key,
-    test_client,
+    async_test_client,
     small_movies_csv_path,
     small_movies,
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = await index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key
@@ -463,7 +471,9 @@ async def test_add_documents_from_file_in_batches_csv(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in response]
+    )
     assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
@@ -478,11 +488,11 @@ async def test_add_documents_from_file_in_batches_csv_with_delimiter(
     batch_size,
     primary_key,
     expected_primary_key,
-    test_client,
+    async_test_client,
     small_movies_csv_path_semicolon_delimiter,
     small_movies,
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = (
         str(small_movies_csv_path_semicolon_delimiter)
         if path_type == "str"
@@ -494,16 +504,18 @@ async def test_add_documents_from_file_in_batches_csv_with_delimiter(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in response]
+    )
     assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
 async def test_add_documents_from_file_in_batches_csv_with_delimiter_invalid(
-    delimiter, test_client, small_movies_csv_path
+    delimiter, async_test_client, small_movies_csv_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.add_documents_from_file_in_batches(
             small_movies_csv_path, csv_delimiter=delimiter
@@ -520,11 +532,11 @@ async def test_add_documents_from_file_in_batches_ndjson(
     batch_size,
     primary_key,
     expected_primary_key,
-    test_client,
+    async_test_client,
     small_movies_ndjson_path,
     small_movies,
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = await index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key
@@ -532,13 +544,15 @@ async def test_add_documents_from_file_in_batches_ndjson(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in response])
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in response]
+    )
     assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == expected_primary_key
 
 
-async def test_add_documents_from_file_in_batches_invalid_extension(test_client):
-    index = test_client.index("movies")
+async def test_add_documents_from_file_in_batches_invalid_extension(async_test_client):
+    index = async_test_client.index("movies")
 
     with pytest.raises(MeilisearchError):
         await index.add_documents_from_file_in_batches("test.bad")
@@ -577,7 +591,7 @@ async def test_get_documents_offset_optional_params(index_with_documents):
 async def test_get_documents_filter(index_with_documents):
     index = await index_with_documents()
     response = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents(filter="genre=action")
     genres = set([x["genre"] for x in response.results])
     assert len(genres) == 1
@@ -587,7 +601,7 @@ async def test_get_documents_filter(index_with_documents):
 async def test_get_documents_filter_with_fields(index_with_documents):
     index = await index_with_documents()
     response = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents(fields=["genre"], filter="genre=action")
     genres = set([x["genre"] for x in response.results])
     assert len(genres) == 1
@@ -600,20 +614,20 @@ async def test_update_documents(index_with_documents, small_movies):
     doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
     update = await index.update_documents([response.results[0]])
-    await wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid)
     response = await index.get_document(doc_id)
     assert response["title"] == "Some title"
     update = await index.update_documents(small_movies)
-    await wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid)
     response = await index.get_document(doc_id)
     assert response["title"] != "Some title"
 
 
-async def test_update_documents_with_primary_key(test_client, small_movies):
+async def test_update_documents_with_primary_key(async_test_client, small_movies):
     primary_key = "release_date"
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     update = await index.update_documents(small_movies, primary_key=primary_key)
-    await wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid)
     assert await index.get_primary_key() == primary_key
 
 
@@ -624,29 +638,33 @@ async def test_update_documents_in_batches(batch_size, index_with_documents, sma
     doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
     update = await index.update_documents([response.results[0]])
-    await wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid)
 
     response = await index.get_document(doc_id)
     assert response["title"] == "Some title"
     updates = await index.update_documents_in_batches(small_movies, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in updates])
 
     response = await index.get_document(doc_id)
     assert response["title"] != "Some title"
 
 
 @pytest.mark.parametrize("batch_size", [100, 500])
-async def test_update_documents_in_batches_with_primary_key(batch_size, test_client, small_movies):
+async def test_update_documents_in_batches_with_primary_key(
+    batch_size, async_test_client, small_movies
+):
     primary_key = "release_date"
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     updates = await index.update_documents_in_batches(
         small_movies, batch_size=batch_size, primary_key=primary_key
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in updates]
+    )
     assert {"succeeded"} == {x.status for x in tasks}
     assert await index.get_primary_key() == primary_key
 
@@ -662,18 +680,18 @@ async def test_update_documents_from_directory(
     number_of_files,
     documents_per_file,
     total_documents,
-    test_client,
+    async_test_client,
     tmp_path,
 ):
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents
     )
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -681,16 +699,16 @@ async def test_update_documents_from_directory(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_csv(
-    path_type, combine_documents, test_client, tmp_path
+    path_type, combine_documents, async_test_client, tmp_path
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv"
     )
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -698,26 +716,26 @@ async def test_update_documents_from_directory_csv(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_csv_with_delimiter(
-    path_type, combine_documents, test_client, tmp_path
+    path_type, combine_documents, async_test_client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", csv_delimiter=";"
     )
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
 async def test_update_documents_from_directory_csv_delimiter_invalid(
-    delimiter, test_client, tmp_path
+    delimiter, async_test_client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 1, 0)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.update_documents_from_directory(
             tmp_path, document_type="csv", csv_delimiter=delimiter
@@ -727,16 +745,16 @@ async def test_update_documents_from_directory_csv_delimiter_invalid(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_ndjson(
-    path_type, combine_documents, test_client, tmp_path
+    path_type, combine_documents, async_test_client, tmp_path
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson"
     )
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -754,19 +772,19 @@ async def test_update_documents_from_directory_in_batchs(
     number_of_files,
     documents_per_file,
     total_documents,
-    test_client,
+    async_test_client,
     tmp_path,
 ):
     for i in range(number_of_files):
         add_json_file(tmp_path / f"text{i}.json", documents_per_file, i * documents_per_file)
 
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents
     )
 
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -775,17 +793,17 @@ async def test_update_documents_from_directory_in_batchs(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_in_batchs_csv(
-    path_type, combine_documents, batch_size, test_client, tmp_path
+    path_type, combine_documents, batch_size, async_test_client, tmp_path
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents, document_type="csv"
     )
 
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -794,11 +812,11 @@ async def test_update_documents_from_directory_in_batchs_csv(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_in_batchs_csv_delimiter(
-    path_type, combine_documents, batch_size, test_client, tmp_path
+    path_type, combine_documents, batch_size, async_test_client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
         path,
@@ -808,17 +826,17 @@ async def test_update_documents_from_directory_in_batchs_csv_delimiter(
         csv_delimiter=";",
     )
 
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
 async def test_update_documents_from_directory_in_batches_csv_delimiter_invalid(
-    delimiter, test_client, tmp_path
+    delimiter, async_test_client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 1, 0)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.update_documents_from_directory_in_batches(
             tmp_path, document_type="csv", csv_delimiter=delimiter
@@ -829,35 +847,37 @@ async def test_update_documents_from_directory_in_batches_csv_delimiter_invalid(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("combine_documents", [True, False])
 async def test_update_documents_from_directory_in_batchs_ndjson(
-    path_type, combine_documents, batch_size, test_client, tmp_path
+    path_type, combine_documents, batch_size, async_test_client, tmp_path
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents, document_type="ndjson"
     )
 
-    await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in responses])
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 20
 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
-async def test_update_documents_from_file(path_type, test_client, small_movies, small_movies_path):
+async def test_update_documents_from_file(
+    path_type, async_test_client, small_movies, small_movies_path
+):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     update = await index.update_documents_from_file(path)
-    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -865,20 +885,20 @@ async def test_update_documents_from_file(path_type, test_client, small_movies, 
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_from_file_csv(
-    path_type, test_client, small_movies, small_movies_csv_path
+    path_type, async_test_client, small_movies, small_movies_csv_path
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     update = await index.update_documents_from_file(path)
-    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -886,13 +906,13 @@ async def test_update_documents_from_file_csv(
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_from_file_csv_with_delimiter(
-    path_type, test_client, small_movies, small_movies_csv_path_semicolon_delimiter
+    path_type, async_test_client, small_movies, small_movies_csv_path_semicolon_delimiter
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -903,7 +923,7 @@ async def test_update_documents_from_file_csv_with_delimiter(
         else small_movies_csv_path_semicolon_delimiter
     )
     update = await index.update_documents_from_file(path, csv_delimiter=";")
-    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -911,9 +931,9 @@ async def test_update_documents_from_file_csv_with_delimiter(
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
 async def test_update_documents_from_file_csv_delimiter_invalid(
-    delimiter, test_client, small_movies_csv_path_semicolon_delimiter
+    delimiter, async_test_client, small_movies_csv_path_semicolon_delimiter
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.update_documents_from_file(
             small_movies_csv_path_semicolon_delimiter, csv_delimiter=delimiter
@@ -922,35 +942,35 @@ async def test_update_documents_from_file_csv_delimiter_invalid(
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_from_file_ndjson(
-    path_type, test_client, small_movies, small_movies_ndjson_path
+    path_type, async_test_client, small_movies, small_movies_ndjson_path
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     update = await index.update_documents_from_file(path)
-    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
 
 
-async def test_update_documents_from_file_with_primary_key(test_client, small_movies_path):
+async def test_update_documents_from_file_with_primary_key(async_test_client, small_movies_path):
     primary_key = "release_date"
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     update = await index.update_documents_from_file(small_movies_path, primary_key=primary_key)
-    await wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid)
     assert await index.get_primary_key() == primary_key
 
 
-async def test_update_documents_from_file_invalid_extension(test_client):
-    index = test_client.index("movies")
+async def test_update_documents_from_file_invalid_extension(async_test_client):
+    index = async_test_client.index("movies")
 
     with pytest.raises(MeilisearchError):
         await index.update_documents_from_file("test.bad")
@@ -959,13 +979,13 @@ async def test_update_documents_from_file_invalid_extension(test_client):
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("batch_size", [100, 500])
 async def test_update_documents_from_file_in_batches(
-    path_type, batch_size, test_client, small_movies_path, small_movies
+    path_type, batch_size, async_test_client, small_movies_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -974,7 +994,9 @@ async def test_update_documents_from_file_in_batches(
     updates = await index.update_documents_from_file_in_batches(path, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in updates]
+    )
     assert {"succeeded"} == {x.status for x in tasks}
 
     response = await index.get_documents()
@@ -984,13 +1006,13 @@ async def test_update_documents_from_file_in_batches(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("batch_size", [100, 500])
 async def test_update_documents_from_file_in_batches_csv(
-    path_type, batch_size, test_client, small_movies_csv_path, small_movies
+    path_type, batch_size, async_test_client, small_movies_csv_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -999,7 +1021,9 @@ async def test_update_documents_from_file_in_batches_csv(
     updates = await index.update_documents_from_file_in_batches(path, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in updates]
+    )
     assert {"succeeded"} == {x.status for x in tasks}
 
     response = await index.get_documents()
@@ -1009,13 +1033,13 @@ async def test_update_documents_from_file_in_batches_csv(
 @pytest.mark.parametrize("path_type", ["path", "str"])
 @pytest.mark.parametrize("batch_size", [100, 500])
 async def test_update_documents_from_file_in_batches_ndjson(
-    path_type, batch_size, test_client, small_movies_ndjson_path, small_movies
+    path_type, batch_size, async_test_client, small_movies_ndjson_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1024,15 +1048,15 @@ async def test_update_documents_from_file_in_batches_ndjson(
     updates = await index.update_documents_from_file_in_batches(path, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = await asyncio.gather(*[wait_for_task(index.http_client, x.task_uid) for x in updates])  # type: ignore
+    tasks = await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in updates])  # type: ignore
     assert {"succeeded"} == {x.status for x in tasks}
 
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
 
 
-async def test_update_documents_from_file_in_batches_invalid_extension(test_client):
-    index = test_client.index("movies")
+async def test_update_documents_from_file_in_batches_invalid_extension(async_test_client):
+    index = async_test_client.index("movies")
 
     with pytest.raises(MeilisearchError):
         await index.update_documents_from_file_in_batches("test.bad")
@@ -1040,20 +1064,20 @@ async def test_update_documents_from_file_in_batches_invalid_extension(test_clie
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_raw_file_csv(
-    path_type, test_client, small_movies_csv_path, small_movies
+    path_type, async_test_client, small_movies_csv_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     update = await index.update_documents_from_raw_file(path, primary_key="id")
-    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1061,13 +1085,13 @@ async def test_update_documents_raw_file_csv(
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_raw_file_csv_with_delimiter(
-    path_type, test_client, small_movies_csv_path_semicolon_delimiter, small_movies
+    path_type, async_test_client, small_movies_csv_path_semicolon_delimiter, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1078,25 +1102,25 @@ async def test_update_documents_raw_file_csv_with_delimiter(
         else small_movies_csv_path_semicolon_delimiter
     )
     update = await index.update_documents_from_raw_file(path, primary_key="id", csv_delimiter=";")
-    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
 
 
 async def test_update_documents_from_raw_file_csv_delimiter_non_csv(
-    test_client, small_movies_ndjson_path
+    async_test_client, small_movies_ndjson_path
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.update_documents_from_raw_file(small_movies_ndjson_path, csv_delimiter=";")
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])
 async def test_update_documents_from_raw_file_csv_delimiter_invalid(
-    delimiter, test_client, small_movies_csv_path_semicolon_delimiter
+    delimiter, async_test_client, small_movies_csv_path_semicolon_delimiter
 ):
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     with pytest.raises(ValueError):
         await index.update_documents_from_raw_file(
             small_movies_csv_path_semicolon_delimiter, csv_delimiter=delimiter
@@ -1105,45 +1129,45 @@ async def test_update_documents_from_raw_file_csv_delimiter_invalid(
 
 @pytest.mark.parametrize("path_type", ["path", "str"])
 async def test_update_documents_raw_file_ndjson(
-    path_type, test_client, small_movies_ndjson_path, small_movies
+    path_type, async_test_client, small_movies_ndjson_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = test_client.index("movies")
+    index = async_test_client.index("movies")
     response = await index.add_documents(small_movies)
-    update = await wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
     response = await index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     update = await index.update_documents_from_raw_file(path)
-    update = await wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
 
 
-async def test_update_documents_raw_file_not_found_error(test_client, tmp_path):
+async def test_update_documents_raw_file_not_found_error(async_test_client, tmp_path):
     with pytest.raises(MeilisearchError):
-        index = test_client.index("movies")
+        index = async_test_client.index("movies")
         await index.update_documents_from_raw_file(tmp_path / "file.csv")
 
 
-async def test_update_document_raw_file_extension_error(test_client, tmp_path):
+async def test_update_document_raw_file_extension_error(async_test_client, tmp_path):
     file_path = tmp_path / "file.bad"
     with open(file_path, "w") as f:
         f.write("test")
 
     with pytest.raises(ValueError):
-        index = test_client.index("movies")
+        index = async_test_client.index("movies")
         await index.update_documents_from_raw_file(file_path)
 
 
 async def test_delete_document(index_with_documents):
     index = await index_with_documents()
     response = await index.delete_document("500682")
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     with pytest.raises(MeilisearchApiError):
         await index.get_document("500682")
 
@@ -1152,7 +1176,7 @@ async def test_delete_documents(index_with_documents):
     to_delete = ["522681", "450465", "329996"]
     index = await index_with_documents()
     response = await index.delete_documents(to_delete)
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     documents = await index.get_documents()
     ids = [x["id"] for x in documents.results]
     assert to_delete not in ids
@@ -1161,11 +1185,11 @@ async def test_delete_documents(index_with_documents):
 async def test_delete_documents_by_filter(index_with_documents):
     index = await index_with_documents()
     response = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     assert "action" in ([x.get("genre") for x in response.results])
     response = await index.delete_documents_by_filter("genre=action")
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     genres = [x.get("genre") for x in response.results]
     assert "action" not in genres
@@ -1175,7 +1199,7 @@ async def test_delete_documents_by_filter(index_with_documents):
 async def test_delete_documents_in_batches_by_filter(index_with_documents):
     index = await index_with_documents()
     response = await index.update_filterable_attributes(["genre", "release_date"])
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     assert "action" in [x.get("genre") for x in response.results]
     assert 1520035200 in [x.get("release_date") for x in response.results]
@@ -1183,7 +1207,7 @@ async def test_delete_documents_in_batches_by_filter(index_with_documents):
         ["genre=action", "release_date=1520035200"]
     )
     for task in response:
-        await wait_for_task(index.http_client, task.task_uid)
+        await async_wait_for_task(index.http_client, task.task_uid)
     response = await index.get_documents()
     genres = [x.get("genre") for x in response.results]
     release_dates = [x.get("release_date") for x in response.results]
@@ -1196,19 +1220,19 @@ async def test_delete_documents_in_batches_by_filter(index_with_documents):
 async def test_delete_all_documents(index_with_documents):
     index = await index_with_documents()
     response = await index.delete_all_documents()
-    await wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     assert response.results == []
 
 
-async def test_load_documents_from_file_invalid_document(tmp_path):
+async def test_async_load_documents_from_file_invalid_document(tmp_path):
     doc = {"id": 1, "name": "test"}
     file_path = tmp_path / "test.json"
     with open(file_path, "w") as f:
         json.dump(doc, f)
 
     with pytest.raises(InvalidDocumentError):
-        await _load_documents_from_file(file_path)
+        await _async_load_documents_from_file(file_path)
 
 
 def test_combine_documents():
