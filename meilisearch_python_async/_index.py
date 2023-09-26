@@ -3638,8 +3638,8 @@ class Index(BaseIndex):
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = _load_documents_from_file(path, csv_delimiter)
-                responses.append(
-                    *self.add_documents_in_batches(
+                responses.extend(
+                    self.add_documents_in_batches(
                         documents, batch_size=batch_size, primary_key=primary_key
                     )
                 )
@@ -4028,8 +4028,8 @@ class Index(BaseIndex):
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = _load_documents_from_file(path, csv_delimiter)
-                responses.append(
-                    *self.update_documents_in_batches(
+                responses.extend(
+                    self.update_documents_in_batches(
                         documents, batch_size=batch_size, primary_key=primary_key
                     )
                 )

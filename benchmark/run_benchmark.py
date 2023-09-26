@@ -14,9 +14,9 @@ from meilisearch.models.task import TaskInfo as SyncTaskInfo
 from rich.console import Console
 from rich.progress import track
 
-from meilisearch_python_async import Client as AsyncClient
+from meilisearch_python_async import AsyncClient
 from meilisearch_python_async.models.task import TaskInfo as AsyncTaskInfo
-from meilisearch_python_async.task import cancel_tasks, wait_for_task
+from meilisearch_python_async.task import async_cancel_tasks, async_wait_for_task
 
 
 def generate_data(add_records: int = 1000000) -> list[dict[str, Any]]:
@@ -96,10 +96,10 @@ async def run_async_batch_add_benchmark(data: list[dict[str, Any]]) -> list[floa
             index = client.index("movies")
             _, time_taken = await benchmark_async_add_document_in_batches(client, data)
             times.append(time_taken)
-            task = await cancel_tasks(index.http_client)
-            await wait_for_task(client.http_client, task.task_uid, timeout_in_ms=None)
+            task = await async_cancel_tasks(index.http_client)
+            await async_wait_for_task(client.http_client, task.task_uid, timeout_in_ms=None)
             task = await index.delete()
-            await wait_for_task(client.http_client, task.task_uid, timeout_in_ms=None)
+            await async_wait_for_task(client.http_client, task.task_uid, timeout_in_ms=None)
 
     return times
 
@@ -128,7 +128,8 @@ async def setup_index(data: list[dict[str, Any]]) -> None:
             index = await client.create_index("movies")
             tasks = await index.add_documents_in_batches(data, batch_size=1000)
             waits = [
-                wait_for_task(client.http_client, x.task_uid, timeout_in_ms=None) for x in tasks
+                async_wait_for_task(client.http_client, x.task_uid, timeout_in_ms=None)
+                for x in tasks
             ]
             await asyncio.gather(*waits)
 

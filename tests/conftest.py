@@ -7,8 +7,8 @@ from uuid import uuid4
 import pytest
 from httpx import AsyncClient as HttpxAsyncClient
 
-from meilisearch_python_async import AsyncClient
-from meilisearch_python_async.task import async_wait_for_task
+from meilisearch_python_async import AsyncClient, Client
+from meilisearch_python_async.task import async_wait_for_task, wait_for_task
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"
@@ -40,6 +40,11 @@ def event_loop():
 async def async_test_client():
     async with AsyncClient(BASE_URL, MASTER_KEY) as client:
         yield client
+
+
+@pytest.fixture(scope="session")
+def test_client():
+    yield Client(BASE_URL, MASTER_KEY)
 
 
 @pytest.fixture(autouse=True)
@@ -83,7 +88,7 @@ def index_uid4():
 
 
 @pytest.fixture
-async def indexes_sample(async_test_client):
+async def async_indexes_sample(async_test_client):
     indexes = []
     for index_args in INDEX_FIXTURE:
         index = await async_test_client.create_index(**index_args)
@@ -91,15 +96,24 @@ async def indexes_sample(async_test_client):
     yield indexes
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
+def indexes_sample(test_client):
+    indexes = []
+    for index_args in INDEX_FIXTURE:
+        index = test_client.create_index(**index_args)
+        indexes.append(index)
+    yield indexes
+
+
+@pytest.fixture
 def small_movies():
     with open(SMALL_MOVIES_PATH) as movie_file:
         yield json.loads(movie_file.read())
 
 
-@pytest.fixture(scope="session")
-def small_movies_csv_path(small_movies, tmp_path_factory):
-    file_path = tmp_path_factory.mktemp("csv") / "small_movies.csv"
+@pytest.fixture
+def small_movies_csv_path(small_movies, tmp_path):
+    file_path = tmp_path / "small_movies.csv"
     with open(file_path, "w") as f:
         field_names = list(small_movies[0].keys())
         writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL)
@@ -109,9 +123,9 @@ def small_movies_csv_path(small_movies, tmp_path_factory):
     return file_path
 
 
-@pytest.fixture(scope="session")
-def small_movies_csv_path_semicolon_delimiter(small_movies, tmp_path_factory):
-    file_path = tmp_path_factory.mktemp("csv") / "small_movies.csv"
+@pytest.fixture
+def small_movies_csv_path_semicolon_delimiter(small_movies, tmp_path):
+    file_path = tmp_path / "small_movies.csv"
     with open(file_path, "w") as f:
         field_names = list(small_movies[0].keys())
         writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL, delimiter=";")
@@ -121,9 +135,9 @@ def small_movies_csv_path_semicolon_delimiter(small_movies, tmp_path_factory):
     return file_path
 
 
-@pytest.fixture(scope="session")
-def small_movies_ndjson_path(small_movies, tmp_path_factory):
-    file_path = tmp_path_factory.mktemp("ndjson") / "small_movies.ndjson"
+@pytest.fixture
+def small_movies_ndjson_path(small_movies, tmp_path):
+    file_path = tmp_path / "small_movies.ndjson"
     nd_json = [json.dumps(x) for x in small_movies]
     with open(file_path, "w") as f:
         for line in nd_json:
@@ -138,7 +152,7 @@ def small_movies_path():
 
 
 @pytest.fixture
-async def empty_index(async_test_client):
+async def async_empty_index(async_test_client):
     async def index_maker():
         return await async_test_client.create_index(uid=str(uuid4()))
 
@@ -146,9 +160,17 @@ async def empty_index(async_test_client):
 
 
 @pytest.fixture
-async def index_with_documents(empty_index, small_movies):
+def empty_index(test_client):
+    def index_maker():
+        return test_client.create_index(uid=str(uuid4()))
+
+    return index_maker
+
+
+@pytest.fixture
+async def async_index_with_documents(async_empty_index, small_movies):
     async def index_maker(documents=small_movies):
-        index = await empty_index()
+        index = await async_empty_index()
         response = await index.add_documents(documents)
         await async_wait_for_task(index.http_client, response.task_uid)
         return index
@@ -157,13 +179,37 @@ async def index_with_documents(empty_index, small_movies):
 
 
 @pytest.fixture
-async def index_with_documents_and_vectors(empty_index, small_movies):
+def index_with_documents(empty_index, small_movies):
+    def index_maker(documents=small_movies):
+        index = empty_index()
+        response = index.add_documents(documents)
+        wait_for_task(index.http_client, response.task_uid)
+        return index
+
+    return index_maker
+
+
+@pytest.fixture
+async def async_index_with_documents_and_vectors(async_empty_index, small_movies):
     small_movies[0]["_vectors"] = [0.1, 0.2]
 
     async def index_maker(documents=small_movies):
-        index = await empty_index()
+        index = await async_empty_index()
         response = await index.add_documents(documents)
         await async_wait_for_task(index.http_client, response.task_uid)
+        return index
+
+    return index_maker
+
+
+@pytest.fixture
+def index_with_documents_and_vectors(empty_index, small_movies):
+    small_movies[0]["_vectors"] = [0.1, 0.2]
+
+    def index_maker(documents=small_movies):
+        index = empty_index()
+        response = index.add_documents(documents)
+        wait_for_task(index.http_client, response.task_uid)
         return index
 
     return index_maker
