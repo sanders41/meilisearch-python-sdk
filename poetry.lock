@@ -644,13 +644,13 @@ files = [
 
 [[package]]
 name = "meilisearch"
-version = "0.28.2"
+version = "0.28.3"
 description = "The python client for Meilisearch API."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "meilisearch-0.28.2-py3-none-any.whl", hash = "sha256:69997e0ca3c9bbdb1159bf8e491937f04d07350a3133ef74079084cef53649b6"},
-    {file = "meilisearch-0.28.2.tar.gz", hash = "sha256:555a9df22ec446c330de3939622b42cd7a1404511027b3e0b2ea24840427e5ee"},
+    {file = "meilisearch-0.28.3-py3-none-any.whl", hash = "sha256:d3639138e4b2be334c56cdd2521269b90c019f72b6feceb51f30de1f84f1666d"},
+    {file = "meilisearch-0.28.3.tar.gz", hash = "sha256:2bfc9063dc325668a36a52e9cb0b831e257df5adb47119c3fd010b11e502be65"},
 ]
 
 [package.dependencies]
