@@ -213,8 +213,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.delete_index_if_exists()
         """
-        url = f"indexes/{uid}"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"indexes/{uid}")
         status = wait_for_task(self.http_client, response.json()["taskUid"], timeout_in_ms=100000)
         if status.status == "succeeded":
             return True
@@ -808,8 +807,7 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.delete_index_if_exists()
         """
-        url = f"indexes/{uid}"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"indexes/{uid}")
         status = await async_wait_for_task(
             self.http_client, response.json()["taskUid"], timeout_in_ms=100000
         )
