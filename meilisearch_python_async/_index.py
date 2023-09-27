@@ -602,9 +602,8 @@ class AsyncIndex(BaseIndex):
             if fields:
                 parameters["fields"] = ",".join(fields)
 
-            response = await self._http_requests.get(
-                f"{self._documents_url}?{urlencode(parameters)}"
-            )
+            url = _build_encoded_url(self._documents_url, parameters)
+            response = await self._http_requests.get(url)
 
             return DocumentsInfo(**response.json())
 
@@ -648,10 +647,10 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.add_documents(documents)
         """
-        url = self._documents_url
         if primary_key:
-            formatted_primary_key = urlencode({"primaryKey": primary_key})
-            url = f"{url}?{formatted_primary_key}"
+            url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
+        else:
+            url = self._documents_url
 
         response = await self._http_requests.post(url, documents)
 
@@ -1039,7 +1038,6 @@ class AsyncIndex(BaseIndex):
             raise ValueError("csv_delimiter must be a single ascii character")
 
         content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
-        url = self._documents_url
         parameters = {}
 
         if primary_key:
@@ -1048,7 +1046,9 @@ class AsyncIndex(BaseIndex):
             parameters["csvDelimiter"] = csv_delimiter
 
         if parameters:
-            url = f"{url}?{urlencode(parameters)}"
+            url = _build_encoded_url(self._documents_url, parameters)
+        else:
+            url = self._documents_url
 
         async with aiofiles.open(upload_path, "r") as f:
             data = await f.read()
@@ -1088,10 +1088,10 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_documents(documents)
         """
-        url = self._documents_url
         if primary_key:
-            formatted_primary_key = urlencode({"primaryKey": primary_key})
-            url = f"{url}?{formatted_primary_key}"
+            url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
+        else:
+            url = self._documents_url
 
         response = await self._http_requests.put(url, documents)
 
@@ -1492,7 +1492,6 @@ class AsyncIndex(BaseIndex):
             raise ValueError("csv_delimiter must be a single ascii character")
 
         content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
-        url = self._documents_url
         parameters = {}
 
         if primary_key:
@@ -1501,7 +1500,9 @@ class AsyncIndex(BaseIndex):
             parameters["csvDelimiter"] = csv_delimiter
 
         if parameters:
-            url = f"{url}?{urlencode(parameters)}"
+            url = _build_encoded_url(self._documents_url, parameters)
+        else:
+            url = self._documents_url
 
         async with aiofiles.open(upload_path, "r") as f:
             data = await f.read()
@@ -3362,7 +3363,8 @@ class Index(BaseIndex):
             if fields:
                 parameters["fields"] = ",".join(fields)
 
-            response = self._http_requests.get(f"{self._documents_url}?{urlencode(parameters)}")
+            url = _build_encoded_url(self._documents_url, parameters)
+            response = self._http_requests.get(url)
 
             return DocumentsInfo(**response.json())
 
@@ -3405,10 +3407,10 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.add_documents(documents)
         """
-        url = self._documents_url
         if primary_key:
-            formatted_primary_key = urlencode({"primaryKey": primary_key})
-            url = f"{url}?{formatted_primary_key}"
+            url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
+        else:
+            url = self._documents_url
 
         response = self._http_requests.post(url, documents)
 
@@ -3744,7 +3746,6 @@ class Index(BaseIndex):
             raise ValueError("csv_delimiter must be a single ascii character")
 
         content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
-        url = self._documents_url
         parameters = {}
 
         if primary_key:
@@ -3753,7 +3754,9 @@ class Index(BaseIndex):
             parameters["csvDelimiter"] = csv_delimiter
 
         if parameters:
-            url = f"{url}?{urlencode(parameters)}"
+            url = _build_encoded_url(self._documents_url, parameters)
+        else:
+            url = self._documents_url
 
         with open(upload_path) as f:
             data = f.read()
@@ -3793,10 +3796,10 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_documents(documents)
         """
-        url = self._documents_url
         if primary_key:
-            formatted_primary_key = urlencode({"primaryKey": primary_key})
-            url = f"{url}?{formatted_primary_key}"
+            url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
+        else:
+            url = self._documents_url
 
         response = self._http_requests.put(url, documents)
 
@@ -4127,7 +4130,6 @@ class Index(BaseIndex):
             raise ValueError("csv_delimiter must be a single ascii character")
 
         content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
-        url = self._documents_url
         parameters = {}
 
         if primary_key:
@@ -4136,7 +4138,9 @@ class Index(BaseIndex):
             parameters["csvDelimiter"] = csv_delimiter
 
         if parameters:
-            url = f"{url}?{urlencode(parameters)}"
+            url = _build_encoded_url(self._documents_url, parameters)
+        else:
+            url = self._documents_url
 
         with open(upload_path) as f:
             data = f.read()
@@ -5605,6 +5609,10 @@ def _process_search_parameters(
         body["vector"] = vector
 
     return body
+
+
+def _build_encoded_url(base_url: str, params: dict[str, Any]) -> str:
+    return f"{base_url}?{urlencode(params)}"
 
 
 def _validate_file_type(file_path: Path) -> None:
