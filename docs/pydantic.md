@@ -1,15 +1,17 @@
 # Pydantic usage
 
 This package uses [Pydantic](https://pydantic-docs.helpmanual.io/) to serialize/deserialize the JSON
-from Meilisearch into Python objects wherever possible, and in the process converts the camelCaseNames
-from JSON into more Pythonic snake_case_names.
+from Meilisearch into Python objects wherever possible, and in the process uses `CamelBase` from
+[camel-converter](https://github.com/sanders41/camel-converter) to convert the camelCaseNames from
+JSON into more Pythonic snake_case_names.
 
 In some instances it is not possible to return the data as an object because the structure will be
 dependant on your particular dataset and can't be known ahead of time. In these instances you can
 either work with the data in the dictionary that is returned, or because you will know the structure
 you can generate your own Pydantic models.
 
-As an example, if you want to get a movie from the [small movies example](https://github.com/sanders41/meilisearch-python-async/blob/main/datasets/small_movies.json)
+As an example, if you want to get a movie from the
+[small movies example](https://github.com/sanders41/meilisearch-python-async/blob/main/datasets/small_movies.json)
 you could put the results into an object with the following:
 
 ```py

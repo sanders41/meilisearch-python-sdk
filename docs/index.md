@@ -11,4 +11,5 @@ Meilisearch itself and how to use it can be found in [here](https://www.meilisea
 If the code base you are working with uses asyncio, for example if you are using
 [FastAPI](https://fastapi.tiangolo.com/), chose the `AsyncClint` otherwise chose the `Client`.
 The functionality of the two clients is the same, the difference being the `AsyncClient` provides
-async methods and uses the `AsyncIndex`, which also provides async methods.
+async methods and uses the `AsyncIndex`, which also provides async methods, while the `Client`
+provides blocking methods and uses the `Index`, which also provides blocking methods.
