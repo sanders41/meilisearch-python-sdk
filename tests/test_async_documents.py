@@ -6,12 +6,12 @@ from math import ceil
 import pytest
 
 from meilisearch_python_async._index import _async_load_documents_from_file, _combine_documents
+from meilisearch_python_async._task import async_wait_for_task
 from meilisearch_python_async.errors import (
     InvalidDocumentError,
     MeilisearchApiError,
     MeilisearchError,
 )
-from meilisearch_python_async.task import async_wait_for_task
 
 
 def generate_test_movies(num_movies=50, id_start=0):

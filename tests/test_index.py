@@ -2,6 +2,7 @@ import pytest
 from httpx import Response
 
 from meilisearch_python_async._http_requests import HttpRequests
+from meilisearch_python_async._task import wait_for_task
 from meilisearch_python_async.errors import MeilisearchApiError
 from meilisearch_python_async.models.settings import (
     Faceting,
@@ -10,7 +11,6 @@ from meilisearch_python_async.models.settings import (
     Pagination,
     TypoTolerance,
 )
-from meilisearch_python_async.task import wait_for_task
 
 
 @pytest.fixture

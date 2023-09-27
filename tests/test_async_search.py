@@ -3,9 +3,9 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from meilisearch_python_async import AsyncClient
+from meilisearch_python_async._task import async_wait_for_task
 from meilisearch_python_async.errors import MeilisearchApiError
 from meilisearch_python_async.models.search import SearchParams
-from meilisearch_python_async.task import async_wait_for_task
 
 
 async def test_basic_search(async_index_with_documents):

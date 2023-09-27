@@ -13,6 +13,7 @@ import aiofiles
 from httpx import AsyncClient, Client
 
 from meilisearch_python_async._http_requests import AsyncHttpRequests, HttpRequests
+from meilisearch_python_async._task import async_wait_for_task, wait_for_task
 from meilisearch_python_async._utils import is_pydantic_2, iso_to_date_time, use_task_groups
 from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_async.models.documents import DocumentsInfo
@@ -25,7 +26,6 @@ from meilisearch_python_async.models.settings import (
     TypoTolerance,
 )
 from meilisearch_python_async.models.task import TaskInfo
-from meilisearch_python_async.task import async_wait_for_task, wait_for_task
 
 
 class BaseIndex:
