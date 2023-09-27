@@ -8,7 +8,7 @@ import pytest
 from httpx import AsyncClient as HttpxAsyncClient
 
 from meilisearch_python_async import AsyncClient, Client
-from meilisearch_python_async.task import async_wait_for_task, wait_for_task
+from meilisearch_python_async._task import async_wait_for_task, wait_for_task
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"
@@ -54,7 +54,7 @@ async def clear_indexes(async_test_client):
     indexes = await async_test_client.get_indexes()
     if indexes:
         tasks = await asyncio.gather(*[async_test_client.index(x.uid).delete() for x in indexes])
-        await asyncio.gather(*[async_wait_for_task(async_test_client, x.task_uid) for x in tasks])
+        await asyncio.gather(*[async_test_client.wait_for_task(x.task_uid) for x in tasks])
 
 
 @pytest.fixture(scope="session")
@@ -242,3 +242,13 @@ async def enable_vector_search():
         await client.patch("/experimental-features", json={"vectorStore": True})
         yield
         await client.patch("/experimental-features", json={"vectorStore": False})
+
+
+@pytest.fixture
+async def create_tasks(async_empty_index, small_movies):
+    """Ensures there are some tasks present for testing."""
+    index = await async_empty_index()
+    await index.update_ranking_rules(["typo", "exactness"])
+    await index.reset_ranking_rules()
+    await index.add_documents(small_movies)
+    await index.add_documents(small_movies)

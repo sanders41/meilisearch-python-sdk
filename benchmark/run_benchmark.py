@@ -15,8 +15,8 @@ from rich.console import Console
 from rich.progress import track
 
 from meilisearch_python_async import AsyncClient
+from meilisearch_python_async._task import async_cancel_tasks, async_wait_for_task
 from meilisearch_python_async.models.task import TaskInfo as AsyncTaskInfo
-from meilisearch_python_async.task import async_cancel_tasks, async_wait_for_task
 
 
 def generate_data(add_records: int = 1000000) -> list[dict[str, Any]]:

@@ -33,7 +33,6 @@ nav:
     - Client: client_api.md
     - AsyncIndex: async_index_api.md
     - Index: index_api.md
-    - Tasks: tasks_api.md
   - Pydantic: pydantic.md
 
 plugins:
