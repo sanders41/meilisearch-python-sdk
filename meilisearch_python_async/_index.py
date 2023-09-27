@@ -52,6 +52,13 @@ class BaseIndex:
     def __repr__(self) -> str:
         return f"{type(self).__name__}(uid={self.uid!r}, primary_key={self.primary_key!r}, created_at={self.created_at!r}, updated_at={self.updated_at!r})"
 
+    def _set_fetch_info(
+        self, primary_key: str, created_at_iso_str: str, updated_at_iso_str: str
+    ) -> None:
+        self.primary_key = primary_key
+        self.created_at = iso_to_date_time(created_at_iso_str)
+        self.updated_at = iso_to_date_time(updated_at_iso_str)
+
 
 class AsyncIndex(BaseIndex):
     """AsyncIndex class gives access to all indexes routes and child routes.
@@ -101,8 +108,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.delete()
         """
-        url = self._base_url_with_uid
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(self._base_url_with_uid)
         return TaskInfo(**response.json())
 
     async def delete_if_exists(self) -> bool:
@@ -157,12 +163,11 @@ class AsyncIndex(BaseIndex):
             >>>     updated_index = await index.update()
         """
         payload = {"primaryKey": primary_key}
-        url = self._base_url_with_uid
-        response = await self._http_requests.patch(url, payload)
+        response = await self._http_requests.patch(self._base_url_with_uid, payload)
         await async_wait_for_task(
             self.http_client, response.json()["taskUid"], timeout_in_ms=100000
         )
-        index_response = await self._http_requests.get(f"{url}")
+        index_response = await self._http_requests.get(f"{self._base_url_with_uid}")
         self.primary_key = index_response.json()["primaryKey"]
         return self
 
@@ -185,12 +190,11 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     index_info = await index.fetch_info()
         """
-        url = self._base_url_with_uid
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(self._base_url_with_uid)
         index_dict = response.json()
-        self.primary_key = index_dict["primaryKey"]
-        self.created_at = iso_to_date_time(index_dict["createdAt"])
-        self.updated_at = iso_to_date_time(index_dict["updatedAt"])
+        self._set_fetch_info(
+            index_dict["primaryKey"], index_dict["createdAt"], index_dict["updatedAt"]
+        )
         return self
 
     async def get_primary_key(self) -> str | None:
@@ -284,8 +288,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     stats = await index.get_stats()
         """
-        url = self._stats_url
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(self._stats_url)
 
         return IndexStats(**response.json())
 
@@ -398,8 +401,7 @@ class AsyncIndex(BaseIndex):
             vector=vector,
         )
 
-        url = f"{self._base_url_with_uid}/search"
-        response = await self._http_requests.post(url, body=body)
+        response = await self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
 
         return SearchResults(**response.json())
 
@@ -522,8 +524,9 @@ class AsyncIndex(BaseIndex):
             vector=vector,
         )
 
-        url = f"{self._base_url_with_uid}/facet-search"
-        response = await self._http_requests.post(url, body=body)
+        response = await self._http_requests.post(
+            f"{self._base_url_with_uid}/facet-search", body=body
+        )
 
         return FacetSearchResults(**response.json())
 
@@ -550,8 +553,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     document = await index.get_document("1234")
         """
-        url = f"{self._documents_url}/{document_id}"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._documents_url}/{document_id}")
 
         return response.json()
 
@@ -600,8 +602,9 @@ class AsyncIndex(BaseIndex):
             if fields:
                 parameters["fields"] = ",".join(fields)
 
-            url = f"{self._documents_url}?{urlencode(parameters)}"
-            response = await self._http_requests.get(url)
+            response = await self._http_requests.get(
+                f"{self._documents_url}?{urlencode(parameters)}"
+            )
 
             return DocumentsInfo(**response.json())
 
@@ -610,8 +613,7 @@ class AsyncIndex(BaseIndex):
 
         parameters["filter"] = filter
 
-        url = f"{self._documents_url}/fetch"
-        response = await self._http_requests.post(url, body=parameters)
+        response = await self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
         return DocumentsInfo(**response.json())
 
@@ -1531,8 +1533,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.delete_document("1234")
         """
-        url = f"{self._documents_url}/{document_id}"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._documents_url}/{document_id}")
 
         return TaskInfo(**response.json())
 
@@ -1559,8 +1560,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.delete_documents(["1234", "5678"])
         """
-        url = f"{self._documents_url}/delete-batch"
-        response = await self._http_requests.post(url, ids)
+        response = await self._http_requests.post(f"{self._documents_url}/delete-batch", ids)
 
         return TaskInfo(**response.json())
 
@@ -1587,8 +1587,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.delete_documents_by_filter("genre=horor"))
         """
-        url = f"{self._documents_url}/delete"
-        response = await self._http_requests.post(url, body={"filter": filter})
+        response = await self._http_requests.post(
+            f"{self._documents_url}/delete", body={"filter": filter}
+        )
 
         return TaskInfo(**response.json())
 
@@ -1652,8 +1653,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.delete_all_document()
         """
-        url = self._documents_url
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(self._documents_url)
 
         return TaskInfo(**response.json())
 
@@ -1676,8 +1676,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     settings = await index.get_settings()
         """
-        url = self._settings_url
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(self._settings_url)
 
         return MeilisearchSettings(**response.json())
 
@@ -1729,8 +1728,7 @@ class AsyncIndex(BaseIndex):
         else:  # pragma: no cover
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
-        url = self._settings_url
-        response = await self._http_requests.patch(url, body_dict)
+        response = await self._http_requests.patch(self._settings_url, body_dict)
 
         return TaskInfo(**response.json())
 
@@ -1753,8 +1751,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_settings()
         """
-        url = self._settings_url
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(self._settings_url)
 
         return TaskInfo(**response.json())
 
@@ -1777,8 +1774,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     ranking_rules = await index.get_ranking_rules()
         """
-        url = f"{self._settings_url}/ranking-rules"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/ranking-rules")
 
         return response.json()
 
@@ -1815,8 +1811,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_ranking_rules(ranking_rules)
         """
-        url = f"{self._settings_url}/ranking-rules"
-        response = await self._http_requests.put(url, ranking_rules)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/ranking-rules", ranking_rules
+        )
 
         return TaskInfo(**response.json())
 
@@ -1839,8 +1836,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_ranking_rules()
         """
-        url = f"{self._settings_url}/ranking-rules"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/ranking-rules")
 
         return TaskInfo(**response.json())
 
@@ -1864,8 +1860,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     distinct_attribute = await index.get_distinct_attribute()
         """
-        url = f"{self._settings_url}/distinct-attribute"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/distinct-attribute")
 
         if not response.json():
             None
@@ -1895,8 +1890,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_distinct_attribute("url")
         """
-        url = f"{self._settings_url}/distinct-attribute"
-        response = await self._http_requests.put(url, body)
+        response = await self._http_requests.put(f"{self._settings_url}/distinct-attribute", body)
 
         return TaskInfo(**response.json())
 
@@ -1919,8 +1913,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_distinct_attributes()
         """
-        url = f"{self._settings_url}/distinct-attribute"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/distinct-attribute")
 
         return TaskInfo(**response.json())
 
@@ -1943,8 +1936,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     searchable_attributes = await index.get_searchable_attributes()
         """
-        url = f"{self._settings_url}/searchable-attributes"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/searchable-attributes")
 
         return response.json()
 
@@ -1971,8 +1963,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_searchable_attributes(["title", "description", "genre"])
         """
-        url = f"{self._settings_url}/searchable-attributes"
-        response = await self._http_requests.put(url, body)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/searchable-attributes", body
+        )
 
         return TaskInfo(**response.json())
 
@@ -1995,8 +1988,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_searchable_attributes()
         """
-        url = f"{self._settings_url}/searchable-attributes"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/searchable-attributes")
 
         return TaskInfo(**response.json())
 
@@ -2019,8 +2011,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     displayed_attributes = await index.get_displayed_attributes()
         """
-        url = f"{self._settings_url}/displayed-attributes"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/displayed-attributes")
 
         return response.json()
 
@@ -2049,8 +2040,7 @@ class AsyncIndex(BaseIndex):
             >>>         ["title", "description", "genre", "release_date"]
             >>>     )
         """
-        url = f"{self._settings_url}/displayed-attributes"
-        response = await self._http_requests.put(url, body)
+        response = await self._http_requests.put(f"{self._settings_url}/displayed-attributes", body)
 
         return TaskInfo(**response.json())
 
@@ -2073,8 +2063,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_displayed_attributes()
         """
-        url = f"{self._settings_url}/displayed-attributes"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/displayed-attributes")
 
         return TaskInfo(**response.json())
 
@@ -2097,8 +2086,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     stop_words = await index.get_stop_words()
         """
-        url = f"{self._settings_url}/stop-words"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/stop-words")
 
         if not response.json():
             return None
@@ -2128,8 +2116,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_stop_words(["the", "a", "an"])
         """
-        url = f"{self._settings_url}/stop-words"
-        response = await self._http_requests.put(url, body)
+        response = await self._http_requests.put(f"{self._settings_url}/stop-words", body)
 
         return TaskInfo(**response.json())
 
@@ -2152,8 +2139,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_stop_words()
         """
-        url = f"{self._settings_url}/stop-words"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/stop-words")
 
         return TaskInfo(**response.json())
 
@@ -2176,8 +2162,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     synonyms = await index.get_synonyms()
         """
-        url = f"{self._settings_url}/synonyms"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/synonyms")
 
         if not response.json():
             return None
@@ -2209,8 +2194,7 @@ class AsyncIndex(BaseIndex):
             >>>         {"wolverine": ["xmen", "logan"], "logan": ["wolverine"]}
             >>>     )
         """
-        url = f"{self._settings_url}/synonyms"
-        response = await self._http_requests.put(url, body)
+        response = await self._http_requests.put(f"{self._settings_url}/synonyms", body)
 
         return TaskInfo(**response.json())
 
@@ -2233,8 +2217,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_synonyms()
         """
-        url = f"{self._settings_url}/synonyms"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/synonyms")
 
         return TaskInfo(**response.json())
 
@@ -2257,8 +2240,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     filterable_attributes = await index.get_filterable_attributes()
         """
-        url = f"{self._settings_url}/filterable-attributes"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/filterable-attributes")
 
         if not response.json():
             return None
@@ -2288,8 +2270,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_filterable_attributes(["genre", "director"])
         """
-        url = f"{self._settings_url}/filterable-attributes"
-        response = await self._http_requests.put(url, body)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/filterable-attributes", body
+        )
 
         return TaskInfo(**response.json())
 
@@ -2312,8 +2295,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_filterable_attributes()
         """
-        url = f"{self._settings_url}/filterable-attributes"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/filterable-attributes")
 
         return TaskInfo(**response.json())
 
@@ -2336,8 +2318,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     sortable_attributes = await index.get_sortable_attributes()
         """
-        url = f"{self._settings_url}/sortable-attributes"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/sortable-attributes")
 
         return response.json()
 
@@ -2364,8 +2345,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_sortable_attributes(["title", "release_date"])
         """
-        url = f"{self._settings_url}/sortable-attributes"
-        response = await self._http_requests.put(url, sortable_attributes)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/sortable-attributes", sortable_attributes
+        )
 
         return TaskInfo(**response.json())
 
@@ -2388,8 +2370,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_sortable_attributes()
         """
-        url = f"{self._settings_url}/sortable-attributes"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/sortable-attributes")
 
         return TaskInfo(**response.json())
 
@@ -2412,8 +2393,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     sortable_attributes = await index.get_typo_tolerance()
         """
-        url = f"{self._settings_url}/typo-tolerance"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/typo-tolerance")
 
         return TypoTolerance(**response.json())
 
@@ -2441,12 +2421,10 @@ class AsyncIndex(BaseIndex):
             >>>     TypoTolerance(enabled=False)
             >>>     await index.update_typo_tolerance()
         """
-        url = f"{self._settings_url}/typo-tolerance"
-
         if is_pydantic_2():
-            response = await self._http_requests.patch(url, typo_tolerance.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = await self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -2469,8 +2447,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_typo_tolerance()
         """
-        url = f"{self._settings_url}/typo-tolerance"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/typo-tolerance")
 
         return TaskInfo(**response.json())
 
@@ -2493,8 +2470,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     faceting = await index.get_faceting()
         """
-        url = f"{self._settings_url}/faceting"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/faceting")
 
         return Faceting(**response.json())
 
@@ -2521,12 +2497,10 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
-        url = f"{self._settings_url}/faceting"
-
         if is_pydantic_2():
-            response = await self._http_requests.patch(url, faceting.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = await self._http_requests.patch(url, faceting.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(f"{self._settings_url}/faceting", faceting.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -2549,8 +2523,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_faceting()
         """
-        url = f"{self._settings_url}/faceting"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/faceting")
 
         return TaskInfo(**response.json())
 
@@ -2573,8 +2546,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     pagination_settings = await index.get_pagination()
         """
-        url = f"{self._settings_url}/pagination"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/pagination")
 
         return Pagination(**response.json())
 
@@ -2602,12 +2574,10 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_pagination(settings=Pagination(max_total_hits=123))
         """
-        url = f"{self._settings_url}/pagination"
-
         if is_pydantic_2():
-            response = await self._http_requests.patch(url, settings.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(f"{self._settings_url}/pagination", settings.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = await self._http_requests.patch(url, settings.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(f"{self._settings_url}/pagination", settings.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -2630,8 +2600,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_pagination()
         """
-        url = f"{self._settings_url}/pagination"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/pagination")
 
         return TaskInfo(**response.json())
 
@@ -2654,8 +2623,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     separator_token_settings = await index.get_separator_tokens()
         """
-        url = f"{self._settings_url}/separator-tokens"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/separator-tokens")
 
         return response.json()
 
@@ -2682,8 +2650,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_separator_tokens(separator_tokenes=["|", "/")
         """
-        url = f"{self._settings_url}/separator-tokens"
-        response = await self._http_requests.put(url, separator_tokens)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/separator-tokens", separator_tokens
+        )
 
         return TaskInfo(**response.json())
 
@@ -2706,8 +2675,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_separator_tokens()
         """
-        url = f"{self._settings_url}/separator-tokens"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/separator-tokens")
 
         return TaskInfo(**response.json())
 
@@ -2730,8 +2698,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     non_separator_token_settings = await index.get_non_separator_tokens()
         """
-        url = f"{self._settings_url}/non-separator-tokens"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/non-separator-tokens")
 
         return response.json()
 
@@ -2758,8 +2725,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_non_separator_tokens(non_separator_tokens=["@", "#")
         """
-        url = f"{self._settings_url}/non-separator-tokens"
-        response = await self._http_requests.put(url, non_separator_tokens)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/non-separator-tokens", non_separator_tokens
+        )
 
         return TaskInfo(**response.json())
 
@@ -2782,8 +2750,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_non_separator_tokens()
         """
-        url = f"{self._settings_url}/non-separator-tokens"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/non-separator-tokens")
 
         return TaskInfo(**response.json())
 
@@ -2806,8 +2773,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     word_dictionary = await index.get_word_dictionary()
         """
-        url = f"{self._settings_url}/dictionary"
-        response = await self._http_requests.get(url)
+        response = await self._http_requests.get(f"{self._settings_url}/dictionary")
 
         return response.json()
 
@@ -2834,8 +2800,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_word_dictionary(dictionary=["S.O.S", "S.O")
         """
-        url = f"{self._settings_url}/dictionary"
-        response = await self._http_requests.put(url, dictionary)
+        response = await self._http_requests.put(f"{self._settings_url}/dictionary", dictionary)
 
         return TaskInfo(**response.json())
 
@@ -2858,8 +2823,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.reset_word_dictionary()
         """
-        url = f"{self._settings_url}/dictionary"
-        response = await self._http_requests.delete(url)
+        response = await self._http_requests.delete(f"{self._settings_url}/dictionary")
 
         return TaskInfo(**response.json())
 
@@ -2912,8 +2876,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.delete()
         """
-        url = self._base_url_with_uid
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(self._base_url_with_uid)
         return TaskInfo(**response.json())
 
     def delete_if_exists(self) -> bool:
@@ -2966,10 +2929,9 @@ class Index(BaseIndex):
             >>> updated_index = index.update()
         """
         payload = {"primaryKey": primary_key}
-        url = self._base_url_with_uid
-        response = self._http_requests.patch(url, payload)
+        response = self._http_requests.patch(self._base_url_with_uid, payload)
         wait_for_task(self.http_client, response.json()["taskUid"], timeout_in_ms=100000)
-        index_response = self._http_requests.get(f"{url}")
+        index_response = self._http_requests.get(self._base_url_with_uid)
         self.primary_key = index_response.json()["primaryKey"]
         return self
 
@@ -2992,12 +2954,11 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index_info = index.fetch_info()
         """
-        url = self._base_url_with_uid
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(self._base_url_with_uid)
         index_dict = response.json()
-        self.primary_key = index_dict["primaryKey"]
-        self.created_at = iso_to_date_time(index_dict["createdAt"])
-        self.updated_at = iso_to_date_time(index_dict["updatedAt"])
+        self._set_fetch_info(
+            index_dict["primaryKey"], index_dict["createdAt"], index_dict["updatedAt"]
+        )
         return self
 
     def get_primary_key(self) -> str | None:
@@ -3089,8 +3050,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> stats = index.get_stats()
         """
-        url = self._stats_url
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(self._stats_url)
 
         return IndexStats(**response.json())
 
@@ -3203,8 +3163,7 @@ class Index(BaseIndex):
             vector=vector,
         )
 
-        url = f"{self._base_url_with_uid}/search"
-        response = self._http_requests.post(url, body=body)
+        response = self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
 
         return SearchResults(**response.json())
 
@@ -3327,8 +3286,7 @@ class Index(BaseIndex):
             vector=vector,
         )
 
-        url = f"{self._base_url_with_uid}/facet-search"
-        response = self._http_requests.post(url, body=body)
+        response = self._http_requests.post(f"{self._base_url_with_uid}/facet-search", body=body)
 
         return FacetSearchResults(**response.json())
 
@@ -3355,8 +3313,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> document = index.get_document("1234")
         """
-        url = f"{self._documents_url}/{document_id}"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._documents_url}/{document_id}")
 
         return response.json()
 
@@ -3405,8 +3362,7 @@ class Index(BaseIndex):
             if fields:
                 parameters["fields"] = ",".join(fields)
 
-            url = f"{self._documents_url}?{urlencode(parameters)}"
-            response = self._http_requests.get(url)
+            response = self._http_requests.get(f"{self._documents_url}?{urlencode(parameters)}")
 
             return DocumentsInfo(**response.json())
 
@@ -3414,9 +3370,7 @@ class Index(BaseIndex):
             parameters["fields"] = fields
 
         parameters["filter"] = filter
-
-        url = f"{self._documents_url}/fetch"
-        response = self._http_requests.post(url, body=parameters)
+        response = self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
         return DocumentsInfo(**response.json())
 
@@ -4214,8 +4168,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.delete_document("1234")
         """
-        url = f"{self._documents_url}/{document_id}"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._documents_url}/{document_id}")
 
         return TaskInfo(**response.json())
 
@@ -4242,8 +4195,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.delete_documents(["1234", "5678"])
         """
-        url = f"{self._documents_url}/delete-batch"
-        response = self._http_requests.post(url, ids)
+        response = self._http_requests.post(f"{self._documents_url}/delete-batch", ids)
 
         return TaskInfo(**response.json())
 
@@ -4270,8 +4222,9 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.delete_documents_by_filter("genre=horor"))
         """
-        url = f"{self._documents_url}/delete"
-        response = self._http_requests.post(url, body={"filter": filter})
+        response = self._http_requests.post(
+            f"{self._documents_url}/delete", body={"filter": filter}
+        )
 
         return TaskInfo(**response.json())
 
@@ -4326,8 +4279,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.delete_all_document()
         """
-        url = self._documents_url
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(self._documents_url)
 
         return TaskInfo(**response.json())
 
@@ -4350,8 +4302,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> settings = index.get_settings()
         """
-        url = self._settings_url
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(self._settings_url)
 
         return MeilisearchSettings(**response.json())
 
@@ -4403,8 +4354,7 @@ class Index(BaseIndex):
         else:  # pragma: no cover
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
-        url = self._settings_url
-        response = self._http_requests.patch(url, body_dict)
+        response = self._http_requests.patch(self._settings_url, body_dict)
 
         return TaskInfo(**response.json())
 
@@ -4427,8 +4377,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_settings()
         """
-        url = self._settings_url
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(self._settings_url)
 
         return TaskInfo(**response.json())
 
@@ -4451,8 +4400,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> ranking_rules = index.get_ranking_rules()
         """
-        url = f"{self._settings_url}/ranking-rules"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/ranking-rules")
 
         return response.json()
 
@@ -4489,8 +4437,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_ranking_rules(ranking_rules)
         """
-        url = f"{self._settings_url}/ranking-rules"
-        response = self._http_requests.put(url, ranking_rules)
+        response = self._http_requests.put(f"{self._settings_url}/ranking-rules", ranking_rules)
 
         return TaskInfo(**response.json())
 
@@ -4513,8 +4460,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_ranking_rules()
         """
-        url = f"{self._settings_url}/ranking-rules"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/ranking-rules")
 
         return TaskInfo(**response.json())
 
@@ -4538,8 +4484,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> distinct_attribute = index.get_distinct_attribute()
         """
-        url = f"{self._settings_url}/distinct-attribute"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/distinct-attribute")
 
         if not response.json():
             None
@@ -4569,8 +4514,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_distinct_attribute("url")
         """
-        url = f"{self._settings_url}/distinct-attribute"
-        response = self._http_requests.put(url, body)
+        response = self._http_requests.put(f"{self._settings_url}/distinct-attribute", body)
 
         return TaskInfo(**response.json())
 
@@ -4593,8 +4537,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_distinct_attributes()
         """
-        url = f"{self._settings_url}/distinct-attribute"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/distinct-attribute")
 
         return TaskInfo(**response.json())
 
@@ -4617,8 +4560,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> searchable_attributes = index.get_searchable_attributes()
         """
-        url = f"{self._settings_url}/searchable-attributes"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/searchable-attributes")
 
         return response.json()
 
@@ -4645,8 +4587,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_searchable_attributes(["title", "description", "genre"])
         """
-        url = f"{self._settings_url}/searchable-attributes"
-        response = self._http_requests.put(url, body)
+        response = self._http_requests.put(f"{self._settings_url}/searchable-attributes", body)
 
         return TaskInfo(**response.json())
 
@@ -4669,8 +4610,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_searchable_attributes()
         """
-        url = f"{self._settings_url}/searchable-attributes"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/searchable-attributes")
 
         return TaskInfo(**response.json())
 
@@ -4693,8 +4633,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> displayed_attributes = index.get_displayed_attributes()
         """
-        url = f"{self._settings_url}/displayed-attributes"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/displayed-attributes")
 
         return response.json()
 
@@ -4723,8 +4662,7 @@ class Index(BaseIndex):
             >>>     ["title", "description", "genre", "release_date"]
             >>> )
         """
-        url = f"{self._settings_url}/displayed-attributes"
-        response = self._http_requests.put(url, body)
+        response = self._http_requests.put(f"{self._settings_url}/displayed-attributes", body)
 
         return TaskInfo(**response.json())
 
@@ -4747,8 +4685,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_displayed_attributes()
         """
-        url = f"{self._settings_url}/displayed-attributes"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/displayed-attributes")
 
         return TaskInfo(**response.json())
 
@@ -4771,8 +4708,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> stop_words = index.get_stop_words()
         """
-        url = f"{self._settings_url}/stop-words"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/stop-words")
 
         if not response.json():
             return None
@@ -4802,8 +4738,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_stop_words(["the", "a", "an"])
         """
-        url = f"{self._settings_url}/stop-words"
-        response = self._http_requests.put(url, body)
+        response = self._http_requests.put(f"{self._settings_url}/stop-words", body)
 
         return TaskInfo(**response.json())
 
@@ -4826,8 +4761,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_stop_words()
         """
-        url = f"{self._settings_url}/stop-words"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/stop-words")
 
         return TaskInfo(**response.json())
 
@@ -4850,8 +4784,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> synonyms = index.get_synonyms()
         """
-        url = f"{self._settings_url}/synonyms"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/synonyms")
 
         if not response.json():
             return None
@@ -4883,8 +4816,7 @@ class Index(BaseIndex):
             >>>     {"wolverine": ["xmen", "logan"], "logan": ["wolverine"]}
             >>> )
         """
-        url = f"{self._settings_url}/synonyms"
-        response = self._http_requests.put(url, body)
+        response = self._http_requests.put(f"{self._settings_url}/synonyms", body)
 
         return TaskInfo(**response.json())
 
@@ -4907,8 +4839,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_synonyms()
         """
-        url = f"{self._settings_url}/synonyms"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/synonyms")
 
         return TaskInfo(**response.json())
 
@@ -4931,8 +4862,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> filterable_attributes = index.get_filterable_attributes()
         """
-        url = f"{self._settings_url}/filterable-attributes"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/filterable-attributes")
 
         if not response.json():
             return None
@@ -4962,8 +4892,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_filterable_attributes(["genre", "director"])
         """
-        url = f"{self._settings_url}/filterable-attributes"
-        response = self._http_requests.put(url, body)
+        response = self._http_requests.put(f"{self._settings_url}/filterable-attributes", body)
 
         return TaskInfo(**response.json())
 
@@ -4986,8 +4915,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_filterable_attributes()
         """
-        url = f"{self._settings_url}/filterable-attributes"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/filterable-attributes")
 
         return TaskInfo(**response.json())
 
@@ -5010,8 +4938,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> sortable_attributes = index.get_sortable_attributes()
         """
-        url = f"{self._settings_url}/sortable-attributes"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/sortable-attributes")
 
         return response.json()
 
@@ -5038,8 +4965,9 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_sortable_attributes(["title", "release_date"])
         """
-        url = f"{self._settings_url}/sortable-attributes"
-        response = self._http_requests.put(url, sortable_attributes)
+        response = self._http_requests.put(
+            f"{self._settings_url}/sortable-attributes", sortable_attributes
+        )
 
         return TaskInfo(**response.json())
 
@@ -5062,8 +4990,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_sortable_attributes()
         """
-        url = f"{self._settings_url}/sortable-attributes"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/sortable-attributes")
 
         return TaskInfo(**response.json())
 
@@ -5086,8 +5013,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> sortable_attributes = index.get_typo_tolerance()
         """
-        url = f"{self._settings_url}/typo-tolerance"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/typo-tolerance")
 
         return TypoTolerance(**response.json())
 
@@ -5115,12 +5041,10 @@ class Index(BaseIndex):
             >>> TypoTolerance(enabled=False)
             >>> index.update_typo_tolerance()
         """
-        url = f"{self._settings_url}/typo-tolerance"
-
         if is_pydantic_2():
-            response = self._http_requests.patch(url, typo_tolerance.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = self._http_requests.patch(url, typo_tolerance.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -5143,8 +5067,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_typo_tolerance()
         """
-        url = f"{self._settings_url}/typo-tolerance"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/typo-tolerance")
 
         return TaskInfo(**response.json())
 
@@ -5167,8 +5090,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> faceting = index.get_faceting()
         """
-        url = f"{self._settings_url}/faceting"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/faceting")
 
         return Faceting(**response.json())
 
@@ -5195,12 +5117,10 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
-        url = f"{self._settings_url}/faceting"
-
         if is_pydantic_2():
-            response = self._http_requests.patch(url, faceting.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = self._http_requests.patch(url, faceting.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(f"{self._settings_url}/faceting", faceting.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -5223,8 +5143,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_faceting()
         """
-        url = f"{self._settings_url}/faceting"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/faceting")
 
         return TaskInfo(**response.json())
 
@@ -5247,8 +5166,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> pagination_settings = index.get_pagination()
         """
-        url = f"{self._settings_url}/pagination"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/pagination")
 
         return Pagination(**response.json())
 
@@ -5276,12 +5194,10 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_pagination(settings=Pagination(max_total_hits=123))
         """
-        url = f"{self._settings_url}/pagination"
-
         if is_pydantic_2():
-            response = self._http_requests.patch(url, settings.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(f"{self._settings_url}/pagination", settings.model_dump(by_alias=True))  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = self._http_requests.patch(url, settings.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(f"{self._settings_url}/pagination", settings.dict(by_alias=True))  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -5304,8 +5220,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_pagination()
         """
-        url = f"{self._settings_url}/pagination"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/pagination")
 
         return TaskInfo(**response.json())
 
@@ -5328,8 +5243,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> separator_token_settings = index.get_separator_tokens()
         """
-        url = f"{self._settings_url}/separator-tokens"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/separator-tokens")
 
         return response.json()
 
@@ -5356,8 +5270,9 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_separator_tokens(separator_tokenes=["|", "/")
         """
-        url = f"{self._settings_url}/separator-tokens"
-        response = self._http_requests.put(url, separator_tokens)
+        response = self._http_requests.put(
+            f"{self._settings_url}/separator-tokens", separator_tokens
+        )
 
         return TaskInfo(**response.json())
 
@@ -5380,8 +5295,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_separator_tokens()
         """
-        url = f"{self._settings_url}/separator-tokens"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/separator-tokens")
 
         return TaskInfo(**response.json())
 
@@ -5404,8 +5318,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> non_separator_token_settings = index.get_non_separator_tokens()
         """
-        url = f"{self._settings_url}/non-separator-tokens"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/non-separator-tokens")
 
         return response.json()
 
@@ -5432,8 +5345,9 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_non_separator_tokens(non_separator_tokens=["@", "#")
         """
-        url = f"{self._settings_url}/non-separator-tokens"
-        response = self._http_requests.put(url, non_separator_tokens)
+        response = self._http_requests.put(
+            f"{self._settings_url}/non-separator-tokens", non_separator_tokens
+        )
 
         return TaskInfo(**response.json())
 
@@ -5456,8 +5370,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_non_separator_tokens()
         """
-        url = f"{self._settings_url}/non-separator-tokens"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/non-separator-tokens")
 
         return TaskInfo(**response.json())
 
@@ -5480,8 +5393,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> word_dictionary = index.get_word_dictionary()
         """
-        url = f"{self._settings_url}/dictionary"
-        response = self._http_requests.get(url)
+        response = self._http_requests.get(f"{self._settings_url}/dictionary")
 
         return response.json()
 
@@ -5508,8 +5420,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_word_dictionary(dictionary=["S.O.S", "S.O")
         """
-        url = f"{self._settings_url}/dictionary"
-        response = self._http_requests.put(url, dictionary)
+        response = self._http_requests.put(f"{self._settings_url}/dictionary", dictionary)
 
         return TaskInfo(**response.json())
 
@@ -5532,8 +5443,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> index.reset_word_dictionary()
         """
-        url = f"{self._settings_url}/dictionary"
-        response = self._http_requests.delete(url)
+        response = self._http_requests.delete(f"{self._settings_url}/dictionary")
 
         return TaskInfo(**response.json())
 
