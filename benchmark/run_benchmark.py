@@ -116,7 +116,7 @@ async def run_async_batch_add_benchmark(data: list[dict[str, Any]]) -> list[floa
 
 async def run_async_search_benchmark(movies_sampled: list[str]) -> list[float]:
     times = []
-    for _ in track(range(10), description="Running async multi function benchmark..."):
+    for _ in track(range(10), description="Running async multi search benchmark..."):
         async with AsyncClient("http://127.0.0.1:7700", "masterKey") as client:
             index = client.index("movies")
             searches = []
@@ -160,7 +160,7 @@ def run_sync_search_benchmark(movies_sampled: list[str]) -> list[float]:
     client = Client("http://127.0.0.1:7700", "masterKey")
     index = client.index("movies")
     times = []
-    for _ in track(range(10), description="Running sync multi function benchmark..."):
+    for _ in track(range(10), description="Running sync multi search benchmark..."):
         start = time()
         for movie in movies_sampled:
             index.search(movie)
@@ -189,7 +189,7 @@ def run_meili_search_benchmark(movies_sampled: list[str]) -> list[float]:
     client = MeilisearchClient("http://127.0.0.1:7700", "masterKey")
     index = client.index("movies")
     times = []
-    for _ in track(range(10), description="Running meili multi function benchmark..."):
+    for _ in track(range(10), description="Running meili multi search benchmark..."):
         start = time()
         for movie in movies_sampled:
             index.search(movie)
