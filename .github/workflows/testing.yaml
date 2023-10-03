@@ -10,16 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: install Just
-      uses: taiki-e/install-action@just
-    - name: Set up Python
-      uses: actions/setup-python@v4
     - name: Install Poetry
       run: pipx install poetry
     - name: Configure poetry
       run: |
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
+    - name: install Just
+      uses: taiki-e/install-action@just
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
         python-version: 3.8
         cache: "poetry"
