@@ -13,8 +13,8 @@ from httpx import (
     Response,
 )
 
-from meilisearch_python_async._version import VERSION
-from meilisearch_python_async.errors import (
+from meilisearch_python_sdk._version import VERSION
+from meilisearch_python_sdk.errors import (
     MeilisearchApiError,
     MeilisearchCommunicationError,
     MeilisearchError,

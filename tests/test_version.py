@@ -1,9 +1,9 @@
 import sys
 from pathlib import Path
 
-from meilisearch_python_async import __version__
-from meilisearch_python_async._http_requests import user_agent
-from meilisearch_python_async._version import VERSION
+from meilisearch_python_sdk import __version__
+from meilisearch_python_sdk._http_requests import user_agent
+from meilisearch_python_sdk._version import VERSION
 
 if sys.version_info < (3, 11):
     import tomli as tomllib

@@ -6,7 +6,7 @@ This client runs in a context manager which ensures that everything is cleaned u
 the client is done. To create a client:
 
 ```py
-from milisearch-python-async import AsyncClient
+from meilisearch-python-sdk import AsyncClient
 
 
 async with AsyncClient("http://localhost:7700", "masterKey") as client:
@@ -20,7 +20,7 @@ It is also possible to call the client without using a context manager, but in d
 need to make sure to do the cleanup yourself:
 
 ```py
-from meilisearch-python-async import AsyncClient
+from meilisearch-python-sdk import AsyncClient
 
 
 try:
@@ -33,4 +33,4 @@ finally:
 
 ## `AsyncClient API`
 
-::: meilisearch_python_async._client.AsyncClient
+::: meilisearch_python_sdk._client.AsyncClient

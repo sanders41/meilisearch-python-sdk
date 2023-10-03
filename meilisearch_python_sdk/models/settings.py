@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 
-from meilisearch_python_async._utils import is_pydantic_2
+from meilisearch_python_sdk._utils import is_pydantic_2
 
 
 class MinWordSizeForTypos(CamelBase):

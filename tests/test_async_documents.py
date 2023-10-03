@@ -5,9 +5,9 @@ from math import ceil
 
 import pytest
 
-from meilisearch_python_async._index import _async_load_documents_from_file, _combine_documents
-from meilisearch_python_async._task import async_wait_for_task
-from meilisearch_python_async.errors import (
+from meilisearch_python_sdk._index import _async_load_documents_from_file, _combine_documents
+from meilisearch_python_sdk._task import async_wait_for_task
+from meilisearch_python_sdk.errors import (
     InvalidDocumentError,
     MeilisearchApiError,
     MeilisearchError,

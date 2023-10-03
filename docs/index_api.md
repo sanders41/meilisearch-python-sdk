@@ -5,4 +5,4 @@ a new index with the `Client` it will create an `Index` instance.
 
 ## `Index`
 
-::: meilisearch_python_async._index.Index
+::: meilisearch_python_sdk._index.Index

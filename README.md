@@ -1,12 +1,12 @@
-# Meilisearch Python Async
+# Meilisearch Python SDK
 
-[![Tests Status](https://github.com/sanders41/meilisearch-python-async/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/meilisearch-python-async/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/meilisearch-python-async/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/meilisearch-python-async/main)
-[![Coverage](https://codecov.io/github/sanders41/meilisearch-python-async/coverage.svg?branch=main)](https://codecov.io/gh/sanders41/meilisearch-python-async)
-[![PyPI version](https://badge.fury.io/py/meilisearch-python-async.svg)](https://badge.fury.io/py/meilisearch-python-async)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/meilisearch-python-async?color=5cc141)](https://github.com/sanders41/meilisearch-python-async)
+[![Tests Status](https://github.com/sanders41/meilisearch-python-sdk/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/meilisearch-python-sdk/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/meilisearch-python-sdk/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/meilisearch-python-sdk/main)
+[![Coverage](https://codecov.io/github/sanders41/meilisearch-python-sdk/coverage.svg?branch=main)](https://codecov.io/gh/sanders41/meilisearch-python-sdk)
+[![PyPI version](https://badge.fury.io/py/meilisearch-python-sdk.svg)](https://badge.fury.io/py/meilisearch-python-sdk)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/meilisearch-python-sdk?color=5cc141)](https://github.com/sanders41/meilisearch-python-sdk)
 
-Meilisearch Python Async provides both an async and sync client for the
+Meilisearch Python SDK provides both an async and sync client for the
 [Meilisearch](https://github.com/meilisearch/meilisearch) API.
 
 Which client to use depends on your use case. If the code base you are working with uses asyncio,
@@ -22,7 +22,7 @@ Using a virtual environmnet is recommended for installing this package. Once the
 environment is created and activated install the package with:
 
 ```sh
-pip install meilisearch-python-async
+pip install meilisearch-python-sdk
 ```
 
 ## Run Meilisearch
@@ -49,7 +49,7 @@ docker run -it --rm -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --mas
 network call to send the data yet so it does not need to be awaited.
 
 ```py
-from meilisearch_python_async import AsyncClient
+from meilisearch_python_sdk import AsyncClient
 
 async with AsyncClient('http://127.0.0.1:7700', 'masterKey') as client:
     index = client.index("books")
@@ -65,7 +65,7 @@ async with AsyncClient('http://127.0.0.1:7700', 'masterKey') as client:
 #### Client
 
 ```py
-from meilisearch_python_async import Client
+from meilisearch_python_sdk import Client
 
 client = Client('http://127.0.0.1:7700', 'masterKey')
 index = client.index("books")
@@ -195,13 +195,13 @@ This test compares how long it takes to send 1 million documents in batches of 1
 Meilisearch server for indexing (lower is better). The time does not take into account how long
 Meilisearch takes to index the documents since that is outside of the library functionality.
 
-![Add Documents in Batches](https://raw.githubusercontent.com/sanders41/meilisearch-python-async/main/assets/add_in_batches.png)
+![Add Documents in Batches](https://raw.githubusercontent.com/sanders41/meilisearch-python-sdk/main/assets/add_in_batches.png)
 
 ### Muiltiple Searches
 
 This test compares how long it takes to complete 1000 searches (lower is better)
 
-![Multiple Searches](https://raw.githubusercontent.com/sanders41/meilisearch-python-async/main/assets/searches.png)
+![Multiple Searches](https://raw.githubusercontent.com/sanders41/meilisearch-python-sdk/main/assets/searches.png)
 
 ### Independent testing
 
@@ -211,7 +211,7 @@ results how he tested them in his [blog post](https://thedataquarry.com/posts/me
 
 ## Documentation
 
-See our [docs](https://meilisearch-python-async.paulsanders.dev) for the full documentation.
+See our [docs](https://meilisearch-python-sdk.paulsanders.dev) for the full documentation.
 
 ## Contributing
 

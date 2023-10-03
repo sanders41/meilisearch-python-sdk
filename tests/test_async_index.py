@@ -1,10 +1,10 @@
 import pytest
 from httpx import Response
 
-from meilisearch_python_async._http_requests import AsyncHttpRequests
-from meilisearch_python_async._task import async_wait_for_task
-from meilisearch_python_async.errors import MeilisearchApiError
-from meilisearch_python_async.models.settings import (
+from meilisearch_python_sdk._http_requests import AsyncHttpRequests
+from meilisearch_python_sdk._task import async_wait_for_task
+from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.models.settings import (
     Faceting,
     MeilisearchSettings,
     MinWordSizeForTypos,

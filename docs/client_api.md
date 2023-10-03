@@ -5,7 +5,7 @@
 To create a client:
 
 ```py
-from milisearch-python-async import Client
+from milisearch_python_sdk import Client
 
 
 client = Client("http://localhost:7700", "masterKey")
@@ -15,4 +15,4 @@ index = client.index("movies")
 
 ## `Client API`
 
-::: meilisearch_python_async._client.Client
+::: meilisearch_python_sdk._client.Client
