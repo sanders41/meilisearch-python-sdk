@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "meilisearch-python-async"
-version = "1.8.1"
+name = "meilisearch-python-sdk"
+version = "2.0.0"
 description = "A Python async client for the Meilisearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
@@ -8,7 +8,7 @@ readme = "README.md"
 repository = "https://github.com/sanders41/meilisearch-python-sdk"
 homepage = "https://github.com/sanders41/meilisearch-python-sdk"
 documentation = "https://meilisearch-python-sdk.paulsanders.dev"
-keywords = ["meilisearch", "async", "python"]
+keywords = ["meilisearch", "async", "python", "client", "sdk"]
 classifiers=[
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
@@ -21,7 +21,7 @@ classifiers=[
   "Operating System :: OS Independent",
   "Typing :: Typed",
 ]
-include = ["meilisearch_python_async/py.typed"]
+include = ["meilisearch_python_sdk/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -76,7 +76,7 @@ exclude = '''
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--cov=meilisearch_python_async --cov-report term-missing"
+addopts = "--cov=meilisearch_python_sdk --cov-report term-missing"
 asyncio_mode = "auto"
 
 [tool.mypy]

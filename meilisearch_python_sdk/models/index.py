@@ -4,7 +4,7 @@ from typing import Dict, Optional
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 
-from meilisearch_python_async._utils import is_pydantic_2, iso_to_date_time
+from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time
 
 
 class IndexBase(CamelBase):

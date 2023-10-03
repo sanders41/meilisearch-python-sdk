@@ -2,44 +2,44 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from meilisearch_python_async import Client
-from meilisearch_python_async.errors import MeilisearchApiError
-from meilisearch_python_async.models.search import SearchParams
-from meilisearch_python_async.task import wait_for_task
+from meilisearch_python_sdk import Client
+from meilisearch_python_sdk._task import wait_for_task
+from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.models.search import SearchParams
 
 
-async def test_basic_search(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("How to Train Your Dragon")
+def test_basic_search(index_with_documents):
+    index = index_with_documents()
+    response = index.search("How to Train Your Dragon")
     assert response.hits[0]["id"] == "166428"
     assert "_formatted" not in response.hits[0]
 
 
-async def test_basic_search_with_empty_params(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("How to Train Your Dragon")
+def test_basic_search_with_empty_params(index_with_documents):
+    index = index_with_documents()
+    response = index.search("How to Train Your Dragon")
     assert response.hits[0]["id"] == "166428"
     assert "_formatted" not in response.hits[0]
 
 
-async def test_search_with_empty_query(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("")
+def test_search_with_empty_query(index_with_documents):
+    index = index_with_documents()
+    response = index.search("")
     assert len(response.hits) == 20
     assert response.query == ""
 
 
-async def test_custom_search(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("Dragon", attributes_to_highlight=["title"])
+def test_custom_search(index_with_documents):
+    index = index_with_documents()
+    response = index.search("Dragon", attributes_to_highlight=["title"])
     assert response.hits[0]["id"] == "166428"
     assert "_formatted" in response.hits[0]
     assert "dragon" in response.hits[0]["_formatted"]["title"].lower()
 
 
-async def test_custom_search_hightlight_tags_and_crop_marker(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search(
+def test_custom_search_hightlight_tags_and_crop_marker(index_with_documents):
+    index = index_with_documents()
+    response = index.search(
         "Dragon",
         crop_length=5,
         attributes_to_highlight=["title"],
@@ -54,36 +54,36 @@ async def test_custom_search_hightlight_tags_and_crop_marker(index_with_document
     assert "</strong>" in response.hits[0]["_formatted"]["title"]
 
 
-async def test_custom_search_with_empty_query(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("", attributes_to_highlight=["title"])
+def test_custom_search_with_empty_query(index_with_documents):
+    index = index_with_documents()
+    response = index.search("", attributes_to_highlight=["title"])
     assert len(response.hits) == 20
     assert response.query == ""
 
 
-async def test_custom_search_params_with_matching_strategy_all(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("man loves", limit=5, matching_strategy="all")
+def test_custom_search_params_with_matching_strategy_all(index_with_documents):
+    index = index_with_documents()
+    response = index.search("man loves", limit=5, matching_strategy="all")
 
     assert len(response.hits) == 1
 
 
-async def test_custom_search_params_with_matching_strategy_last(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("man loves", limit=5, matching_strategy="last")
+def test_custom_search_params_with_matching_strategy_last(index_with_documents):
+    index = index_with_documents()
+    response = index.search("man loves", limit=5, matching_strategy="last")
 
     assert len(response.hits) > 1
 
 
-async def test_custom_search_with_no_query(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("", limit=5)
+def test_custom_search_with_no_query(index_with_documents):
+    index = index_with_documents()
+    response = index.search("", limit=5)
     assert len(response.hits) == 5
 
 
-async def test_custom_search_params_with_wildcard(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search(
+def test_custom_search_params_with_wildcard(index_with_documents):
+    index = index_with_documents()
+    response = index.search(
         "a",
         limit=5,
         attributes_to_highlight=["*"],
@@ -95,9 +95,9 @@ async def test_custom_search_params_with_wildcard(index_with_documents):
     assert "title" in response.hits[0]["_formatted"]
 
 
-async def test_custom_search_params_with_simple_string(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search(
+def test_custom_search_params_with_simple_string(index_with_documents):
+    index = index_with_documents()
+    response = index.search(
         "a",
         limit=5,
         attributes_to_highlight=["title"],
@@ -110,9 +110,9 @@ async def test_custom_search_params_with_simple_string(index_with_documents):
     assert "release_date" not in response.hits[0]["_formatted"]
 
 
-async def test_custom_search_params_with_string_list(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search(
+def test_custom_search_params_with_string_list(index_with_documents):
+    index = index_with_documents()
+    response = index.search(
         "a",
         limit=5,
         attributes_to_retrieve=["title", "overview"],
@@ -126,11 +126,11 @@ async def test_custom_search_params_with_string_list(index_with_documents):
     assert "<em>" not in response.hits[0]["_formatted"]["overview"]
 
 
-async def test_custom_search_params_with_facets(index_with_documents):
-    index = await index_with_documents()
-    update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.task_uid)
-    response = await index.search("world", facets=["genre"])
+def test_custom_search_params_with_facets(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.search("world", facets=["genre"])
     assert len(response.hits) == 12
     assert response.facet_distribution is not None
     assert "genre" in response.facet_distribution
@@ -139,27 +139,27 @@ async def test_custom_search_params_with_facets(index_with_documents):
     assert response.facet_distribution["genre"]["fantasy"] == 1
 
 
-async def test_custom_search_params_with_facet_filters(index_with_documents):
-    index = await index_with_documents()
-    update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.task_uid)
-    response = await index.search("world", filter=[["genre = action"]])
+def test_custom_search_params_with_facet_filters(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.search("world", filter=[["genre = action"]])
     assert len(response.hits) == 3
     assert response.facet_distribution is None
 
 
-async def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
-    index = await index_with_documents()
-    update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.task_uid)
-    response = await index.search(
+def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.search(
         "world", filter=["genre = action", ["genre = action", "genre = action"]]
     )
     assert len(response.hits) == 3
     assert response.facet_distribution is None
 
 
-async def test_custom_search_facet_filters_with_space(test_client):
+def test_custom_search_facet_filters_with_space(test_client):
     dataset = [
         {
             "id": 123,
@@ -201,18 +201,18 @@ async def test_custom_search_facet_filters_with_space(test_client):
     ]
 
     index = test_client.index("books")
-    update = await index.add_documents(dataset)
-    await wait_for_task(index.http_client, update.task_uid)
-    update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.task_uid)
-    response = await index.search("h", filter=["genre = 'sci fi'"])
+    update = index.add_documents(dataset)
+    wait_for_task(index.http_client, update.task_uid)
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.search("h", filter=["genre = 'sci fi'"])
     assert len(response.hits) == 1
     assert response.hits[0]["title"] == "The Hobbit"
 
 
-async def test_custom_search_params_with_pagination_parameters(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("", hits_per_page=1, page=1)
+def test_custom_search_params_with_pagination_parameters(index_with_documents):
+    index = index_with_documents()
+    response = index.search("", hits_per_page=1, page=1)
 
     assert len(response.hits) == 1
     assert response.hits_per_page == 1
@@ -221,9 +221,9 @@ async def test_custom_search_params_with_pagination_parameters(index_with_docume
     assert response.total_hits is not None
 
 
-async def test_custom_search_params_with_pagination_parameters_at_zero(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("", hits_per_page=0, page=0)
+def test_custom_search_params_with_pagination_parameters_at_zero(index_with_documents):
+    index = index_with_documents()
+    response = index.search("", hits_per_page=0, page=0)
 
     assert len(response.hits) == 0
     assert response.hits_per_page == 0
@@ -233,11 +233,11 @@ async def test_custom_search_params_with_pagination_parameters_at_zero(index_wit
     assert response.estimated_total_hits is None
 
 
-async def test_custom_search_params_with_many_params(index_with_documents):
-    index = await index_with_documents()
-    update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.task_uid)
-    response = await index.search(
+def test_custom_search_params_with_many_params(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.search(
         "world", filter=[["genre = action"]], attributes_to_retrieve=["title", "poster"]
     )
     assert len(response.hits) == 3
@@ -262,52 +262,50 @@ async def test_custom_search_params_with_many_params(index_with_documents):
         ),
     ],
 )
-async def test_search_sort(sort, titles, index_with_documents):
-    index = await index_with_documents()
-    response = await index.update_sortable_attributes(["title"])
-    await wait_for_task(index.http_client, response.task_uid)
-    stats = await index.get_stats()  # get this to get the total document count
+def test_search_sort(sort, titles, index_with_documents):
+    index = index_with_documents()
+    response = index.update_sortable_attributes(["title"])
+    wait_for_task(index.http_client, response.task_uid)
+    stats = index.get_stats()  # get this to get the total document count
 
     # Using a placeholder search because ranking rules affect sort otherwaise meaning the results
     # will almost never be in alphabetical order.
-    response = await index.search(sort=sort, limit=stats.number_of_documents)
+    response = index.search(sort=sort, limit=stats.number_of_documents)
     assert response.hits[0]["title"] == titles[0]
     assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
 
 
-async def test_search_with_tenant_token(
-    test_client, index_with_documents, base_url, default_search_key
-):
+def test_search_with_tenant_token(test_client, index_with_documents, base_url, default_search_key):
     token = test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
-    index_docs = await index_with_documents()
+    index_docs = index_with_documents()
 
-    async with Client(base_url, token) as client:
-        index = client.index(index_docs.uid)
-        response = await index.search("How to Train Your Dragon")
+    client = Client(base_url, token)
+    index = client.index(index_docs.uid)
+    response = index.search("How to Train Your Dragon")
 
     assert response.hits[0]["id"] == "166428"
 
 
-async def test_search_with_tenant_token_and_expire_date(
+def test_search_with_tenant_token_and_expire_date(
     test_client, index_with_documents, base_url, default_search_key
 ):
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     token = test_client.generate_tenant_token(
         search_rules=["*"], api_key=default_search_key, expires_at=expires_at
     )
-    index_docs = await index_with_documents()
+    index_docs = index_with_documents()
 
-    async with Client(base_url, token) as client:
-        index = client.index(index_docs.uid)
-        response = await index.search("How to Train Your Dragon")
+    client = Client(base_url, token)
+    index = client.index(index_docs.uid)
+    response = index.search("How to Train Your Dragon")
 
     assert response.hits[0]["id"] == "166428"
 
 
-async def test_multi_search(test_client, index_with_documents, empty_index):
-    index1 = await index_with_documents()
-    index2 = await empty_index()
-    response = await test_client.multi_search(
+def test_multi_search(test_client, index_with_documents, empty_index):
+    index1 = index_with_documents()
+    index2 = empty_index()
+    response = test_client.multi_search(
         [
             SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
             SearchParams(index_uid=index2.uid, query=""),
@@ -320,85 +318,85 @@ async def test_multi_search(test_client, index_with_documents, empty_index):
     assert response[1].index_uid == index2.uid
 
 
-async def test_multi_search_one_index(test_client, index_with_documents):
-    index = await index_with_documents()
-    response = await test_client.multi_search(
+def test_multi_search_one_index(test_client, index_with_documents):
+    index = index_with_documents()
+    response = test_client.multi_search(
         [SearchParams(index_uid=index.uid, query="How to Train Your Dragon")]
     )
     assert response[0].hits[0]["id"] == "166428"
     assert "_formatted" not in response[0].hits[0]
 
 
-async def test_multi_search_no_index(test_client):
+def test_multi_search_no_index(test_client):
     with pytest.raises(MeilisearchApiError):
-        await test_client.multi_search(
+        test_client.multi_search(
             [SearchParams(index_uid="bad", query="How to Train Your Dragon")],
         )
 
 
-async def test_attributes_to_search_on_search(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search(
+def test_attributes_to_search_on_search(index_with_documents):
+    index = index_with_documents()
+    response = index.search(
         "How to Train Your Dragon", attributes_to_search_on=["title", "overview"]
     )
     assert response.hits[0]["id"] == "166428"
 
 
-async def test_attributes_to_search_on_search_no_match(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("How to Train Your Dragon", attributes_to_search_on=["id"])
+def test_attributes_to_search_on_search_no_match(index_with_documents):
+    index = index_with_documents()
+    response = index.search("How to Train Your Dragon", attributes_to_search_on=["id"])
     assert response.hits == []
 
 
-async def test_show_ranking_score_serach(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("How to Train Your Dragon", show_ranking_score=True)
+def test_show_ranking_score_serach(index_with_documents):
+    index = index_with_documents()
+    response = index.search("How to Train Your Dragon", show_ranking_score=True)
     assert response.hits[0]["id"] == "166428"
     assert "_rankingScore" in response.hits[0]
 
 
 @pytest.mark.usefixtures("enable_score_details")
-async def test_show_ranking_details_serach(index_with_documents):
-    index = await index_with_documents()
-    response = await index.search("How to Train Your Dragon", show_ranking_score_details=True)
+def test_show_ranking_details_serach(index_with_documents):
+    index = index_with_documents()
+    response = index.search("How to Train Your Dragon", show_ranking_score_details=True)
     assert response.hits[0]["id"] == "166428"
     assert "_rankingScoreDetails" in response.hits[0]
 
 
 @pytest.mark.usefixtures("enable_vector_search")
-async def test_vector_search(index_with_documents_and_vectors):
-    index = await index_with_documents_and_vectors()
-    response = await index.search("How to Train Your Dragon", vector=[0.1, 0.2])
+def test_vector_search(index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
+    response = index.search("How to Train Your Dragon", vector=[0.1, 0.2])
     assert response.hits[0]["id"] == "287947"
     assert response.vector == [0.1, 0.2]
 
 
-async def test_basic_facet_search(index_with_documents):
-    index = await index_with_documents()
-    update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.task_uid)
-    response = await index.facet_search(
+def test_basic_facet_search(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.facet_search(
         "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
     )
     assert response.facet_hits[0].value == "cartoon"
     assert response.facet_hits[0].count == 1
 
 
-async def test_basic_facet_search_not_found(index_with_documents):
-    index = await index_with_documents()
-    update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.task_uid)
-    response = await index.facet_search(
+def test_basic_facet_search_not_found(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.facet_search(
         "How to Train Your Dragon", facet_name="genre", facet_query="horror"
     )
     assert response.facet_hits == []
 
 
-async def test_custom_facet_search(index_with_documents):
-    index = await index_with_documents()
-    update = await index.update_filterable_attributes(["genre"])
-    await wait_for_task(index.http_client, update.task_uid)
-    response = await index.facet_search(
+def test_custom_facet_search(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.facet_search(
         "Dragon", facet_name="genre", facet_query="cartoon", attributes_to_highlight=["title"]
     )
     assert response.facet_hits[0].value == "cartoon"

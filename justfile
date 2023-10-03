@@ -7,7 +7,7 @@
   just --justfile {{justfile()}} ruff
 
 @black:
-  poetry run black meilisearch_python_async tests
+  poetry run black meilisearch_python_sdk tests
 
 @mypy:
   poetry run mypy .
@@ -19,7 +19,7 @@
   -poetry run pytest
 
 @test-ci: start-meilisearch-detached && stop-meilisearch
-  poetry run pytest --cov=meilisearch_python_async --cov-report=xml
+  poetry run pytest --cov=meilisearch_python_sdk --cov-report=xml
 
 @start-meilisearch:
   docker compose up

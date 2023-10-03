@@ -9,20 +9,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install Poetry
-      run: |
-        pip install pipx
-        pipx install poetry
+      run: pipx install poetry
+    - name: Add pypi token to Poetry
+      run: poetry config pypi-token.pypi ${{ secrets.PYPI_API_KEY }}
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: 3.11
         cache: "poetry"
     - name: Install Dependencies
-      run: |
-        poetry install
-    - name: Add pypi token to Poetry
-      run: |
-        poetry config pypi-token.pypi ${{ secrets.PYPI_API_KEY }}
+      run: poetry install
     - name: Publish package
       run: poetry publish --build
     - name: Deploy Docs
