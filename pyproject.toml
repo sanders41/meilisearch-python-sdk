@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "meilisearch-python-async"
-version = "1.8.0"
+version = "1.8.1"
 description = "A Python async client for the Meilisearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/sanders41/meilisearch-python-async"
-homepage = "https://github.com/sanders41/meilisearch-python-async"
-documentation = "https://meilisearch-python-async.paulsanders.dev"
+repository = "https://github.com/sanders41/meilisearch-python-sdk"
+homepage = "https://github.com/sanders41/meilisearch-python-sdk"
+documentation = "https://meilisearch-python-sdk.paulsanders.dev"
 keywords = ["meilisearch", "async", "python"]
 classifiers=[
   "Development Status :: 5 - Production/Stable",
