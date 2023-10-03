@@ -10,33 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Install Poetry
+      run: pipx install poetry
+    - name: Configure poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
     - name: install Just
       uses: taiki-e/install-action@just
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.8"
-    - name: Get full Python version
-      id: full-python-version
-      run: echo version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))") >> $GITHUB_OUTPUT
-    - name: Install Poetry
-      run: |
-        pip install pipx
-        pipx install poetry
-    - name: Configure poetry
-      run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-    - name: Cache poetry venv
-      uses: actions/cache@v3
-      id: poetry-cache
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
-    - name: Ensure cache is healthy
-      if: steps.poetry-cache.outputs.cache-hit == 'true'
-      shell: bash
-      run: timeout 10s poetry run pip --version || rm -rf .venv
+        python-version: 3.8
+        cache: "poetry"
     - name: Install Dependencies
       run: just install
     - name: mypy check
@@ -50,33 +36,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Install Poetry
+      run: pipx install poetry
+    - name: Configure poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
     - name: install Just
       uses: taiki-e/install-action@just
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Get full Python version
-      id: full-python-version
-      run: echo version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))") >> $GITHUB_OUTPUT
-    - name: Install Poetry
-      run: |
-        pip install pipx
-        pipx install poetry
-    - name: Configure poetry
-      run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-    - name: Cache poetry venv
-      uses: actions/cache@v3
-      id: poetry-cache
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
-    - name: Ensure cache is healthy
-      if: steps.poetry-cache.outputs.cache-hit == 'true'
-      shell: bash
-      run: timeout 10s poetry run pip --version || rm -rf .venv
+        cache: "poetry"
     - name: Install Dependencies
       run: just install
     - name: Test with pytest
@@ -91,31 +63,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Install Poetry
+      run: pipx install poetry
+    - name: Configure poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
     - name: install Just
       uses: taiki-e/install-action@just
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
-    - name: Get full Python version
-      id: full-python-version
-      run: echo version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))") >> $GITHUB_OUTPUT
-    - name: Install Poetry
-      run: |
-        pip install pipx
-        pipx install poetry
-    - name: Configure poetry
-      run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-    - name: Cache poetry venv
-      uses: actions/cache@v3
-      id: poetry-cache
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
+        cache: "poetry"
     - name: Install Dependencies
-      if: steps.poetry-cache.outputs.cache-hit != 'true'
       run: just install
     - name: Test Docs Build
       run: just build-docs
