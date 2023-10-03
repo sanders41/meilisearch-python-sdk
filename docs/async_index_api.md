@@ -6,4 +6,4 @@ it will create an `AsyncIndex` instance.
 
 ## `AsyncIndex API`
 
-::: meilisearch_python_async._index.AsyncIndex
+::: meilisearch_python_sdk._index.AsyncIndex

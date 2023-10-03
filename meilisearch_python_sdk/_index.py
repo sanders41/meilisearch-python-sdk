@@ -12,20 +12,20 @@ from urllib.parse import urlencode
 import aiofiles
 from httpx import AsyncClient, Client
 
-from meilisearch_python_async._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_async._task import async_wait_for_task, wait_for_task
-from meilisearch_python_async._utils import is_pydantic_2, iso_to_date_time, use_task_groups
-from meilisearch_python_async.errors import InvalidDocumentError, MeilisearchError
-from meilisearch_python_async.models.documents import DocumentsInfo
-from meilisearch_python_async.models.index import IndexStats
-from meilisearch_python_async.models.search import FacetSearchResults, SearchResults
-from meilisearch_python_async.models.settings import (
+from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
+from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
+from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time, use_task_groups
+from meilisearch_python_sdk.errors import InvalidDocumentError, MeilisearchError
+from meilisearch_python_sdk.models.documents import DocumentsInfo
+from meilisearch_python_sdk.models.index import IndexStats
+from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
+from meilisearch_python_sdk.models.settings import (
     Faceting,
     MeilisearchSettings,
     Pagination,
     TypoTolerance,
 )
-from meilisearch_python_async.models.task import TaskInfo
+from meilisearch_python_sdk.models.task import TaskInfo
 
 
 class BaseIndex:
@@ -103,7 +103,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.delete()
@@ -125,7 +125,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.delete_if_exists()
@@ -157,7 +157,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     updated_index = await index.update()
@@ -185,7 +185,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     index_info = await index.fetch_info()
@@ -211,7 +211,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     primary_key = await index.get_primary_key()
@@ -246,7 +246,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await index.create(client, "movies")
         """
@@ -283,7 +283,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     stats = await index.get_stats()
@@ -372,7 +372,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     search_results = await index.search("Tron")
@@ -489,7 +489,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     search_results = await index.search(
@@ -548,7 +548,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     document = await index.get_document("1234")
@@ -588,7 +588,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     documents = await index.get_documents()
@@ -638,7 +638,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -684,7 +684,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -743,7 +743,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -845,7 +845,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -921,7 +921,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -965,7 +965,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1013,7 +1013,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.csv")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1079,7 +1079,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -1127,7 +1127,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -1185,7 +1185,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1284,7 +1284,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1385,7 +1385,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1420,7 +1420,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1467,7 +1467,7 @@ class AsyncIndex(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.csv")
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1529,7 +1529,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.delete_document("1234")
@@ -1556,7 +1556,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.delete_documents(["1234", "5678"])
@@ -1583,7 +1583,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.delete_documents_by_filter("genre=horor"))
@@ -1614,7 +1614,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.delete_documents_in_batches_by_filter(
@@ -1649,7 +1649,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.delete_all_document()
@@ -1672,7 +1672,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     settings = await index.get_settings()
@@ -1699,8 +1699,8 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
-            >>> from meilisearch_python_async import MeilisearchSettings
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk import MeilisearchSettings
             >>> new_settings = MeilisearchSettings(
             >>>     synonyms={"wolverine": ["xmen", "logan"], "logan": ["wolverine"]},
             >>>     stop_words=["the", "a", "an"],
@@ -1747,7 +1747,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_settings()
@@ -1770,7 +1770,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     ranking_rules = await index.get_ranking_rules()
@@ -1797,7 +1797,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> ranking_rules=[
             >>>      "words",
             >>>      "typo",
@@ -1832,7 +1832,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_ranking_rules()
@@ -1856,7 +1856,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     distinct_attribute = await index.get_distinct_attribute()
@@ -1886,7 +1886,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_distinct_attribute("url")
@@ -1909,7 +1909,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_distinct_attributes()
@@ -1932,7 +1932,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     searchable_attributes = await index.get_searchable_attributes()
@@ -1959,7 +1959,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_searchable_attributes(["title", "description", "genre"])
@@ -1984,7 +1984,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_searchable_attributes()
@@ -2007,7 +2007,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     displayed_attributes = await index.get_displayed_attributes()
@@ -2034,7 +2034,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_displayed_attributes(
@@ -2059,7 +2059,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_displayed_attributes()
@@ -2082,7 +2082,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     stop_words = await index.get_stop_words()
@@ -2112,7 +2112,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_stop_words(["the", "a", "an"])
@@ -2135,7 +2135,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_stop_words()
@@ -2158,7 +2158,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     synonyms = await index.get_synonyms()
@@ -2188,7 +2188,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_synonyms(
@@ -2213,7 +2213,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_synonyms()
@@ -2236,7 +2236,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     filterable_attributes = await index.get_filterable_attributes()
@@ -2266,7 +2266,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_filterable_attributes(["genre", "director"])
@@ -2291,7 +2291,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_filterable_attributes()
@@ -2314,7 +2314,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     sortable_attributes = await index.get_sortable_attributes()
@@ -2341,7 +2341,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_sortable_attributes(["title", "release_date"])
@@ -2366,7 +2366,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_sortable_attributes()
@@ -2389,7 +2389,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     sortable_attributes = await index.get_typo_tolerance()
@@ -2416,7 +2416,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     TypoTolerance(enabled=False)
@@ -2443,7 +2443,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_typo_tolerance()
@@ -2466,7 +2466,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     faceting = await index.get_faceting()
@@ -2493,7 +2493,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_faceting(faceting=Faceting(max_values_per_facet=100))
@@ -2519,7 +2519,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_faceting()
@@ -2569,8 +2569,8 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
-            >>> from meilisearch_python_async.models.settings import Pagination
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.settings import Pagination
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_pagination(settings=Pagination(max_total_hits=123))
@@ -2646,7 +2646,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_separator_tokens(separator_tokenes=["|", "/")
@@ -2721,7 +2721,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_non_separator_tokens(non_separator_tokens=["@", "#")
@@ -2796,7 +2796,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_word_dictionary(dictionary=["S.O.S", "S.O")
@@ -2872,7 +2872,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.delete()
@@ -2894,7 +2894,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.delete_if_exists()
@@ -2924,7 +2924,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> updated_index = index.update()
@@ -2950,7 +2950,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index_info = index.fetch_info()
@@ -2976,7 +2976,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> primary_key = index.get_primary_key()
@@ -3009,7 +3009,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = index.create(client, "movies")
         """
@@ -3046,7 +3046,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> stats = index.get_stats()
@@ -3135,7 +3135,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> search_results = index.search("Tron")
@@ -3252,7 +3252,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> search_results = index.search(
@@ -3309,7 +3309,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> document = index.get_document("1234")
@@ -3349,7 +3349,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> documents = index.get_documents()
@@ -3398,7 +3398,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -3444,7 +3444,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -3493,7 +3493,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -3567,7 +3567,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -3629,7 +3629,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -3673,7 +3673,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -3721,7 +3721,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.csv")
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -3787,7 +3787,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -3835,7 +3835,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -3884,7 +3884,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -3957,7 +3957,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -4023,7 +4023,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
             >>> client = Client("http://localhost.com", "masterKey") as client:
             >>> index = client.index("movies")
@@ -4058,7 +4058,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
             >>> client = Client("http://localhost.com", "masterKey") as client:
             >>> index = client.index("movies")
@@ -4105,7 +4105,7 @@ class Index(BaseIndex):
         Examples:
 
             >>> from pathlib import Path
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.csv")
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -4167,7 +4167,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.delete_document("1234")
@@ -4194,7 +4194,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.delete_documents(["1234", "5678"])
@@ -4221,7 +4221,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.delete_documents_by_filter("genre=horor"))
@@ -4252,7 +4252,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.delete_documents_in_batches_by_filter(
@@ -4278,7 +4278,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.delete_all_document()
@@ -4301,7 +4301,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> settings = index.get_settings()
@@ -4328,8 +4328,8 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
-            >>> from meilisearch_python_async import MeilisearchSettings
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk import MeilisearchSettings
             >>> new_settings = MeilisearchSettings(
             >>>     synonyms={"wolverine": ["xmen", "logan"], "logan": ["wolverine"]},
             >>>     stop_words=["the", "a", "an"],
@@ -4376,7 +4376,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_settings()
@@ -4399,7 +4399,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> ranking_rules = index.get_ranking_rules()
@@ -4426,7 +4426,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> ranking_rules=[
             >>>      "words",
             >>>      "typo",
@@ -4459,7 +4459,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_ranking_rules()
@@ -4483,7 +4483,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> distinct_attribute = index.get_distinct_attribute()
@@ -4513,7 +4513,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_distinct_attribute("url")
@@ -4536,7 +4536,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_distinct_attributes()
@@ -4559,7 +4559,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> searchable_attributes = index.get_searchable_attributes()
@@ -4586,7 +4586,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_searchable_attributes(["title", "description", "genre"])
@@ -4609,7 +4609,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_searchable_attributes()
@@ -4632,7 +4632,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> displayed_attributes = index.get_displayed_attributes()
@@ -4659,7 +4659,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_displayed_attributes(
@@ -4684,7 +4684,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_displayed_attributes()
@@ -4707,7 +4707,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> stop_words = index.get_stop_words()
@@ -4737,7 +4737,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_stop_words(["the", "a", "an"])
@@ -4760,7 +4760,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_stop_words()
@@ -4783,7 +4783,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> synonyms = index.get_synonyms()
@@ -4813,7 +4813,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey") as client:
             >>> index = client.index("movies")
             >>> index.update_synonyms(
@@ -4838,7 +4838,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_synonyms()
@@ -4861,7 +4861,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> filterable_attributes = index.get_filterable_attributes()
@@ -4891,7 +4891,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_filterable_attributes(["genre", "director"])
@@ -4914,7 +4914,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_filterable_attributes()
@@ -4937,7 +4937,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> sortable_attributes = index.get_sortable_attributes()
@@ -4964,7 +4964,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_sortable_attributes(["title", "release_date"])
@@ -4989,7 +4989,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_sortable_attributes()
@@ -5012,7 +5012,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> sortable_attributes = index.get_typo_tolerance()
@@ -5039,7 +5039,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> TypoTolerance(enabled=False)
@@ -5066,7 +5066,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_typo_tolerance()
@@ -5089,7 +5089,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> faceting = index.get_faceting()
@@ -5116,7 +5116,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_faceting(faceting=Faceting(max_values_per_facet=100))
@@ -5142,7 +5142,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.reset_faceting()
@@ -5192,8 +5192,8 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
-            >>> from meilisearch_python_async.models.settings import Pagination
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.settings import Pagination
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_pagination(settings=Pagination(max_total_hits=123))
@@ -5269,7 +5269,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_separator_tokens(separator_tokenes=["|", "/")
@@ -5344,7 +5344,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_non_separator_tokens(non_separator_tokens=["@", "#")
@@ -5419,7 +5419,7 @@ class Index(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_word_dictionary(dictionary=["S.O.S", "S.O")

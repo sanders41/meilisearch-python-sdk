@@ -7,8 +7,8 @@ from uuid import uuid4
 import pytest
 from httpx import AsyncClient as HttpxAsyncClient
 
-from meilisearch_python_async import AsyncClient, Client
-from meilisearch_python_async._task import async_wait_for_task, wait_for_task
+from meilisearch_python_sdk import AsyncClient, Client
+from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"

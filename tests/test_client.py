@@ -10,17 +10,17 @@ import pytest
 from httpx import Client as HttpxClient
 from httpx import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
 
-from meilisearch_python_async import Client
-from meilisearch_python_async.errors import (
+from meilisearch_python_sdk import Client
+from meilisearch_python_sdk.errors import (
     InvalidRestriction,
     MeilisearchApiError,
     MeilisearchCommunicationError,
     MeilisearchTaskFailedError,
     MeilisearchTimeoutError,
 )
-from meilisearch_python_async.models.client import KeyCreate, KeyUpdate
-from meilisearch_python_async.models.index import IndexInfo
-from meilisearch_python_async.models.version import Version
+from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate
+from meilisearch_python_sdk.models.index import IndexInfo
+from meilisearch_python_sdk.models.version import Version
 
 
 @pytest.fixture

@@ -10,23 +10,23 @@ import jwt
 from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
-from meilisearch_python_async import _task
-from meilisearch_python_async._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_async._index import AsyncIndex, Index
-from meilisearch_python_async._utils import is_pydantic_2
-from meilisearch_python_async.errors import InvalidRestriction, MeilisearchApiError
-from meilisearch_python_async.models.client import (
+from meilisearch_python_sdk import _task
+from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
+from meilisearch_python_sdk._index import AsyncIndex, Index
+from meilisearch_python_sdk._utils import is_pydantic_2
+from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
+from meilisearch_python_sdk.models.client import (
     ClientStats,
     Key,
     KeyCreate,
     KeySearch,
     KeyUpdate,
 )
-from meilisearch_python_async.models.health import Health
-from meilisearch_python_async.models.index import IndexInfo
-from meilisearch_python_async.models.search import SearchParams, SearchResultsWithUID
-from meilisearch_python_async.models.task import TaskInfo, TaskResult, TaskStatus
-from meilisearch_python_async.models.version import Version
+from meilisearch_python_sdk.models.health import Health
+from meilisearch_python_sdk.models.index import IndexInfo
+from meilisearch_python_sdk.models.search import SearchParams, SearchResultsWithUID
+from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
+from meilisearch_python_sdk.models.version import Version
 
 
 class BaseClient:
@@ -74,7 +74,7 @@ class BaseClient:
             Async:
 
             >>> from datetime import datetime, timedelta, timezone
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>>
             >>> expires_at = datetime.now(tz=timezone.utc) + timedelta(days=7)
             >>>
@@ -86,7 +86,7 @@ class BaseClient:
             Sync:
 
             >>> from datetime import datetime, timedelta, timezone
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>>
             >>> expires_at = datetime.now(tz=timezone.utc) + timedelta(days=7)
             >>>
@@ -176,7 +176,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.create_dump()
         """
@@ -203,7 +203,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.create_index("movies")
         """
@@ -227,7 +227,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.delete_index_if_exists()
         """
@@ -259,7 +259,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     indexes = await client.get_indexes()
         """
@@ -298,7 +298,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_index()
         """
@@ -324,7 +324,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
         """
@@ -345,7 +345,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     stats = await client.get_all_stats()
         """
@@ -373,7 +373,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_or_create_index("movies")
         """
@@ -404,7 +404,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilissearch_async_client.models.client import KeyCreate
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     key_info = KeyCreate(
@@ -439,7 +439,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.delete_key("abc123")
         """
@@ -466,7 +466,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            from meilisearch_python_async import AsyncClient
+            from meilisearch_python_sdk import AsyncClient
             async with AsyncClient("http://localhost.com", "masterKey") as client:
                 keys = await client.get_keys()
         """
@@ -493,7 +493,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     keys = await client.get_key("abc123")
         """
@@ -520,7 +520,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilissearch_async_client.models.client import KeyUpdate
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     key_info = KeyUpdate(
@@ -552,8 +552,8 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
-            >>> from meilisearch_python_async.models.search import SearchParams
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.search import SearchParams
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     queries = [
             >>>         SearchParams(index_uid="my_first_index", query"Some search"),
@@ -591,7 +591,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_raw_index("movies")
         """
@@ -626,7 +626,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_raw_indexes()
         """
@@ -652,7 +652,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     version = await client.get_version()
         """
@@ -674,7 +674,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     health = await client.get_healths()
         """
@@ -700,7 +700,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.swap_indexes([("index_a", "index_b")])
         """
@@ -748,7 +748,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>>
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.cancel_tasks(uids=[1, 2])
@@ -784,8 +784,8 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
-            >>> from meilisearch_python_async.task import get_task
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.task import get_task
             >>>
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.get_task(client, 1244)
@@ -831,8 +831,8 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
-            >>> from meilisearch_python_async.task import delete_tasks
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.task import delete_tasks
             >>>
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.delete_tasks(uids=[1, 2])
@@ -875,7 +875,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>>
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.get_tasks()
@@ -915,7 +915,7 @@ class AsyncClient(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
@@ -978,7 +978,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.create_dump()
         """
@@ -1005,7 +1005,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.create_index("movies")
         """
@@ -1029,7 +1029,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.delete_index_if_exists()
         """
@@ -1061,7 +1061,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey") as client:
             >>> indexes = client.get_indexes()
         """
@@ -1100,7 +1100,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.get_index()
         """
@@ -1124,7 +1124,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
         """
@@ -1145,7 +1145,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> stats = client.get_all_stats()
         """
@@ -1173,7 +1173,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.get_or_create_index("movies")
         """
@@ -1204,7 +1204,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> from meilissearch_async_client.models.client import KeyCreate
             >>> client = Client("http://localhost.com", "masterKey")
             >>> key_info = KeyCreate(
@@ -1239,7 +1239,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.delete_key("abc123")
         """
@@ -1266,7 +1266,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = AsyncClient("http://localhost.com", "masterKey")
             >>> keys = client.get_keys()
         """
@@ -1293,7 +1293,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> keys = client.get_key("abc123")
         """
@@ -1320,7 +1320,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> from meilissearch_async_client.models.client import KeyUpdate
             >>> client = Client("http://localhost.com", "masterKey")
             >>> key_info = KeyUpdate(
@@ -1352,8 +1352,8 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
-            >>> from meilisearch_python_async.models.search import SearchParams
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.search import SearchParams
             >>> client = Client("http://localhost.com", "masterKey")
             >>> queries = [
             >>>     SearchParams(index_uid="my_first_index", query"Some search"),
@@ -1391,7 +1391,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.get_raw_index("movies")
         """
@@ -1426,7 +1426,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.get_raw_indexes()
         """
@@ -1452,7 +1452,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> version = client.get_version()
         """
@@ -1474,7 +1474,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> health = client.get_healths()
         """
@@ -1500,7 +1500,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.swap_indexes([("index_a", "index_b")])
         """
@@ -1548,8 +1548,8 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
-            >>> from meilisearch_python_async.task import cancel_tasks
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.task import cancel_tasks
             >>>
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.cancel_tasks(uids=[1, 2])
@@ -1605,7 +1605,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>>
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.delete_tasks(client, uids=[1, 2])
@@ -1641,7 +1641,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>>
             >>> client = AsyncClient("http://localhost.com", "masterKey")
             >>> get_task(client, 1244)
@@ -1674,7 +1674,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>>
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.get_tasks(client)
@@ -1693,7 +1693,7 @@ class Client(BaseClient):
 
         Args:
 
-            client: An httpx HttpxClient or meilisearch_python_async Client instance.
+            client: An httpx HttpxClient or meilisearch_python_sdk Client instance.
             task_id: Identifier of the task to retrieve.
             timeout_in_ms: Amount of time in milliseconds to wait before raising a
                 MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
@@ -1715,7 +1715,7 @@ class Client(BaseClient):
 
         Examples:
 
-            >>> from meilisearch_python_async import Client
+            >>> from meilisearch_python_sdk import Client
             >>> >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},

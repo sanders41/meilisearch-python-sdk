@@ -9,12 +9,12 @@ from urllib.parse import urlencode
 from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
-from meilisearch_python_async._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_async.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
-from meilisearch_python_async.models.task import TaskInfo, TaskResult, TaskStatus
+from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
+from meilisearch_python_sdk.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
+from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 
 if TYPE_CHECKING:
-    from meilisearch_python_async._client import AsyncClient, Client  # pragma: no cover
+    from meilisearch_python_sdk._client import AsyncClient, Client  # pragma: no cover
 
 
 async def async_cancel_tasks(
@@ -35,7 +35,7 @@ async def async_cancel_tasks(
 
     Args:
 
-        client: An httpx HttpxAsyncClient or meilisearch_python_async AsyncClient instance.
+        client: An httpx HttpxAsyncClient or meilisearch_python_sdk AsyncClient instance.
         uids: A list of task UIDs to cancel.
         index_uids: A list of index UIDs for which to cancel tasks.
         statuses: A list of statuses to cancel.
@@ -57,8 +57,8 @@ async def async_cancel_tasks(
 
     Examples:
 
-        >>> from meilisearch_python_async import AsyncClient
-        >>> from meilisearch_python_async.task import cancel_tasks
+        >>> from meilisearch_python_sdk import AsyncClient
+        >>> from meilisearch_python_sdk.task import cancel_tasks
         >>>
         >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
         >>>     await cancel_tasks(client, uids=[1, 2])

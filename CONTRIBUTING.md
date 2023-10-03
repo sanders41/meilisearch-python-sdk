@@ -4,7 +4,7 @@
 
 All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome.
 
-The best place to start is to check the [issues](https://github.com/sanders41/meilisearch-python-async/issues)
+The best place to start is to check the [issues](https://github.com/sanders41/meilisearch-python-sdk/issues)
 for something that interests you.
 
 ## Bug Reports
@@ -15,7 +15,7 @@ Please include:
 [GitHub markdown](https://docs.github.com/en/free-pro-team@latest/github/writing-on-github). For example:
 
   ```py
-  from meilisearch_python_async import Client
+  from meilisearch_python_sdk import Client
 
   async with Client(BASE_URL, MASTER_KEY) as client:
       client.index("movies")
@@ -34,12 +34,12 @@ this project.
 Once the project is forked clone it to your local machine:
 
 ```sh
-git clone https://github.com/your-user-name/meilisearch-python-async.git
-cd meilisearch-python-async
-git remote add upstream https://github.com/sanders41/meilisearch-python-async.git
+git clone https://github.com/your-user-name/meilisearch-python-sdk.git
+cd meilisearch-python-sdk
+git remote add upstream https://github.com/sanders41/meilisearch-python-sdk.git
 ```
 
-This creates the directory meilisearch-python-async and connects your repository to the upstream (main project) repository.
+This creates the directory meilisearch-python-sdk and connects your repository to the upstream (main project) repository.
 
 ### Working with the code
 
@@ -74,7 +74,7 @@ git pull upstream main --ff-only
 
 ### Code Standards and tests (ruff, black, mypy, pytest, and pre-commit)
 
-meilisearch-python-async uses [ruff](https://github.com/charliermarsh/ruff),
+meilisearch-python-sdk uses [ruff](https://github.com/charliermarsh/ruff),
 [Black](https://github.com/psf/black), and [mypy](https://mypy.readthedocs.io/en/stable/) to ensure
 consistent code formatting.
 
@@ -82,13 +82,13 @@ You can run linting on your code at any time with:
 
 ```sh
 # Run black
-poetry run black meilisearch_python_async tests
+poetry run black meilisearch_python_sdk tests
 
 # Run ruff
 poetry run ruff check .
 
 # Run mypy
-poetry run mypy meilisearch_python_async
+poetry run mypy meilisearch_python_sdk
 ```
 
 It is also suggested that you setup [pre-commit](https://pre-commit.com/) in order to run linting
@@ -140,7 +140,7 @@ This project uses [pytest](https://docs.pytest.org/en/stable/) for testing. Plea
 additions/changes you make to the code have tests to go along with them. Code coverage should not
 drop blow it's current level with any pull requests you make, if it does the pull request will not
 be accepted. You can view the current coverage level in the codecov badge on the
-[main github page](https://github.com/sanders41/meilisearch-python-async). You can run tests and see the
+[main github page](https://github.com/sanders41/meilisearch-python-sdk). You can run tests and see the
 code coverage.
 
 There are multiple way Meilisearch can be setup for testing. The examples below use docker, however
@@ -186,7 +186,7 @@ To see a full list of `just` commands run `just --list`
 
 Documentation is automatically generated based on the doc strings from the functions/methods. If
 functions/methods are added/removed make sure to update the
-[api documentation page](https://github.com/sanders41/meilisearch-python-async/docs/api.md) accordingly.
+[api documentation page](https://github.com/sanders41/meilisearch-python-sdk/docs/api.md) accordingly.
 
 You can view any changes to the docs locally by running:
 
@@ -238,11 +238,11 @@ git remote -v
 
 ## Making a Pull Request
 
-After pushing your code to origin it is now on GitHub but not yet part of the meilisearch-python-async project. When you’re ready to ask for a code review, file a pull request. Before you do, once again make sure that you have followed all the guidelines outlined in this document regarding code style, tests, and documentation.
+After pushing your code to origin it is now on GitHub but not yet part of the meilisearch-python-sdk project. When you’re ready to ask for a code review, file a pull request. Before you do, once again make sure that you have followed all the guidelines outlined in this document regarding code style, tests, and documentation.
 
 ### Make the pull request
 
-If everything looks good, you are ready to make a pull request. This is how you let the maintainers of the meilisearch-python-async project know you have code ready to be reviewed. To submit the pull request:
+If everything looks good, you are ready to make a pull request. This is how you let the maintainers of the meilisearch-python-sdk project know you have code ready to be reviewed. To submit the pull request:
 
 1. Navigate to your repository on GitHub
 2. Click on the Pull Request button for your feature branch

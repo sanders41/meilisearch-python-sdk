@@ -14,8 +14,8 @@ from meilisearch.models.task import TaskInfo as MeiliTaskInfo
 from rich.console import Console
 from rich.progress import track
 
-from meilisearch_python_async import AsyncClient, Client
-from meilisearch_python_async.models.task import TaskInfo
+from meilisearch_python_sdk import AsyncClient, Client
+from meilisearch_python_sdk.models.task import TaskInfo
 
 
 def generate_data(add_records: int = 1000000) -> list[dict[str, Any]]:

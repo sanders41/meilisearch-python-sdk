@@ -1,6 +1,6 @@
 site_name: Meilisearch Python Async
 site_description: A Python async client for the Meilisearch API
-site_url: https://meilisearch-python-async.paulsanders.dev
+site_url: https://meilisearch-python-sdk.paulsanders.dev
 
 theme:
   name: material
@@ -23,8 +23,8 @@ theme:
   features:
     - search.suggest
     - search.highlight
-repo_name: sanders41/meilisearch-python-async
-repo_url: https://github.com/sanders41/meilisearch-python-async
+repo_name: sanders41/meilisearch-python-sdk
+repo_url: https://github.com/sanders41/meilisearch-python-sdk
 
 nav:
   - Home: index.md
