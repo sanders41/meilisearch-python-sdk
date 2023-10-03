@@ -135,4 +135,4 @@ def build_headers(content_type: str) -> dict[str, str]:
 
 @lru_cache(maxsize=1)
 def user_agent() -> str:
-    return f"Meilisearch Python Async (v{VERSION})"
+    return f"Meilisearch Python SDK (v{VERSION})"

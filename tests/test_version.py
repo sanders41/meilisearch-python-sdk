@@ -21,4 +21,4 @@ def test_versions_match():
 
 
 def test_user_agent():
-    assert user_agent() == f"Meilisearch Python Async (v{__version__})"
+    assert user_agent() == f"Meilisearch Python SDK (v{__version__})"
