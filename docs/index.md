@@ -1,9 +1,9 @@
-# Meilisearch Python Async
+# Meilisearch Python SDK
 
-Meilisearch Python Async provides both an async and sync client for the
+Meilisearch Python SDK provides both an async and sync client for the
 [Meilisearch](https://github.com/meilisearch/meilisearch) API.
 
-The focus of this documentation is on the Meilisearch Python Async API. More information of
+The focus of this documentation is on the Meilisearch Python SDK API. More information of
 Meilisearch itself and how to use it can be found in [here](https://www.meilisearch.com/docs).
 
 ## Which client to chose

@@ -1,4 +1,4 @@
-site_name: Meilisearch Python Async
+site_name: Meilisearch Python SDK
 site_description: A Python async client for the Meilisearch API
 site_url: https://meilisearch-python-sdk.paulsanders.dev
 
