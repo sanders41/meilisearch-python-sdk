@@ -5,13 +5,13 @@ from math import ceil
 
 import pytest
 
-from meilisearch_python_sdk._index import _async_load_documents_from_file, _combine_documents
 from meilisearch_python_sdk._task import async_wait_for_task
 from meilisearch_python_sdk.errors import (
     InvalidDocumentError,
     MeilisearchApiError,
     MeilisearchError,
 )
+from meilisearch_python_sdk.index import _async_load_documents_from_file, _combine_documents
 
 
 def generate_test_movies(num_movies=50, id_start=0):
