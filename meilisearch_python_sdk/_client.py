@@ -12,9 +12,9 @@ from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk import _task
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_sdk._index import AsyncIndex, Index
 from meilisearch_python_sdk._utils import is_pydantic_2
 from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
+from meilisearch_python_sdk.index import AsyncIndex, Index
 from meilisearch_python_sdk.models.client import (
     ClientStats,
     Key,

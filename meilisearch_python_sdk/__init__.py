@@ -1,6 +1,6 @@
 from meilisearch_python_sdk._client import AsyncClient, Client
-from meilisearch_python_sdk._index import AsyncIndex, Index
 from meilisearch_python_sdk._version import VERSION
+from meilisearch_python_sdk.index import AsyncIndex, Index
 
 __version__ = VERSION
 
