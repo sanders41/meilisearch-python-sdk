@@ -1,9 +1,10 @@
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 
 from meilisearch_python_sdk._utils import is_pydantic_2
+from meilisearch_python_sdk.types import JsonDict
 
 
 class MinWordSizeForTypos(CamelBase):
@@ -56,7 +57,7 @@ class Pagination(CamelBase):
 
 
 class MeilisearchSettings(CamelBase):
-    synonyms: Optional[Dict[str, Any]] = None
+    synonyms: Optional[JsonDict] = None
     stop_words: Optional[List[str]] = None
     ranking_rules: Optional[List[str]] = None
     filterable_attributes: Optional[List[str]] = None

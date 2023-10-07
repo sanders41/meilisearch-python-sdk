@@ -26,6 +26,7 @@ from meilisearch_python_sdk.models.settings import (
     TypoTolerance,
 )
 from meilisearch_python_sdk.models.task import TaskInfo
+from meilisearch_python_sdk.types import Filter, JsonDict
 
 
 class BaseIndex:
@@ -298,7 +299,7 @@ class AsyncIndex(BaseIndex):
         *,
         offset: int = 0,
         limit: int = 20,
-        filter: str | list[str | list[str]] | None = None,
+        filter: Filter | None = None,
         facets: list[str] | None = None,
         attributes_to_retrieve: list[str] = ["*"],
         attributes_to_crop: list[str] | None = None,
@@ -413,7 +414,7 @@ class AsyncIndex(BaseIndex):
         facet_query: str,
         offset: int = 0,
         limit: int = 20,
-        filter: str | list[str | list[str]] | None = None,
+        filter: Filter | None = None,
         facets: list[str] | None = None,
         attributes_to_retrieve: list[str] = ["*"],
         attributes_to_crop: list[str] | None = None,
@@ -530,7 +531,7 @@ class AsyncIndex(BaseIndex):
 
         return FacetSearchResults(**response.json())
 
-    async def get_document(self, document_id: str) -> dict[str, Any]:
+    async def get_document(self, document_id: str) -> JsonDict:
         """Get one document with given document identifier.
 
         Args:
@@ -563,7 +564,7 @@ class AsyncIndex(BaseIndex):
         offset: int = 0,
         limit: int = 20,
         fields: list[str] | None = None,
-        filter: str | list[str | list[str]] | None = None,
+        filter: Filter | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -593,7 +594,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     documents = await index.get_documents()
         """
-        parameters: dict[str, Any] = {
+        parameters: JsonDict = {
             "offset": offset,
             "limit": limit,
         }
@@ -617,7 +618,7 @@ class AsyncIndex(BaseIndex):
         return DocumentsInfo(**response.json())
 
     async def add_documents(
-        self, documents: list[dict[str, Any]], primary_key: str | None = None
+        self, documents: list[JsonDict], primary_key: str | None = None
     ) -> TaskInfo:
         """Add documents to the index.
 
@@ -658,7 +659,7 @@ class AsyncIndex(BaseIndex):
 
     async def add_documents_in_batches(
         self,
-        documents: list[dict[str, Any]],
+        documents: list[JsonDict],
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
@@ -1058,7 +1059,7 @@ class AsyncIndex(BaseIndex):
         return TaskInfo(**response.json())
 
     async def update_documents(
-        self, documents: list[dict[str, Any]], primary_key: str | None = None
+        self, documents: list[JsonDict], primary_key: str | None = None
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -1099,7 +1100,7 @@ class AsyncIndex(BaseIndex):
 
     async def update_documents_in_batches(
         self,
-        documents: list[dict[str, Any]],
+        documents: list[JsonDict],
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
@@ -1565,7 +1566,7 @@ class AsyncIndex(BaseIndex):
 
         return TaskInfo(**response.json())
 
-    async def delete_documents_by_filter(self, filter: str | list[str | list[str]]) -> TaskInfo:
+    async def delete_documents_by_filter(self, filter: Filter) -> TaskInfo:
         """Delete documents from the index by filter.
 
         Args:
@@ -3061,7 +3062,7 @@ class Index(BaseIndex):
         *,
         offset: int = 0,
         limit: int = 20,
-        filter: str | list[str | list[str]] | None = None,
+        filter: Filter | None = None,
         facets: list[str] | None = None,
         attributes_to_retrieve: list[str] = ["*"],
         attributes_to_crop: list[str] | None = None,
@@ -3176,7 +3177,7 @@ class Index(BaseIndex):
         facet_query: str,
         offset: int = 0,
         limit: int = 20,
-        filter: str | list[str | list[str]] | None = None,
+        filter: Filter | None = None,
         facets: list[str] | None = None,
         attributes_to_retrieve: list[str] = ["*"],
         attributes_to_crop: list[str] | None = None,
@@ -3291,7 +3292,7 @@ class Index(BaseIndex):
 
         return FacetSearchResults(**response.json())
 
-    def get_document(self, document_id: str) -> dict[str, Any]:
+    def get_document(self, document_id: str) -> JsonDict:
         """Get one document with given document identifier.
 
         Args:
@@ -3324,7 +3325,7 @@ class Index(BaseIndex):
         offset: int = 0,
         limit: int = 20,
         fields: list[str] | None = None,
-        filter: str | list[str | list[str]] | None = None,
+        filter: Filter | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -3354,7 +3355,7 @@ class Index(BaseIndex):
             >>> index = client.index("movies")
             >>> documents = index.get_documents()
         """
-        parameters: dict[str, Any] = {
+        parameters: JsonDict = {
             "offset": offset,
             "limit": limit,
         }
@@ -3376,9 +3377,7 @@ class Index(BaseIndex):
 
         return DocumentsInfo(**response.json())
 
-    def add_documents(
-        self, documents: list[dict[str, Any]], primary_key: str | None = None
-    ) -> TaskInfo:
+    def add_documents(self, documents: list[JsonDict], primary_key: str | None = None) -> TaskInfo:
         """Add documents to the index.
 
         Args:
@@ -3418,7 +3417,7 @@ class Index(BaseIndex):
 
     def add_documents_in_batches(
         self,
-        documents: list[dict[str, Any]],
+        documents: list[JsonDict],
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
@@ -3766,7 +3765,7 @@ class Index(BaseIndex):
         return TaskInfo(**response.json())
 
     def update_documents(
-        self, documents: list[dict[str, Any]], primary_key: str | None = None
+        self, documents: list[JsonDict], primary_key: str | None = None
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -3807,7 +3806,7 @@ class Index(BaseIndex):
 
     def update_documents_in_batches(
         self,
-        documents: list[dict[str, Any]],
+        documents: list[JsonDict],
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
@@ -4203,7 +4202,7 @@ class Index(BaseIndex):
 
         return TaskInfo(**response.json())
 
-    def delete_documents_by_filter(self, filter: str | list[str | list[str]]) -> TaskInfo:
+    def delete_documents_by_filter(self, filter: Filter) -> TaskInfo:
         """Delete documents from the index by filter.
 
         Args:
@@ -5555,7 +5554,7 @@ def _process_search_parameters(
     facet_query: str | None = None,
     offset: int = 0,
     limit: int = 20,
-    filter: str | list[str | list[str]] | None = None,
+    filter: Filter | None = None,
     facets: list[str] | None = None,
     attributes_to_retrieve: list[str] = ["*"],
     attributes_to_crop: list[str] | None = None,
@@ -5573,8 +5572,8 @@ def _process_search_parameters(
     show_ranking_score: bool = False,
     show_ranking_score_details: bool = False,
     vector: list[float] | None = None,
-) -> dict[str, Any]:
-    body: dict[str, Any] = {
+) -> JsonDict:
+    body: JsonDict = {
         "q": q,
         "offset": offset,
         "limit": limit,
@@ -5611,7 +5610,7 @@ def _process_search_parameters(
     return body
 
 
-def _build_encoded_url(base_url: str, params: dict[str, Any]) -> str:
+def _build_encoded_url(base_url: str, params: JsonDict) -> str:
     return f"{base_url}?{urlencode(params)}"
 
 
