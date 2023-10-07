@@ -1,6 +1,4 @@
-from __future__ import annotations
+from typing import Any, Dict, List, Union
 
-from typing import Any
-
-Filter = str | list[str | list[str]]
-JsonDict = dict[str, Any]
+Filter = Union[str, List[Union[str, List[str]]]]
+JsonDict = Dict[str, Any]
