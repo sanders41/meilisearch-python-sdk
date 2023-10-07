@@ -7,7 +7,6 @@ from copy import deepcopy
 from pathlib import Path
 from statistics import fmean
 from time import time
-from typing import Any
 
 from meilisearch import Client as MeilisearchClient
 from meilisearch.models.task import TaskInfo as MeiliTaskInfo
@@ -16,9 +15,10 @@ from rich.progress import track
 
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk.models.task import TaskInfo
+from meilisearch_python_sdk.types import JsonDict
 
 
-def generate_data(add_records: int = 1000000) -> list[dict[str, Any]]:
+def generate_data(add_records: int = 1000000) -> list[JsonDict]:
     """Generate data for running the benchmark.
 
     Defaults to creating a json file with 1000000 documents.
@@ -67,7 +67,7 @@ def create_search_samples() -> list[str]:
 
 
 async def benchmark_async_add_document_in_batches(
-    client: AsyncClient, data: list[dict[str, Any]]
+    client: AsyncClient, data: list[JsonDict]
 ) -> tuple[list[TaskInfo], float]:
     index = client.index("movies")
     start = time()
@@ -78,7 +78,7 @@ async def benchmark_async_add_document_in_batches(
 
 
 def benchmark_sync_add_document_in_batches(
-    client: Client, data: list[dict[str, Any]]
+    client: Client, data: list[JsonDict]
 ) -> tuple[list[TaskInfo], float]:
     index = client.index("movies")
     start = time()
@@ -89,7 +89,7 @@ def benchmark_sync_add_document_in_batches(
 
 
 def benchmark_meili_add_documents_in_batches(
-    client: MeilisearchClient, data: list[dict[str, Any]]
+    client: MeilisearchClient, data: list[JsonDict]
 ) -> tuple[list[MeiliTaskInfo], float]:
     index = client.index("movies")
     start = time()
@@ -99,7 +99,7 @@ def benchmark_meili_add_documents_in_batches(
     return tasks, (end - start)
 
 
-async def run_async_batch_add_benchmark(data: list[dict[str, Any]]) -> list[float]:
+async def run_async_batch_add_benchmark(data: list[JsonDict]) -> list[float]:
     times = []
     for _ in track(range(10), description="Running async add in batches benchmark..."):
         async with AsyncClient("http://127.0.0.1:7700", "masterKey") as client:
@@ -131,7 +131,7 @@ async def run_async_search_benchmark(movies_sampled: list[str]) -> list[float]:
     return times
 
 
-async def setup_index(data: list[dict[str, Any]]) -> None:
+async def setup_index(data: list[JsonDict]) -> None:
     console = Console()
     with console.status("Preparing Meilisearch for tests..."):
         async with AsyncClient("http://127.0.0.1:7700", "masterKey") as client:
@@ -141,7 +141,7 @@ async def setup_index(data: list[dict[str, Any]]) -> None:
             await asyncio.gather(*waits)
 
 
-def run_sync_batch_add_benchmark(data: list[dict[str, Any]]) -> list[float]:
+def run_sync_batch_add_benchmark(data: list[JsonDict]) -> list[float]:
     times = []
     for _ in track(range(10), description="Running sync add in batches benchmark..."):
         client = Client("http://127.0.0.1:7700", "masterKey")
@@ -170,7 +170,7 @@ def run_sync_search_benchmark(movies_sampled: list[str]) -> list[float]:
     return times
 
 
-def run_meili_batch_add_benchmark(data: list[dict[str, Any]]) -> list[float]:
+def run_meili_batch_add_benchmark(data: list[JsonDict]) -> list[float]:
     times = []
     for _ in track(range(10), description="Running meili add in batches benchmark..."):
         client = MeilisearchClient("http://127.0.0.1:7700", "masterKey")

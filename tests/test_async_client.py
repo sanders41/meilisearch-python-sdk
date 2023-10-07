@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from asyncio import sleep
 from datetime import datetime, timedelta, timezone
-from typing import Any
 from urllib.parse import quote_plus
 
 import jwt
@@ -24,6 +23,7 @@ from meilisearch_python_sdk.errors import (
 from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.version import Version
+from meilisearch_python_sdk.types import JsonDict
 
 
 @pytest.fixture
@@ -126,9 +126,9 @@ async def test_generate_tenant_token_default_key(async_test_client, default_sear
 
 
 async def test_generate_tenant_token_default_key_expires(async_test_client, default_search_key):
-    search_rules: dict[str, Any] = {"test": "value"}
+    search_rules: JsonDict = {"test": "value"}
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
-    expected: dict[str, Any] = {"searchRules": search_rules}
+    expected: JsonDict = {"searchRules": search_rules}
     expected["apiKeyUid"] = default_search_key.uid
     expected["exp"] = int(datetime.timestamp(expires_at))
     token = async_test_client.generate_tenant_token(
@@ -140,7 +140,7 @@ async def test_generate_tenant_token_default_key_expires(async_test_client, defa
 async def test_generate_tenant_token_default_key_expires_past(
     async_test_client, default_search_key
 ):
-    search_rules: dict[str, Any] = {"test": "value"}
+    search_rules: JsonDict = {"test": "value"}
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=-1)
     with pytest.raises(ValueError):
         async_test_client.generate_tenant_token(

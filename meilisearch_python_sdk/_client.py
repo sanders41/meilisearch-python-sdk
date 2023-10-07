@@ -4,7 +4,6 @@ import json
 from datetime import datetime, timezone
 from ssl import SSLContext
 from types import TracebackType
-from typing import Any
 
 import jwt
 from httpx import AsyncClient as HttpxAsyncClient
@@ -27,6 +26,7 @@ from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.search import SearchParams, SearchResultsWithUID
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
+from meilisearch_python_sdk.types import JsonDict
 
 
 class BaseClient:
@@ -42,7 +42,7 @@ class BaseClient:
 
     def generate_tenant_token(
         self,
-        search_rules: dict[str, Any] | list[str],
+        search_rules: JsonDict | list[str],
         *,
         api_key: Key,
         expires_at: datetime | None = None,
@@ -102,7 +102,7 @@ class BaseClient:
                         "Invalid index. The token cannot be less restrictive than the API key"
                     )
 
-        payload: dict[str, Any] = {"searchRules": search_rules}
+        payload: JsonDict = {"searchRules": search_rules}
 
         payload["apiKeyUid"] = api_key.uid
         if expires_at:
@@ -1745,7 +1745,7 @@ def _build_offset_limit_url(base: str, offset: int | None, limit: int | None) ->
     return base
 
 
-def _build_update_key_payload(key: KeyUpdate) -> dict[str, Any]:
+def _build_update_key_payload(key: KeyUpdate) -> JsonDict:
     # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
     # but can when converting to a json string.
     if is_pydantic_2():

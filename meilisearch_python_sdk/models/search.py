@@ -1,7 +1,9 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional
 
 from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
+
+from meilisearch_python_sdk.types import Filter, JsonDict
 
 
 class FacetHits(CamelBase):
@@ -20,7 +22,7 @@ class SearchParams(CamelBase):
     query: Optional[str] = Field(None, alias="q")
     offset: int = 0
     limit: int = 20
-    filter: Optional[Union[str, List[Union[str, List[str]]]]] = None
+    filter: Optional[Filter] = None
     facets: Optional[List[str]] = None
     attributes_to_retrieve: List[str] = ["*"]
     attributes_to_crop: Optional[List[str]] = None
@@ -41,13 +43,13 @@ class SearchParams(CamelBase):
 
 
 class SearchResults(CamelBase):
-    hits: List[Dict[str, Any]]
+    hits: List[JsonDict]
     offset: Optional[int] = None
     limit: Optional[int] = None
     estimated_total_hits: Optional[int] = None
     processing_time_ms: int
     query: str
-    facet_distribution: Optional[Dict[str, Any]] = None
+    facet_distribution: Optional[JsonDict] = None
     total_pages: Optional[int] = None
     total_hits: Optional[int] = None
     page: Optional[int] = None

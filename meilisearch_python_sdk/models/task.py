@@ -1,11 +1,12 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
 
 from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time
+from meilisearch_python_sdk.types import JsonDict
 
 
 class TaskId(CamelBase):
@@ -15,9 +16,9 @@ class TaskId(CamelBase):
 class TaskResult(TaskId):
     index_uid: Optional[str] = None
     status: str
-    task_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
-    details: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
+    task_type: Union[str, JsonDict] = Field(..., alias="type")
+    details: Optional[JsonDict] = None
+    error: Optional[JsonDict] = None
     canceled_by: Optional[int] = None
     duration: Optional[str] = None
     enqueued_at: datetime
@@ -81,7 +82,7 @@ class TaskInfo(CamelBase):
     task_uid: int
     index_uid: Optional[str] = None
     status: str
-    task_type: Union[str, Dict[str, Any]] = Field(..., alias="type")
+    task_type: Union[str, JsonDict] = Field(..., alias="type")
     enqueued_at: datetime
 
     if is_pydantic_2():
