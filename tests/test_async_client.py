@@ -389,14 +389,22 @@ async def test_get_version(async_test_client):
 
 async def test_create_dump(async_test_client, async_index_with_documents):
     index = await async_index_with_documents()
-
     response = await async_test_client.create_dump()
-
     await async_test_client.wait_for_task(response.task_uid)
 
     dump_status = await async_get_task(index.http_client, response.task_uid)
     assert dump_status.status == "succeeded"
     assert dump_status.task_type == "dumpCreation"
+
+
+async def test_create_snapshot(async_test_client, async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await async_test_client.create_snapshot()
+    await async_test_client.wait_for_task(response.task_uid)
+
+    snapshot_status = await async_get_task(index.http_client, response.task_uid)
+    assert snapshot_status.status == "succeeded"
+    assert snapshot_status.task_type == "dumpCreation"
 
 
 async def test_no_master_key(base_url):

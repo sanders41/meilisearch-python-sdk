@@ -390,6 +390,16 @@ def test_create_dump(test_client, index_with_documents):
     assert dump_status.task_type == "dumpCreation"
 
 
+def test_create_snapshot(test_client, index_with_documents):
+    index_with_documents()
+    response = test_client.create_snapshot()
+    test_client.wait_for_task(response.task_uid)
+
+    snapshot_status = test_client.get_task(response.task_uid)
+    assert snapshot_status.status == "succeeded"
+    assert snapshot_status.task_type == "snapshotCreation"
+
+
 def test_no_master_key(base_url):
     with pytest.raises(MeilisearchApiError):
         client = Client(base_url)
