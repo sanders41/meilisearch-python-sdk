@@ -783,7 +783,9 @@ async def test_wait_for_pending_update_time_out(async_test_client, async_empty_i
     )
 
 
-async def test_wait_for_task_raise_for_status_true(async_test_client, async_empty_index, small_movies):
+async def test_wait_for_task_raise_for_status_true(
+    async_test_client, async_empty_index, small_movies
+):
     index = await async_empty_index()
     response = await index.add_documents(small_movies)
     update = await async_test_client.wait_for_task(response.task_uid, raise_for_status=True)
