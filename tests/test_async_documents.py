@@ -1048,7 +1048,9 @@ async def test_update_documents_from_file_in_batches_ndjson(
     updates = await index.update_documents_from_file_in_batches(path, batch_size=batch_size)
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in updates])  # type: ignore
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in updates]
+    )  # type: ignore
     assert {"succeeded"} == {x.status for x in tasks}
 
     response = await index.get_documents()

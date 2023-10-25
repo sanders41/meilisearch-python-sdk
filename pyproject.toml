@@ -32,7 +32,6 @@ pydantic = ">=1.8"
 PyJWT = ">=2.3.0"
 
 [tool.poetry.group.dev.dependencies]
-black = ">=22.8.0"
 mkdocs = ">=1.2.4"
 mkdocs-material = ">=8.2.7"
 mkdocstrings = {version = ">=0.19.0", extras = ["python"]}
@@ -52,27 +51,6 @@ rich = ">=13.3.5"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 100
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.egg
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.nox
-  | \.tox
-  | \.venv
-  | \venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | setup.py
-)/
-'''
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -94,7 +72,24 @@ ignore_missing_imports = true
 
 [tool.ruff]
 select=["E", "F", "UP", "I001", "T201", "T203"]
-ignore=["E501"]
+ignore=[
+  "E501",
+  # Recommened ignores by ruff when using formatter
+  "W191",
+  "E111",
+  "E114",
+  "E117",
+  "D206",
+  "D300",
+  "Q000",
+  "Q001",
+  "Q002",
+  "Q003",
+  "COM812",
+  "COM819",
+  "ISC001",
+  "ISC002",
+]
 line-length = 100
 target-version = "py38"
 fix = true

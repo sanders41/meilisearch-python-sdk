@@ -1,19 +1,19 @@
 @lint:
-  echo black
-  just --justfile {{justfile()}} black
   echo mypy
   just --justfile {{justfile()}} mypy
   echo ruff
   just --justfile {{justfile()}} ruff
-
-@black:
-  poetry run black meilisearch_python_sdk tests
+  echo ruff-format
+  just --justfile {{justfile()}} ruff-format
 
 @mypy:
   poetry run mypy .
 
 @ruff:
   poetry run ruff check .
+
+@ruff-format:
+  poetry run ruff format meilisearch_python_sdk tests
 
 @test: start-meilisearch-detached && stop-meilisearch
   -poetry run pytest

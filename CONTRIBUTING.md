@@ -12,15 +12,15 @@ for something that interests you.
 Please include:
 
 1. A short, self-contained Python snippet reproducing the problem. You can format the code by using
-[GitHub markdown](https://docs.github.com/en/free-pro-team@latest/github/writing-on-github). For example:
+   [GitHub markdown](https://docs.github.com/en/free-pro-team@latest/github/writing-on-github). For example:
 
-  ```py
-  from meilisearch_python_sdk import Client
+```py
+from meilisearch_python_sdk import Client
 
-  async with Client(BASE_URL, MASTER_KEY) as client:
-      client.index("movies")
-      ...
-  ```
+async with Client(BASE_URL, MASTER_KEY) as client:
+    client.index("movies")
+    ...
+```
 
 2. Explain what is currently happening and what you expect instead.
 
@@ -72,19 +72,18 @@ git checkout main
 git pull upstream main --ff-only
 ```
 
-### Code Standards and tests (ruff, black, mypy, pytest, and pre-commit)
+### Code Standards and tests (ruff, mypy, pytest, and pre-commit)
 
-meilisearch-python-sdk uses [ruff](https://github.com/charliermarsh/ruff),
-[Black](https://github.com/psf/black), and [mypy](https://mypy.readthedocs.io/en/stable/) to ensure
-consistent code formatting.
+meilisearch-python-sdk uses [ruff](https://github.com/charliermarsh/ruff), and
+[mypy](https://mypy.readthedocs.io/en/stable/) to ensure consistent code formatting.
 
 You can run linting on your code at any time with:
 
 ```sh
-# Run black
-poetry run black meilisearch_python_sdk tests
+# Run ruff formatting
+poetry run ruff format meilisearch_python_sdk tests
 
-# Run ruff
+# Run ruff linting
 poetry run ruff check .
 
 # Run mypy
@@ -165,6 +164,7 @@ In additon to mainting the coverage percentage please ensure that all
 tests are passing before submitting a pull request.
 
 #### just
+
 If you have [just](https://github.com/casey/just) installed it can be used for testing and linting.
 
 To run linting:
