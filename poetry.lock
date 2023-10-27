@@ -65,13 +65,13 @@ dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
 
 [[package]]
 name = "camel-converter"
-version = "3.0.3"
+version = "3.1.0"
 description = "Converts a string from snake case to camel case or camel case to snake case"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "camel_converter-3.0.3-py3-none-any.whl", hash = "sha256:d20aec6f048a9c2b79ef5e83dbc41bcf5aaaad40cd1ac66c92d384e9696a3c2d"},
-    {file = "camel_converter-3.0.3.tar.gz", hash = "sha256:70e282f94359b40269aa754c12df613356acbc283a97be7e15beac1cfce33891"},
+    {file = "camel_converter-3.1.0-py3-none-any.whl", hash = "sha256:830c10358240cdf0a91a1b6e95c48aed7a7e29bc1e91330e225a05e8e55aad24"},
+    {file = "camel_converter-3.1.0.tar.gz", hash = "sha256:369d241251c352ea37c422427e7db9de6ec99c751adff1f1df7bb1ed7e92ddbb"},
 ]
 
 [package.dependencies]
