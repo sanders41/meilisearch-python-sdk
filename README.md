@@ -31,7 +31,7 @@ pip install meilisearch-python-sdk
 ## Run Meilisearch
 
 There are several ways to
-[run Meilisearch](https://docs.meilisearch.com/reference/features/installation.html#download-and-launch).
+[run Meilisearch](https://www.meilisearch.com/docs/learn/getting_started/installation).
 Pick the one that works best for your use case and then start the server.
 
 As as example to use Docker:
@@ -45,11 +45,10 @@ docker run -it --rm -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --mas
 
 ### Add Documents
 
-
 #### AsyncClient
 
 - Note: `client.index("books") creates an instance of an AsyncIndex object but does not make a
-network call to send the data yet so it does not need to be awaited.
+  network call to send the data yet so it does not need to be awaited.
 
 ```py
 from meilisearch_python_sdk import AsyncClient
@@ -82,7 +81,7 @@ index.add_documents(documents)
 ```
 
 The server will return an update id that can be used to
-[get the status](https://docs.meilisearch.com/reference/api/updates.html#get-an-update-status)
+[get the status](https://www.meilisearch.com/docs/reference/api/tasks#status)
 of the updates. To do this you would save the result response from adding the documents to a
 variable, this will be an `UpdateId` object, and use it to check the status of the updates.
 
