@@ -404,7 +404,7 @@ async def test_create_snapshot(async_test_client, async_index_with_documents):
 
     snapshot_status = await async_get_task(index.http_client, response.task_uid)
     assert snapshot_status.status == "succeeded"
-    assert snapshot_status.task_type == "dumpCreation"
+    assert snapshot_status.task_type == "snapshotCreation"
 
 
 async def test_no_master_key(base_url):

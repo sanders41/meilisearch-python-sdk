@@ -227,7 +227,7 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.create_snapshot()
         """
-        response = await self._http_requests.post("snapshot")
+        response = await self._http_requests.post("snapshots")
 
         return TaskInfo(**response.json())
 
@@ -1055,7 +1055,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.create_snapshot()
         """
-        response = self._http_requests.post("snapshot")
+        response = self._http_requests.post("snapshots")
 
         return TaskInfo(**response.json())
 
