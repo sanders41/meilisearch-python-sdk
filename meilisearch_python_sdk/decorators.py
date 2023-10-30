@@ -13,7 +13,7 @@ def async_add_documments(
     index_name: str,
     async_client: AsyncClient | None = None,
     url: str | None = None,
-    api_key: str | None = None,
+    api_token: str | None = None,
     batch_size: int | None = None,
     primary_key: str | None = None,
     wait_for_task: bool = False,
@@ -27,7 +27,7 @@ def async_add_documments(
         index_name: The name of the index to which the documents should be added.
         async_client: An AsyncClient instance. Default = None.
         url: URL for the Meilisearch server. Default = None.
-        api_key: The API key for the server. This key needs to have permission to add documents
+        api_token: The API key for the server. This key needs to have permission to add documents
             to the index, and create the index if it does not already exist. Default = None.
         batch_size: If provided the documents will be sent in batches of the specified size.
             Otherwise all documents are sent at once. Default = None.
@@ -50,7 +50,7 @@ def async_add_documments(
 
         >>> from meilisearch_python_sdk.decorators import async_add_documents
         >>>
-        >>> @async_add_documents(index_name="movies", url="http://localhost:7700", api_key="masterKey")
+        >>> @async_add_documents(index_name="movies", url="http://localhost:7700", api_token="masterKey")
         >>> async def my_function() -> list[dict[str, Any]]:
         >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
     """
@@ -68,7 +68,7 @@ def async_add_documments(
             if not url:
                 raise ValueError("Either an async_client or url is required")
 
-            async with AsyncClient(url, api_key) as client:
+            async with AsyncClient(url, api_token) as client:
                 await _async_add_documents(
                     client, index_name, result, batch_size, primary_key, wait_for_task
                 )
@@ -85,7 +85,7 @@ def add_documments(
     index_name: str,
     client: Client | None = None,
     url: str | None = None,
-    api_key: str | None = None,
+    api_token: str | None = None,
     batch_size: int | None = None,
     primary_key: str | None = None,
     wait_for_task: bool = False,
@@ -99,7 +99,7 @@ def add_documments(
         index_name: The name of the index to which the documents should be added.
         client: An Client instance. Default = None.
         url: URL for the Meilisearch server. Default = None.
-        api_key: The API key for the server. This key needs to have permission to add documents
+        api_token: The API key for the server. This key needs to have permission to add documents
             to the index, and create the index if it does not already exist. Default = None.
         batch_size: If provided the documents will be sent in batches of the specified size.
             Otherwise all documents are sent at once. Default = None.
@@ -122,7 +122,7 @@ def add_documments(
 
         >>> from meilisearch_python_sdk.decorators import add_documents
         >>>
-        >>> @add_documents(index_name="movies", url="http://localhost:7700", api_key="masterKey")
+        >>> @add_documents(index_name="movies", url="http://localhost:7700", api_token="masterKey")
         >>> def my_function() -> list[dict[str, Any]]:
         >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
     """
@@ -138,7 +138,7 @@ def add_documments(
             if not url:
                 raise ValueError("Either an async_client or url is required")
 
-            decorator_client = Client(url, api_key)
+            decorator_client = Client(url, api_token)
             _add_documents(
                 decorator_client, index_name, result, batch_size, primary_key, wait_for_task
             )
