@@ -437,7 +437,9 @@ class AsyncClient(BaseClient):
             >>>     keys = await client.create_key(key_info)
         """
         if is_pydantic_2():
-            response = await self._http_requests.post("keys", json.loads(key.model_dump_json(by_alias=True)))  # type: ignore[attr-defined]
+            response = await self._http_requests.post(
+                "keys", json.loads(key.model_dump_json(by_alias=True))
+            )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
 
@@ -586,11 +588,13 @@ class AsyncClient(BaseClient):
         url = "multi-search"
         if is_pydantic_2():
             response = await self._http_requests.post(
-                url, body={"queries": [x.model_dump(by_alias=True) for x in queries]}  # type: ignore[attr-defined]
+                url,
+                body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
             )
         else:  # pragma: no cover
             response = await self._http_requests.post(
-                url, body={"queries": [x.dict(by_alias=True) for x in queries]}  # type: ignore[attr-defined]
+                url,
+                body={"queries": [x.dict(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
             )
 
         return [SearchResultsWithUID(**x) for x in response.json()["results"]]
@@ -1259,7 +1263,9 @@ class Client(BaseClient):
             >>> keys = client.create_key(key_info)
         """
         if is_pydantic_2():
-            response = self._http_requests.post("keys", json.loads(key.model_dump_json(by_alias=True)))  # type: ignore[attr-defined]
+            response = self._http_requests.post(
+                "keys", json.loads(key.model_dump_json(by_alias=True))
+            )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             response = self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
 
@@ -1408,11 +1414,13 @@ class Client(BaseClient):
         url = "multi-search"
         if is_pydantic_2():
             response = self._http_requests.post(
-                url, body={"queries": [x.model_dump(by_alias=True) for x in queries]}  # type: ignore[attr-defined]
+                url,
+                body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
             )
         else:  # pragma: no cover
             response = self._http_requests.post(
-                url, body={"queries": [x.dict(by_alias=True) for x in queries]}  # type: ignore[attr-defined]
+                url,
+                body={"queries": [x.dict(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
             )
 
         return [SearchResultsWithUID(**x) for x in response.json()["results"]]

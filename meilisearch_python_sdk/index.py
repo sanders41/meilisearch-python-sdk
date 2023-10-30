@@ -2424,9 +2424,13 @@ class AsyncIndex(BaseIndex):
             >>>     await index.update_typo_tolerance()
         """
         if is_pydantic_2():
-            response = await self._http_requests.patch(f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(
+                f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True)
+            )  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = await self._http_requests.patch(f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(
+                f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True)
+            )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -2500,9 +2504,13 @@ class AsyncIndex(BaseIndex):
             >>>     await index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
         if is_pydantic_2():
-            response = await self._http_requests.patch(f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(
+                f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True)
+            )  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = await self._http_requests.patch(f"{self._settings_url}/faceting", faceting.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(
+                f"{self._settings_url}/faceting", faceting.dict(by_alias=True)
+            )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -2577,9 +2585,13 @@ class AsyncIndex(BaseIndex):
             >>>     await index.update_pagination(settings=Pagination(max_total_hits=123))
         """
         if is_pydantic_2():
-            response = await self._http_requests.patch(f"{self._settings_url}/pagination", settings.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(
+                f"{self._settings_url}/pagination", settings.model_dump(by_alias=True)
+            )  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = await self._http_requests.patch(f"{self._settings_url}/pagination", settings.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = await self._http_requests.patch(
+                f"{self._settings_url}/pagination", settings.dict(by_alias=True)
+            )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -5045,9 +5057,13 @@ class Index(BaseIndex):
             >>> index.update_typo_tolerance()
         """
         if is_pydantic_2():
-            response = self._http_requests.patch(f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(
+                f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True)
+            )  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = self._http_requests.patch(f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(
+                f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True)
+            )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -5121,9 +5137,13 @@ class Index(BaseIndex):
             >>> index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
         if is_pydantic_2():
-            response = self._http_requests.patch(f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(
+                f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True)
+            )  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = self._http_requests.patch(f"{self._settings_url}/faceting", faceting.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(
+                f"{self._settings_url}/faceting", faceting.dict(by_alias=True)
+            )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 
@@ -5198,9 +5218,13 @@ class Index(BaseIndex):
             >>> index.update_pagination(settings=Pagination(max_total_hits=123))
         """
         if is_pydantic_2():
-            response = self._http_requests.patch(f"{self._settings_url}/pagination", settings.model_dump(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(
+                f"{self._settings_url}/pagination", settings.model_dump(by_alias=True)
+            )  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            response = self._http_requests.patch(f"{self._settings_url}/pagination", settings.dict(by_alias=True))  # type: ignore[attr-defined]
+            response = self._http_requests.patch(
+                f"{self._settings_url}/pagination", settings.dict(by_alias=True)
+            )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
 

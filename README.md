@@ -13,16 +13,16 @@ Meilisearch Python SDK provides both an async and sync client for the
 [Meilisearch](https://github.com/meilisearch/meilisearch) API.
 
 Which client to use depends on your use case. If the code base you are working with uses asyncio,
-for example if you are using [FastAPI](https://fastapi.tiangolo.com/), chose the `AsyncClint`
-otherwise chose the `Client`. The functionality of the two clients is the same, the difference
-being the `AsyncClient` provides async methods and uses the `AsyncIndex`, which also provides async
-methods, while the `Client` provides blocking methods and uses the `Index`, which also provides
+for example if you are using [FastAPI](https://fastapi.tiangolo.com/), choose the `AsyncClient`,
+otherwise choose the sync `Client`. The functionality of the two clients is the same, the difference
+being that the `AsyncClient` provides async methods and uses the `AsyncIndex` with its own additional async
+methods. On the other hand, `Client` provides blocking methods and uses the `Index` with its own
 blocking methods.
 
 ## Installation
 
-Using a virtual environmnet is recommended for installing this package. Once the virtual
-environment is created and activated install the package with:
+Using a virtual environment is recommended for installing this package. Once the virtual
+environment is created and activated, install the package with:
 
 ```sh
 pip install meilisearch-python-sdk
@@ -31,7 +31,7 @@ pip install meilisearch-python-sdk
 ## Run Meilisearch
 
 There are several ways to
-[run Meilisearch](https://docs.meilisearch.com/reference/features/installation.html#download-and-launch).
+[run Meilisearch](https://www.meilisearch.com/docs/learn/getting_started/installation).
 Pick the one that works best for your use case and then start the server.
 
 As as example to use Docker:
@@ -41,15 +41,14 @@ docker pull getmeili/meilisearch:latest
 docker run -it --rm -p 7700:7700 getmeili/meilisearch:latest ./meilisearch --master-key=masterKey
 ```
 
-## Useage
+## Usage
 
 ### Add Documents
-
 
 #### AsyncClient
 
 - Note: `client.index("books") creates an instance of an AsyncIndex object but does not make a
-network call to send the data yet so it does not need to be awaited.
+  network call to send the data yet so it does not need to be awaited.
 
 ```py
 from meilisearch_python_sdk import AsyncClient
@@ -82,9 +81,9 @@ index.add_documents(documents)
 ```
 
 The server will return an update id that can be used to
-[get the status](https://docs.meilisearch.com/reference/api/updates.html#get-an-update-status)
-of the updates. To do this you would save the result response from adding the documets to a
-variable, this will be a UpdateId object, and use it to check the status of the updates.
+[get the status](https://www.meilisearch.com/docs/reference/api/tasks#status)
+of the updates. To do this you would save the result response from adding the documents to a
+variable, this will be an `UpdateId` object, and use it to check the status of the updates.
 
 #### AsyncClient
 
@@ -189,8 +188,8 @@ SearchResults(
 The following benchmarks compare this library to the official
 [Meilisearch Python](https://github.com/meilisearch/meilisearch-python) library. Note that all
 of the performance gains seen with the `AsyncClient` are achieved by taking advantage of asyncio.
-This means that if your code is not taking advantage of asyncio or blocking the event loop the
-gains here will not be seen and the performance between the clients will be very close to the same.
+This means that if your code is not taking advantage of asyncio or it does not block the event loop,
+the gains here will not be seen and the performance between the clients will be very similar.
 
 ### Add Documents in Batches
 
