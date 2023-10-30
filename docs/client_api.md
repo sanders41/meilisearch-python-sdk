@@ -1,4 +1,4 @@
-## `Client Usage`
+## `client` Usage
 
 ### Create a client
 
@@ -13,6 +13,6 @@ index = client.index("movies")
 ...
 ```
 
-## `Client API`
+## `Client` API
 
-::: meilisearch_python_sdk._client.Client
+::: meilisearch_python_sdk.Client

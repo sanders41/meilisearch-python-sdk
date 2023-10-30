@@ -159,7 +159,7 @@ async def test_custom_search_params_with_multiple_facet_filters(async_index_with
     assert response.facet_distribution is None
 
 
-async def test_custom_search_facet_filters_with_space(async_test_client):
+async def test_custom_search_facet_filters_with_space(async_client):
     dataset = [
         {
             "id": 123,
@@ -200,7 +200,7 @@ async def test_custom_search_facet_filters_with_space(async_test_client):
         {"id": 42, "title": "The Hitchhiker's Guide to the Galaxy", "genre": "fantasy"},
     ]
 
-    index = async_test_client.index("books")
+    index = async_client.index("books")
     update = await index.add_documents(dataset)
     await async_wait_for_task(index.http_client, update.task_uid)
     update = await index.update_filterable_attributes(["genre"])
@@ -276,9 +276,9 @@ async def test_search_sort(sort, titles, async_index_with_documents):
 
 
 async def test_search_with_tenant_token(
-    async_test_client, async_index_with_documents, base_url, default_search_key
+    async_client, async_index_with_documents, base_url, default_search_key
 ):
-    token = async_test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
+    token = async_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     index_docs = await async_index_with_documents()
 
     async with AsyncClient(base_url, token) as client:
@@ -289,10 +289,10 @@ async def test_search_with_tenant_token(
 
 
 async def test_search_with_tenant_token_and_expire_date(
-    async_test_client, async_index_with_documents, base_url, default_search_key
+    async_client, async_index_with_documents, base_url, default_search_key
 ):
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
-    token = async_test_client.generate_tenant_token(
+    token = async_client.generate_tenant_token(
         search_rules=["*"], api_key=default_search_key, expires_at=expires_at
     )
     index_docs = await async_index_with_documents()
@@ -304,10 +304,10 @@ async def test_search_with_tenant_token_and_expire_date(
     assert response.hits[0]["id"] == "166428"
 
 
-async def test_multi_search(async_test_client, async_index_with_documents, async_empty_index):
+async def test_multi_search(async_client, async_index_with_documents, async_empty_index):
     index1 = await async_index_with_documents()
     index2 = await async_empty_index()
-    response = await async_test_client.multi_search(
+    response = await async_client.multi_search(
         [
             SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
             SearchParams(index_uid=index2.uid, query=""),
@@ -320,18 +320,18 @@ async def test_multi_search(async_test_client, async_index_with_documents, async
     assert response[1].index_uid == index2.uid
 
 
-async def test_multi_search_one_index(async_test_client, async_index_with_documents):
+async def test_multi_search_one_index(async_client, async_index_with_documents):
     index = await async_index_with_documents()
-    response = await async_test_client.multi_search(
+    response = await async_client.multi_search(
         [SearchParams(index_uid=index.uid, query="How to Train Your Dragon")]
     )
     assert response[0].hits[0]["id"] == "166428"
     assert "_formatted" not in response[0].hits[0]
 
 
-async def test_multi_search_no_index(async_test_client):
+async def test_multi_search_no_index(async_client):
     with pytest.raises(MeilisearchApiError):
-        await async_test_client.multi_search(
+        await async_client.multi_search(
             [SearchParams(index_uid="bad", query="How to Train Your Dragon")],
         )
 

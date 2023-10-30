@@ -37,24 +37,24 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def async_test_client():
+async def async_client():
     async with AsyncClient(BASE_URL, MASTER_KEY) as client:
         yield client
 
 
 @pytest.fixture(scope="session")
-def test_client():
+def client():
     yield Client(BASE_URL, MASTER_KEY)
 
 
 @pytest.fixture(autouse=True)
-async def clear_indexes(async_test_client):
+async def clear_indexes(async_client):
     """Auto-clears the indexes after each test function run."""
     yield
-    indexes = await async_test_client.get_indexes()
+    indexes = await async_client.get_indexes()
     if indexes:
-        tasks = await asyncio.gather(*[async_test_client.index(x.uid).delete() for x in indexes])
-        await asyncio.gather(*[async_test_client.wait_for_task(x.task_uid) for x in tasks])
+        tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
+        await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in tasks])
 
 
 @pytest.fixture(scope="session")
@@ -88,19 +88,19 @@ def index_uid4():
 
 
 @pytest.fixture
-async def async_indexes_sample(async_test_client):
+async def async_indexes_sample(async_client):
     indexes = []
     for index_args in INDEX_FIXTURE:
-        index = await async_test_client.create_index(**index_args)
+        index = await async_client.create_index(**index_args)
         indexes.append(index)
     yield indexes
 
 
 @pytest.fixture
-def indexes_sample(test_client):
+def indexes_sample(client):
     indexes = []
     for index_args in INDEX_FIXTURE:
-        index = test_client.create_index(**index_args)
+        index = client.create_index(**index_args)
         indexes.append(index)
     yield indexes
 
@@ -152,17 +152,17 @@ def small_movies_path():
 
 
 @pytest.fixture
-async def async_empty_index(async_test_client):
+async def async_empty_index(async_client):
     async def index_maker():
-        return await async_test_client.create_index(uid=str(uuid4()))
+        return await async_client.create_index(uid=str(uuid4()))
 
     return index_maker
 
 
 @pytest.fixture
-def empty_index(test_client):
+def empty_index(client):
     def index_maker():
-        return test_client.create_index(uid=str(uuid4()))
+        return client.create_index(uid=str(uuid4()))
 
     return index_maker
 
@@ -216,8 +216,8 @@ def index_with_documents_and_vectors(empty_index, small_movies):
 
 
 @pytest.fixture
-async def default_search_key(async_test_client):
-    keys = await async_test_client.get_keys()
+async def default_search_key(async_client):
+    keys = await async_client.get_keys()
 
     for key in keys.results:
         if key.actions == ["search"]:
