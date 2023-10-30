@@ -159,7 +159,7 @@ def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
     assert response.facet_distribution is None
 
 
-def test_custom_search_facet_filters_with_space(test_client):
+def test_custom_search_facet_filters_with_space(client):
     dataset = [
         {
             "id": 123,
@@ -200,7 +200,7 @@ def test_custom_search_facet_filters_with_space(test_client):
         {"id": 42, "title": "The Hitchhiker's Guide to the Galaxy", "genre": "fantasy"},
     ]
 
-    index = test_client.index("books")
+    index = client.index("books")
     update = index.add_documents(dataset)
     wait_for_task(index.http_client, update.task_uid)
     update = index.update_filterable_attributes(["genre"])
@@ -275,8 +275,8 @@ def test_search_sort(sort, titles, index_with_documents):
     assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
 
 
-def test_search_with_tenant_token(test_client, index_with_documents, base_url, default_search_key):
-    token = test_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
+def test_search_with_tenant_token(client, index_with_documents, base_url, default_search_key):
+    token = client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     index_docs = index_with_documents()
 
     client = Client(base_url, token)
@@ -287,10 +287,10 @@ def test_search_with_tenant_token(test_client, index_with_documents, base_url, d
 
 
 def test_search_with_tenant_token_and_expire_date(
-    test_client, index_with_documents, base_url, default_search_key
+    client, index_with_documents, base_url, default_search_key
 ):
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
-    token = test_client.generate_tenant_token(
+    token = client.generate_tenant_token(
         search_rules=["*"], api_key=default_search_key, expires_at=expires_at
     )
     index_docs = index_with_documents()
@@ -302,10 +302,10 @@ def test_search_with_tenant_token_and_expire_date(
     assert response.hits[0]["id"] == "166428"
 
 
-def test_multi_search(test_client, index_with_documents, empty_index):
+def test_multi_search(client, index_with_documents, empty_index):
     index1 = index_with_documents()
     index2 = empty_index()
-    response = test_client.multi_search(
+    response = client.multi_search(
         [
             SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
             SearchParams(index_uid=index2.uid, query=""),
@@ -318,18 +318,18 @@ def test_multi_search(test_client, index_with_documents, empty_index):
     assert response[1].index_uid == index2.uid
 
 
-def test_multi_search_one_index(test_client, index_with_documents):
+def test_multi_search_one_index(client, index_with_documents):
     index = index_with_documents()
-    response = test_client.multi_search(
+    response = client.multi_search(
         [SearchParams(index_uid=index.uid, query="How to Train Your Dragon")]
     )
     assert response[0].hits[0]["id"] == "166428"
     assert "_formatted" not in response[0].hits[0]
 
 
-def test_multi_search_no_index(test_client):
+def test_multi_search_no_index(client):
     with pytest.raises(MeilisearchApiError):
-        test_client.multi_search(
+        client.multi_search(
             [SearchParams(index_uid="bad", query="How to Train Your Dragon")],
         )
 

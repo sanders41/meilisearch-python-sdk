@@ -24,8 +24,8 @@ from meilisearch_python_sdk.types import JsonDict
 
 
 @pytest.fixture
-def remove_default_search_key(default_search_key, test_client):
-    test_client.delete_key(default_search_key.key)
+def remove_default_search_key(default_search_key, client):
+    client.delete_key(default_search_key.key)
     yield
     key = KeyCreate(
         description=default_search_key.description,
@@ -33,41 +33,41 @@ def remove_default_search_key(default_search_key, test_client):
         indexes=default_search_key.indexes,
         expires_at=default_search_key.expires_at,
     )
-    test_client.create_key(key)
+    client.create_key(key)
 
 
 @pytest.fixture
-def test_key(test_client):
+def test_key(client):
     key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
-    key = test_client.create_key(key_info)
+    key = client.create_key(key_info)
 
     yield key
 
     try:
-        test_client.delete_key(key.key)
+        client.delete_key(key.key)
     except MeilisearchApiError:
         pass
 
 
 @pytest.fixture
-def test_key_info(test_client):
+def test_key_info(client):
     key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
 
     yield key_info
 
     try:
-        keys = test_client.get_keys()
+        keys = client.get_keys()
         key = next(x for x in keys.results if x.description == key_info.description)
-        test_client.delete_key(key.key)
+        client.delete_key(key.key)
     except MeilisearchApiError:
         pass
 
 
-def wait_for_dump_creation(test_client, dump_uid, timeout_in_ms=10000.0, interval_in_ms=500.0):
+def wait_for_dump_creation(client, dump_uid, timeout_in_ms=10000.0, interval_in_ms=500.0):
     start_time = datetime.now()
     elapsed_time = 0.0
     while elapsed_time < timeout_in_ms:
-        dump = test_client.get_dump_status(dump_uid)
+        dump = client.get_dump_status(dump_uid)
         if dump.status != "in_progress":
             return None
         sleep(interval_in_ms / 1000)
@@ -76,10 +76,10 @@ def wait_for_dump_creation(test_client, dump_uid, timeout_in_ms=10000.0, interva
     raise TimeoutError
 
 
-def test_create_index_with_primary_key(test_client):
+def test_create_index_with_primary_key(client):
     uid = "test"
     primary_key = "pk_test"
-    index = test_client.create_index(uid=uid, primary_key=primary_key)
+    index = client.create_index(uid=uid, primary_key=primary_key)
 
     assert index.uid == uid
 
@@ -88,9 +88,9 @@ def test_create_index_with_primary_key(test_client):
     assert isinstance(index.updated_at, datetime)
 
 
-def test_create_index_no_primary_key(test_client):
+def test_create_index_no_primary_key(client):
     uid = "test"
-    index = test_client.create_index(uid=uid)
+    index = client.create_index(uid=uid)
 
     assert index.uid == uid
 
@@ -99,60 +99,60 @@ def test_create_index_no_primary_key(test_client):
     assert isinstance(index.updated_at, datetime)
 
 
-def test_create_keys_with_wildcarded_actions(test_client, test_key_info):
+def test_create_keys_with_wildcarded_actions(client, test_key_info):
     test_key_info.actions = ["documents.*"]
-    key = test_client.create_key(test_key_info)
+    key = client.create_key(test_key_info)
 
     assert key.actions == ["documents.*"]
 
 
-def test_generate_tenant_token_custom_key(test_client, test_key):
+def test_generate_tenant_token_custom_key(client, test_key):
     search_rules = {"test": "value"}
     expected = {"searchRules": search_rules, "apiKeyUid": test_key.uid}
-    token = test_client.generate_tenant_token(search_rules, api_key=test_key)
+    token = client.generate_tenant_token(search_rules, api_key=test_key)
     assert expected == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
 
 
-def test_generate_tenant_token_default_key(test_client, default_search_key):
+def test_generate_tenant_token_default_key(client, default_search_key):
     search_rules = {"test": "value"}
     expected = {"searchRules": search_rules, "apiKeyUid": default_search_key.uid}
-    token = test_client.generate_tenant_token(search_rules, api_key=default_search_key)
+    token = client.generate_tenant_token(search_rules, api_key=default_search_key)
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
-def test_generate_tenant_token_default_key_expires(test_client, default_search_key):
+def test_generate_tenant_token_default_key_expires(client, default_search_key):
     search_rules: JsonDict = {"test": "value"}
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     expected: JsonDict = {"searchRules": search_rules}
     expected["apiKeyUid"] = default_search_key.uid
     expected["exp"] = int(datetime.timestamp(expires_at))
-    token = test_client.generate_tenant_token(
+    token = client.generate_tenant_token(
         search_rules, api_key=default_search_key, expires_at=expires_at
     )
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
-def test_generate_tenant_token_default_key_expires_past(test_client, default_search_key):
+def test_generate_tenant_token_default_key_expires_past(client, default_search_key):
     search_rules: JsonDict = {"test": "value"}
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=-1)
     with pytest.raises(ValueError):
-        test_client.generate_tenant_token(
+        client.generate_tenant_token(
             search_rules, api_key=default_search_key, expires_at=expires_at
         )
 
 
-def test_generate_tenant_token_invalid_restriction(test_key_info, test_client):
+def test_generate_tenant_token_invalid_restriction(test_key_info, client):
     test_key_info.indexes = ["good"]
-    key = test_client.create_key(test_key_info)
+    key = client.create_key(test_key_info)
     payload = {"indexes": ["bad"]}
 
     with pytest.raises(InvalidRestriction):
-        test_client.generate_tenant_token(payload, api_key=key)
+        client.generate_tenant_token(payload, api_key=key)
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_indexes(test_client, index_uid, index_uid2):
-    response = test_client.get_indexes()
+def test_get_indexes(client, index_uid, index_uid2):
+    response = client.get_indexes()
     response_uids = [x.uid for x in response]
 
     assert index_uid in response_uids
@@ -161,32 +161,32 @@ def test_get_indexes(test_client, index_uid, index_uid2):
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_indexes_offset_and_limit(test_client):
-    response = test_client.get_indexes(offset=1, limit=1)
+def test_get_indexes_offset_and_limit(client):
+    response = client.get_indexes(offset=1, limit=1)
     assert len(response) == 1
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_indexes_offset(test_client):
-    response = test_client.get_indexes(offset=1)
+def test_get_indexes_offset(client):
+    response = client.get_indexes(offset=1)
     assert len(response) >= 1 and len(response) <= 20
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_indexes_limit(test_client):
-    response = test_client.get_indexes(limit=1)
+def test_get_indexes_limit(client):
+    response = client.get_indexes(limit=1)
     assert len(response) == 1
 
 
-def test_get_indexes_none(test_client):
-    response = test_client.get_indexes()
+def test_get_indexes_none(client):
+    response = client.get_indexes()
 
     assert response is None
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_index(test_client, index_uid):
-    response = test_client.get_index(index_uid)
+def test_get_index(client, index_uid):
+    response = client.get_index(index_uid)
 
     assert response.uid == index_uid
     assert response.primary_key is None
@@ -194,36 +194,36 @@ def test_get_index(test_client, index_uid):
     assert isinstance(response.updated_at, datetime)
 
 
-def test_get_index_not_found(test_client):
+def test_get_index_not_found(client):
     with pytest.raises(MeilisearchApiError):
-        test_client.get_index("test")
+        client.get_index("test")
 
 
-def test_index(test_client):
+def test_index(client):
     uid = "test"
-    response = test_client.index(uid)
+    response = client.index(uid)
 
     assert response.uid == uid
 
 
-def test_get_or_create_index_with_primary_key(test_client):
+def test_get_or_create_index_with_primary_key(client):
     primary_key = "pk_test"
     uid = "test1"
-    response = test_client.get_or_create_index(uid, primary_key)
+    response = client.get_or_create_index(uid, primary_key)
 
     assert response.uid == uid
     assert response.primary_key == primary_key
 
 
-def test_get_or_create_index_no_primary_key(test_client):
+def test_get_or_create_index_no_primary_key(client):
     uid = "test"
-    response = test_client.get_or_create_index(uid)
+    response = client.get_or_create_index(uid)
 
     assert response.uid == uid
     assert response.primary_key is None
 
 
-def test_get_or_create_index_communication_error(test_client, monkeypatch):
+def test_get_or_create_index_communication_error(client, monkeypatch):
     def mock_get_response(*args, **kwargs):
         raise ConnectError("test", request=Request("GET", url="http://localhost"))
 
@@ -233,43 +233,43 @@ def test_get_or_create_index_communication_error(test_client, monkeypatch):
     monkeypatch.setattr(HttpxClient, "get", mock_get_response)
     monkeypatch.setattr(HttpxClient, "post", mock_post_response)
     with pytest.raises(MeilisearchCommunicationError):
-        test_client.get_or_create_index("test")
+        client.get_or_create_index("test")
 
 
-def test_get_or_create_index_api_error(test_client, monkeypatch):
+def test_get_or_create_index_api_error(client, monkeypatch):
     def mock_response(*args, **kwargs):
         raise MeilisearchApiError("test", Response(status_code=404))
 
     monkeypatch.setattr(Client, "get_index", mock_response)
     with pytest.raises(MeilisearchApiError):
-        test_client.get_or_create_index("test")
+        client.get_or_create_index("test")
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_all_stats(test_client, index_uid, index_uid2):
-    response = test_client.get_all_stats()
+def test_get_all_stats(client, index_uid, index_uid2):
+    response = client.get_all_stats()
 
     assert index_uid in response.indexes
     assert index_uid2 in response.indexes
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_raw_index(test_client, index_uid):
-    response = test_client.get_raw_index(index_uid)
+def test_get_raw_index(client, index_uid):
+    response = client.get_raw_index(index_uid)
 
     assert response.uid == index_uid
     assert isinstance(response, IndexInfo)
 
 
-def test_get_raw_index_none(test_client):
-    response = test_client.get_raw_index("test")
+def test_get_raw_index_none(client):
+    response = client.get_raw_index("test")
 
     assert response is None
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_raw_indexes(test_client, index_uid, index_uid2):
-    response = test_client.get_raw_indexes()
+def test_get_raw_indexes(client, index_uid, index_uid2):
+    response = client.get_raw_indexes()
     response_uids = [x.uid for x in response]
 
     assert index_uid in response_uids
@@ -278,39 +278,39 @@ def test_get_raw_indexes(test_client, index_uid, index_uid2):
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_raw_indexes_offset_and_limit(test_client):
-    response = test_client.get_raw_indexes(offset=1, limit=1)
+def test_get_raw_indexes_offset_and_limit(client):
+    response = client.get_raw_indexes(offset=1, limit=1)
     assert len(response) == 1
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_raw_indexes_offset(test_client):
-    response = test_client.get_raw_indexes(offset=1)
+def test_get_raw_indexes_offset(client):
+    response = client.get_raw_indexes(offset=1)
     assert len(response) >= 1 and len(response) <= 20
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_raw_indexes_limit(test_client):
-    response = test_client.get_raw_indexes(limit=1)
+def test_get_raw_indexes_limit(client):
+    response = client.get_raw_indexes(limit=1)
     assert len(response) == 1
 
 
-def test_get_raw_indexes_none(test_client):
-    response = test_client.get_raw_indexes()
+def test_get_raw_indexes_none(client):
+    response = client.get_raw_indexes()
 
     assert response is None
 
 
-def test_health(test_client):
-    health = test_client.health()
+def test_health(client):
+    health = client.health()
 
     assert health.status == "available"
 
 
-def test_create_key(test_key_info, test_client):
+def test_create_key(test_key_info, client):
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=2)
     test_key_info.expires_at = expires_at
-    key = test_client.create_key(test_key_info)
+    key = client.create_key(test_key_info)
 
     assert key.description == test_key_info.description
     assert key.actions == test_key_info.actions
@@ -318,8 +318,8 @@ def test_create_key(test_key_info, test_client):
     assert key.expires_at == expires_at.replace(tzinfo=None)
 
 
-def test_create_key_no_expires(test_key_info, test_client):
-    key = test_client.create_key(test_key_info)
+def test_create_key_no_expires(test_key_info, client):
+    key = client.create_key(test_key_info)
 
     assert key.description == test_key_info.description
     assert key.actions == test_key_info.actions
@@ -327,46 +327,46 @@ def test_create_key_no_expires(test_key_info, test_client):
     assert key.expires_at is None
 
 
-def test_delete_key(test_key, test_client):
-    result = test_client.delete_key(test_key.key)
+def test_delete_key(test_key, client):
+    result = client.delete_key(test_key.key)
     assert result == 204
 
     with pytest.raises(MeilisearchApiError):
-        test_client.get_key(test_key.key)
+        client.get_key(test_key.key)
 
 
-def test_get_keys(test_client):
-    response = test_client.get_keys()
+def test_get_keys(client):
+    response = client.get_keys()
     assert len(response.results) == 2
 
 
-def test_get_keys_offset_and_limit(test_client):
-    response = test_client.get_keys(offset=1, limit=1)
+def test_get_keys_offset_and_limit(client):
+    response = client.get_keys(offset=1, limit=1)
     assert len(response.results) == 1
 
 
-def test_get_keys_offset(test_client):
-    response = test_client.get_keys(offset=1)
+def test_get_keys_offset(client):
+    response = client.get_keys(offset=1)
     assert len(response.results) >= 1 and len(response.results) <= 20
 
 
-def test_get_keys_limit(test_client):
-    response = test_client.get_keys(limit=1)
+def test_get_keys_limit(client):
+    response = client.get_keys(limit=1)
     assert len(response.results) == 1
 
 
-def test_get_key(test_key, test_client):
-    key = test_client.get_key(test_key.key)
+def test_get_key(test_key, client):
+    key = client.get_key(test_key.key)
     assert key.description == test_key.description
 
 
-def test_update_key(test_key, test_client):
+def test_update_key(test_key, client):
     update_key_info = KeyUpdate(
         key=test_key.key,
         description="updated",
     )
 
-    key = test_client.update_key(update_key_info)
+    key = client.update_key(update_key_info)
 
     assert key.description == update_key_info.description
     assert key.actions == test_key.actions
@@ -374,18 +374,18 @@ def test_update_key(test_key, test_client):
     assert key.expires_at == test_key.expires_at
 
 
-def test_get_version(test_client):
-    response = test_client.get_version()
+def test_get_version(client):
+    response = client.get_version()
 
     assert isinstance(response, Version)
 
 
-def test_create_dump(test_client, index_with_documents):
+def test_create_dump(client, index_with_documents):
     index_with_documents()
-    response = test_client.create_dump()
-    test_client.wait_for_task(response.task_uid)
+    response = client.create_dump()
+    client.wait_for_task(response.task_uid)
 
-    dump_status = test_client.get_task(response.task_uid)
+    dump_status = client.get_task(response.task_uid)
     assert dump_status.status == "succeeded"
     assert dump_status.task_type == "dumpCreation"
 
@@ -418,35 +418,35 @@ def test_communication_error(master_key):
         client.create_index("some_index")
 
 
-def test_remote_protocol_error(test_client, monkeypatch):
+def test_remote_protocol_error(client, monkeypatch):
     def mock_error(*args, **kwargs):
         raise RemoteProtocolError("error", request=args[0])
 
     monkeypatch.setattr(HttpxClient, "post", mock_error)
     with pytest.raises(MeilisearchCommunicationError):
-        test_client.create_index("some_index")
+        client.create_index("some_index")
 
 
-def test_connection_timeout(test_client, monkeypatch):
+def test_connection_timeout(client, monkeypatch):
     def mock_error(*args, **kwargs):
         raise ConnectTimeout("error")
 
     monkeypatch.setattr(HttpxClient, "post", mock_error)
     with pytest.raises(MeilisearchCommunicationError):
-        test_client.create_index("some_index")
+        client.create_index("some_index")
 
 
-def test_swap_indexes(test_client, empty_index):
+def test_swap_indexes(client, empty_index):
     index_a = empty_index()
     index_b = empty_index()
     task_a = index_a.add_documents([{"id": 1, "title": index_a.uid}])
     task_b = index_b.add_documents([{"id": 1, "title": index_b.uid}])
-    test_client.wait_for_task(task_a.task_uid)
-    test_client.wait_for_task(task_b.task_uid)
-    swapTask = test_client.swap_indexes([(index_a.uid, index_b.uid)])
-    task = test_client.wait_for_task(swapTask.task_uid)
-    doc_a = test_client.index(index_a.uid).get_document(1)
-    doc_b = test_client.index(index_b.uid).get_document(1)
+    client.wait_for_task(task_a.task_uid)
+    client.wait_for_task(task_b.task_uid)
+    swapTask = client.swap_indexes([(index_a.uid, index_b.uid)])
+    task = client.wait_for_task(swapTask.task_uid)
+    doc_a = client.index(index_a.uid).get_document(1)
+    doc_b = client.index(index_b.uid).get_document(1)
 
     assert doc_a["title"] == index_b.uid
     assert doc_b["title"] == index_a.uid
@@ -454,11 +454,11 @@ def test_swap_indexes(test_client, empty_index):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_statuses(test_client):
-    task = test_client.cancel_tasks(statuses=["enqueued", "processing"])
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+def test_cancel_statuses(client):
+    task = client.cancel_tasks(statuses=["enqueued", "processing"])
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.index_uid is None
     assert completed_task.status == "succeeded"
@@ -468,11 +468,11 @@ def test_cancel_statuses(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_tasks_uids(test_client):
-    task = test_client.cancel_tasks(uids=["1", "2"])
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+def test_cancel_tasks_uids(client):
+    task = client.cancel_tasks(uids=["1", "2"])
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -481,12 +481,12 @@ def test_cancel_tasks_uids(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_tasks_index_uids(test_client):
-    task = test_client.cancel_tasks(index_uids=["1"])
+def test_cancel_tasks_index_uids(client):
+    task = client.cancel_tasks(index_uids=["1"])
 
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -495,11 +495,11 @@ def test_cancel_tasks_index_uids(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_tasks_types(test_client):
-    task = test_client.cancel_tasks(types=["taskDeletion"])
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+def test_cancel_tasks_types(client):
+    task = client.cancel_tasks(types=["taskDeletion"])
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -508,12 +508,12 @@ def test_cancel_tasks_types(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_tasks_before_enqueued_at(test_client):
+def test_cancel_tasks_before_enqueued_at(client):
     before = datetime.now()
-    task = test_client.cancel_tasks(before_enqueued_at=before)
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+    task = client.cancel_tasks(before_enqueued_at=before)
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -525,12 +525,12 @@ def test_cancel_tasks_before_enqueued_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_tasks_after_enqueued_at(test_client):
+def test_cancel_tasks_after_enqueued_at(client):
     after = datetime.now()
-    task = test_client.cancel_tasks(after_enqueued_at=after)
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+    task = client.cancel_tasks(after_enqueued_at=after)
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -542,12 +542,12 @@ def test_cancel_tasks_after_enqueued_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_tasks_before_started_at(test_client):
+def test_cancel_tasks_before_started_at(client):
     before = datetime.now()
-    task = test_client.cancel_tasks(before_started_at=before)
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+    task = client.cancel_tasks(before_started_at=before)
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -559,12 +559,12 @@ def test_cancel_tasks_before_started_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_tasks_after_finished_at(test_client):
+def test_cancel_tasks_after_finished_at(client):
     after = datetime.now()
-    task = test_client.cancel_tasks(after_finished_at=after)
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+    task = client.cancel_tasks(after_finished_at=after)
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -576,11 +576,11 @@ def test_cancel_tasks_after_finished_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_cancel_task_no_params(test_client):
-    task = test_client.cancel_tasks()
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskCancelation")
+def test_cancel_task_no_params(client):
+    task = client.cancel_tasks()
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskCancelation")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskCancelation"
@@ -589,11 +589,11 @@ def test_cancel_task_no_params(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_statuses(test_client):
-    task = test_client.delete_tasks(statuses=["enqueued", "processing"])
-    test_client.wait_for_task(task.task_uid)
-    deleted_tasks = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+def test_delete_statuses(client):
+    task = client.delete_tasks(statuses=["enqueued", "processing"])
+    client.wait_for_task(task.task_uid)
+    deleted_tasks = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert deleted_tasks.status == "succeeded"
     assert deleted_tasks.task_type == "taskDeletion"
@@ -602,11 +602,11 @@ def test_delete_statuses(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_tasks(test_client):
-    task = test_client.delete_tasks(uids=["1", "2"])
-    test_client.wait_for_task(task.task_uid)
-    completed_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+def test_delete_tasks(client):
+    task = client.delete_tasks(uids=["1", "2"])
+    client.wait_for_task(task.task_uid)
+    completed_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert completed_task.status == "succeeded"
     assert completed_task.task_type == "taskDeletion"
@@ -615,11 +615,11 @@ def test_delete_tasks(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_tasks_index_uids(test_client):
-    task = test_client.delete_tasks(index_uids=["1"])
-    test_client.wait_for_task(task.task_uid)
-    deleted_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+def test_delete_tasks_index_uids(client):
+    task = client.delete_tasks(index_uids=["1"])
+    client.wait_for_task(task.task_uid)
+    deleted_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -628,11 +628,11 @@ def test_delete_tasks_index_uids(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_tasks_types(test_client):
-    task = test_client.delete_tasks(types=["taskDeletion"])
-    test_client.wait_for_task(task.task_uid)
-    deleted_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+def test_delete_tasks_types(client):
+    task = client.delete_tasks(types=["taskDeletion"])
+    client.wait_for_task(task.task_uid)
+    deleted_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -641,12 +641,12 @@ def test_delete_tasks_types(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_tasks_before_enqueued_at(test_client):
+def test_delete_tasks_before_enqueued_at(client):
     before = datetime.now()
-    task = test_client.delete_tasks(before_enqueued_at=before)
-    test_client.wait_for_task(task.task_uid)
-    deleted_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+    task = client.delete_tasks(before_enqueued_at=before)
+    client.wait_for_task(task.task_uid)
+    deleted_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -658,12 +658,12 @@ def test_delete_tasks_before_enqueued_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_tasks_after_enqueued_at(test_client):
+def test_delete_tasks_after_enqueued_at(client):
     after = datetime.now()
-    task = test_client.delete_tasks(after_enqueued_at=after)
-    test_client.wait_for_task(task.task_uid)
-    deleted_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+    task = client.delete_tasks(after_enqueued_at=after)
+    client.wait_for_task(task.task_uid)
+    deleted_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -675,12 +675,12 @@ def test_delete_tasks_after_enqueued_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_tasks_before_started_at(test_client):
+def test_delete_tasks_before_started_at(client):
     before = datetime.now()
-    task = test_client.delete_tasks(before_started_at=before)
-    test_client.wait_for_task(task.task_uid)
-    deleted_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+    task = client.delete_tasks(before_started_at=before)
+    client.wait_for_task(task.task_uid)
+    deleted_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -692,12 +692,12 @@ def test_delete_tasks_before_started_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_tasks_after_finished_at(test_client):
+def test_delete_tasks_after_finished_at(client):
     after = datetime.now()
-    task = test_client.delete_tasks(after_finished_at=after)
-    test_client.wait_for_task(task.task_uid)
-    deleted_task = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+    task = client.delete_tasks(after_finished_at=after)
+    client.wait_for_task(task.task_uid)
+    deleted_task = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert deleted_task.status == "succeeded"
     assert deleted_task.task_type == "taskDeletion"
@@ -709,11 +709,11 @@ def test_delete_tasks_after_finished_at(test_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_no_params(test_client):
-    task = test_client.delete_tasks()
-    test_client.wait_for_task(task.task_uid)
-    deleted_tasks = test_client.get_task(task.task_uid)
-    tasks = test_client.get_tasks(types="taskDeletion")
+def test_delete_no_params(client):
+    task = client.delete_tasks()
+    client.wait_for_task(task.task_uid)
+    deleted_tasks = client.get_task(task.task_uid)
+    tasks = client.get_tasks(types="taskDeletion")
 
     assert deleted_tasks.status == "succeeded"
     assert deleted_tasks.task_type == "taskDeletion"
@@ -724,75 +724,75 @@ def test_delete_no_params(test_client):
     )
 
 
-def test_get_tasks(test_client, empty_index, small_movies):
+def test_get_tasks(client, empty_index, small_movies):
     index = empty_index()
-    tasks = test_client.get_tasks()
+    tasks = client.get_tasks()
     current_tasks = len(tasks.results)
     response = index.add_documents(small_movies)
-    test_client.wait_for_task(response.task_uid)
+    client.wait_for_task(response.task_uid)
     response = index.add_documents(small_movies)
-    test_client.wait_for_task(response.task_uid)
-    response = test_client.get_tasks()
+    client.wait_for_task(response.task_uid)
+    response = client.get_tasks()
     assert len(response.results) >= current_tasks
 
 
-def test_get_tasks_for_index(test_client, empty_index, small_movies):
+def test_get_tasks_for_index(client, empty_index, small_movies):
     index = empty_index()
-    tasks = test_client.get_tasks(index_ids=[index.uid])
+    tasks = client.get_tasks(index_ids=[index.uid])
     current_tasks = len(tasks.results)
     response = index.add_documents(small_movies)
-    test_client.wait_for_task(response.task_uid)
+    client.wait_for_task(response.task_uid)
     response = index.add_documents(small_movies)
-    test_client.wait_for_task(response.task_uid)
-    response = test_client.get_tasks(index_ids=[index.uid])
+    client.wait_for_task(response.task_uid)
+    response = client.get_tasks(index_ids=[index.uid])
     assert len(response.results) >= current_tasks
     uid = set([x.index_uid for x in response.results])
     assert len(uid) == 1
     assert next(iter(uid)) == index.uid
 
 
-def test_get_task(test_client, empty_index, small_movies):
+def test_get_task(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)
-    test_client.wait_for_task(response.task_uid)
-    update = test_client.get_task(response.task_uid)
+    client.wait_for_task(response.task_uid)
+    update = client.get_task(response.task_uid)
     assert update.status == "succeeded"
 
 
-def test_wait_for_task(test_client, empty_index, small_movies):
+def test_wait_for_task(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)
-    update = test_client.wait_for_task(response.task_uid)
+    update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
 
 
-def test_wait_for_task_no_timeout(test_client, empty_index, small_movies):
+def test_wait_for_task_no_timeout(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)
-    update = test_client.wait_for_task(response.task_uid, timeout_in_ms=None)
+    update = client.wait_for_task(response.task_uid, timeout_in_ms=None)
     assert update.status == "succeeded"
 
 
-def test_wait_for_pending_update_time_out(test_client, empty_index, small_movies):
+def test_wait_for_pending_update_time_out(client, empty_index, small_movies):
     index = empty_index()
     with pytest.raises(MeilisearchTimeoutError):
         response = index.add_documents(small_movies)
-        test_client.wait_for_task(response.task_uid, timeout_in_ms=1, interval_in_ms=1)
+        client.wait_for_task(response.task_uid, timeout_in_ms=1, interval_in_ms=1)
 
-    test_client.wait_for_task(  # Make sure the indexing finishes so subsequent tests don't have issues.
+    client.wait_for_task(  # Make sure the indexing finishes so subsequent tests don't have issues.
         response.task_uid
     )
 
 
-def test_wait_for_task_raise_for_status_true(test_client, empty_index, small_movies):
+def test_wait_for_task_raise_for_status_true(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)
-    update = test_client.wait_for_task(response.task_uid, raise_for_status=True)
+    update = client.wait_for_task(response.task_uid, raise_for_status=True)
     assert update.status == "succeeded"
 
 
 def test_wait_for_task_raise_for_status_true_no_timeout(
-    test_client, empty_index, small_movies, base_url, monkeypatch
+    client, empty_index, small_movies, base_url, monkeypatch
 ):
     def mock_get_response(*args, **kwargs):
         task = {
@@ -815,11 +815,11 @@ def test_wait_for_task_raise_for_status_true_no_timeout(
     response = index.add_documents(small_movies)
     monkeypatch.setattr(HttpxClient, "get", mock_get_response)
     with pytest.raises(MeilisearchTaskFailedError):
-        test_client.wait_for_task(response.task_uid, raise_for_status=True, timeout_in_ms=None)
+        client.wait_for_task(response.task_uid, raise_for_status=True, timeout_in_ms=None)
 
 
 def test_wait_for_task_raise_for_status_false(
-    test_client, empty_index, small_movies, base_url, monkeypatch
+    client, empty_index, small_movies, base_url, monkeypatch
 ):
     def mock_get_response(*args, **kwargs):
         task = {
@@ -841,4 +841,4 @@ def test_wait_for_task_raise_for_status_false(
     response = index.add_documents(small_movies)
     monkeypatch.setattr(HttpxClient, "get", mock_get_response)
     with pytest.raises(MeilisearchTaskFailedError):
-        test_client.wait_for_task(response.task_uid, raise_for_status=True)
+        client.wait_for_task(response.task_uid, raise_for_status=True)

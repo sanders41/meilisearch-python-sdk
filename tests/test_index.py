@@ -89,26 +89,26 @@ def sortable_attributes():
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_delete_index(test_client, index_uid, index_uid2):
-    response = test_client.index(uid=index_uid).delete()
-    wait_for_task(test_client, response.task_uid)
+def test_delete_index(client, index_uid, index_uid2):
+    response = client.index(uid=index_uid).delete()
+    wait_for_task(client, response.task_uid)
 
     with pytest.raises(MeilisearchApiError):
-        test_client.get_index(uid=index_uid)
+        client.get_index(uid=index_uid)
 
-    response = test_client.index(uid=index_uid2).delete()
-    wait_for_task(test_client, response.task_uid)
+    response = client.index(uid=index_uid2).delete()
+    wait_for_task(client, response.task_uid)
 
     with pytest.raises(MeilisearchApiError):
-        test_client.get_index(uid=index_uid2)
+        client.get_index(uid=index_uid2)
 
-    indexes = test_client.get_indexes()
+    indexes = client.get_indexes()
     assert indexes is None
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_update_index(test_client, index_uid):
-    index = test_client.index(uid=index_uid)
+def test_update_index(client, index_uid):
+    index = client.index(uid=index_uid)
     index.update(primary_key="objectID")
 
     assert index.primary_key == "objectID"
@@ -659,54 +659,54 @@ def test_repr(empty_index):
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_delete_if_exists(test_client, index_uid):
-    assert test_client.get_index(uid=index_uid)
-    deleted = test_client.index(index_uid).delete_if_exists()
+def test_delete_if_exists(client, index_uid):
+    assert client.get_index(uid=index_uid)
+    deleted = client.index(index_uid).delete_if_exists()
     assert deleted is True
     with pytest.raises(MeilisearchApiError):
-        test_client.get_index(uid=index_uid)
+        client.get_index(uid=index_uid)
 
 
-def test_delete_if_exists_no_delete(test_client):
+def test_delete_if_exists_no_delete(client):
     with pytest.raises(MeilisearchApiError):
-        test_client.get_index(uid="none")
+        client.get_index(uid="none")
 
-    deleted = test_client.index("none").delete_if_exists()
+    deleted = client.index("none").delete_if_exists()
     assert deleted is False
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_delete_if_exists_error(test_client, index_uid, monkeypatch):
+def test_delete_if_exists_error(client, index_uid, monkeypatch):
     def mock_response(*args, **kwargs):
         raise MeilisearchApiError("test", Response(status_code=404))
 
     monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
     with pytest.raises(MeilisearchApiError):
-        test_client.index(index_uid).delete_if_exists()
+        client.index(index_uid).delete_if_exists()
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_delete_index_if_exists(test_client, index_uid):
-    assert test_client.get_index(uid=index_uid)
-    deleted = test_client.delete_index_if_exists(index_uid)
+def test_delete_index_if_exists(client, index_uid):
+    assert client.get_index(uid=index_uid)
+    deleted = client.delete_index_if_exists(index_uid)
     assert deleted is True
     with pytest.raises(MeilisearchApiError):
-        test_client.get_index(uid=index_uid)
+        client.get_index(uid=index_uid)
 
 
-def test_delete_index_if_exists_no_delete(test_client):
+def test_delete_index_if_exists_no_delete(client):
     with pytest.raises(MeilisearchApiError):
-        test_client.get_index(uid="none")
+        client.get_index(uid="none")
 
-    deleted = test_client.delete_index_if_exists("none")
+    deleted = client.delete_index_if_exists("none")
     assert deleted is False
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_delete_index_if_exists_error(test_client, index_uid, monkeypatch):
+def test_delete_index_if_exists_error(client, index_uid, monkeypatch):
     def mock_response(*args, **kwargs):
         raise MeilisearchApiError("test", Response(status_code=404))
 
     monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
     with pytest.raises(MeilisearchApiError):
-        test_client.delete_index_if_exists(index_uid)
+        client.delete_index_if_exists(index_uid)
