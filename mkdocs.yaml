@@ -29,10 +29,11 @@ repo_url: https://github.com/sanders41/meilisearch-python-sdk
 nav:
   - Home: index.md
   - API:
-    - AsyncClient: async_client_api.md
-    - Client: client_api.md
-    - AsyncIndex: async_index_api.md
-    - Index: index_api.md
+      - AsyncClient: async_client_api.md
+      - Client: client_api.md
+      - AsyncIndex: async_index_api.md
+      - Index: index_api.md
+      - Decorators: decorators_api.md
   - Pydantic: pydantic.md
 
 plugins:

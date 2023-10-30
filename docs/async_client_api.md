@@ -1,4 +1,4 @@
-## `AsyncClient Usage`
+## `AsyncClient` Usage
 
 ### Create a client with a context manager
 
@@ -31,6 +31,6 @@ finally:
 
 ```
 
-## `AsyncClient API`
+## `AsyncClient` API
 
-::: meilisearch_python_sdk._client.AsyncClient
+::: meilisearch_python_sdk.AsyncClient
