@@ -26,23 +26,13 @@ ROOT_PATH = Path().absolute()
 SMALL_MOVIES_PATH = ROOT_PATH / "datasets" / "small_movies.json"
 
 
-@pytest.fixture(scope="session", autouse=True)
-def event_loop():
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session")
+@pytest.fixture
 async def async_client():
     async with AsyncClient(BASE_URL, MASTER_KEY) as client:
         yield client
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def client():
     yield Client(BASE_URL, MASTER_KEY)
 

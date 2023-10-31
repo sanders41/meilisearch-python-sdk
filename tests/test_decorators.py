@@ -2,7 +2,11 @@ from uuid import uuid4
 
 import pytest
 
-from meilisearch_python_sdk.decorators import add_documments, async_add_documments
+from meilisearch_python_sdk.decorators import (
+    ConnectionInfo,
+    add_documments,
+    async_add_documments,
+)
 
 
 @pytest.mark.parametrize("batch_size, primary_key", [(None, None), (10, "alternate")])
@@ -15,7 +19,7 @@ def test_add_documents_with_client(batch_size, primary_key, client):
 
     @add_documments(
         index_name=index_name,
-        client=client,
+        connection_info=client,
         batch_size=batch_size,
         primary_key=primary_key,
         wait_for_task=True,
@@ -35,7 +39,7 @@ def test_add_documents_with_client(batch_size, primary_key, client):
 
 
 @pytest.mark.parametrize("batch_size, primary_key", [(None, None), (10, "alternate")])
-def test_add_documents_with_url(batch_size, primary_key, client, base_url, master_key):
+def test_add_documents_with_connection_info(batch_size, primary_key, client, base_url, master_key):
     index_name = str(uuid4())
     documents = []
 
@@ -44,8 +48,7 @@ def test_add_documents_with_url(batch_size, primary_key, client, base_url, maste
 
     @add_documments(
         index_name=index_name,
-        url=base_url,
-        api_token=master_key,
+        connection_info=ConnectionInfo(url=base_url, api_key=master_key),
         batch_size=batch_size,
         primary_key=primary_key,
         wait_for_task=True,
@@ -62,18 +65,6 @@ def test_add_documents_with_url(batch_size, primary_key, client, base_url, maste
 
     result = index.get_documents(limit=50)
     assert result.results == documents
-
-
-def test_add_documents_no_client_or_url():
-    index_name = str(uuid4())
-    documents = [{"id": 1, "title": "Title 1"}, {"id": 2, "title": "Title 2"}]
-
-    @add_documments(index_name=index_name, wait_for_task=True)
-    def tester():
-        return documents
-
-    with pytest.raises(ValueError):
-        tester()
 
 
 @pytest.mark.parametrize("batch_size, primary_key", [(None, None), (10, "alternate")])
@@ -86,7 +77,7 @@ async def test_async_add_documents_with_client(batch_size, primary_key, async_cl
 
     @async_add_documments(
         index_name=index_name,
-        async_client=async_client,
+        connection_info=async_client,
         batch_size=batch_size,
         primary_key=primary_key,
         wait_for_task=True,
@@ -108,7 +99,7 @@ async def test_async_add_documents_with_client(batch_size, primary_key, async_cl
 
 
 @pytest.mark.parametrize("batch_size, primary_key", [(None, None), (10, "alternate")])
-async def test_async_add_documents_with_url(
+async def test_async_add_documents_with_connection_info(
     batch_size, primary_key, async_client, base_url, master_key
 ):
     index_name = str(uuid4())
@@ -119,8 +110,7 @@ async def test_async_add_documents_with_url(
 
     @async_add_documments(
         index_name=index_name,
-        url=base_url,
-        api_token=master_key,
+        connection_info=ConnectionInfo(url=base_url, api_key=master_key),
         batch_size=batch_size,
         primary_key=primary_key,
         wait_for_task=True,
@@ -139,15 +129,3 @@ async def test_async_add_documents_with_url(
 
     # order will be random since documents were added async so sort them first.
     assert sorted(result.results, key=lambda x: x["id"]) == documents
-
-
-async def test_async_add_documents_no_client():
-    index_name = str(uuid4())
-    documents = [{"id": 1, "title": "Title 1"}, {"id": 2, "title": "Title 2"}]
-
-    @async_add_documments(index_name=index_name, wait_for_task=True)
-    async def tester():
-        return documents
-
-    with pytest.raises(ValueError):
-        await tester()
