@@ -211,6 +211,11 @@ This test compares how long it takes to complete 1000 searches (lower is better)
 to be ~30% faster than the sync client for data ingestion. You can find a good write-up of the
 results how he tested them in his [blog post](https://thedataquarry.com/posts/meilisearch-async/).
 
+## Testing
+
+[pytest-meilisearch](https://github.com/sanders41/pytest-meilisearch) is a pytest plugin that can
+help with testing your code. It provides a lot of the boiler plate code you will need.
+
 ## Documentation
 
 See our [docs](https://meilisearch-python-sdk.paulsanders.dev) for the full documentation.
