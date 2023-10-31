@@ -26,23 +26,13 @@ ROOT_PATH = Path().absolute()
 SMALL_MOVIES_PATH = ROOT_PATH / "datasets" / "small_movies.json"
 
 
-@pytest.fixture(scope="session", autouse=True)
-def event_loop():
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session")
+@pytest.fixture
 async def async_client():
     async with AsyncClient(BASE_URL, MASTER_KEY) as client:
         yield client
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def client():
     yield Client(BASE_URL, MASTER_KEY)
 
@@ -53,7 +43,9 @@ async def clear_indexes(async_client):
     yield
     indexes = await async_client.get_indexes()
     if indexes:
-        tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
+        tasks = await asyncio.gather(
+            *[async_client.index(x.uid).delete() for x in indexes]
+        )
         await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in tasks])
 
 
@@ -128,7 +120,9 @@ def small_movies_csv_path_semicolon_delimiter(small_movies, tmp_path):
     file_path = tmp_path / "small_movies.csv"
     with open(file_path, "w") as f:
         field_names = list(small_movies[0].keys())
-        writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL, delimiter=";")
+        writer = csv.DictWriter(
+            f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL, delimiter=";"
+        )
         writer.writeheader()
         writer.writerows(small_movies)
 
