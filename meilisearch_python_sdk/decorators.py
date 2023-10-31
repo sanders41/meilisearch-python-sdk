@@ -90,9 +90,7 @@ def async_add_documments(
                 )
                 return result
 
-            async with AsyncClient(
-                connection_info.url, connection_info.api_key
-            ) as client:
+            async with AsyncClient(connection_info.url, connection_info.api_key) as client:
                 await _async_add_documents(
                     client, index_name, result, batch_size, primary_key, wait_for_task
                 )
@@ -174,9 +172,7 @@ def add_documments(
                 )
                 return result
 
-            decorator_client = Client(
-                url=connection_info.url, api_key=connection_info.api_key
-            )
+            decorator_client = Client(url=connection_info.url, api_key=connection_info.api_key)
             _add_documents(
                 decorator_client,
                 index_name,
