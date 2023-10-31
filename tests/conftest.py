@@ -43,9 +43,7 @@ async def clear_indexes(async_client):
     yield
     indexes = await async_client.get_indexes()
     if indexes:
-        tasks = await asyncio.gather(
-            *[async_client.index(x.uid).delete() for x in indexes]
-        )
+        tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
         await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in tasks])
 
 
@@ -120,9 +118,7 @@ def small_movies_csv_path_semicolon_delimiter(small_movies, tmp_path):
     file_path = tmp_path / "small_movies.csv"
     with open(file_path, "w") as f:
         field_names = list(small_movies[0].keys())
-        writer = csv.DictWriter(
-            f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL, delimiter=";"
-        )
+        writer = csv.DictWriter(f, fieldnames=field_names, quoting=csv.QUOTE_MINIMAL, delimiter=";")
         writer.writeheader()
         writer.writerows(small_movies)
 
