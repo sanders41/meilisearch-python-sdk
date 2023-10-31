@@ -11,9 +11,8 @@ from meilisearch_python_sdk._utils import use_task_groups
 class ConnectionInfo(NamedTuple):
     """Infomation on how to connect to Meilisearch.
 
-    Args:
-        url: URL for the Meilisearch server.
-        api_token: The API key for the server.
+    url: URL for the Meilisearch server.
+    api_key: The API key for the server.
     """
 
     url: str
@@ -61,7 +60,7 @@ def async_add_documments(
         >>>
         >>>
         >>> # with `AsyncClient`
-        >>> client = AsyncClient(url="http://localhost:7700", api_token="masterKey")
+        >>> client = AsyncClient(url="http://localhost:7700", api_key="masterKey")
         >>> @async_add_documents(index_name="movies", connection_info=client)
         >>> async def my_function() -> list[dict[str, Any]]:
         >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
@@ -143,7 +142,7 @@ def add_documments(
         >>>
         >>>
         >>> # With `Client`
-        >>> client = Client(url="http://localhost:7700", api_token="masterKey")
+        >>> client = Client(url="http://localhost:7700", api_key="masterKey")
         >>> @add_documents(index_name="movies", connection_info=client)
         >>> def my_function() -> list[dict[str, Any]]:
         >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
