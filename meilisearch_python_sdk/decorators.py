@@ -2,18 +2,28 @@ from __future__ import annotations
 
 import asyncio
 from functools import wraps
-from typing import Any, Callable
+from typing import Any, Callable, NamedTuple
 
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._utils import use_task_groups
 
 
+class ConnectionInfo(NamedTuple):
+    """Infomation on how to connect to Meilisearch.
+
+    Args:
+        url: URL for the Meilisearch server.
+        api_token: The API key for the server.
+    """
+
+    url: str
+    api_key: str
+
+
 def async_add_documments(
     *,
     index_name: str,
-    async_client: AsyncClient | None = None,
-    url: str | None = None,
-    api_token: str | None = None,
+    connection_info: AsyncClient | ConnectionInfo,
     batch_size: int | None = None,
     primary_key: str | None = None,
     wait_for_task: bool = False,
@@ -25,10 +35,8 @@ def async_add_documments(
     Args:
 
         index_name: The name of the index to which the documents should be added.
-        async_client: An AsyncClient instance. Default = None.
-        url: URL for the Meilisearch server. Default = None.
-        api_token: The API key for the server. This key needs to have permission to add documents
-            to the index, and create the index if it does not already exist. Default = None.
+        connection_info: Either an AsyncClient instance ConnectionInfo with informtaion on how to
+            connect to Meilisearch.
         batch_size: If provided the documents will be sent in batches of the specified size.
             Otherwise all documents are sent at once. Default = None.
         primary_key: The primary key of the documents. This will be ignored if already set.
@@ -48,9 +56,21 @@ def async_add_documments(
 
     Examples:
 
-        >>> from meilisearch_python_sdk.decorators import async_add_documents
+        >>> from meilisearch_python_sdk import AsyncClient
+        >>> from meilisearch_python_sdk.decorators import async_add_documents, ConnectionInfo
         >>>
-        >>> @async_add_documents(index_name="movies", url="http://localhost:7700", api_token="masterKey")
+        >>>
+        >>> # with `AsyncClient`
+        >>> client = AsyncClient(url="http://localhost:7700", api_token="masterKey")
+        >>> @async_add_documents(index_name="movies", connection_info=client)
+        >>> async def my_function() -> list[dict[str, Any]]:
+        >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
+        >>>
+        >>> # with `ConnectionInfo`
+        >>> @async_add_documents(
+                index_name="movies",
+                connection_info=ConnectionInfo(url="http://localhost:7700", api_key="masterKey",
+            )
         >>> async def my_function() -> list[dict[str, Any]]:
         >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
     """
@@ -59,16 +79,20 @@ def async_add_documments(
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = await func(*args, **kwargs)
-            if async_client:
+            if isinstance(connection_info, AsyncClient):
                 await _async_add_documents(
-                    async_client, index_name, result, batch_size, primary_key, wait_for_task
+                    connection_info,
+                    index_name,
+                    result,
+                    batch_size,
+                    primary_key,
+                    wait_for_task,
                 )
                 return result
 
-            if not url:
-                raise ValueError("Either an async_client or url is required")
-
-            async with AsyncClient(url, api_token) as client:
+            async with AsyncClient(
+                connection_info.url, connection_info.api_key
+            ) as client:
                 await _async_add_documents(
                     client, index_name, result, batch_size, primary_key, wait_for_task
                 )
@@ -83,9 +107,7 @@ def async_add_documments(
 def add_documments(
     *,
     index_name: str,
-    client: Client | None = None,
-    url: str | None = None,
-    api_token: str | None = None,
+    connection_info: Client | ConnectionInfo,
     batch_size: int | None = None,
     primary_key: str | None = None,
     wait_for_task: bool = False,
@@ -97,10 +119,8 @@ def add_documments(
     Args:
 
         index_name: The name of the index to which the documents should be added.
-        client: An Client instance. Default = None.
-        url: URL for the Meilisearch server. Default = None.
-        api_token: The API key for the server. This key needs to have permission to add documents
-            to the index, and create the index if it does not already exist. Default = None.
+        connection_info: Either an Client instance ConnectionInfo with informtaion on how to
+            connect to Meilisearch.
         batch_size: If provided the documents will be sent in batches of the specified size.
             Otherwise all documents are sent at once. Default = None.
         primary_key: The primary key of the documents. This will be ignored if already set.
@@ -120,9 +140,21 @@ def add_documments(
 
     Examples:
 
-        >>> from meilisearch_python_sdk.decorators import add_documents
+        >>> from meilisearch_python_sdk import Client
+        >>> from meilisearch_python_sdk.decorators import add_documents, ConnectionInfo
         >>>
-        >>> @add_documents(index_name="movies", url="http://localhost:7700", api_token="masterKey")
+        >>>
+        >>> # With `Client`
+        >>> client = Client(url="http://localhost:7700", api_token="masterKey")
+        >>> @add_documents(index_name="movies", connection_info=client)
+        >>> def my_function() -> list[dict[str, Any]]:
+        >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
+        >>>
+        >>> # With `ConnectionInfo`
+        >>> @add_documents(
+                index_name="movies",
+                connection_info=ConnectionInfo(url="http://localhost:7700", api_key="masterKey"),
+            )
         >>> def my_function() -> list[dict[str, Any]]:
         >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
     """
@@ -131,16 +163,27 @@ def add_documments(
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = func(*args, **kwargs)
-            if client:
-                _add_documents(client, index_name, result, batch_size, primary_key, wait_for_task)
+            if isinstance(connection_info, Client):
+                _add_documents(
+                    connection_info,
+                    index_name,
+                    result,
+                    batch_size,
+                    primary_key,
+                    wait_for_task,
+                )
                 return result
 
-            if not url:
-                raise ValueError("Either an async_client or url is required")
-
-            decorator_client = Client(url, api_token)
+            decorator_client = Client(
+                url=connection_info.url, api_key=connection_info.api_key
+            )
             _add_documents(
-                decorator_client, index_name, result, batch_size, primary_key, wait_for_task
+                decorator_client,
+                index_name,
+                result,
+                batch_size,
+                primary_key,
+                wait_for_task,
             )
 
             return result
