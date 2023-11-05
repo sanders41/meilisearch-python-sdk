@@ -9,7 +9,7 @@ from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time
 
 class IndexBase(CamelBase):
     uid: str
-    primary_key: Optional[str]
+    primary_key: Optional[str] = None
 
 
 class IndexInfo(IndexBase):
