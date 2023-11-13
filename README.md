@@ -6,8 +6,8 @@
 [![PyPI version](https://badge.fury.io/py/meilisearch-python-sdk.svg)](https://badge.fury.io/py/meilisearch-python-sdk)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/meilisearch-python-sdk?color=5cc141)](https://github.com/sanders41/meilisearch-python-sdk)
 
-:warning: This project was previously named `meilisearch-python-async`. Development on that project
-continues here under the new name.
+:information_source: This project was previously named `meilisearch-python-async`. Development on
+that project continues here under the new name.
 
 Meilisearch Python SDK provides both an async and sync client for the
 [Meilisearch](https://github.com/meilisearch/meilisearch) API.
@@ -15,9 +15,9 @@ Meilisearch Python SDK provides both an async and sync client for the
 Which client to use depends on your use case. If the code base you are working with uses asyncio,
 for example if you are using [FastAPI](https://fastapi.tiangolo.com/), choose the `AsyncClient`,
 otherwise choose the sync `Client`. The functionality of the two clients is the same, the difference
-being that the `AsyncClient` provides async methods and uses the `AsyncIndex` with its own additional async
-methods. On the other hand, `Client` provides blocking methods and uses the `Index` with its own
-blocking methods.
+being that the `AsyncClient` provides async methods and uses the `AsyncIndex` with its own
+additional async methods. On the other hand, `Client` provides blocking methods and uses the `Index`
+with its own blocking methods.
 
 ## Installation
 
