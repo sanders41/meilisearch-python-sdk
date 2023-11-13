@@ -6,7 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/meilisearch-python-sdk.svg)](https://badge.fury.io/py/meilisearch-python-sdk)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/meilisearch-python-sdk?color=5cc141)](https://github.com/sanders41/meilisearch-python-sdk)
 
-:information_source: This project was previously named `meilisearch-python-async`. Development on
+NOTE: This project was previously named `meilisearch-python-async`. Development on
 that project continues here under the new name.
 
 Meilisearch Python SDK provides both an async and sync client for the
