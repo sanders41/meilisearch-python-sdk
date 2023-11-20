@@ -16,7 +16,7 @@
   poetry run ruff format meilisearch_python_sdk tests
 
 @test: start-meilisearch-detached && stop-meilisearch
-  -poetry run pytest
+  -poetry run pytest -x
 
 @test-ci: start-meilisearch-detached && stop-meilisearch
   poetry run pytest --cov=meilisearch_python_sdk --cov-report=xml

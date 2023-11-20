@@ -54,7 +54,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--cov=meilisearch_python_sdk --cov-report term-missing"
+addopts = "--cov=meilisearch_python_sdk --cov-report term-missing --no-cov-on-fail"
 asyncio_mode = "auto"
 
 [tool.mypy]

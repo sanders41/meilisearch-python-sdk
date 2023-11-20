@@ -209,6 +209,28 @@ class AsyncClient(BaseClient):
         """
         return await AsyncIndex.create(self.http_client, uid, primary_key)
 
+    async def create_snapshot(self) -> TaskInfo:
+        """Trigger the creation of a Meilisearch snapshot.
+
+        Returns:
+
+            The details of the task.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     await client.create_snapshot()
+        """
+        response = await self._http_requests.post("snapshots")
+
+        return TaskInfo(**response.json())
+
     async def delete_index_if_exists(self, uid: str) -> bool:
         """Deletes an index if it already exists.
 
@@ -1014,6 +1036,28 @@ class Client(BaseClient):
             >>> index = client.create_index("movies")
         """
         return Index.create(self.http_client, uid, primary_key)
+
+    def create_snapshot(self) -> TaskInfo:
+        """Trigger the creation of a Meilisearch snapshot.
+
+        Returns:
+
+            The details of the task.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> client.create_snapshot()
+        """
+        response = self._http_requests.post("snapshots")
+
+        return TaskInfo(**response.json())
 
     def delete_index_if_exists(self, uid: str) -> bool:
         """Deletes an index if it already exists.
