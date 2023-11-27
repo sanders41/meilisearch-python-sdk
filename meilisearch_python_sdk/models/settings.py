@@ -1,4 +1,5 @@
 from typing import Dict, List, Optional
+from warnings import warn
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
@@ -38,6 +39,10 @@ class Faceting(CamelBase):
             return v
 
     else:  # pragma: no cover
+        warn(
+            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+            DeprecationWarning,
+        )
 
         @pydantic.validator("sort_facet_values_by")  # type: ignore[attr-defined]
         @classmethod
