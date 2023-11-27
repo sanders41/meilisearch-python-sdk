@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, Optional
+from warnings import warn
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
@@ -39,6 +40,10 @@ class IndexInfo(IndexBase):
             return converted
 
     else:  # pragma: no cover
+        warn(
+            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+            DeprecationWarning,
+        )
 
         @pydantic.validator("created_at", pre=True)
         @classmethod

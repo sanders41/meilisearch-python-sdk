@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from ssl import SSLContext
 from types import TracebackType
+from warnings import warn
 
 import jwt
 from httpx import AsyncClient as HttpxAsyncClient
@@ -441,6 +442,10 @@ class AsyncClient(BaseClient):
                 "keys", json.loads(key.model_dump_json(by_alias=True))
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
 
         return Key(**response.json())
@@ -592,6 +597,10 @@ class AsyncClient(BaseClient):
                 body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
             )
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = await self._http_requests.post(
                 url,
                 body={"queries": [x.dict(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
@@ -1267,6 +1276,10 @@ class Client(BaseClient):
                 "keys", json.loads(key.model_dump_json(by_alias=True))
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
 
         return Key(**response.json())
@@ -1418,6 +1431,10 @@ class Client(BaseClient):
                 body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
             )
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = self._http_requests.post(
                 url,
                 body={"queries": [x.dict(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
@@ -1807,6 +1824,10 @@ def _build_update_key_payload(key: KeyUpdate) -> JsonDict:
             if v is not None and k != "key"
         }
     else:  # pragma: no cover
+        warn(
+            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+            DeprecationWarning,
+        )
         return {  # type: ignore[attr-defined]
             k: v
             for k, v in json.loads(key.json(by_alias=True)).items()

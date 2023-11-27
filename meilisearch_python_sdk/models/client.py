@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
+from warnings import warn
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
@@ -21,6 +22,10 @@ class ClientStats(CamelBase):
             return iso_to_date_time(v)
 
     else:  # pragma: no cover
+        warn(
+            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+            DeprecationWarning,
+        )
 
         @pydantic.validator("last_update", pre=True)
         @classmethod
@@ -45,6 +50,10 @@ class _KeyBase(CamelBase):
             return iso_to_date_time(v)
 
     else:  # pragma: no cover
+        warn(
+            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+            DeprecationWarning,
+        )
 
         @pydantic.validator("expires_at", pre=True)
         @classmethod
@@ -86,6 +95,10 @@ class Key(_KeyBase):
             return iso_to_date_time(v)
 
     else:  # pragma: no cover
+        warn(
+            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+            DeprecationWarning,
+        )
 
         @pydantic.validator("created_at", pre=True)
         @classmethod
@@ -114,6 +127,10 @@ class KeyCreate(CamelBase):
         model_config = pydantic.ConfigDict(ser_json_timedelta="iso8601")  # type: ignore[typeddict-unknown-key]
 
     else:  # pragma: no cover
+        warn(
+            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+            DeprecationWarning,
+        )
 
         class Config:
             json_encoders = {
@@ -139,6 +156,10 @@ class KeyUpdate(CamelBase):
         model_config = pydantic.ConfigDict(ser_json_timedelta="iso8601")  # type: ignore[typeddict-unknown-key]
 
     else:  # pragma: no cover
+        warn(
+            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+            DeprecationWarning,
+        )
 
         class Config:
             json_encoders = {

@@ -8,6 +8,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Generator
 from urllib.parse import urlencode
+from warnings import warn
 
 import aiofiles
 from httpx import AsyncClient, Client
@@ -1728,6 +1729,10 @@ class AsyncIndex(BaseIndex):
         if is_pydantic_2():
             body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
         response = await self._http_requests.patch(self._settings_url, body_dict)
@@ -2428,6 +2433,10 @@ class AsyncIndex(BaseIndex):
                 f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True)
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = await self._http_requests.patch(
                 f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True)
             )  # type: ignore[attr-defined]
@@ -2508,6 +2517,10 @@ class AsyncIndex(BaseIndex):
                 f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True)
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = await self._http_requests.patch(
                 f"{self._settings_url}/faceting", faceting.dict(by_alias=True)
             )  # type: ignore[attr-defined]
@@ -2589,6 +2602,10 @@ class AsyncIndex(BaseIndex):
                 f"{self._settings_url}/pagination", settings.model_dump(by_alias=True)
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = await self._http_requests.patch(
                 f"{self._settings_url}/pagination", settings.dict(by_alias=True)
             )  # type: ignore[attr-defined]
@@ -4367,6 +4384,10 @@ class Index(BaseIndex):
         if is_pydantic_2():
             body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
         response = self._http_requests.patch(self._settings_url, body_dict)
@@ -5061,6 +5082,10 @@ class Index(BaseIndex):
                 f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True)
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = self._http_requests.patch(
                 f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True)
             )  # type: ignore[attr-defined]
@@ -5141,6 +5166,10 @@ class Index(BaseIndex):
                 f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True)
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = self._http_requests.patch(
                 f"{self._settings_url}/faceting", faceting.dict(by_alias=True)
             )  # type: ignore[attr-defined]
@@ -5222,6 +5251,10 @@ class Index(BaseIndex):
                 f"{self._settings_url}/pagination", settings.model_dump(by_alias=True)
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
             response = self._http_requests.patch(
                 f"{self._settings_url}/pagination", settings.dict(by_alias=True)
             )  # type: ignore[attr-defined]
