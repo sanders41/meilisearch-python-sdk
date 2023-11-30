@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "meilisearch-python-sdk"
-version = "2.2.1"
+version = "2.2.2"
 description = "A Python async client for the Meilisearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
