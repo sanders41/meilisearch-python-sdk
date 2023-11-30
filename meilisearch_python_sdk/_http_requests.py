@@ -34,7 +34,7 @@ class AsyncHttpRequests:
     ) -> Response:
         headers = build_headers(content_type)
         try:
-            if not body:
+            if body is None:
                 response = await http_method(path)
             elif content_type == "application/json":
                 response = await http_method(path, json=body, headers=headers)
