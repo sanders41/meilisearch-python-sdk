@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import json
-from collections.abc import Mapping, Sequence
 from csv import DictReader
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any, Generator, Mapping, Sequence
 from urllib.parse import urlencode
 from warnings import warn
 
