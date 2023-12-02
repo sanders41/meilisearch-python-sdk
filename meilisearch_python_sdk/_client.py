@@ -27,7 +27,7 @@ from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.search import SearchParams, SearchResultsWithUID
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
-from meilisearch_python_sdk.types import JsonDict
+from meilisearch_python_sdk.types import JsonDict, JsonMapping
 
 
 class BaseClient:
@@ -43,7 +43,7 @@ class BaseClient:
 
     def generate_tenant_token(
         self,
-        search_rules: JsonDict | list[str],
+        search_rules: JsonMapping | list[str],
         *,
         api_key: Key,
         expires_at: datetime | None = None,
