@@ -6,7 +6,7 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any, Generator, Mapping, Sequence
 from urllib.parse import urlencode
 from warnings import warn
 
@@ -27,7 +27,7 @@ from meilisearch_python_sdk.models.settings import (
     TypoTolerance,
 )
 from meilisearch_python_sdk.models.task import TaskInfo
-from meilisearch_python_sdk.types import Filter, JsonDict
+from meilisearch_python_sdk.types import Filter, JsonDict, JsonMapping
 
 
 class BaseIndex:
@@ -619,7 +619,7 @@ class AsyncIndex(BaseIndex):
         return DocumentsInfo(**response.json())
 
     async def add_documents(
-        self, documents: list[JsonDict], primary_key: str | None = None
+        self, documents: Sequence[JsonMapping], primary_key: str | None = None
     ) -> TaskInfo:
         """Add documents to the index.
 
@@ -660,7 +660,7 @@ class AsyncIndex(BaseIndex):
 
     async def add_documents_in_batches(
         self,
-        documents: list[JsonDict],
+        documents: Sequence[JsonMapping],
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
@@ -1060,7 +1060,7 @@ class AsyncIndex(BaseIndex):
         return TaskInfo(**response.json())
 
     async def update_documents(
-        self, documents: list[JsonDict], primary_key: str | None = None
+        self, documents: Sequence[JsonMapping], primary_key: str | None = None
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -1101,7 +1101,7 @@ class AsyncIndex(BaseIndex):
 
     async def update_documents_in_batches(
         self,
-        documents: list[JsonDict],
+        documents: Sequence[JsonMapping],
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
@@ -3406,7 +3406,9 @@ class Index(BaseIndex):
 
         return DocumentsInfo(**response.json())
 
-    def add_documents(self, documents: list[JsonDict], primary_key: str | None = None) -> TaskInfo:
+    def add_documents(
+        self, documents: Sequence[JsonMapping], primary_key: str | None = None
+    ) -> TaskInfo:
         """Add documents to the index.
 
         Args:
@@ -3446,7 +3448,7 @@ class Index(BaseIndex):
 
     def add_documents_in_batches(
         self,
-        documents: list[JsonDict],
+        documents: Sequence[JsonMapping],
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
@@ -3794,7 +3796,7 @@ class Index(BaseIndex):
         return TaskInfo(**response.json())
 
     def update_documents(
-        self, documents: list[JsonDict], primary_key: str | None = None
+        self, documents: Sequence[JsonMapping], primary_key: str | None = None
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -3835,7 +3837,7 @@ class Index(BaseIndex):
 
     def update_documents_in_batches(
         self,
-        documents: list[JsonDict],
+        documents: Sequence[JsonMapping],
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
@@ -5549,7 +5551,9 @@ async def _async_load_documents_from_file(
         return documents
 
 
-def _batch(documents: list[dict], batch_size: int) -> Generator[list[dict], None, None]:
+def _batch(
+    documents: Sequence[Mapping], batch_size: int
+) -> Generator[Sequence[Mapping], None, None]:
     total_len = len(documents)
     for i in range(0, total_len, batch_size):
         yield documents[i : i + batch_size]
@@ -5667,7 +5671,7 @@ def _process_search_parameters(
     return body
 
 
-def _build_encoded_url(base_url: str, params: JsonDict) -> str:
+def _build_encoded_url(base_url: str, params: JsonMapping) -> str:
     return f"{base_url}?{urlencode(params)}"
 
 
