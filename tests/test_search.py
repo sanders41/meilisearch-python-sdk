@@ -251,7 +251,7 @@ def test_custom_search_params_with_many_params(index_with_documents):
 
 @pytest.mark.parametrize(
     "sort, titles",
-    [
+    (
         (
             ["title:asc"],
             ["After", "Us"],
@@ -260,7 +260,7 @@ def test_custom_search_params_with_many_params(index_with_documents):
             ["title:desc"],
             ["Us", "After"],
         ),
-    ],
+    ),
 )
 def test_search_sort(sort, titles, index_with_documents):
     index = index_with_documents()
@@ -275,7 +275,9 @@ def test_search_sort(sort, titles, index_with_documents):
     assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
 
 
-def test_search_with_tenant_token(client, index_with_documents, base_url, default_search_key):
+def test_search_with_tenant_token(
+    client, index_with_documents, base_url, default_search_key
+):
     token = client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     index_docs = index_with_documents()
 
@@ -397,7 +399,10 @@ def test_custom_facet_search(index_with_documents):
     update = index.update_filterable_attributes(["genre"])
     wait_for_task(index.http_client, update.task_uid)
     response = index.facet_search(
-        "Dragon", facet_name="genre", facet_query="cartoon", attributes_to_highlight=["title"]
+        "Dragon",
+        facet_name="genre",
+        facet_query="cartoon",
+        attributes_to_highlight=["title"],
     )
     assert response.facet_hits[0].value == "cartoon"
     assert response.facet_hits[0].count == 1

@@ -81,7 +81,7 @@ async def test_get_documents_default(async_empty_index):
 
 
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
 async def test_add_documents(primary_key, expected_primary_key, async_empty_index, small_movies):
     index = await async_empty_index()
@@ -91,9 +91,9 @@ async def test_add_documents(primary_key, expected_primary_key, async_empty_inde
     assert update.status == "succeeded"
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
 async def test_add_documents_in_batches(
     batch_size, primary_key, expected_primary_key, async_empty_index, small_movies
@@ -111,8 +111,8 @@ async def test_add_documents_in_batches(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 @pytest.mark.parametrize(
     "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
@@ -136,8 +136,8 @@ async def test_add_documents_from_directory(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_add_documents_from_directory_csv_path(
     path_type, combine_documents, async_client, tmp_path
 ):
@@ -153,8 +153,8 @@ async def test_add_documents_from_directory_csv_path(
     assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_add_documents_from_directory_csv_path_with_delimiter(
     path_type, combine_documents, async_client, tmp_path
 ):
@@ -170,8 +170,8 @@ async def test_add_documents_from_directory_csv_path_with_delimiter(
     assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_add_documents_from_directory_ndjson(
     path_type, combine_documents, async_client, tmp_path
 ):
@@ -187,7 +187,7 @@ async def test_add_documents_from_directory_ndjson(
     assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_add_documents_from_directory_no_documents(combine_documents, async_client, tmp_path):
     with open(tmp_path / "test.txt", "w") as f:
         f.write("nothing")
@@ -209,8 +209,8 @@ async def test_add_documents_from_directory_csv_delimiter_invalid(
         )
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 @pytest.mark.parametrize(
     "batch_size, number_of_files, documents_per_file, total_documents",
     [(25, 1, 50, 50), (50, 2, 50, 100)],
@@ -240,8 +240,8 @@ async def test_add_documents_from_directory_in_batchs(
 
 
 @pytest.mark.parametrize("batch_size", [10, 25])
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_add_documents_from_directory_in_batchs_csv(
     path_type, combine_documents, batch_size, async_client, tmp_path
 ):
@@ -259,8 +259,8 @@ async def test_add_documents_from_directory_in_batchs_csv(
 
 
 @pytest.mark.parametrize("batch_size", [10, 25])
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_add_documents_from_directory_in_batchs_ndjson(
     path_type, combine_documents, batch_size, async_client, tmp_path
 ):
@@ -278,9 +278,9 @@ async def test_add_documents_from_directory_in_batchs_ndjson(
 
 
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_from_file(
     path_type, primary_key, expected_primary_key, async_client, small_movies_path
 ):
@@ -294,9 +294,9 @@ async def test_add_documents_from_file(
 
 
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_from_file_csv(
     path_type, primary_key, expected_primary_key, async_client, small_movies_csv_path
 ):
@@ -310,9 +310,9 @@ async def test_add_documents_from_file_csv(
 
 
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_raw_file_csv(
     path_type, primary_key, expected_primary_key, async_client, small_movies_csv_path
 ):
@@ -325,9 +325,9 @@ async def test_add_documents_raw_file_csv(
 
 
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_raw_file_csv_delimiter(
     path_type,
     primary_key,
@@ -348,9 +348,9 @@ async def test_add_documents_raw_file_csv_delimiter(
 
 
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_raw_file_ndjson(
     path_type, primary_key, expected_primary_key, async_client, small_movies_ndjson_path
 ):
@@ -396,9 +396,9 @@ async def test_add_documents_raw_file_csv_delimiter_invalid(
 
 
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_from_file_ndjson(
     path_type, primary_key, expected_primary_key, async_client, small_movies_ndjson_path
 ):
@@ -420,9 +420,9 @@ async def test_add_documents_from_file_invalid_extension(async_client):
 
 @pytest.mark.parametrize("batch_size", [10, 25])
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_from_file_in_batches(
     path_type,
     batch_size,
@@ -447,11 +447,11 @@ async def test_add_documents_from_file_in_batches(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_from_file_in_batches_csv(
     path_type,
     batch_size,
@@ -476,11 +476,11 @@ async def test_add_documents_from_file_in_batches_csv(
     assert await index.get_primary_key() == expected_primary_key
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_from_file_in_batches_csv_with_delimiter(
     path_type,
     batch_size,
@@ -520,11 +520,11 @@ async def test_add_documents_from_file_in_batches_csv_with_delimiter_invalid(
         )
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
+    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_add_documents_from_file_in_batches_ndjson(
     path_type,
     batch_size,
@@ -629,7 +629,7 @@ async def test_update_documents_with_primary_key(async_client, small_movies):
     assert await index.get_primary_key() == primary_key
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("batch_size", (100, 500))
 async def test_update_documents_in_batches(batch_size, async_index_with_documents, small_movies):
     index = await async_index_with_documents()
     response = await index.get_documents()
@@ -649,7 +649,7 @@ async def test_update_documents_in_batches(batch_size, async_index_with_document
     assert response["title"] != "Some title"
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("batch_size", (100, 500))
 async def test_update_documents_in_batches_with_primary_key(batch_size, async_client, small_movies):
     primary_key = "release_date"
     index = async_client.index("movies")
@@ -665,8 +665,8 @@ async def test_update_documents_in_batches_with_primary_key(batch_size, async_cl
     assert await index.get_primary_key() == primary_key
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 @pytest.mark.parametrize(
     "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
 )
@@ -692,8 +692,8 @@ async def test_update_documents_from_directory(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_update_documents_from_directory_csv(
     path_type, combine_documents, async_client, tmp_path
 ):
@@ -709,8 +709,8 @@ async def test_update_documents_from_directory_csv(
     assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_update_documents_from_directory_csv_with_delimiter(
     path_type, combine_documents, async_client, tmp_path
 ):
@@ -738,8 +738,8 @@ async def test_update_documents_from_directory_csv_delimiter_invalid(
         )
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_update_documents_from_directory_ndjson(
     path_type, combine_documents, async_client, tmp_path
 ):
@@ -755,8 +755,8 @@ async def test_update_documents_from_directory_ndjson(
     assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 @pytest.mark.parametrize(
     "batch_size, number_of_files, documents_per_file, total_documents",
     [(25, 1, 50, 50), (50, 2, 50, 100)],
@@ -785,9 +785,9 @@ async def test_update_documents_from_directory_in_batchs(
     assert stats.number_of_documents == total_documents
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("batch_size", (100, 500))
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_update_documents_from_directory_in_batchs_csv(
     path_type, combine_documents, batch_size, async_client, tmp_path
 ):
@@ -804,9 +804,9 @@ async def test_update_documents_from_directory_in_batchs_csv(
     assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("batch_size", (100, 500))
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_update_documents_from_directory_in_batchs_csv_delimiter(
     path_type, combine_documents, batch_size, async_client, tmp_path
 ):
@@ -839,9 +839,9 @@ async def test_update_documents_from_directory_in_batches_csv_delimiter_invalid(
         )
 
 
-@pytest.mark.parametrize("batch_size", [100, 500])
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("combine_documents", [True, False])
+@pytest.mark.parametrize("batch_size", (100, 500))
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("combine_documents", (True, False))
 async def test_update_documents_from_directory_in_batchs_ndjson(
     path_type, combine_documents, batch_size, async_client, tmp_path
 ):
@@ -858,7 +858,7 @@ async def test_update_documents_from_directory_in_batchs_ndjson(
     assert stats.number_of_documents == 20
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_update_documents_from_file(path_type, async_client, small_movies, small_movies_path):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
@@ -877,7 +877,7 @@ async def test_update_documents_from_file(path_type, async_client, small_movies,
     assert response.results[0]["title"] != "Some title"
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_update_documents_from_file_csv(
     path_type, async_client, small_movies, small_movies_csv_path
 ):
@@ -898,7 +898,7 @@ async def test_update_documents_from_file_csv(
     assert response.results[0]["title"] != "Some title"
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_update_documents_from_file_csv_with_delimiter(
     path_type, async_client, small_movies, small_movies_csv_path_semicolon_delimiter
 ):
@@ -934,7 +934,7 @@ async def test_update_documents_from_file_csv_delimiter_invalid(
         )
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_update_documents_from_file_ndjson(
     path_type, async_client, small_movies, small_movies_ndjson_path
 ):
@@ -970,8 +970,8 @@ async def test_update_documents_from_file_invalid_extension(async_client):
         await index.update_documents_from_file("test.bad")
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("batch_size", (100, 500))
 async def test_update_documents_from_file_in_batches(
     path_type, batch_size, async_client, small_movies_path, small_movies
 ):
@@ -997,8 +997,8 @@ async def test_update_documents_from_file_in_batches(
     assert response.results[0]["title"] != "Some title"
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("batch_size", (100, 500))
 async def test_update_documents_from_file_in_batches_csv(
     path_type, batch_size, async_client, small_movies_csv_path, small_movies
 ):
@@ -1024,8 +1024,8 @@ async def test_update_documents_from_file_in_batches_csv(
     assert response.results[0]["title"] != "Some title"
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
-@pytest.mark.parametrize("batch_size", [100, 500])
+@pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("batch_size", (100, 500))
 async def test_update_documents_from_file_in_batches_ndjson(
     path_type, batch_size, async_client, small_movies_ndjson_path, small_movies
 ):
@@ -1058,7 +1058,7 @@ async def test_update_documents_from_file_in_batches_invalid_extension(async_cli
         await index.update_documents_from_file_in_batches("test.bad")
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_update_documents_raw_file_csv(
     path_type, async_client, small_movies_csv_path, small_movies
 ):
@@ -1079,7 +1079,7 @@ async def test_update_documents_raw_file_csv(
     assert response.results[0]["title"] != "Some title"
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_update_documents_raw_file_csv_with_delimiter(
     path_type, async_client, small_movies_csv_path_semicolon_delimiter, small_movies
 ):
@@ -1123,7 +1123,7 @@ async def test_update_documents_from_raw_file_csv_delimiter_invalid(
         )
 
 
-@pytest.mark.parametrize("path_type", ["path", "str"])
+@pytest.mark.parametrize("path_type", ("path", "str"))
 async def test_update_documents_raw_file_ndjson(
     path_type, async_client, small_movies_ndjson_path, small_movies
 ):
