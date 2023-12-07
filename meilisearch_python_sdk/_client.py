@@ -711,7 +711,7 @@ class AsyncClient(BaseClient):
 
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
-            >>>     health = await client.get_healths()
+            >>>     health = await client.get_health()
         """
         response = await self._http_requests.get("health")
 
@@ -1545,7 +1545,7 @@ class Client(BaseClient):
 
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
-            >>> health = client.get_healths()
+            >>> health = client.get_health()
         """
         response = self._http_requests.get("health")
 
