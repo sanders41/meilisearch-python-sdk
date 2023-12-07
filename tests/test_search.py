@@ -275,9 +275,7 @@ def test_search_sort(sort, titles, index_with_documents):
     assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
 
 
-def test_search_with_tenant_token(
-    client, index_with_documents, base_url, default_search_key
-):
+def test_search_with_tenant_token(client, index_with_documents, base_url, default_search_key):
     token = client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     index_docs = index_with_documents()
 

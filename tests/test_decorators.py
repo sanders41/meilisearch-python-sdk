@@ -39,9 +39,7 @@ def test_add_documents_with_client(batch_size, primary_key, client):
 
 
 @pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
-def test_add_documents_with_connection_info(
-    batch_size, primary_key, client, base_url, master_key
-):
+def test_add_documents_with_connection_info(batch_size, primary_key, client, base_url, master_key):
     index_name = str(uuid4())
     documents = []
 
