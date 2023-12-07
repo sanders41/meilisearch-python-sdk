@@ -9,7 +9,7 @@ from meilisearch_python_sdk.decorators import (
 )
 
 
-@pytest.mark.parametrize("batch_size, primary_key", [(None, None), (10, "alternate")])
+@pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
 def test_add_documents_with_client(batch_size, primary_key, client):
     index_name = str(uuid4())
     documents = []
@@ -38,7 +38,7 @@ def test_add_documents_with_client(batch_size, primary_key, client):
     assert result.results == documents
 
 
-@pytest.mark.parametrize("batch_size, primary_key", [(None, None), (10, "alternate")])
+@pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
 def test_add_documents_with_connection_info(batch_size, primary_key, client, base_url, master_key):
     index_name = str(uuid4())
     documents = []
@@ -67,7 +67,7 @@ def test_add_documents_with_connection_info(batch_size, primary_key, client, bas
     assert result.results == documents
 
 
-@pytest.mark.parametrize("batch_size, primary_key", [(None, None), (10, "alternate")])
+@pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
 async def test_async_add_documents_with_client(batch_size, primary_key, async_client):
     index_name = str(uuid4())
     documents = []
@@ -98,7 +98,7 @@ async def test_async_add_documents_with_client(batch_size, primary_key, async_cl
     assert sorted(result.results, key=lambda x: x["id"]) == documents
 
 
-@pytest.mark.parametrize("batch_size, primary_key", [(None, None), (10, "alternate")])
+@pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
 async def test_async_add_documents_with_connection_info(
     batch_size, primary_key, async_client, base_url, master_key
 ):

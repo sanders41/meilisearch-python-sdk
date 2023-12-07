@@ -251,7 +251,7 @@ async def test_custom_search_params_with_many_params(async_index_with_documents)
 
 @pytest.mark.parametrize(
     "sort, titles",
-    [
+    (
         (
             ["title:asc"],
             ["After", "Us"],
@@ -260,7 +260,7 @@ async def test_custom_search_params_with_many_params(async_index_with_documents)
             ["title:desc"],
             ["Us", "After"],
         ),
-    ],
+    ),
 )
 async def test_search_sort(sort, titles, async_index_with_documents):
     index = await async_index_with_documents()

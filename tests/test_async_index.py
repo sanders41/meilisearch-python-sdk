@@ -592,7 +592,7 @@ async def test_update_faceting(async_empty_index):
 
 @pytest.mark.parametrize(
     "index_name, facet_order, max_values_per_facet, expected",
-    [
+    (
         ("*", "alpha", 17, {"max_values_per_facet": 17, "sort_facet_values_by": {"*": "alpha"}}),
         ("*", "count", 41, {"max_values_per_facet": 41, "sort_facet_values_by": {"*": "count"}}),
         (
@@ -607,7 +607,7 @@ async def test_update_faceting(async_empty_index):
             73,
             {"max_values_per_facet": 73, "sort_facet_values_by": {"*": "alpha", "movies": "alpha"}},
         ),
-    ],
+    ),
 )
 async def test_update_faceting_sort_facet_values(
     index_name, facet_order, max_values_per_facet, expected, async_empty_index
