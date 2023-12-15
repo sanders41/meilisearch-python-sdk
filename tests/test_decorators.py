@@ -4,8 +4,8 @@ import pytest
 
 from meilisearch_python_sdk.decorators import (
     ConnectionInfo,
-    add_documments,
-    async_add_documments,
+    add_documents,
+    async_add_documents,
 )
 
 
@@ -17,7 +17,7 @@ def test_add_documents_with_client(batch_size, primary_key, client):
     for i in range(50):
         documents.append({"id": i, "alternate": i, "title": f"Title {i}"})
 
-    @add_documments(
+    @add_documents(
         index_name=index_name,
         connection_info=client,
         batch_size=batch_size,
@@ -46,7 +46,7 @@ def test_add_documents_with_connection_info(batch_size, primary_key, client, bas
     for i in range(50):
         documents.append({"id": i, "alternate": i, "title": f"Title {i}"})
 
-    @add_documments(
+    @add_documents(
         index_name=index_name,
         connection_info=ConnectionInfo(url=base_url, api_key=master_key),
         batch_size=batch_size,
@@ -75,7 +75,7 @@ async def test_async_add_documents_with_client(batch_size, primary_key, async_cl
     for i in range(50):
         documents.append({"id": i, "alternate": i, "title": f"Title {i}"})
 
-    @async_add_documments(
+    @async_add_documents(
         index_name=index_name,
         connection_info=async_client,
         batch_size=batch_size,
@@ -108,7 +108,7 @@ async def test_async_add_documents_with_connection_info(
     for i in range(50):
         documents.append({"id": i, "alternate": i, "title": f"Title {i}"})
 
-    @async_add_documments(
+    @async_add_documents(
         index_name=index_name,
         connection_info=ConnectionInfo(url=base_url, api_key=master_key),
         batch_size=batch_size,
