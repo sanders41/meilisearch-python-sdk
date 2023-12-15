@@ -19,7 +19,7 @@ class ConnectionInfo(NamedTuple):
     api_key: str
 
 
-def async_add_documments(
+def async_add_documents(
     *,
     index_name: str,
     connection_info: AsyncClient | ConnectionInfo,
@@ -101,7 +101,7 @@ def async_add_documments(
     return decorator
 
 
-def add_documments(
+def add_documents(
     *,
     index_name: str,
     connection_info: Client | ConnectionInfo,
