@@ -3,7 +3,7 @@ name: Nightly Testing
 on:
   schedule:
     # Set with UTC time
-    cron: "0 5 * * *"
+    - cron: "0 5 * * *"
 jobs:
   random-test-order:
     strategy:
