@@ -1,0 +1,32 @@
+name: Nightly Testing
+
+on:
+  schedule:
+    # Set with UTC time
+    - cron: "0 5 * * *"
+jobs:
+  random-test-order:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Configure poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+      - name: install Just
+        uses: taiki-e/install-action@just
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+          cache: "poetry"
+      - name: Install Dependencies
+        run: |
+          just install
+          poetry add --group dev pytest-randomly
+      - name: Test with pytest in random order
+        run: just test-ci
