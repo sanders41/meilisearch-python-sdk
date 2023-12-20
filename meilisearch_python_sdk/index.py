@@ -242,10 +242,10 @@ class AsyncIndex(BaseIndex):
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
             settings: Settings for the index. The settings can also be updated independently of
-            creating the index. The advantage to updating them here is updating the settings after
-            adding documents will cause the documents to be re-indexed. Because of this it will be
-            faster to update them before adding documents. Defaults to None (i.e. default
-            Meilisearch index settings).
+                creating the index. The advantage to updating them here is updating the settings after
+                adding documents will cause the documents to be re-indexed. Because of this it will be
+                faster to update them before adding documents. Defaults to None (i.e. default
+                Meilisearch index settings).
 
         Returns:
 
@@ -3048,14 +3048,14 @@ class Index(BaseIndex):
         Args:
 
             http_client: An instance of the Client. This automatically gets passed by the Client
-                when creating and Index instance.
+                when creating an Index instance.
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
             settings: Settings for the index. The settings can also be updated independently of
-            creating the index. The advantage to updating them here is updating the settings after
-            adding documents will cause the documents to be re-indexed. Because of this it will be
-            faster to update them before adding documents. Defaults to None (i.e. default
-            Meilisearch index settings).
+                creating the index. The advantage to updating them here is updating the settings after
+                adding documents will cause the documents to be re-indexed. Because of this it will be
+                faster to update them before adding documents. Defaults to None (i.e. default
+                Meilisearch index settings).
 
         Returns:
 
