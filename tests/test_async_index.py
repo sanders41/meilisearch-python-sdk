@@ -9,6 +9,7 @@ from meilisearch_python_sdk.models.settings import (
     MeilisearchSettings,
     MinWordSizeForTypos,
     Pagination,
+    ProximityPrecision,
     TypoTolerance,
 )
 
@@ -22,6 +23,7 @@ def new_settings():
         typo_tolerance=TypoTolerance(enabled=False),
         faceting=Faceting(max_values_per_facet=123),
         pagination=Pagination(max_total_hits=17),
+        proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
         separator_tokens=["&sep", "/", "|"],
         non_separator_tokens=["#", "@"],
         dictionary=["S.O", "S.O.S"],
@@ -84,6 +86,11 @@ def default_pagination():
 
 
 @pytest.fixture
+def new_proximity_precision():
+    return ProximityPrecision.BY_ATTRIBUTE
+
+
+@pytest.fixture
 def sortable_attributes():
     return ["genre", "title"]
 
@@ -125,7 +132,10 @@ async def test_get_stats(async_empty_index, small_movies):
 
 
 async def test_get_settings_default(
-    async_empty_index, default_ranking_rules, default_faceting, default_pagination
+    async_empty_index,
+    default_ranking_rules,
+    default_faceting,
+    default_pagination,
 ):
     index = await async_empty_index()
     response = await index.get_settings()
@@ -139,6 +149,7 @@ async def test_get_settings_default(
     assert response.typo_tolerance.enabled is True
     assert response.faceting == default_faceting
     assert response.pagination == default_pagination
+    assert response.proximity_precision is None
     assert response.separator_tokens == []
     assert response.non_separator_tokens == []
     assert response.dictionary == []
@@ -162,6 +173,7 @@ async def test_update_settings(async_empty_index, new_settings):
         response.faceting.max_values_per_facet == new_settings.faceting.max_values_per_facet == 123
     )
     assert response.pagination == new_settings.pagination
+    assert response.proximity_precision == new_settings.proximity_precision
     assert response.separator_tokens == new_settings.separator_tokens
     assert response.non_separator_tokens == new_settings.non_separator_tokens
     assert response.dictionary == new_settings.dictionary
@@ -182,6 +194,7 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.sortable_attributes == new_settings.sortable_attributes
     assert response.typo_tolerance.enabled is False
     assert response.pagination == new_settings.pagination
+    assert response.proximity_precision == new_settings.proximity_precision
     response = await index.reset_settings()
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
@@ -196,6 +209,7 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.typo_tolerance.enabled is True
     assert response.faceting.max_values_per_facet == 100
     assert response.pagination.max_total_hits == 1000
+    assert response.proximity_precision is None
 
 
 async def test_get_ranking_rules_default(async_empty_index, default_ranking_rules):
@@ -588,6 +602,33 @@ async def test_update_faceting(async_empty_index):
     expected = faceting.model_dump()
     expected["sort_facet_values_by"] = {"*": "alpha"}
     assert response.model_dump() == expected
+
+
+async def test_get_proximity_precision(async_empty_index):
+    index = await async_empty_index()
+    response = await index.get_proximity_precision()
+    assert response is None
+
+
+async def test_update_proximity_precision(async_empty_index):
+    index = await async_empty_index()
+    response = await index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_proximity_precision()
+    assert response == ProximityPrecision.BY_ATTRIBUTE
+
+
+async def test_reset_proximity_precision(async_empty_index):
+    index = await async_empty_index()
+    response = await index.update_proximity_precision(ProximityPrecision.BY_WORD)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_proximity_precision()
+    assert response == ProximityPrecision.BY_WORD
+    response = await index.reset_proximity_precision()
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_proximity_precision()
+    assert response is None
 
 
 @pytest.mark.parametrize(

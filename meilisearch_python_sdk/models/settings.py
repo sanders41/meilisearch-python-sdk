@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict, List, Optional
 from warnings import warn
 
@@ -61,6 +62,11 @@ class Pagination(CamelBase):
     max_total_hits: int
 
 
+class ProximityPrecision(str, Enum):
+    BY_WORD = "byWord"
+    BY_ATTRIBUTE = "byAttribute"
+
+
 class MeilisearchSettings(CamelBase):
     synonyms: Optional[JsonDict] = None
     stop_words: Optional[List[str]] = None
@@ -73,6 +79,7 @@ class MeilisearchSettings(CamelBase):
     typo_tolerance: Optional[TypoTolerance] = None
     faceting: Optional[Faceting] = None
     pagination: Optional[Pagination] = None
+    proximity_precision: Optional[ProximityPrecision] = None
     separator_tokens: Optional[List[str]] = None
     non_separator_tokens: Optional[List[str]] = None
     dictionary: Optional[List[str]] = None
