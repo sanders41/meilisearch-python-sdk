@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from time import sleep
 from urllib.parse import quote_plus
+from uuid import uuid4
 
 import jwt
 import pytest
@@ -77,7 +78,7 @@ def wait_for_dump_creation(client, dump_uid, timeout_in_ms=10000.0, interval_in_
 
 
 def test_create_index_with_primary_key(client):
-    uid = "test"
+    uid = str(uuid4())
     primary_key = "pk_test"
     index = client.create_index(uid=uid, primary_key=primary_key)
 
@@ -89,7 +90,7 @@ def test_create_index_with_primary_key(client):
 
 
 def test_create_index_no_primary_key(client):
-    uid = "test"
+    uid = str(uuid4())
     index = client.create_index(uid=uid)
 
     assert index.uid == uid
@@ -97,6 +98,28 @@ def test_create_index_no_primary_key(client):
     assert index.primary_key is None
     assert isinstance(index.created_at, datetime)
     assert isinstance(index.updated_at, datetime)
+
+
+def test_create_index_with_settings(client, new_settings):
+    uid = str(uuid4())
+    index = client.create_index(uid=uid, settings=new_settings)
+    assert index.uid == uid
+    response = index.get_settings()
+    assert response.ranking_rules == new_settings.ranking_rules
+    assert response.distinct_attribute is None
+    assert response.searchable_attributes == new_settings.searchable_attributes
+    assert response.displayed_attributes == ["*"]
+    assert response.stop_words == []
+    assert response.synonyms == {}
+    assert response.sortable_attributes == new_settings.sortable_attributes
+    assert response.typo_tolerance.enabled is False
+    assert (
+        response.faceting.max_values_per_facet == new_settings.faceting.max_values_per_facet == 123
+    )
+    assert response.pagination == new_settings.pagination
+    assert response.separator_tokens == new_settings.separator_tokens
+    assert response.non_separator_tokens == new_settings.non_separator_tokens
+    assert response.dictionary == new_settings.dictionary
 
 
 def test_create_keys_with_wildcarded_actions(client, test_key_info):
@@ -200,7 +223,7 @@ def test_get_index_not_found(client):
 
 
 def test_index(client):
-    uid = "test"
+    uid = str(uuid4())
     response = client.index(uid)
 
     assert response.uid == uid
@@ -216,7 +239,7 @@ def test_get_or_create_index_with_primary_key(client):
 
 
 def test_get_or_create_index_no_primary_key(client):
-    uid = "test"
+    uid = str(uuid4())
     response = client.get_or_create_index(uid)
 
     assert response.uid == uid
