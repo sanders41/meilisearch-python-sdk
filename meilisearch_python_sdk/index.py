@@ -24,6 +24,7 @@ from meilisearch_python_sdk.models.settings import (
     Faceting,
     MeilisearchSettings,
     Pagination,
+    ProximityPrecision,
     TypoTolerance,
 )
 from meilisearch_python_sdk.models.task import TaskInfo
@@ -2564,7 +2565,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     pagination_settings = await index.get_pagination()
@@ -2626,7 +2627,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_pagination()
@@ -2649,7 +2650,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     separator_token_settings = await index.get_separator_tokens()
@@ -2701,7 +2702,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_separator_tokens()
@@ -2724,7 +2725,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     non_separator_token_settings = await index.get_non_separator_tokens()
@@ -2776,7 +2777,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_non_separator_tokens()
@@ -2799,7 +2800,7 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     word_dictionary = await index.get_word_dictionary()
@@ -2849,12 +2850,88 @@ class AsyncIndex(BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_word_dictionary()
         """
         response = await self._http_requests.delete(f"{self._settings_url}/dictionary")
+
+        return TaskInfo(**response.json())
+
+    async def get_proximity_precision(self) -> ProximityPrecision:
+        """Get proximity precision settings for the index.
+
+        Returns:
+
+            Proximity precision for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     proximity_precision = await index.get_proximity_precision()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/proximity-precision")
+
+        return response.json()
+
+    async def update_proximity_precision(self, proximity_precision: ProximityPrecision) -> TaskInfo:
+        """Update the proximity precision settings for an index.
+
+        Args:
+
+            proximity_precision: The proximity precision value.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.settings import ProximityPrecision
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+        """
+        response = await self._http_requests.put(
+            f"{self._settings_url}/proximity-precision", proximity_precision.value
+        )
+
+        return TaskInfo(**response.json())
+
+    async def reset_proximity_precision(self) -> TaskInfo:
+        """Reset an index's proximity precision settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_proximity_precision()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/proximity-precision")
 
         return TaskInfo(**response.json())
 
@@ -5506,6 +5583,82 @@ class Index(BaseIndex):
             >>> index.reset_word_dictionary()
         """
         response = self._http_requests.delete(f"{self._settings_url}/dictionary")
+
+        return TaskInfo(**response.json())
+
+    def get_proximity_precision(self) -> ProximityPrecision:
+        """Get proximity precision settings for the index.
+
+        Returns:
+
+            Proximity precision for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> proximity_precision = index.get_proximity_precision()
+        """
+        response = self._http_requests.get(f"{self._settings_url}/proximity-precision")
+
+        return response.json()
+
+    def update_proximity_precision(self, proximity_precision: ProximityPrecision) -> TaskInfo:
+        """Update the proximity precision settings for an index.
+
+        Args:
+
+            proximity_precision: The proximity precision value.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.settings import ProximityPrecision
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+        """
+        response = self._http_requests.put(
+            f"{self._settings_url}/proximity-precision", proximity_precision.value
+        )
+
+        return TaskInfo(**response.json())
+
+    def reset_proximity_precision(self) -> TaskInfo:
+        """Reset an index's proximity precision settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.reset_proximity_precision()
+        """
+        response = self._http_requests.delete(f"{self._settings_url}/proximity-precision")
 
         return TaskInfo(**response.json())
 
