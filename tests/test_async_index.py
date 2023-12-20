@@ -6,28 +6,11 @@ from meilisearch_python_sdk._task import async_wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
     Faceting,
-    MeilisearchSettings,
     MinWordSizeForTypos,
     Pagination,
     ProximityPrecision,
     TypoTolerance,
 )
-
-
-@pytest.fixture
-def new_settings():
-    return MeilisearchSettings(
-        ranking_rules=["typo", "words"],
-        searchable_attributes=["title", "overview"],
-        sortable_attributes=["genre", "title"],
-        typo_tolerance=TypoTolerance(enabled=False),
-        faceting=Faceting(max_values_per_facet=123),
-        pagination=Pagination(max_total_hits=17),
-        proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
-        separator_tokens=["&sep", "/", "|"],
-        non_separator_tokens=["#", "@"],
-        dictionary=["S.O", "S.O.S"],
-    )
 
 
 @pytest.fixture

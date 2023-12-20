@@ -25,6 +25,7 @@ from meilisearch_python_sdk.models.client import (
 from meilisearch_python_sdk.models.health import Health
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.search import SearchParams, SearchResultsWithUID
+from meilisearch_python_sdk.models.settings import MeilisearchSettings
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
 from meilisearch_python_sdk.types import JsonDict, JsonMapping
@@ -185,13 +186,24 @@ class AsyncClient(BaseClient):
 
         return TaskInfo(**response.json())
 
-    async def create_index(self, uid: str, primary_key: str | None = None) -> AsyncIndex:
+    async def create_index(
+        self,
+        uid: str,
+        primary_key: str | None = None,
+        *,
+        settings: MeilisearchSettings | None = None,
+    ) -> AsyncIndex:
         """Creates a new index.
 
         Args:
 
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
+            settings: Settings for the index. The settings can also be updated independently of
+            creating the index. The advantage to updating them here is updating the settings after
+            adding documents will cause the documents to be re-indexed. Because of this it will be
+            faster to update them before adding documents. Defaults to None (i.e. default
+            Meilisearch index settings).
 
         Returns:
 
@@ -208,7 +220,7 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.create_index("movies")
         """
-        return await AsyncIndex.create(self.http_client, uid, primary_key)
+        return await AsyncIndex.create(self.http_client, uid, primary_key, settings=settings)
 
     async def create_snapshot(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch snapshot.
@@ -1021,13 +1033,24 @@ class Client(BaseClient):
 
         return TaskInfo(**response.json())
 
-    def create_index(self, uid: str, primary_key: str | None = None) -> Index:
+    def create_index(
+        self,
+        uid: str,
+        primary_key: str | None = None,
+        *,
+        settings: MeilisearchSettings | None = None,
+    ) -> Index:
         """Creates a new index.
 
         Args:
 
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
+            settings: Settings for the index. The settings can also be updated independently of
+            creating the index. The advantage to updating them here is updating the settings after
+            adding documents will cause the documents to be re-indexed. Because of this it will be
+            faster to update them before adding documents. Defaults to None (i.e. default
+            Meilisearch index settings).
 
         Returns:
 
@@ -1044,7 +1067,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.create_index("movies")
         """
-        return Index.create(self.http_client, uid, primary_key)
+        return Index.create(self.http_client, uid, primary_key, settings=settings)
 
     def create_snapshot(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch snapshot.
