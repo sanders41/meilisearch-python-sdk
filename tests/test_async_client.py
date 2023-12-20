@@ -3,6 +3,7 @@ from __future__ import annotations
 from asyncio import sleep
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
+from uuid import uuid4
 
 import jwt
 import pytest
@@ -82,7 +83,7 @@ async def wait_for_dump_creation(
 
 
 async def test_create_index_with_primary_key(async_client):
-    uid = "test"
+    uid = str(uuid4())
     primary_key = "pk_test"
     index = await async_client.create_index(uid=uid, primary_key=primary_key)
 
@@ -94,7 +95,7 @@ async def test_create_index_with_primary_key(async_client):
 
 
 async def test_create_index_no_primary_key(async_client):
-    uid = "test"
+    uid = str(uuid4())
     index = await async_client.create_index(uid=uid)
 
     assert index.uid == uid
@@ -102,6 +103,28 @@ async def test_create_index_no_primary_key(async_client):
     assert index.primary_key is None
     assert isinstance(index.created_at, datetime)
     assert isinstance(index.updated_at, datetime)
+
+
+async def test_create_index_with_settings(async_client, new_settings):
+    uid = str(uuid4())
+    index = await async_client.create_index(uid=uid, settings=new_settings)
+    assert index.uid == uid
+    response = await index.get_settings()
+    assert response.ranking_rules == new_settings.ranking_rules
+    assert response.distinct_attribute is None
+    assert response.searchable_attributes == new_settings.searchable_attributes
+    assert response.displayed_attributes == ["*"]
+    assert response.stop_words == []
+    assert response.synonyms == {}
+    assert response.sortable_attributes == new_settings.sortable_attributes
+    assert response.typo_tolerance.enabled is False
+    assert (
+        response.faceting.max_values_per_facet == new_settings.faceting.max_values_per_facet == 123
+    )
+    assert response.pagination == new_settings.pagination
+    assert response.separator_tokens == new_settings.separator_tokens
+    assert response.non_separator_tokens == new_settings.non_separator_tokens
+    assert response.dictionary == new_settings.dictionary
 
 
 async def test_create_keys_with_wildcarded_actions(async_client, test_key_info):
@@ -205,7 +228,7 @@ async def test_get_index_not_found(async_client):
 
 
 def test_index(async_client):
-    uid = "test"
+    uid = str(uuid4())
     response = async_client.index(uid)
 
     assert response.uid == uid
@@ -221,7 +244,7 @@ async def test_get_or_create_index_with_primary_key(async_client):
 
 
 async def test_get_or_create_index_no_primary_key(async_client):
-    uid = "test"
+    uid = str(uuid4())
     response = await async_client.get_or_create_index(uid)
 
     assert response.uid == uid

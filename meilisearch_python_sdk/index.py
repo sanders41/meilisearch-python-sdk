@@ -223,7 +223,12 @@ class AsyncIndex(BaseIndex):
 
     @classmethod
     async def create(
-        cls, http_client: AsyncClient, uid: str, primary_key: str | None = None
+        cls,
+        http_client: AsyncClient,
+        uid: str,
+        primary_key: str | None = None,
+        *,
+        settings: MeilisearchSettings | None = None,
     ) -> AsyncIndex:
         """Creates a new index.
 
@@ -233,9 +238,14 @@ class AsyncIndex(BaseIndex):
         Args:
 
             http_client: An instance of the AsyncClient. This automatically gets passed by the
-                Client when creating and AsyncIndex instance.
+                Client when creating an AsyncIndex instance.
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
+            settings: Settings for the index. The settings can also be updated independently of
+                creating the index. The advantage to updating them here is updating the settings after
+                adding documents will cause the documents to be re-indexed. Because of this it will be
+                faster to update them before adding documents. Defaults to None (i.e. default
+                Meilisearch index settings).
 
         Returns:
 
@@ -261,15 +271,22 @@ class AsyncIndex(BaseIndex):
         http_request = AsyncHttpRequests(http_client)
         response = await http_request.post(url, payload)
         await async_wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=100000)
+
         index_response = await http_request.get(f"{url}/{uid}")
         index_dict = index_response.json()
-        return cls(
+        index = cls(
             http_client=http_client,
             uid=index_dict["uid"],
             primary_key=index_dict["primaryKey"],
             created_at=index_dict["createdAt"],
             updated_at=index_dict["updatedAt"],
         )
+
+        if settings:
+            settings_task = await index.update_settings(settings)
+            await async_wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=100000)
+
+        return index
 
     async def get_stats(self) -> IndexStats:
         """Get stats of the index.
@@ -3015,7 +3032,14 @@ class Index(BaseIndex):
         return info.primary_key
 
     @classmethod
-    def create(cls, http_client: Client, uid: str, primary_key: str | None = None) -> Index:
+    def create(
+        cls,
+        http_client: Client,
+        uid: str,
+        primary_key: str | None = None,
+        *,
+        settings: MeilisearchSettings | None = None,
+    ) -> Index:
         """Creates a new index.
 
         In general this method should not be used directly and instead the index should be created
@@ -3024,9 +3048,14 @@ class Index(BaseIndex):
         Args:
 
             http_client: An instance of the Client. This automatically gets passed by the Client
-                when creating and Index instance.
+                when creating an Index instance.
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
+            settings: Settings for the index. The settings can also be updated independently of
+                creating the index. The advantage to updating them here is updating the settings after
+                adding documents will cause the documents to be re-indexed. Because of this it will be
+                faster to update them before adding documents. Defaults to None (i.e. default
+                Meilisearch index settings).
 
         Returns:
 
@@ -3054,13 +3083,19 @@ class Index(BaseIndex):
         wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=100000)
         index_response = http_request.get(f"{url}/{uid}")
         index_dict = index_response.json()
-        return cls(
+        index = cls(
             http_client=http_client,
             uid=index_dict["uid"],
             primary_key=index_dict["primaryKey"],
             created_at=index_dict["createdAt"],
             updated_at=index_dict["updatedAt"],
         )
+
+        if settings:
+            settings_task = index.update_settings(settings)
+            wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=10000)
+
+        return index
 
     def get_stats(self) -> IndexStats:
         """Get stats of the index.

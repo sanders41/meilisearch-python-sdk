@@ -9,6 +9,12 @@ from httpx import AsyncClient as HttpxAsyncClient
 
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
+from meilisearch_python_sdk.models.settings import (
+    Faceting,
+    MeilisearchSettings,
+    Pagination,
+    TypoTolerance,
+)
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"
@@ -242,3 +248,18 @@ async def create_tasks(async_empty_index, small_movies):
     await index.reset_ranking_rules()
     await index.add_documents(small_movies)
     await index.add_documents(small_movies)
+
+
+@pytest.fixture
+def new_settings():
+    return MeilisearchSettings(
+        ranking_rules=["typo", "words"],
+        searchable_attributes=["title", "overview"],
+        sortable_attributes=["genre", "title"],
+        typo_tolerance=TypoTolerance(enabled=False),
+        faceting=Faceting(max_values_per_facet=123),
+        pagination=Pagination(max_total_hits=17),
+        separator_tokens=["&sep", "/", "|"],
+        non_separator_tokens=["#", "@"],
+        dictionary=["S.O", "S.O.S"],
+    )
