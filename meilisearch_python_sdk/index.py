@@ -817,7 +817,8 @@ class AsyncIndex(_BaseIndex):
                 concurrent_tasks.append(self._http_requests.post(search_url, body=body))
 
                 responses = await asyncio.gather(*concurrent_tasks)
-                result = SearchResults(**responses[-1].json())
+                if responses:
+                    result = SearchResults(**responses[-1].json())
                 if self._post_search_plugins:
                     post = await AsyncIndex._run_plugins(
                         self._post_search_plugins, AsyncEvent.POST, search_results=result
@@ -1062,7 +1063,8 @@ class AsyncIndex(_BaseIndex):
                         )
 
                 responses = await asyncio.gather(*tasks)
-                result = FacetSearchResults(**responses[-1].json())
+                if responses:
+                    result = FacetSearchResults(**responses[-1].json())
                 if self._post_search_plugins:
                     post = await AsyncIndex._run_plugins(
                         self._post_search_plugins, AsyncEvent.POST, search_results=result
@@ -1282,7 +1284,8 @@ class AsyncIndex(_BaseIndex):
                 tasks.append(self._http_requests.post(url, documents))
 
                 responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
+                if responses:
+                    result = TaskInfo(**responses[-1].json())
                 if self._post_add_documents_plugins:
                     post = await AsyncIndex._run_plugins(
                         self._post_add_documents_plugins, AsyncEvent.POST, result=result
@@ -1813,7 +1816,8 @@ class AsyncIndex(_BaseIndex):
                 tasks.append(self._http_requests.put(url, documents))
 
                 responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
+                if responses:
+                    result = TaskInfo(**responses[-1].json())
                 if self._post_update_documents_plugins:
                     post = await AsyncIndex._run_plugins(
                         self._post_update_documents_plugins,
@@ -2334,7 +2338,8 @@ class AsyncIndex(_BaseIndex):
                 tasks.append(self._http_requests.delete(url))
 
                 responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
+                if responses:
+                    result = TaskInfo(**responses[-1].json())
                 if self._post_delete_document_plugins:
                     await AsyncIndex._run_plugins(
                         self._post_delete_document_plugins, AsyncEvent.POST, result=result
@@ -2409,7 +2414,8 @@ class AsyncIndex(_BaseIndex):
                 tasks.append(self._http_requests.post(url, ids))
 
                 responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
+                if responses:
+                    result = TaskInfo(**responses[-1].json())
                 if self._post_delete_documents_plugins:
                     await AsyncIndex._run_plugins(
                         self._post_delete_documents_plugins, AsyncEvent.POST, result=result
@@ -2482,7 +2488,8 @@ class AsyncIndex(_BaseIndex):
                 tasks.append(self._http_requests.post(url, body={"filter": filter}))
 
                 responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
+                if responses:
+                    result = TaskInfo(**responses[-1].json())
                 if self._post_delete_documents_by_filter_plugins:
                     await AsyncIndex._run_plugins(
                         self._post_delete_documents_by_filter_plugins,
@@ -2590,7 +2597,8 @@ class AsyncIndex(_BaseIndex):
                 tasks.append(self._http_requests.delete(self._documents_url))
 
                 responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
+                if responses:
+                    result = TaskInfo(**responses[-1].json())
                 if self._post_delete_all_documents_plugins:
                     await AsyncIndex._run_plugins(
                         self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
