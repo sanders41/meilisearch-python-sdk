@@ -3830,11 +3830,11 @@ class AsyncIndex(_BaseIndex):
         if not use_task_groups():
             for plugin in plugins:
                 if _plugin_has_method(plugin, "run_plugin"):
-                    generic_plugins.append(plugin.run_plugin(**kwargs))  # type: ignore[union-attr]
+                    generic_plugins.append(plugin.run_plugin(event=event, **kwargs))  # type: ignore[union-attr]
                 if _plugin_has_method(plugin, "run_document_plugin"):
-                    document_plugins.append(plugin.run_document_plugin(**kwargs))  # type: ignore[union-attr]
+                    document_plugins.append(plugin.run_document_plugin(event=event, **kwargs))  # type: ignore[union-attr]
                 if _plugin_has_method(plugin, "run_post_search_plugin"):
-                    search_plugins.append(plugin.run_post_search_plugin(**kwargs))  # type: ignore[union-attr]
+                    search_plugins.append(plugin.run_post_search_plugin(event=event, **kwargs))  # type: ignore[union-attr]
             if generic_plugins:
                 generic_results = await asyncio.gather(*generic_plugins)
                 if generic_results:
