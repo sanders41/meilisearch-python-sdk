@@ -130,8 +130,6 @@ async def test_delete_document(async_client, small_movies, capsys):
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
 
-    out, _ = capsys.readouterr()
-
     response = await index.delete_document("500682")
     out, _ = capsys.readouterr()
 
@@ -154,8 +152,6 @@ async def test_delete_documents_by_filter(async_client, small_movies, capsys):
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
-
-    out, _ = capsys.readouterr()
 
     response = await index.get_documents()
     assert "action" in ([x.get("genre") for x in response.results])
@@ -183,8 +179,6 @@ async def test_delete_documents(async_client, small_movies, capsys):
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
 
-    out, _ = capsys.readouterr()
-
     to_delete = ["522681", "450465", "329996"]
     response = await index.delete_documents(to_delete)
     await async_client.wait_for_task(response.task_uid)
@@ -199,6 +193,27 @@ async def test_delete_documents(async_client, small_movies, capsys):
     assert to_delete not in ids
 
 
+async def test_delete_all_documents(async_client, small_movies, capsys):
+    plugins = AsyncIndexPlugins(
+        delete_all_documents_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
+    )
+    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+    response = await index.add_documents(small_movies)
+    update = await async_client.wait_for_task(response.task_uid)
+    assert update.status == "succeeded"
+
+    response = await index.delete_all_documents()
+    await async_client.wait_for_task(response.task_uid)
+    out, _ = capsys.readouterr()
+
+    assert "Concurrent plugin ran" in out
+    assert "Pre plugin ran" in out
+    assert "Post plugin ran {'result':" in out
+
+    documents = await index.get_documents()
+    assert documents.results == []
+
+
 async def test_update_documents(async_client, small_movies, capsys):
     plugins = AsyncIndexPlugins(
         update_documents_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
@@ -207,8 +222,6 @@ async def test_update_documents(async_client, small_movies, capsys):
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
-
-    out, _ = capsys.readouterr()
 
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -232,9 +245,6 @@ async def test_update_documents_in_batches(async_client, small_movies, capsys):
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
-
-    out, _ = capsys.readouterr()
-
     response = await index.get_documents()
     assert response.results[0]["title"] != "Some title"
     doc_id = response.results[0]["id"]
@@ -255,8 +265,6 @@ async def test_search(async_client, small_movies, capsys):
     index = await async_client.create_index(str(uuid4()), plugins=plugins)
     response = await index.add_documents(small_movies)
     await async_client.wait_for_task(response.task_uid)
-    out, _ = capsys.readouterr()
-
     response = await index.search("How to Train Your Dragon")
     assert response.hits[0]["id"] == "166428"
     assert "_formatted" not in response.hits[0]
@@ -274,8 +282,6 @@ async def test_facet_search(async_client, small_movies, capsys):
     update = await index.update_filterable_attributes(["genre"])
     response = await index.add_documents(small_movies)
     await async_client.wait_for_task(response.task_uid)
-    out, _ = capsys.readouterr()
-
     await async_client.wait_for_task(update.task_uid)
     response = await index.facet_search(
         "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"

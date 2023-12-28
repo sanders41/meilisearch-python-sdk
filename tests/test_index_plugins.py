@@ -105,8 +105,6 @@ def test_delete_document(client, small_movies, capsys):
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
 
-    out, _ = capsys.readouterr()
-
     response = index.delete_document("500682")
     out, _ = capsys.readouterr()
 
@@ -126,8 +124,6 @@ def test_delete_documents_by_filter(client, small_movies, capsys):
     response = index.add_documents(small_movies)
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
-
-    out, _ = capsys.readouterr()
 
     response = index.get_documents()
     assert "action" in ([x.get("genre") for x in response.results])
@@ -152,8 +148,6 @@ def test_delete_documents(client, small_movies, capsys):
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
 
-    out, _ = capsys.readouterr()
-
     to_delete = ["522681", "450465", "329996"]
     response = index.delete_documents(to_delete)
     client.wait_for_task(response.task_uid)
@@ -167,14 +161,30 @@ def test_delete_documents(client, small_movies, capsys):
     assert to_delete not in ids
 
 
+def test_delete_all_documents(client, small_movies, capsys):
+    plugins = IndexPlugins(delete_all_documents_plugins=(PostPlugin(), PrePlugin()))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    response = index.add_documents(small_movies)
+    update = client.wait_for_task(response.task_uid)
+    update.status == "succeeded"
+
+    response = index.delete_all_documents()
+    client.wait_for_task(response.task_uid)
+    out, _ = capsys.readouterr()
+
+    assert "Pre plugin ran" in out
+    assert "Post plugin ran {'result':" in out
+
+    documents = index.get_documents()
+    assert documents.results == []
+
+
 def test_update_documents(client, small_movies, capsys):
     plugins = IndexPlugins(update_documents_plugins=(PostPlugin(), PrePlugin()))
     index = client.create_index(str(uuid4()), plugins=plugins)
     response = index.add_documents(small_movies)
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
-
-    out, _ = capsys.readouterr()
 
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -196,8 +206,6 @@ def test_update_documents_in_batches(client, small_movies, capsys):
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
 
-    out, _ = capsys.readouterr()
-
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
     doc_id = response.results[0]["id"]
@@ -218,8 +226,6 @@ def test_search(client, small_movies, capsys):
     index = client.create_index(str(uuid4()), plugins=plugins)
     response = index.add_documents(small_movies)
     client.wait_for_task(response.task_uid)
-    out, _ = capsys.readouterr()
-
     response = index.search("How to Train Your Dragon")
     assert response.hits[0]["id"] == "166428"
     assert "_formatted" not in response.hits[0]
@@ -234,11 +240,9 @@ def test_facet_search(client, small_movies, capsys):
     plugins = IndexPlugins(search_plugins=(PostPlugin(), PrePlugin()))
     index = client.create_index(str(uuid4()), plugins=plugins)
     update = index.update_filterable_attributes(["genre"])
+    client.wait_for_task(update.task_uid)
     response = index.add_documents(small_movies)
     client.wait_for_task(response.task_uid)
-    out, _ = capsys.readouterr()
-
-    client.wait_for_task(update.task_uid)
     response = index.facet_search(
         "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
     )
