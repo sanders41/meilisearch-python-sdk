@@ -28,6 +28,7 @@ from meilisearch_python_sdk.models.search import SearchParams, SearchResultsWith
 from meilisearch_python_sdk.models.settings import MeilisearchSettings
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
+from meilisearch_python_sdk.plugins import AsyncIndexPlugins, IndexPlugins
 from meilisearch_python_sdk.types import JsonDict, JsonMapping
 
 
@@ -192,6 +193,7 @@ class AsyncClient(BaseClient):
         primary_key: str | None = None,
         *,
         settings: MeilisearchSettings | None = None,
+        plugins: AsyncIndexPlugins | None = None,
     ) -> AsyncIndex:
         """Creates a new index.
 
@@ -220,7 +222,9 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.create_index("movies")
         """
-        return await AsyncIndex.create(self.http_client, uid, primary_key, settings=settings)
+        return await AsyncIndex.create(
+            self.http_client, uid, primary_key, settings=settings, plugins=plugins
+        )
 
     async def create_snapshot(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch snapshot.
@@ -339,7 +343,7 @@ class AsyncClient(BaseClient):
         """
         return await AsyncIndex(self.http_client, uid).fetch_info()
 
-    def index(self, uid: str) -> AsyncIndex:
+    def index(self, uid: str, *, plugins: AsyncIndexPlugins | None = None) -> AsyncIndex:
         """Create a local reference to an index identified by UID, without making an HTTP call.
 
         Because no network call is made this method is not awaitable.
@@ -363,7 +367,7 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
         """
-        return AsyncIndex(self.http_client, uid=uid)
+        return AsyncIndex(self.http_client, uid=uid, plugins=plugins)
 
     async def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.
@@ -388,7 +392,9 @@ class AsyncClient(BaseClient):
 
         return ClientStats(**response.json())
 
-    async def get_or_create_index(self, uid: str, primary_key: str | None = None) -> AsyncIndex:
+    async def get_or_create_index(
+        self, uid: str, primary_key: str | None = None, *, plugins: AsyncIndexPlugins | None = None
+    ) -> AsyncIndex:
         """Get an index, or create it if it doesn't exist.
 
         Args:
@@ -417,7 +423,7 @@ class AsyncClient(BaseClient):
         except MeilisearchApiError as err:
             if "index_not_found" not in err.code:
                 raise
-            index_instance = await self.create_index(uid, primary_key)
+            index_instance = await self.create_index(uid, primary_key, plugins=plugins)
         return index_instance
 
     async def create_key(self, key: KeyCreate) -> Key:
@@ -1039,6 +1045,7 @@ class Client(BaseClient):
         primary_key: str | None = None,
         *,
         settings: MeilisearchSettings | None = None,
+        plugins: IndexPlugins | None = None,
     ) -> Index:
         """Creates a new index.
 
@@ -1067,7 +1074,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.create_index("movies")
         """
-        return Index.create(self.http_client, uid, primary_key, settings=settings)
+        return Index.create(self.http_client, uid, primary_key, settings=settings, plugins=plugins)
 
     def create_snapshot(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch snapshot.
@@ -1186,7 +1193,7 @@ class Client(BaseClient):
         """
         return Index(self.http_client, uid).fetch_info()
 
-    def index(self, uid: str) -> Index:
+    def index(self, uid: str, *, plugins: IndexPlugins | None = None) -> Index:
         """Create a local reference to an index identified by UID, without making an HTTP call.
 
         Args:
@@ -1208,7 +1215,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
         """
-        return Index(self.http_client, uid=uid)
+        return Index(self.http_client, uid=uid, plugins=plugins)
 
     def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.
@@ -1233,7 +1240,9 @@ class Client(BaseClient):
 
         return ClientStats(**response.json())
 
-    def get_or_create_index(self, uid: str, primary_key: str | None = None) -> Index:
+    def get_or_create_index(
+        self, uid: str, primary_key: str | None = None, *, plugins: IndexPlugins | None = None
+    ) -> Index:
         """Get an index, or create it if it doesn't exist.
 
         Args:
@@ -1262,7 +1271,7 @@ class Client(BaseClient):
         except MeilisearchApiError as err:
             if "index_not_found" not in err.code:
                 raise
-            index_instance = self.create_index(uid, primary_key)
+            index_instance = self.create_index(uid, primary_key, plugins=plugins)
         return index_instance
 
     def create_key(self, key: KeyCreate) -> Key:

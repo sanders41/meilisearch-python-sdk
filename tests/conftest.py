@@ -39,6 +39,12 @@ async def async_client():
 
 
 @pytest.fixture
+async def async_client_with_plugins():
+    async with AsyncClient(BASE_URL, MASTER_KEY) as client:
+        yield client
+
+
+@pytest.fixture
 def client():
     yield Client(BASE_URL, MASTER_KEY)
 
