@@ -1308,7 +1308,7 @@ class AsyncIndex(_BaseIndex):
                         )
                     if _plugin_has_method(plugin, "run_document_plugin"):
                         tg.create_task(
-                            plugin.run_plugin(  # type: ignore[union-attr]
+                            plugin.run_document_plugin(  # type: ignore[union-attr]
                                 event=AsyncEvent.CONCURRENT,
                                 documents=documents,
                                 primary_key=primary_key,
