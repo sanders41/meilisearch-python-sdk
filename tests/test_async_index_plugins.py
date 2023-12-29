@@ -373,9 +373,10 @@ async def test_facet_search(plugins, expected, async_client, small_movies, capsy
         assert e in out
 
 
-async def test_documents_plugin(async_client, small_movies):
-    plugins = AsyncIndexPlugins(add_documents_plugins=(DocumentPlugin(),))
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize("plugins", ((DocumentPlugin(),), (DocumentPlugin(), ConcurrentPlugin())))
+async def test_documents_plugin(plugins, async_client, small_movies):
+    use_plugins = AsyncIndexPlugins(add_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
@@ -386,8 +387,8 @@ async def test_documents_plugin(async_client, small_movies):
 
 @pytest.mark.parametrize("plugins", ((SearchPlugin(),), (SearchPlugin(), ConcurrentPlugin())))
 async def test_search_plugin(plugins, async_client, small_movies):
-    plugins = AsyncIndexPlugins(search_plugins=plugins)
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+    use_plugins = AsyncIndexPlugins(search_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
