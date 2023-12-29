@@ -384,8 +384,9 @@ async def test_documents_plugin(async_client, small_movies):
     assert result.hits[0]["title"] == "Test"
 
 
-async def test_search_plugin(async_client, small_movies):
-    plugins = AsyncIndexPlugins(search_plugins=(SearchPlugin(),))
+@pytest.mark.parametrize("plugins", ((SearchPlugin(),), (SearchPlugin(), ConcurrentPlugin())))
+async def test_search_plugin(plugins, async_client, small_movies):
+    plugins = AsyncIndexPlugins(search_plugins=plugins)
     index = await async_client.create_index(str(uuid4()), plugins=plugins)
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
@@ -395,8 +396,9 @@ async def test_search_plugin(async_client, small_movies):
     assert result.hits[0]["title"] == "Test"
 
 
-async def test_facet_search_plugin(async_client, small_movies):
-    plugins = AsyncIndexPlugins(search_plugins=(SearchPlugin(),))
+@pytest.mark.parametrize("plugins", ((SearchPlugin(),), (SearchPlugin(), ConcurrentPlugin())))
+async def test_facet_search_plugin(plugins, async_client, small_movies):
+    plugins = AsyncIndexPlugins(search_plugins=plugins)
     index = await async_client.create_index(str(uuid4()), plugins=plugins)
     response = await index.update_filterable_attributes(["genre"])
     update = await async_client.wait_for_task(response.task_uid)

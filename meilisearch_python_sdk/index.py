@@ -331,7 +331,7 @@ class AsyncIndex(_BaseIndex):
         return plugins
 
     @cached_property
-    def _concurrent_search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
+    def _concurrent_post_search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
@@ -346,7 +346,7 @@ class AsyncIndex(_BaseIndex):
         return plugins
 
     @cached_property
-    def _search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
+    def _post_search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
@@ -361,7 +361,7 @@ class AsyncIndex(_BaseIndex):
         return plugins
 
     @cached_property
-    def _pre_search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
+    def _pre_post_search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
@@ -755,9 +755,9 @@ class AsyncIndex(_BaseIndex):
         )
         search_url = f"{self._base_url_with_uid}/search"
 
-        if self._pre_search_plugins:
+        if self._pre_post_search_plugins:
             await AsyncIndex._run_plugins(
-                self._pre_search_plugins,
+                self._pre_post_search_plugins,
                 AsyncEvent.PRE,
                 query=query,
                 offset=offset,
@@ -782,10 +782,10 @@ class AsyncIndex(_BaseIndex):
                 vector=vector,
             )
 
-        if self._concurrent_search_plugins:
+        if self._concurrent_post_search_plugins:
             if not use_task_groups():
                 concurrent_tasks: Any = []
-                for plugin in self._concurrent_search_plugins:
+                for plugin in self._concurrent_post_search_plugins:
                     if _plugin_has_method(plugin, "run_plugin"):
                         concurrent_tasks.append(
                             plugin.run_plugin(  # type: ignore[union-attr]
@@ -818,9 +818,9 @@ class AsyncIndex(_BaseIndex):
 
                 responses = await asyncio.gather(*concurrent_tasks)
                 result = SearchResults(**responses[-1].json())
-                if self._search_plugins:
+                if self._post_search_plugins:
                     post = await AsyncIndex._run_plugins(
-                        self._search_plugins, AsyncEvent.POST, search_results=result
+                        self._post_search_plugins, AsyncEvent.POST, search_results=result
                     )
                     if post.get("search_result"):
                         result = post["search_result"]
@@ -828,7 +828,7 @@ class AsyncIndex(_BaseIndex):
                 return result
 
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
-                for plugin in self._concurrent_search_plugins:
+                for plugin in self._concurrent_post_search_plugins:
                     if _plugin_has_method(plugin, "run_plugin"):
                         tg.create_task(
                             plugin.run_plugin(  # type: ignore[union-attr]
@@ -861,9 +861,9 @@ class AsyncIndex(_BaseIndex):
 
             response = await response_coroutine
             result = SearchResults(**response.json())
-            if self._search_plugins:
+            if self._post_search_plugins:
                 post = await AsyncIndex._run_plugins(
-                    self._search_plugins, AsyncEvent.POST, search_results=result
+                    self._post_search_plugins, AsyncEvent.POST, search_results=result
                 )
                 if post.get("search_result"):
                     result = post["search_result"]
@@ -873,9 +873,9 @@ class AsyncIndex(_BaseIndex):
         response = await self._http_requests.post(search_url, body=body)
         result = SearchResults(**response.json())
 
-        if self._search_plugins:
+        if self._post_search_plugins:
             post = await AsyncIndex._run_plugins(
-                self._search_plugins, AsyncEvent.POST, search_results=result
+                self._post_search_plugins, AsyncEvent.POST, search_results=result
             )
             if post.get("search_result"):
                 result = post["search_result"]
@@ -1002,9 +1002,9 @@ class AsyncIndex(_BaseIndex):
         )
         search_url = f"{self._base_url_with_uid}/facet-search"
 
-        if self._pre_search_plugins:
+        if self._pre_post_search_plugins:
             await AsyncIndex._run_plugins(
-                self._pre_search_plugins,
+                self._pre_post_search_plugins,
                 AsyncEvent.PRE,
                 query=query,
                 offset=offset,
@@ -1029,10 +1029,10 @@ class AsyncIndex(_BaseIndex):
                 vector=vector,
             )
 
-        if self._concurrent_search_plugins:
+        if self._concurrent_post_search_plugins:
             if not use_task_groups():
                 tasks: Any = []
-                for plugin in self._concurrent_search_plugins:
+                for plugin in self._concurrent_post_search_plugins:
                     if _plugin_has_method(plugin, "run_plugin"):
                         tasks.append(
                             plugin.run_plugin(  # type: ignore[union-attr]
@@ -1064,9 +1064,9 @@ class AsyncIndex(_BaseIndex):
                 tasks.append(self._http_requests.post(search_url, body=body))
                 responses = await asyncio.gather(*tasks)
                 result = FacetSearchResults(**responses[-1].json())
-                if self._search_plugins:
+                if self._post_search_plugins:
                     post = await AsyncIndex._run_plugins(
-                        self._search_plugins, AsyncEvent.POST, search_results=result
+                        self._post_search_plugins, AsyncEvent.POST, search_results=result
                     )
                     if post.get("search_result"):
                         result = post["search_result"]
@@ -1074,7 +1074,7 @@ class AsyncIndex(_BaseIndex):
                 return result
 
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
-                for plugin in self._concurrent_search_plugins:
+                for plugin in self._concurrent_post_search_plugins:
                     if _plugin_has_method(plugin, "run_plugin"):
                         tg.create_task(
                             plugin.run_plugin(  # type: ignore[union-attr]
@@ -1107,9 +1107,9 @@ class AsyncIndex(_BaseIndex):
 
             response = await response_coroutine
             result = FacetSearchResults(**response.json())
-            if self._search_plugins:
+            if self._post_search_plugins:
                 post = await AsyncIndex._run_plugins(
-                    self._search_plugins, AsyncEvent.POST, search_results=result
+                    self._post_search_plugins, AsyncEvent.POST, search_results=result
                 )
                 if post.get("search_result"):
                     result = post["search_result"]
@@ -1118,9 +1118,9 @@ class AsyncIndex(_BaseIndex):
 
         response = await self._http_requests.post(search_url, body=body)
         result = FacetSearchResults(**response.json())
-        if self._search_plugins:
+        if self._post_search_plugins:
             post = await AsyncIndex._run_plugins(
-                self._search_plugins, AsyncEvent.POST, search_results=result
+                self._post_search_plugins, AsyncEvent.POST, search_results=result
             )
             if post.get("search_result"):
                 result = post["search_result"]
@@ -4061,7 +4061,7 @@ class Index(_BaseIndex):
         return plugins
 
     @cached_property
-    def _search_plugins(self) -> list[Plugin | PostSearchPlugin] | None:
+    def _post_search_plugins(self) -> list[Plugin | PostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
@@ -4076,7 +4076,7 @@ class Index(_BaseIndex):
         return plugins
 
     @cached_property
-    def _pre_search_plugins(self) -> list[Plugin | PostSearchPlugin] | None:
+    def _pre_post_search_plugins(self) -> list[Plugin | PostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
@@ -4446,9 +4446,9 @@ class Index(_BaseIndex):
             vector=vector,
         )
 
-        if self._pre_search_plugins:
+        if self._pre_post_search_plugins:
             Index._run_plugins(
-                self._pre_search_plugins,
+                self._pre_post_search_plugins,
                 Event.PRE,
                 query=query,
                 offset=offset,
@@ -4475,8 +4475,8 @@ class Index(_BaseIndex):
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
         result = SearchResults(**response.json())
-        if self._search_plugins:
-            post = Index._run_plugins(self._search_plugins, Event.POST, search_results=result)
+        if self._post_search_plugins:
+            post = Index._run_plugins(self._post_search_plugins, Event.POST, search_results=result)
             if post.get("search_result"):
                 result = post["search_result"]
 
@@ -4601,9 +4601,9 @@ class Index(_BaseIndex):
             vector=vector,
         )
 
-        if self._pre_search_plugins:
+        if self._pre_post_search_plugins:
             Index._run_plugins(
-                self._pre_search_plugins,
+                self._pre_post_search_plugins,
                 Event.PRE,
                 query=query,
                 offset=offset,
@@ -4630,8 +4630,8 @@ class Index(_BaseIndex):
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/facet-search", body=body)
         result = FacetSearchResults(**response.json())
-        if self._search_plugins:
-            post = Index._run_plugins(self._search_plugins, Event.POST, search_results=result)
+        if self._post_search_plugins:
+            post = Index._run_plugins(self._post_search_plugins, Event.POST, search_results=result)
             if post.get("search_result"):
                 result = post["search_result"]
 
