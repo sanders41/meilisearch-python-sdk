@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, Sequence
 from uuid import uuid4
 
@@ -7,6 +8,7 @@ import pytest
 
 from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.search import FacetHits, FacetSearchResults, SearchResults
+from meilisearch_python_sdk.models.task import TaskInfo
 from meilisearch_python_sdk.plugins import Event, IndexPlugins
 from meilisearch_python_sdk.types import JsonMapping
 
@@ -73,6 +75,15 @@ class PrePlugin:
 
     def run_plugin(self, event: Event, **kwargs: Any) -> None:
         print(f"Pre plugin ran {kwargs}")  # noqa: T201
+
+
+class TaskInfoPlugin:
+    CONCURRENT_EVENT = False
+    POST_EVENT = True
+    PRE_EVENT = False
+
+    def run_plugin(self, event: Event, **kwargs: Any) -> TaskInfo:
+        return TaskInfo(task_uid=1, status="succeeded", type="test", enqueued_at=datetime.now())
 
 
 @pytest.mark.parametrize(
@@ -378,3 +389,9 @@ def test_facet_search_plugin(client, small_movies):
     result = index.facet_search("", facet_name="genre", facet_query="cartoon")
     assert len(result.facet_hits) == 1
     assert result.facet_hits[0].value == "Test"
+
+
+async def test_task_info(async_client, small_movies):
+    index = await async_client.create_index(str(uuid4()), plugins=(TaskInfoPlugin(),))
+    task = await index.add_documents(small_movies)
+    assert task.task_uid == 1
