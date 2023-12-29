@@ -392,6 +392,7 @@ def test_facet_search_plugin(client, small_movies):
 
 
 async def test_task_info(async_client, small_movies):
-    index = await async_client.create_index(str(uuid4()), plugins=(TaskInfoPlugin(),))
+    plugins = IndexPlugins(add_documents_plugins=(TaskInfoPlugin(),))
+    index = await async_client.create_index(str(uuid4()), plugins=plugins)
     task = await index.add_documents(small_movies)
     assert task.task_uid == 1

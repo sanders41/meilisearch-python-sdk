@@ -67,7 +67,11 @@ class Plugin(Protocol):
     POST_EVENT: bool
     PRE_EVENT: bool
 
-    def run_plugin(self, event: Event, **kwargs: Any) -> None:  # pragma: no cover
+    def run_plugin(
+        self, event: Event, **kwargs: Any
+    ) -> (
+        None | list[JsonDict] | TaskInfo | list[TaskInfo] | SearchResults | FacetSearchResults
+    ):  # pragma: no cover
         ...
 
 
