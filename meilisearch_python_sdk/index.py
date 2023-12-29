@@ -2341,9 +2341,11 @@ class AsyncIndex(_BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_delete_document_plugins:
-                    await AsyncIndex._run_plugins(
+                    post = await AsyncIndex._run_plugins(
                         self._post_delete_document_plugins, AsyncEvent.POST, result=result
                     )
+                    if isinstance(post.get("generic_result"), TaskInfo):
+                        result = post["generic_result"]
                 return result
 
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
@@ -2416,9 +2418,11 @@ class AsyncIndex(_BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_delete_documents_plugins:
-                    await AsyncIndex._run_plugins(
+                    post = await AsyncIndex._run_plugins(
                         self._post_delete_documents_plugins, AsyncEvent.POST, result=result
                     )
+                    if isinstance(post.get("generic_result"), TaskInfo):
+                        result = post["generic_result"]
                 return result
 
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
