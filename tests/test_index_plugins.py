@@ -356,7 +356,7 @@ def test_facet_search(plugins, expected, client, small_movies, capsys):
         assert e in out
 
 
-def test_documents_plugin(client, small_movies):
+def test_add_documents_plugin(client, small_movies):
     plugins = IndexPlugins(add_documents_plugins=(DocumentPlugin(),))
     index = client.create_index(str(uuid4()), plugins=plugins)
     response = index.add_documents(small_movies)
@@ -365,6 +365,20 @@ def test_documents_plugin(client, small_movies):
     result = index.search("")
     assert len(result.hits) == 1
     assert result.hits[0]["title"] == "Test"
+
+
+def test_update_documents_plugin(client, small_movies):
+    plugins = IndexPlugins(update_documents_plugins=(DocumentPlugin(),))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    response = index.add_documents(small_movies)
+    task = client.wait_for_task(response.task_uid)
+    assert task.status == "succeeded"
+    doc = deepcopy(small_movies[0])
+    doc["title"] = "Test"
+    update = index.update_documents([doc])
+    client.wait_for_task(update.task_uid)
+    result = index.get_document(1)
+    assert result["title"] == "Test"
 
 
 def test_search_plugin(client, small_movies):

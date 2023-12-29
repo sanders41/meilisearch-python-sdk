@@ -386,15 +386,30 @@ async def test_facet_search(plugins, expected, async_client, small_movies, capsy
 
 
 @pytest.mark.parametrize("plugins", ((DocumentPlugin(),), (DocumentPlugin(), ConcurrentPlugin())))
-async def test_documents_plugin(plugins, async_client, small_movies):
+async def test_add_documents_plugin(plugins, async_client, small_movies):
     use_plugins = AsyncIndexPlugins(add_documents_plugins=plugins)
     index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
-    update = await async_client.wait_for_task(response.task_uid)
-    assert update.status == "succeeded"
+    task = await async_client.wait_for_task(response.task_uid)
+    assert task.status == "succeeded"
     result = await index.search("")
     assert len(result.hits) == 1
     assert result.hits[0]["title"] == "Test"
+
+
+@pytest.mark.parametrize("plugins", ((DocumentPlugin(),), (DocumentPlugin(), ConcurrentPlugin())))
+async def test_update_documents_plugin(plugins, async_client, small_movies):
+    use_plugins = AsyncIndexPlugins(update_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
+    response = await index.add_documents(small_movies)
+    task = await async_client.wait_for_task(response.task_uid)
+    assert task.status == "succeeded"
+    doc = deepcopy(small_movies[0])
+    doc["title"] = "Test"
+    update = await index.update_documents([doc])
+    await async_client.wait_for_task(update.task_uid)
+    result = await index.get_document(1)
+    assert result["title"] == "Test"
 
 
 @pytest.mark.parametrize("plugins", ((SearchPlugin(),), (SearchPlugin(), ConcurrentPlugin())))
