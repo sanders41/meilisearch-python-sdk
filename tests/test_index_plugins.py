@@ -75,15 +75,26 @@ class PrePlugin:
         print(f"Pre plugin ran {kwargs}")  # noqa: T201
 
 
-def test_add_documents(client, small_movies, capsys):
-    plugins = IndexPlugins(add_documents_plugins=(PostPlugin(), PrePlugin()))
-    index = client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (PostPlugin(), PrePlugin()),
+            ("Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+def test_add_documents(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(add_documents_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
     response = index.add_documents(small_movies)
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
     out, _ = capsys.readouterr()
-    assert "Pre plugin ran {'documents':" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
 
 def test_add_documents_in_batches(client, small_movies, capsys):
@@ -98,9 +109,20 @@ def test_add_documents_in_batches(client, small_movies, capsys):
     assert "Post plugin ran {'result':" in out
 
 
-def test_delete_document(client, small_movies, capsys):
-    plugins = IndexPlugins(delete_document_plugins=(PostPlugin(), PrePlugin()))
-    index = client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (PostPlugin(), PrePlugin()),
+            ("Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+def test_delete_document(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(delete_document_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
     response = index.add_documents(small_movies)
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
@@ -108,17 +130,28 @@ def test_delete_document(client, small_movies, capsys):
     response = index.delete_document("500682")
     out, _ = capsys.readouterr()
 
-    assert "Pre plugin ran {'document_id':" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
     client.wait_for_task(response.task_uid)
     with pytest.raises(MeilisearchApiError):
         index.get_document("500682")
 
 
-def test_delete_documents_by_filter(client, small_movies, capsys):
-    plugins = IndexPlugins(delete_documents_by_filter_plugins=(PostPlugin(), PrePlugin()))
-    index = client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (PostPlugin(), PrePlugin()),
+            ("Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+def test_delete_documents_by_filter(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(delete_documents_by_filter_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
     response = index.update_filterable_attributes(["genre"])
     client.wait_for_task(response.task_uid)
     response = index.add_documents(small_movies)
@@ -131,8 +164,8 @@ def test_delete_documents_by_filter(client, small_movies, capsys):
 
     out, _ = capsys.readouterr()
 
-    assert "Pre plugin ran {'filter':" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
     client.wait_for_task(response.task_uid)
     response = index.get_documents()
@@ -141,9 +174,20 @@ def test_delete_documents_by_filter(client, small_movies, capsys):
     assert "cartoon" in genres
 
 
-def test_delete_documents(client, small_movies, capsys):
-    plugins = IndexPlugins(delete_documents_plugins=(PostPlugin(), PrePlugin()))
-    index = client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (PostPlugin(), PrePlugin()),
+            ("Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+def test_delete_documents(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(delete_documents_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
     response = index.add_documents(small_movies)
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
@@ -153,17 +197,28 @@ def test_delete_documents(client, small_movies, capsys):
     client.wait_for_task(response.task_uid)
     out, _ = capsys.readouterr()
 
-    assert "Pre plugin ran" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
     documents = index.get_documents()
     ids = [x["id"] for x in documents.results]
     assert to_delete not in ids
 
 
-def test_delete_all_documents(client, small_movies, capsys):
-    plugins = IndexPlugins(delete_all_documents_plugins=(PostPlugin(), PrePlugin()))
-    index = client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (PostPlugin(), PrePlugin()),
+            ("Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+def test_delete_all_documents(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(delete_all_documents_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
     response = index.add_documents(small_movies)
     update = client.wait_for_task(response.task_uid)
     update.status == "succeeded"
@@ -172,16 +227,27 @@ def test_delete_all_documents(client, small_movies, capsys):
     client.wait_for_task(response.task_uid)
     out, _ = capsys.readouterr()
 
-    assert "Pre plugin ran" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
     documents = index.get_documents()
     assert documents.results == []
 
 
-def test_update_documents(client, small_movies, capsys):
-    plugins = IndexPlugins(update_documents_plugins=(PostPlugin(), PrePlugin()))
-    index = client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (PostPlugin(), PrePlugin()),
+            ("Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+def test_update_documents(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(update_documents_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
     response = index.add_documents(small_movies)
     update = client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
@@ -195,8 +261,9 @@ def test_update_documents(client, small_movies, capsys):
     client.wait_for_task(update.task_uid)
     response = index.get_document(doc_id)
     assert response["title"] == "Some title"
-    assert "Pre plugin ran {'documents':" in out
-    assert "Post plugin ran {'result':" in out
+
+    for e in expected:
+        assert e in out
 
 
 def test_update_documents_in_batches(client, small_movies, capsys):
@@ -221,9 +288,20 @@ def test_update_documents_in_batches(client, small_movies, capsys):
     assert "Post plugin ran {'result':" in out
 
 
-def test_search(client, small_movies, capsys):
-    plugins = IndexPlugins(search_plugins=(PostPlugin(), PrePlugin()))
-    index = client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (PostPlugin(), PrePlugin()),
+            ("Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+def test_search(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(search_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
     response = index.add_documents(small_movies)
     client.wait_for_task(response.task_uid)
     response = index.search("How to Train Your Dragon")
@@ -232,13 +310,24 @@ def test_search(client, small_movies, capsys):
 
     out, _ = capsys.readouterr()
 
-    assert "Pre plugin ran {'query':" in out
-    assert "Post plugin ran {'search_results':" in out
+    for e in expected:
+        assert e in out
 
 
-def test_facet_search(client, small_movies, capsys):
-    plugins = IndexPlugins(search_plugins=(PostPlugin(), PrePlugin()))
-    index = client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (PostPlugin(), PrePlugin()),
+            ("Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+def test_facet_search(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(search_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
     update = index.update_filterable_attributes(["genre"])
     client.wait_for_task(update.task_uid)
     response = index.add_documents(small_movies)
@@ -251,8 +340,8 @@ def test_facet_search(client, small_movies, capsys):
 
     out, _ = capsys.readouterr()
 
-    assert "Pre plugin ran {'query':" in out
-    assert "Post plugin ran {'search_results':" in out
+    for e in expected:
+        assert e in out
 
 
 def test_documents_plugin(client, small_movies):

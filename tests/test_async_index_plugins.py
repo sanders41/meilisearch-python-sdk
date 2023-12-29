@@ -93,25 +93,34 @@ class PrePlugin:
         print(f"Pre plugin ran {kwargs}")  # noqa: T201
 
 
-async def test_add_documents(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(
-        add_documents_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
-    )
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+async def test_add_documents(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(add_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
     out, _ = capsys.readouterr()
-    assert "Concurrent plugin ran {'documents':" in out
-    assert "Pre plugin ran {'documents':" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
 
 async def test_add_documents_in_batches(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(
+    use_plugins = AsyncIndexPlugins(
         add_documents_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
     )
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents_in_batches(small_movies, batch_size=100)
     tasks = await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in response])
     assert {"succeeded"} == {x.status for x in tasks}
@@ -121,11 +130,21 @@ async def test_add_documents_in_batches(async_client, small_movies, capsys):
     assert "Post plugin ran {'result':" in out
 
 
-async def test_delete_document(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(
-        delete_document_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
-    )
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+async def test_delete_document(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(delete_document_plugins=(plugins))
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
@@ -133,20 +152,29 @@ async def test_delete_document(async_client, small_movies, capsys):
     response = await index.delete_document("500682")
     out, _ = capsys.readouterr()
 
-    assert "Concurrent plugin ran {'document_id':" in out
-    assert "Pre plugin ran {'document_id':" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
     await async_client.wait_for_task(response.task_uid)
     with pytest.raises(MeilisearchApiError):
         await index.get_document("500682")
 
 
-async def test_delete_documents_by_filter(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(
-        delete_documents_by_filter_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
-    )
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+async def test_delete_documents_by_filter(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(delete_documents_by_filter_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.update_filterable_attributes(["genre"])
     await async_client.wait_for_task(response.task_uid)
     response = await index.add_documents(small_movies)
@@ -159,9 +187,8 @@ async def test_delete_documents_by_filter(async_client, small_movies, capsys):
 
     out, _ = capsys.readouterr()
 
-    assert "Concurrent plugin ran {'filter':" in out
-    assert "Pre plugin ran {'filter':" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
     await async_client.wait_for_task(response.task_uid)
     response = await index.get_documents()
@@ -170,11 +197,21 @@ async def test_delete_documents_by_filter(async_client, small_movies, capsys):
     assert "cartoon" in genres
 
 
-async def test_delete_documents(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(
-        delete_documents_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
-    )
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+async def test_delete_documents(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(delete_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
@@ -184,20 +221,29 @@ async def test_delete_documents(async_client, small_movies, capsys):
     await async_client.wait_for_task(response.task_uid)
     out, _ = capsys.readouterr()
 
-    assert "Concurrent plugin ran" in out
-    assert "Pre plugin ran" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
     documents = await index.get_documents()
     ids = [x["id"] for x in documents.results]
     assert to_delete not in ids
 
 
-async def test_delete_all_documents(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(
-        delete_all_documents_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
-    )
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+async def test_delete_all_documents(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(delete_all_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
@@ -206,19 +252,28 @@ async def test_delete_all_documents(async_client, small_movies, capsys):
     await async_client.wait_for_task(response.task_uid)
     out, _ = capsys.readouterr()
 
-    assert "Concurrent plugin ran" in out
-    assert "Pre plugin ran" in out
-    assert "Post plugin ran {'result':" in out
+    for e in expected:
+        assert e in out
 
     documents = await index.get_documents()
     assert documents.results == []
 
 
-async def test_update_documents(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(
-        update_documents_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin())
-    )
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+async def test_update_documents(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(update_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
     update = await async_client.wait_for_task(response.task_uid)
     assert update.status == "succeeded"
@@ -232,9 +287,9 @@ async def test_update_documents(async_client, small_movies, capsys):
     await async_client.wait_for_task(update.task_uid)
     response = await index.get_document(doc_id)
     assert response["title"] == "Some title"
-    assert "Concurrent plugin ran {'documents':" in out
-    assert "Pre plugin ran {'documents':" in out
-    assert "Post plugin ran {'result':" in out
+
+    for e in expected:
+        assert e in out
 
 
 async def test_update_documents_in_batches(async_client, small_movies, capsys):
