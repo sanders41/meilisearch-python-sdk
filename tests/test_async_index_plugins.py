@@ -315,9 +315,21 @@ async def test_update_documents_in_batches(async_client, small_movies, capsys):
     assert "Post plugin ran {'result':" in out
 
 
-async def test_search(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(search_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin()))
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+async def test_search(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(search_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     response = await index.add_documents(small_movies)
     await async_client.wait_for_task(response.task_uid)
     response = await index.search("How to Train Your Dragon")
@@ -326,14 +338,25 @@ async def test_search(async_client, small_movies, capsys):
 
     out, _ = capsys.readouterr()
 
-    assert "Concurrent plugin ran {'query':" in out
-    assert "Pre plugin ran {'query':" in out
-    assert "Post plugin ran {'search_results':" in out
+    for e in expected:
+        assert e in out
 
 
-async def test_facet_search(async_client, small_movies, capsys):
-    plugins = AsyncIndexPlugins(search_plugins=(ConcurrentPlugin(), PostPlugin(), PrePlugin()))
-    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
+async def test_facet_search(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(search_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     update = await index.update_filterable_attributes(["genre"])
     response = await index.add_documents(small_movies)
     await async_client.wait_for_task(response.task_uid)
@@ -346,9 +369,8 @@ async def test_facet_search(async_client, small_movies, capsys):
 
     out, _ = capsys.readouterr()
 
-    assert "Concurrent plugin ran {'query':" in out
-    assert "Pre plugin ran {'query':" in out
-    assert "Post plugin ran {'search_results':" in out
+    for e in expected:
+        assert e in out
 
 
 async def test_documents_plugin(async_client, small_movies):
