@@ -1286,7 +1286,11 @@ class AsyncIndex(_BaseIndex):
                 result = TaskInfo(**responses[-1].json())
                 if self._post_add_documents_plugins:
                     post = await AsyncIndex._run_plugins(
-                        self._post_add_documents_plugins, AsyncEvent.POST, result=result
+                        self._post_add_documents_plugins,
+                        AsyncEvent.POST,
+                        result=result,
+                        documents=documents,
+                        primary_key=primary_key,
                     )
                     if isinstance(post["generic_result"], TaskInfo):
                         result = post["generic_result"]

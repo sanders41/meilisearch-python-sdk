@@ -22,8 +22,8 @@ class ConcurrentPlugin:
 
 
 class DocumentPlugin:
-    CONCURRENT_EVENT = False
-    POST_EVENT = False
+    CONCURRENT_EVENT = True
+    POST_EVENT = True
     PRE_EVENT = True
 
     async def run_document_plugin(
