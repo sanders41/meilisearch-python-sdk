@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from copy import deepcopy
 from datetime import datetime
 from typing import Any, Sequence
 from uuid import uuid4
@@ -425,8 +426,62 @@ async def test_facet_search_plugin(plugins, async_client, small_movies):
 
 
 @pytest.mark.parametrize("plugins", ((TaskInfoPlugin(),), (TaskInfoPlugin(), ConcurrentPlugin())))
-async def test_task_info(plugins, async_client, small_movies):
+async def test_add_documents_task_info(plugins, async_client, small_movies):
     use_plugins = AsyncIndexPlugins(add_documents_plugins=plugins)
     index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
     task = await index.add_documents(small_movies)
+    assert task.task_uid == 1
+
+
+@pytest.mark.parametrize("plugins", ((TaskInfoPlugin(),), (TaskInfoPlugin(), ConcurrentPlugin())))
+async def test_delete_document_task_info(plugins, async_client, small_movies):
+    use_plugins = AsyncIndexPlugins(delete_document_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
+    task = await index.add_documents(small_movies)
+    await async_client.wait_for_task(task.task_uid)
+    task = await index.delete_document(small_movies[0]["id"])
+    assert task.task_uid == 1
+
+
+@pytest.mark.parametrize("plugins", ((TaskInfoPlugin(),), (TaskInfoPlugin(), ConcurrentPlugin())))
+async def test_delete_documents_task_info(plugins, async_client, small_movies):
+    use_plugins = AsyncIndexPlugins(delete_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
+    task = await index.add_documents(small_movies)
+    await async_client.wait_for_task(task.task_uid)
+    task = await index.delete_documents([small_movies[0]["id"], small_movies[1]["id"]])
+    assert task.task_uid == 1
+
+
+@pytest.mark.parametrize("plugins", ((TaskInfoPlugin(),), (TaskInfoPlugin(), ConcurrentPlugin())))
+async def test_delete_all_documents_task_info(plugins, async_client, small_movies):
+    use_plugins = AsyncIndexPlugins(delete_all_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
+    task = await index.add_documents(small_movies)
+    await async_client.wait_for_task(task.task_uid)
+    task = await index.delete_all_documents()
+    assert task.task_uid == 1
+
+
+@pytest.mark.parametrize("plugins", ((TaskInfoPlugin(),), (TaskInfoPlugin(), ConcurrentPlugin())))
+async def test_delete_documents_by_filter_task_info(plugins, async_client, small_movies):
+    use_plugins = AsyncIndexPlugins(delete_documents_by_filter_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
+    response = await index.update_filterable_attributes(["genre"])
+    await async_client.wait_for_task(response.task_uid)
+    task = await index.add_documents(small_movies)
+    await async_client.wait_for_task(task.task_uid)
+    task = await index.delete_documents_by_filter("genre=action")
+    assert task.task_uid == 1
+
+
+@pytest.mark.parametrize("plugins", ((TaskInfoPlugin(),), (TaskInfoPlugin(), ConcurrentPlugin())))
+async def test_update_documents_task_info(plugins, async_client, small_movies):
+    use_plugins = AsyncIndexPlugins(update_documents_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
+    task = await index.add_documents(small_movies)
+    await async_client.wait_for_task(task.task_uid)
+    doc = deepcopy(small_movies[0])
+    doc["title"] = "test"
+    task = await index.update_documents([doc])
     assert task.task_uid == 1

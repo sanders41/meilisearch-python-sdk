@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime
 from typing import Any, Sequence
 from uuid import uuid4
@@ -391,8 +392,57 @@ def test_facet_search_plugin(client, small_movies):
     assert result.facet_hits[0].value == "Test"
 
 
-def test_task_info(client, small_movies):
+def test_add_documents_task_info(client, small_movies):
     plugins = IndexPlugins(add_documents_plugins=(TaskInfoPlugin(),))
     index = client.create_index(str(uuid4()), plugins=plugins)
     task = index.add_documents(small_movies)
+    assert task.task_uid == 1
+
+
+def test_delete_document_task_info(client, small_movies):
+    plugins = IndexPlugins(delete_document_plugins=(TaskInfoPlugin(),))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    task = index.add_documents(small_movies)
+    client.wait_for_task(task.task_uid)
+    task = index.delete_document(small_movies[0]["id"])
+    assert task.task_uid == 1
+
+
+def test_delete_documents_task_info(client, small_movies):
+    plugins = IndexPlugins(delete_documents_plugins=(TaskInfoPlugin(),))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    task = index.add_documents(small_movies)
+    client.wait_for_task(task.task_uid)
+    task = index.delete_documents([small_movies[0]["id"], small_movies[1]["id"]])
+    assert task.task_uid == 1
+
+
+def test_delete_all_documents_task_info(client, small_movies):
+    plugins = IndexPlugins(delete_all_documents_plugins=(TaskInfoPlugin(),))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    task = index.add_documents(small_movies)
+    client.wait_for_task(task.task_uid)
+    task = index.delete_all_documents()
+    assert task.task_uid == 1
+
+
+def test_delete_documents_by_filter_task_info(client, small_movies):
+    plugins = IndexPlugins(delete_documents_by_filter_plugins=(TaskInfoPlugin(),))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    response = index.update_filterable_attributes(["genre"])
+    client.wait_for_task(response.task_uid)
+    task = index.add_documents(small_movies)
+    client.wait_for_task(task.task_uid)
+    task = index.delete_documents_by_filter("genre=action")
+    assert task.task_uid == 1
+
+
+def test_update_documents_task_info(client, small_movies):
+    plugins = IndexPlugins(update_documents_plugins=(TaskInfoPlugin(),))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    task = index.add_documents(small_movies)
+    client.wait_for_task(task.task_uid)
+    doc = deepcopy(small_movies[0])
+    doc["title"] = "test"
+    task = index.update_documents([doc])
     assert task.task_uid == 1

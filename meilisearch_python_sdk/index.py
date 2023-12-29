@@ -2489,11 +2489,13 @@ class AsyncIndex(_BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_delete_documents_by_filter_plugins:
-                    await AsyncIndex._run_plugins(
+                    post = await AsyncIndex._run_plugins(
                         self._post_delete_documents_by_filter_plugins,
                         AsyncEvent.POST,
                         result=result,
                     )
+                    if isinstance(post["generic_result"], TaskInfo):
+                        result = post["generic_result"]
                 return result
 
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
@@ -2518,9 +2520,11 @@ class AsyncIndex(_BaseIndex):
         response = await self._http_requests.post(url, body={"filter": filter})
         result = TaskInfo(**response.json())
         if self._post_delete_documents_by_filter_plugins:
-            await AsyncIndex._run_plugins(
+            post = await AsyncIndex._run_plugins(
                 self._post_delete_documents_by_filter_plugins, AsyncEvent.POST, result=result
             )
+            if isinstance(post.get("generic_result"), TaskInfo):
+                result = post["generic_result"]
         return result
 
     async def delete_documents_in_batches_by_filter(
@@ -2597,9 +2601,11 @@ class AsyncIndex(_BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_delete_all_documents_plugins:
-                    await AsyncIndex._run_plugins(
+                    post = await AsyncIndex._run_plugins(
                         self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
                     )
+                    if isinstance(post.get("generic_result"), TaskInfo):
+                        result = post["generic_result"]
                 return result
 
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
@@ -2611,17 +2617,21 @@ class AsyncIndex(_BaseIndex):
             response = await response_coroutine
             result = TaskInfo(**response.json())
             if self._post_delete_all_documents_plugins:
-                await AsyncIndex._run_plugins(
+                post = await AsyncIndex._run_plugins(
                     self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
                 )
+                if isinstance(post.get("generic_result"), TaskInfo):
+                    result = post["generic_result"]
             return result
 
         response = await self._http_requests.delete(self._documents_url)
         result = TaskInfo(**response.json())
         if self._post_delete_all_documents_plugins:
-            await AsyncIndex._run_plugins(
+            post = await AsyncIndex._run_plugins(
                 self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
             )
+            if isinstance(post.get("generic_result"), TaskInfo):
+                result = post["generic_result"]
         return result
 
     async def get_settings(self) -> MeilisearchSettings:
