@@ -374,8 +374,18 @@ async def test_facet_search(plugins, expected, async_client, small_movies, capsy
         assert e in out
 
 
-async def test_facet_search_return(async_client, small_movies):
-    plugins = AsyncIndexPlugins(facet_search_plugins=(FacetSearchPlugin(),))
+@pytest.mark.parametrize(
+    "plugins",
+    (
+        (FacetSearchPlugin(),),
+        (
+            ConcurrentPlugin(),
+            FacetSearchPlugin(),
+        ),
+    ),
+)
+async def test_facet_search_return(plugins, async_client, small_movies):
+    plugins = AsyncIndexPlugins(facet_search_plugins=plugins)
     index = await async_client.create_index(str(uuid4()), plugins=plugins)
     update = await index.update_filterable_attributes(["genre"])
     response = await index.add_documents(small_movies)
