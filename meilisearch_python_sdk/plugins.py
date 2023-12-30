@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, NamedTuple, Protocol, Sequence
 
-from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
+from meilisearch_python_sdk.models.search import SearchResults
 from meilisearch_python_sdk.models.task import TaskInfo
 from meilisearch_python_sdk.types import JsonDict, JsonMapping
 
@@ -26,9 +26,7 @@ class AsyncPlugin(Protocol):
 
     async def run_plugin(
         self, event: AsyncEvent, **kwargs: Any
-    ) -> (
-        None | list[JsonDict] | TaskInfo | list[TaskInfo] | SearchResults | FacetSearchResults
-    ):  # pragma: no cover
+    ) -> None | list[JsonDict] | TaskInfo | list[TaskInfo] | SearchResults:  # pragma: no cover
         ...
 
 
@@ -57,9 +55,9 @@ class AsyncPostSearchPlugin(Protocol):
         self,
         event: AsyncEvent,
         *,
-        search_results: SearchResults | FacetSearchResults,
+        search_results: SearchResults,
         **kwargs: Any,
-    ) -> SearchResults | FacetSearchResults | None:  # pragma: no cover
+    ) -> SearchResults | None:  # pragma: no cover
         ...
 
 
@@ -69,9 +67,7 @@ class Plugin(Protocol):
 
     def run_plugin(
         self, event: Event, **kwargs: Any
-    ) -> (
-        None | list[JsonDict] | TaskInfo | list[TaskInfo] | SearchResults | FacetSearchResults
-    ):  # pragma: no cover
+    ) -> None | list[JsonDict] | TaskInfo | list[TaskInfo] | SearchResults:  # pragma: no cover
         ...
 
 
@@ -95,8 +91,8 @@ class PostSearchPlugin(Protocol):
     PRE_EVENT: bool
 
     def run_post_search_plugin(
-        self, event: Event, *, search_results: SearchResults | FacetSearchResults, **kwargs: Any
-    ) -> SearchResults | FacetSearchResults | None:  # pragma: no cover
+        self, event: Event, *, search_results: SearchResults, **kwargs: Any
+    ) -> SearchResults | None:  # pragma: no cover
         ...
 
 
