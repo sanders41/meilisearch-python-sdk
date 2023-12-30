@@ -102,6 +102,7 @@ class AsyncIndexPlugins(NamedTuple):
     delete_document_plugins: Sequence[AsyncPlugin] | None = None
     delete_documents_plugins: Sequence[AsyncPlugin] | None = None
     delete_documents_by_filter_plugins: Sequence[AsyncPlugin] | None = None
+    facet_search_plugins: Sequence[AsyncPlugin] | None = None
     search_plugins: Sequence[AsyncPlugin | AsyncPostSearchPlugin] | None = None
     update_documents_plugins: Sequence[AsyncPlugin | AsyncDocumentPlugin] | None = None
 
@@ -112,5 +113,6 @@ class IndexPlugins(NamedTuple):
     delete_document_plugins: Sequence[Plugin] | None = None
     delete_documents_plugins: Sequence[Plugin] | None = None
     delete_documents_by_filter_plugins: Sequence[Plugin] | None = None
+    facet_search_plugins: Sequence[Plugin] | None = None
     search_plugins: Sequence[Plugin | PostSearchPlugin] | None = None
     update_documents_plugins: Sequence[Plugin | DocumentPlugin] | None = None

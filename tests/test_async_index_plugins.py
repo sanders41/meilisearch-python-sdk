@@ -336,6 +336,35 @@ async def test_update_documents_in_batches(async_client, small_movies, capsys):
         ),
     ),
 )
+async def test_facet_search(plugins, expected, async_client, small_movies, capsys):
+    use_plugins = AsyncIndexPlugins(facet_search_plugins=plugins)
+    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
+    update = await index.update_filterable_attributes(["genre"])
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    await async_client.wait_for_task(update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
+    )
+    assert response.facet_hits[0].value == "cartoon"
+    assert response.facet_hits[0].count == 1
+    out, _ = capsys.readouterr()
+    for e in expected:
+        assert e in out
+
+
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
+        (
+            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
+            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
+        ),
+    ),
+)
 async def test_search(plugins, expected, async_client, small_movies, capsys):
     use_plugins = AsyncIndexPlugins(search_plugins=plugins)
     index = await async_client.create_index(str(uuid4()), plugins=use_plugins)

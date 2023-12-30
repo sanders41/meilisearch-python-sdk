@@ -302,6 +302,30 @@ def test_update_documents_in_batches(client, small_movies, capsys):
     (
         ((PostPlugin(),), ("Post plugin ran",)),
         ((PrePlugin(),), ("Pre plugin ran")),
+    ),
+)
+def test_facet_search(plugins, expected, client, small_movies, capsys):
+    use_plugins = IndexPlugins(facet_search_plugins=plugins)
+    index = client.create_index(str(uuid4()), plugins=use_plugins)
+    update = index.update_filterable_attributes(["genre"])
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    client.wait_for_task(update.task_uid)
+    response = index.facet_search(
+        "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
+    )
+    assert response.facet_hits[0].value == "cartoon"
+    assert response.facet_hits[0].count == 1
+    out, _ = capsys.readouterr()
+    for e in expected:
+        assert e in out
+
+
+@pytest.mark.parametrize(
+    "plugins, expected",
+    (
+        ((PostPlugin(),), ("Post plugin ran",)),
+        ((PrePlugin(),), ("Pre plugin ran")),
         (
             (PostPlugin(), PrePlugin()),
             ("Post plugin ran", "Pre plugin ran"),
