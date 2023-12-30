@@ -9,7 +9,7 @@ from uuid import uuid4
 import pytest
 
 from meilisearch_python_sdk.errors import MeilisearchApiError
-from meilisearch_python_sdk.models.search import SearchResults
+from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
 from meilisearch_python_sdk.models.task import TaskInfo
 from meilisearch_python_sdk.plugins import AsyncEvent, AsyncIndexPlugins
 from meilisearch_python_sdk.types import JsonMapping
@@ -73,6 +73,27 @@ class SearchPlugin:
         ]
 
         return search_results
+
+
+class FacetSearchPlugin:
+    CONCURRENT_EVENT = False
+    POST_EVENT = True
+    PRE_EVENT = False
+
+    async def run_plugin(
+        self,
+        event: AsyncEvent,
+        **kwargs: Any,
+    ) -> FacetSearchResults | None:
+        if (
+            kwargs.get("result")
+            and isinstance(kwargs["result"], FacetSearchResults)
+            and kwargs["result"].facet_hits
+        ):
+            kwargs["result"].facet_hits[0].value = "test"
+            return kwargs["result"]
+
+        return None
 
 
 class PostPlugin:
@@ -351,6 +372,19 @@ async def test_facet_search(plugins, expected, async_client, small_movies, capsy
     out, _ = capsys.readouterr()
     for e in expected:
         assert e in out
+
+
+async def test_facet_search_return(async_client, small_movies):
+    plugins = AsyncIndexPlugins(facet_search_plugins=(FacetSearchPlugin(),))
+    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+    update = await index.update_filterable_attributes(["genre"])
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    await async_client.wait_for_task(update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
+    )
+    assert response.facet_hits[0].value == "test"
 
 
 @pytest.mark.parametrize(

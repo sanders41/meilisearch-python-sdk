@@ -1113,10 +1113,10 @@ class AsyncIndex(_BaseIndex):
                 result = FacetSearchResults(**responses[-1].json())
                 if self._post_facet_search_plugins:
                     post = await AsyncIndex._run_plugins(
-                        self._post_facet_search_plugins, AsyncEvent.POST, search_results=result
+                        self._post_facet_search_plugins, AsyncEvent.POST, result=result
                     )
-                    if post.get("result"):
-                        result = post["result"]
+                    if isinstance(post["generic_result"], FacetSearchResults):
+                        result = post["generic_result"]
 
                 return result
 
@@ -1156,10 +1156,10 @@ class AsyncIndex(_BaseIndex):
             result = FacetSearchResults(**response.json())
             if self._post_facet_search_plugins:
                 post = await AsyncIndex._run_plugins(
-                    self._post_facet_search_plugins, AsyncEvent.POST, search_results=result
+                    self._post_facet_search_plugins, AsyncEvent.POST, result=result
                 )
-                if post.get("result"):
-                    result = post["result"]
+                if isinstance(post["generic_result"], FacetSearchResults):
+                    result = post["generic_result"]
 
             return result
 
@@ -1167,10 +1167,10 @@ class AsyncIndex(_BaseIndex):
         result = FacetSearchResults(**response.json())
         if self._post_facet_search_plugins:
             post = await AsyncIndex._run_plugins(
-                self._post_facet_search_plugins, AsyncEvent.POST, search_results=result
+                self._post_facet_search_plugins, AsyncEvent.POST, result=result
             )
-            if post.get("result"):
-                result = post["result"]
+            if isinstance(post["generic_result"], FacetSearchResults):
+                result = post["generic_result"]
 
         return result
 
@@ -3892,7 +3892,11 @@ class AsyncIndex(_BaseIndex):
         generic_plugins = []
         document_plugins = []
         search_plugins = []
-        results = {"generic_result": None, "document_result": None, "search_result": None}
+        results: dict[str, Any] = {
+            "generic_result": None,
+            "document_result": None,
+            "search_result": None,
+        }
         if not use_task_groups():
             for plugin in plugins:
                 if _plugin_has_method(plugin, "run_plugin"):
@@ -3905,6 +3909,7 @@ class AsyncIndex(_BaseIndex):
                 generic_results = await asyncio.gather(*generic_plugins)
                 if generic_results:
                     results["generic_result"] = generic_results[-1]
+
             if document_plugins:
                 document_results = await asyncio.gather(*document_plugins)
                 if document_results:
@@ -3933,7 +3938,10 @@ class AsyncIndex(_BaseIndex):
                     )
 
         if generic_tasks:
-            results["generic_result"] = await generic_tasks[-1]
+            for result in reversed(generic_tasks):
+                if result:
+                    results["generic_result"] = await result
+                    break
 
         if document_tasks:
             results["document_result"] = await document_tasks[-1]
@@ -4728,11 +4736,9 @@ class Index(_BaseIndex):
         response = self._http_requests.post(f"{self._base_url_with_uid}/facet-search", body=body)
         result = FacetSearchResults(**response.json())
         if self._post_facet_search_plugins:
-            post = Index._run_plugins(
-                self._post_facet_search_plugins, Event.POST, search_results=result
-            )
-            if post.get("search_result"):
-                result = post["search_result"]
+            post = Index._run_plugins(self._post_facet_search_plugins, Event.POST, result=result)
+            if isinstance(post["generic_result"], FacetSearchResults):
+                result = post["generic_result"]
 
         return result
 
@@ -7025,7 +7031,10 @@ class Index(_BaseIndex):
                 )
 
         if generic_tasks:
-            results["generic_result"] = generic_tasks[-1]
+            for result in reversed(generic_tasks):
+                if result:
+                    results["generic_result"] = result
+                    break
 
         if document_tasks:
             results["document_result"] = document_tasks[-1]
