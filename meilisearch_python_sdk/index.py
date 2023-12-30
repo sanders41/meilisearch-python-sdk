@@ -6,7 +6,7 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from typing import Any, Generator, Mapping, Sequence
+from typing import Any, Generator, MutableMapping, Sequence
 from urllib.parse import urlencode
 from warnings import warn
 
@@ -5587,8 +5587,8 @@ async def _async_load_documents_from_file(
 
 
 def _batch(
-    documents: Sequence[Mapping], batch_size: int
-) -> Generator[Sequence[Mapping], None, None]:
+    documents: Sequence[MutableMapping], batch_size: int
+) -> Generator[Sequence[MutableMapping], None, None]:
     total_len = len(documents)
     for i in range(0, total_len, batch_size):
         yield documents[i : i + batch_size]
