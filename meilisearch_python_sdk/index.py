@@ -99,6 +99,7 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. Defaults to None.
             created_at: The date and time the index was created. Defaults to None.
             updated_at: The date and time the index was last updated. Defaults to None.
+            plugins: Optional plugins can be provided to extend functionality.
         """
         super().__init__(uid, primary_key, created_at, updated_at)
         self.http_client = http_client
@@ -578,6 +579,7 @@ class AsyncIndex(_BaseIndex):
                 adding documents will cause the documents to be re-indexed. Because of this it will be
                 faster to update them before adding documents. Defaults to None (i.e. default
                 Meilisearch index settings).
+            plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
 
@@ -3922,6 +3924,7 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. Defaults to None.
             created_at: The date and time the index was created. Defaults to None.
             updated_at: The date and time the index was last updated. Defaults to None.
+            plugins: Optional plugins can be provided to extend functionality.
         """
         super().__init__(uid, primary_key, created_at, updated_at)
         self.http_client = http_client
@@ -4290,6 +4293,7 @@ class Index(_BaseIndex):
                 adding documents will cause the documents to be re-indexed. Because of this it will be
                 faster to update them before adding documents. Defaults to None (i.e. default
                 Meilisearch index settings).
+            plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
 

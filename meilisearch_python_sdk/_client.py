@@ -202,10 +202,11 @@ class AsyncClient(BaseClient):
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
             settings: Settings for the index. The settings can also be updated independently of
-            creating the index. The advantage to updating them here is updating the settings after
-            adding documents will cause the documents to be re-indexed. Because of this it will be
-            faster to update them before adding documents. Defaults to None (i.e. default
-            Meilisearch index settings).
+                creating the index. The advantage to updating them here is updating the settings after
+                adding documents will cause the documents to be re-indexed. Because of this it will be
+                faster to update them before adding documents. Defaults to None (i.e. default
+                Meilisearch index settings).
+            plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
 
@@ -351,6 +352,7 @@ class AsyncClient(BaseClient):
         Args:
 
             uid: The index's unique identifier.
+            plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
 
@@ -401,6 +403,7 @@ class AsyncClient(BaseClient):
 
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
+            plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
 
@@ -1054,10 +1057,11 @@ class Client(BaseClient):
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
             settings: Settings for the index. The settings can also be updated independently of
-            creating the index. The advantage to updating them here is updating the settings after
-            adding documents will cause the documents to be re-indexed. Because of this it will be
-            faster to update them before adding documents. Defaults to None (i.e. default
-            Meilisearch index settings).
+                creating the index. The advantage to updating them here is updating the settings after
+                adding documents will cause the documents to be re-indexed. Because of this it will be
+                faster to update them before adding documents. Defaults to None (i.e. default
+                Meilisearch index settings).
+            plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
 
@@ -1199,6 +1203,7 @@ class Client(BaseClient):
         Args:
 
             uid: The index's unique identifier.
+            plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
 
@@ -1249,6 +1254,7 @@ class Client(BaseClient):
 
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
+            plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
 

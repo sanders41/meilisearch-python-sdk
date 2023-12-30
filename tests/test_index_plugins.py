@@ -8,7 +8,7 @@ from uuid import uuid4
 import pytest
 
 from meilisearch_python_sdk.errors import MeilisearchApiError
-from meilisearch_python_sdk.models.search import FacetHits, FacetSearchResults, SearchResults
+from meilisearch_python_sdk.models.search import SearchResults
 from meilisearch_python_sdk.models.task import TaskInfo
 from meilisearch_python_sdk.plugins import Event, IndexPlugins
 from meilisearch_python_sdk.types import JsonMapping
@@ -43,21 +43,18 @@ class SearchPlugin:
     PRE_EVENT = False
 
     def run_post_search_plugin(
-        self, event: Event, *, search_results: SearchResults | FacetSearchResults, **kwargs: Any
-    ) -> SearchResults | FacetSearchResults | None:
-        if isinstance(search_results, SearchResults):
-            search_results.hits = [
-                {
-                    "id": "1",
-                    "title": "Test",
-                    "poster": "https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg",
-                    "overview": "This is a test.",
-                    "release_date": 1553299200,
-                    "genre": "action",
-                }
-            ]
-        if isinstance(search_results, FacetSearchResults):
-            search_results.facet_hits = [FacetHits(value="Test", count=1)]
+        self, event: Event, *, search_results: SearchResults, **kwargs: Any
+    ) -> SearchResults | None:
+        search_results.hits = [
+            {
+                "id": "1",
+                "title": "Test",
+                "poster": "https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg",
+                "overview": "This is a test.",
+                "release_date": 1553299200,
+                "genre": "action",
+            }
+        ]
 
         return search_results
 
@@ -326,36 +323,6 @@ def test_search(plugins, expected, client, small_movies, capsys):
         assert e in out
 
 
-@pytest.mark.parametrize(
-    "plugins, expected",
-    (
-        ((PostPlugin(),), ("Post plugin ran",)),
-        ((PrePlugin(),), ("Pre plugin ran")),
-        (
-            (PostPlugin(), PrePlugin()),
-            ("Post plugin ran", "Pre plugin ran"),
-        ),
-    ),
-)
-def test_facet_search(plugins, expected, client, small_movies, capsys):
-    use_plugins = IndexPlugins(search_plugins=plugins)
-    index = client.create_index(str(uuid4()), plugins=use_plugins)
-    update = index.update_filterable_attributes(["genre"])
-    client.wait_for_task(update.task_uid)
-    response = index.add_documents(small_movies)
-    client.wait_for_task(response.task_uid)
-    response = index.facet_search(
-        "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
-    )
-    assert response.facet_hits[0].value == "cartoon"
-    assert response.facet_hits[0].count == 1
-
-    out, _ = capsys.readouterr()
-
-    for e in expected:
-        assert e in out
-
-
 def test_add_documents_plugin(client, small_movies):
     plugins = IndexPlugins(add_documents_plugins=(DocumentPlugin(),))
     index = client.create_index(str(uuid4()), plugins=plugins)
@@ -390,20 +357,6 @@ def test_search_plugin(client, small_movies):
     result = index.search("")
     assert len(result.hits) == 1
     assert result.hits[0]["title"] == "Test"
-
-
-def test_facet_search_plugin(client, small_movies):
-    plugins = IndexPlugins(search_plugins=(SearchPlugin(),))
-    index = client.create_index(str(uuid4()), plugins=plugins)
-    response = index.update_filterable_attributes(["genre"])
-    update = client.wait_for_task(response.task_uid)
-    assert update.status == "succeeded"
-    response = index.add_documents(small_movies)
-    update = client.wait_for_task(response.task_uid)
-    assert update.status == "succeeded"
-    result = index.facet_search("", facet_name="genre", facet_query="cartoon")
-    assert len(result.facet_hits) == 1
-    assert result.facet_hits[0].value == "Test"
 
 
 def test_add_documents_task_info(client, small_movies):

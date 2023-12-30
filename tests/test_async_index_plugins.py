@@ -9,7 +9,7 @@ from uuid import uuid4
 import pytest
 
 from meilisearch_python_sdk.errors import MeilisearchApiError
-from meilisearch_python_sdk.models.search import FacetHits, FacetSearchResults, SearchResults
+from meilisearch_python_sdk.models.search import SearchResults
 from meilisearch_python_sdk.models.task import TaskInfo
 from meilisearch_python_sdk.plugins import AsyncEvent, AsyncIndexPlugins
 from meilisearch_python_sdk.types import JsonMapping
@@ -58,22 +58,19 @@ class SearchPlugin:
         self,
         event: AsyncEvent,
         *,
-        search_results: SearchResults | FacetSearchResults,
+        search_results: SearchResults,
         **kwargs: Any,
-    ) -> SearchResults | FacetSearchResults | None:
-        if isinstance(search_results, SearchResults):
-            search_results.hits = [
-                {
-                    "id": "1",
-                    "title": "Test",
-                    "poster": "https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg",
-                    "overview": "This is a test.",
-                    "release_date": 1553299200,
-                    "genre": "action",
-                }
-            ]
-        if isinstance(search_results, FacetSearchResults):
-            search_results.facet_hits = [FacetHits(value="Test", count=1)]
+    ) -> SearchResults | None:
+        search_results.hits = [
+            {
+                "id": "1",
+                "title": "Test",
+                "poster": "https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg",
+                "overview": "This is a test.",
+                "release_date": 1553299200,
+                "genre": "action",
+            }
+        ]
 
         return search_results
 
@@ -354,37 +351,6 @@ async def test_search(plugins, expected, async_client, small_movies, capsys):
         assert e in out
 
 
-@pytest.mark.parametrize(
-    "plugins, expected",
-    (
-        ((ConcurrentPlugin(),), ("Concurrent plugin ran",)),
-        ((PostPlugin(),), ("Post plugin ran",)),
-        ((PrePlugin(),), ("Pre plugin ran")),
-        (
-            (ConcurrentPlugin(), PostPlugin(), PrePlugin()),
-            ("Concurrent plugin ran", "Post plugin ran", "Pre plugin ran"),
-        ),
-    ),
-)
-async def test_facet_search(plugins, expected, async_client, small_movies, capsys):
-    use_plugins = AsyncIndexPlugins(search_plugins=plugins)
-    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
-    update = await index.update_filterable_attributes(["genre"])
-    response = await index.add_documents(small_movies)
-    await async_client.wait_for_task(response.task_uid)
-    await async_client.wait_for_task(update.task_uid)
-    response = await index.facet_search(
-        "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
-    )
-    assert response.facet_hits[0].value == "cartoon"
-    assert response.facet_hits[0].count == 1
-
-    out, _ = capsys.readouterr()
-
-    for e in expected:
-        assert e in out
-
-
 @pytest.mark.parametrize("plugins", ((DocumentPlugin(),), (DocumentPlugin(), ConcurrentPlugin())))
 async def test_add_documents_plugin(plugins, async_client, small_movies):
     use_plugins = AsyncIndexPlugins(add_documents_plugins=plugins)
@@ -422,22 +388,6 @@ async def test_search_plugin(plugins, async_client, small_movies):
     result = await index.search("")
     assert len(result.hits) == 1
     assert result.hits[0]["title"] == "Test"
-
-
-@pytest.mark.parametrize("plugins", ((SearchPlugin(),), (SearchPlugin(), ConcurrentPlugin())))
-async def test_facet_search_plugin(plugins, async_client, small_movies):
-    use_plugins = AsyncIndexPlugins(search_plugins=plugins)
-    index = await async_client.create_index(str(uuid4()), plugins=use_plugins)
-    response = await index.update_filterable_attributes(["genre"])
-    update = await async_client.wait_for_task(response.task_uid)
-    assert update.status == "succeeded"
-    assert update.status == "succeeded"
-    response = await index.add_documents(small_movies)
-    update = await async_client.wait_for_task(response.task_uid)
-    assert update.status == "succeeded"
-    result = await index.facet_search("", facet_name="genre", facet_query="cartoon")
-    assert len(result.facet_hits) == 1
-    assert result.facet_hits[0].value == "Test"
 
 
 @pytest.mark.parametrize("plugins", ((TaskInfoPlugin(),), (TaskInfoPlugin(), ConcurrentPlugin())))

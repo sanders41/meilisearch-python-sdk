@@ -34,6 +34,7 @@ nav:
       - AsyncIndex: async_index_api.md
       - Index: index_api.md
       - Decorators: decorators_api.md
+  - Plugins: plugins.md
   - Pydantic: pydantic.md
 
 plugins:
