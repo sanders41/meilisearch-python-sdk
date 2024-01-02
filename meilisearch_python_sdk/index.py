@@ -7532,15 +7532,16 @@ def _process_search_parameters(
     if vector:
         body["vector"] = vector
 
-    if hybrid:
-        if is_pydantic_2():
-            body["hybrid"] = hybrid.model_dump(by_alias=True)  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-            )
-            body["hybrid"] = hybrid.dict(by_alias=True)  # type: ignore[attr-defined]
+    # TODO: hybrid is not implemented yet. Add this back when adding hybrid search
+    # if hybrid:
+    #     if is_pydantic_2():
+    #         body["hybrid"] = hybrid.model_dump(by_alias=True)  # type: ignore[attr-defined]
+    #     else:  # pragma: no cover
+    #         warn(
+    #             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+    #             DeprecationWarning,
+    #         )
+    #         body["hybrid"] = hybrid.dict(by_alias=True)  # type: ignore[attr-defined]
 
     return body
 
