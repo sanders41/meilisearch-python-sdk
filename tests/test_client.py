@@ -100,6 +100,7 @@ def test_create_index_no_primary_key(client):
     assert isinstance(index.updated_at, datetime)
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 def test_create_index_with_settings(client, new_settings):
     uid = str(uuid4())
     index = client.create_index(uid=uid, settings=new_settings)

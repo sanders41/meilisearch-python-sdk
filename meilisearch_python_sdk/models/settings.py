@@ -83,3 +83,4 @@ class MeilisearchSettings(CamelBase):
     separator_tokens: Optional[List[str]] = None
     non_separator_tokens: Optional[List[str]] = None
     dictionary: Optional[List[str]] = None
+    embedders: Optional[JsonDict] = None
