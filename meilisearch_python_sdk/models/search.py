@@ -17,6 +17,11 @@ class FacetSearchResults(CamelBase):
     processing_time_ms: int
 
 
+class Hybrid(CamelBase):
+    semantic_ratio: float
+    embedder: str
+
+
 class SearchParams(CamelBase):
     index_uid: str
     query: Optional[str] = Field(None, alias="q")
@@ -40,6 +45,7 @@ class SearchParams(CamelBase):
     show_ranking_score: bool = False
     show_ranking_score_details: bool = False
     vector: Optional[List[float]] = None
+    hybrid: Optional[Hybrid] = None
 
 
 class SearchResults(CamelBase):

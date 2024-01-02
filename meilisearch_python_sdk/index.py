@@ -19,7 +19,7 @@ from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time, use_t
 from meilisearch_python_sdk.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_sdk.models.documents import DocumentsInfo
 from meilisearch_python_sdk.models.index import IndexStats
-from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
+from meilisearch_python_sdk.models.search import FacetSearchResults, Hybrid, SearchResults
 from meilisearch_python_sdk.models.settings import (
     Faceting,
     MeilisearchSettings,
@@ -3960,6 +3960,81 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
+    async def get_embedders(self) -> JsonDict:
+        """Get embedder settings for the index.
+
+        Returns:
+
+            Embedders for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     embedders = await index.get_embedders()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/embedders")
+
+        return response.json()
+
+    async def update_embedders(self, embedders: JsonDict) -> TaskInfo:
+        """Update the embedders settings for an index.
+
+        Args:
+
+            embedders: The embedders value.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_embedders(
+            >>>         {"embedders": {"source": "userProvided", "dimensions": 512}}
+            >>>     )
+        """
+        response = await self._http_requests.patch(f"{self._settings_url}/embedders", embedders)
+
+        return TaskInfo(**response.json())
+
+    async def reset_embedders(self) -> TaskInfo:
+        """Reset an index's embedders settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_embedders()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/embedders")
+
+        return TaskInfo(**response.json())
+
     @staticmethod
     async def _run_plugins(
         plugins: Sequence[AsyncPlugin | AsyncDocumentPlugin | AsyncPostSearchPlugin],
@@ -4543,6 +4618,7 @@ class Index(_BaseIndex):
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
         vector: list[float] | None = None,
+        hybrid: Hybrid | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -4587,6 +4663,13 @@ class Index(_BaseIndex):
                 { "vectorStore": true }. Because this feature is experimental it may be removed or
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
+            hybrid: Hybrid search information. Defaults to None. Note: This parameter can
+                only be used with Meilisearch >= v1.6.0, and is experimental in Meilisearch v1.6.0.
+                In order to use this feature in Meilisearch v1.6.0 you first need to enable the
+                feature by sending a PATCH request to /experimental-features with
+                { "vectorStore": true }. Because this feature is experimental it may be removed or
+                updated causing breaking changes in this library without a major version bump so use
+                with caution.
 
         Returns:
 
@@ -4626,6 +4709,7 @@ class Index(_BaseIndex):
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
+            hybrid=hybrid,
         )
 
         if self._pre_search_plugins:
@@ -7157,6 +7241,81 @@ class Index(_BaseIndex):
 
         return TaskInfo(**response.json())
 
+    def get_embedders(self) -> JsonDict:
+        """Get embedder settings for the index.
+
+        Returns:
+
+            Embedders for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> embedders = await index.get_embedders()
+        """
+        response = self._http_requests.get(f"{self._settings_url}/embedders")
+
+        return response.json()
+
+    def update_embedders(self, embedders: JsonDict) -> TaskInfo:
+        """Update the embedders settings for an index.
+
+        Args:
+
+            embedders: The embedders value.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.update_embedders(
+            >>>     {"embedders": {"source": "userProvided", "dimensions": 512}}
+            >>> )
+        """
+        response = self._http_requests.patch(f"{self._settings_url}/embedders", embedders)
+
+        return TaskInfo(**response.json())
+
+    def reset_embedders(self) -> TaskInfo:
+        """Reset an index's embedders settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = AsyncClient("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.reset_embedders()
+        """
+        response = self._http_requests.delete(f"{self._settings_url}/embedders")
+
+        return TaskInfo(**response.json())
+
     @staticmethod
     def _run_plugins(
         plugins: Sequence[Plugin | DocumentPlugin | PostSearchPlugin],
@@ -7337,6 +7496,7 @@ def _process_search_parameters(
     show_ranking_score: bool = False,
     show_ranking_score_details: bool = False,
     vector: list[float] | None = None,
+    hybrid: Hybrid | None = None,
 ) -> JsonDict:
     body: JsonDict = {
         "q": q,
@@ -7371,6 +7531,16 @@ def _process_search_parameters(
 
     if vector:
         body["vector"] = vector
+
+    if hybrid:
+        if is_pydantic_2():
+            body["hybrid"] = hybrid.model_dump(by_alias=True)  # type: ignore[attr-defined]
+        else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
+            body["hybrid"] = hybrid.dict(by_alias=True)  # type: ignore[attr-defined]
 
     return body
 

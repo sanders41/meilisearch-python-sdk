@@ -128,8 +128,10 @@ def test_get_settings_default(
     assert response.separator_tokens == []
     assert response.non_separator_tokens == []
     assert response.dictionary == []
+    assert response.embedders == {}
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 def test_update_settings(empty_index, new_settings):
     index = empty_index()
     response = index.update_settings(new_settings)
@@ -152,8 +154,10 @@ def test_update_settings(empty_index, new_settings):
     assert response.separator_tokens == new_settings.separator_tokens
     assert response.non_separator_tokens == new_settings.non_separator_tokens
     assert response.dictionary == new_settings.dictionary
+    assert response.embedders == new_settings.embedders
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     index = empty_index()
     response = index.update_settings(new_settings)
@@ -170,6 +174,7 @@ def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.typo_tolerance.enabled is False
     assert response.pagination == new_settings.pagination
     assert response.proximity_precision == new_settings.proximity_precision
+    assert response.embedders == new_settings.embedders
     response = index.reset_settings()
     update = wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
@@ -185,6 +190,7 @@ def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.faceting.max_values_per_facet == 100
     assert response.pagination.max_total_hits == 1000
     assert response.proximity_precision is None
+    assert response.embedders == {}
 
 
 def test_get_ranking_rules_default(empty_index, default_ranking_rules):
@@ -601,6 +607,36 @@ def test_reset_proximity_precision(empty_index):
     wait_for_task(index.http_client, response.task_uid)
     response = index.get_proximity_precision()
     assert response is None
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+def test_get_embedders(empty_index):
+    index = empty_index()
+    response = index.get_embedders()
+    assert response == {}
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+def test_update_embedders(empty_index):
+    index = empty_index()
+    response = index.update_embedders({"default": {"source": "userProvided", "dimensions": 512}})
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_embedders()
+    assert response == {"default": {"source": "userProvided", "dimensions": 512}}
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+def test_reset_embedders(empty_index):
+    index = empty_index()
+    response = index.update_embedders({"default": {"source": "userProvided", "dimensions": 512}})
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = index.get_embedders()
+    assert response == {"default": {"source": "userProvided", "dimensions": 512}}
+    response = index.reset_embedders()
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_embedders()
+    assert response == {}
 
 
 @pytest.mark.parametrize(

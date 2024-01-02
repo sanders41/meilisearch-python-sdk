@@ -206,10 +206,14 @@ async def async_index_with_documents_and_vectors(async_empty_index, small_movies
 
 @pytest.fixture
 def index_with_documents_and_vectors(empty_index, small_movies):
-    small_movies[0]["_vectors"] = [0.1, 0.2]
+    small_movies[0]["_vectors"] = {"poster": [0.1, 0.2]}
 
     def index_maker(documents=small_movies):
         index = empty_index()
+        response = index.update_settings(
+            MeilisearchSettings(embedders={"default": {"source": "userProvided", "dimensions": 2}})
+        )
+        wait_for_task(index.http_client, response.task_uid)
         response = index.add_documents(documents)
         wait_for_task(index.http_client, response.task_uid)
         return index
@@ -268,4 +272,7 @@ def new_settings():
         separator_tokens=["&sep", "/", "|"],
         non_separator_tokens=["#", "@"],
         dictionary=["S.O", "S.O.S"],
+        embedders={
+            "default": {"source": "userProvided", "dimensions": 512},
+        },
     )
