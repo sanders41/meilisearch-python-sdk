@@ -132,7 +132,7 @@ async def test_get_settings_default(
     assert response.typo_tolerance.enabled is True
     assert response.faceting == default_faceting
     assert response.pagination == default_pagination
-    assert response.proximity_precision is None
+    assert response.proximity_precision is ProximityPrecision.BY_WORD
     assert response.separator_tokens == []
     assert response.non_separator_tokens == []
     assert response.dictionary == []
@@ -197,7 +197,7 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.typo_tolerance.enabled is True
     assert response.faceting.max_values_per_facet == 100
     assert response.pagination.max_total_hits == 1000
-    assert response.proximity_precision is None
+    assert response.proximity_precision is ProximityPrecision.BY_WORD
     assert response.embedders == {}
 
 
@@ -596,7 +596,7 @@ async def test_update_faceting(async_empty_index):
 async def test_get_proximity_precision(async_empty_index):
     index = await async_empty_index()
     response = await index.get_proximity_precision()
-    assert response is None
+    assert response == ProximityPrecision.BY_WORD
 
 
 async def test_update_proximity_precision(async_empty_index):
@@ -617,7 +617,7 @@ async def test_reset_proximity_precision(async_empty_index):
     response = await index.reset_proximity_precision()
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_proximity_precision()
-    assert response is None
+    assert response is ProximityPrecision.BY_WORD
 
 
 @pytest.mark.usefixtures("enable_vector_search")

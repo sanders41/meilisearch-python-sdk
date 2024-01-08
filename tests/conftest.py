@@ -13,6 +13,7 @@ from meilisearch_python_sdk.models.settings import (
     Faceting,
     MeilisearchSettings,
     Pagination,
+    ProximityPrecision,
     TypoTolerance,
 )
 
@@ -275,4 +276,5 @@ def new_settings():
         embedders={
             "default": {"source": "userProvided", "dimensions": 512},
         },
+        proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
     )
