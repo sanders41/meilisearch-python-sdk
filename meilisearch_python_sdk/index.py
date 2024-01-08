@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 from warnings import warn
 
 import aiofiles
+from camel_converter import to_snake
 from httpx import AsyncClient, Client
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
@@ -3905,7 +3906,7 @@ class AsyncIndex(_BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/proximity-precision")
 
-        return response.json()
+        return ProximityPrecision[to_snake(response.json()).upper()]
 
     async def update_proximity_precision(self, proximity_precision: ProximityPrecision) -> TaskInfo:
         """Update the proximity precision settings for an index.
@@ -7186,7 +7187,7 @@ class Index(_BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/proximity-precision")
 
-        return response.json()
+        return ProximityPrecision[to_snake(response.json()).upper()]
 
     def update_proximity_precision(self, proximity_precision: ProximityPrecision) -> TaskInfo:
         """Update the proximity precision settings for an index.
