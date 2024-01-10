@@ -10,6 +10,7 @@ from httpx import AsyncClient as HttpxAsyncClient
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
 from meilisearch_python_sdk.models.settings import (
+    Embedders,
     Faceting,
     MeilisearchSettings,
     Pagination,
@@ -195,10 +196,17 @@ def index_with_documents(empty_index, small_movies):
 
 @pytest.fixture
 async def async_index_with_documents_and_vectors(async_empty_index, small_movies):
-    small_movies[0]["_vectors"] = [0.1, 0.2]
+    small_movies[0]["_vectors"] = {"default": [0.1, 0.2]}
+    for movie in small_movies[1:]:
+        movie["_vectors"] = {"default": [0.9, 0.9]}
 
     async def index_maker(documents=small_movies):
         index = await async_empty_index()
+        task = await index.update_embedders(
+            Embedders(embedders={"default": UserProvidedEmbedder(dimensions=2)})
+        )
+        await async_wait_for_task(index.http_client, task.task_uid)
+
         response = await index.add_documents(documents)
         await async_wait_for_task(index.http_client, response.task_uid)
         return index
@@ -208,14 +216,16 @@ async def async_index_with_documents_and_vectors(async_empty_index, small_movies
 
 @pytest.fixture
 def index_with_documents_and_vectors(empty_index, small_movies):
-    small_movies[0]["_vectors"] = {"poster": [0.1, 0.2]}
+    small_movies[0]["_vectors"] = {"default": [0.1, 0.2]}
+    for movie in small_movies[1:]:
+        movie["_vectors"] = {"default": [0.9, 0.9]}
 
     def index_maker(documents=small_movies):
         index = empty_index()
-        response = index.update_settings(
-            MeilisearchSettings(embedders={"default": UserProvidedEmbedder(dimensions=2)})
+        task = index.update_embedders(
+            Embedders(embedders={"default": UserProvidedEmbedder(dimensions=2)})
         )
-        wait_for_task(index.http_client, response.task_uid)
+        wait_for_task(index.http_client, task.task_uid)
         response = index.add_documents(documents)
         wait_for_task(index.http_client, response.task_uid)
         return index
