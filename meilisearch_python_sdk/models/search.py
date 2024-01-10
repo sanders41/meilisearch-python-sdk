@@ -19,7 +19,7 @@ class FacetSearchResults(CamelBase):
 
 class Hybrid(CamelBase):
     semantic_ratio: float
-    embedder: str
+    embedder: Optional[str] = None
 
 
 class SearchParams(CamelBase):

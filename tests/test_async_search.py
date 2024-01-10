@@ -5,7 +5,7 @@ import pytest
 from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk._task import async_wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
-from meilisearch_python_sdk.models.search import SearchParams
+from meilisearch_python_sdk.models.search import Hybrid, SearchParams
 
 
 async def test_basic_search(async_index_with_documents):
@@ -365,11 +365,14 @@ async def test_show_ranking_details_serach(async_index_with_documents):
     assert "_rankingScoreDetails" in response.hits[0]
 
 
-@pytest.mark.xfail(strict=True, reason="Needs updating for Meilisearch 1.6.0")
 @pytest.mark.usefixtures("enable_vector_search")
 async def test_vector_search(async_index_with_documents_and_vectors):
     index = await async_index_with_documents_and_vectors()
-    response = await index.search("How to Train Your Dragon", vector=[0.1, 0.2])
+    response = await index.search(
+        "",
+        vector=[0.1, 0.2],
+        hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
+    )
     assert response.hits[0]["id"] == "287947"
     assert response.vector == [0.1, 0.2]
 

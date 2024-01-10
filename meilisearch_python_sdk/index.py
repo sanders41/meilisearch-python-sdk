@@ -718,6 +718,7 @@ class AsyncIndex(_BaseIndex):
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
         vector: list[float] | None = None,
+        hybrid: Hybrid | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -762,6 +763,13 @@ class AsyncIndex(_BaseIndex):
                 { "vectorStore": true }. Because this feature is experimental it may be removed or
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
+            hybrid: Hybrid search information. Defaults to None. Note: This parameter can
+                only be used with Meilisearch >= v1.6.0, and is experimental in Meilisearch v1.6.0.
+                In order to use this feature in Meilisearch v1.6.0 you first need to enable the
+                feature by sending a PATCH request to /experimental-features with
+                { "vectorStore": true }. Because this feature is experimental it may be removed or
+                updated causing breaking changes in this library without a major version bump so use
+                with caution.
 
         Returns:
 
@@ -802,6 +810,7 @@ class AsyncIndex(_BaseIndex):
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
+            hybrid=hybrid,
         )
         search_url = f"{self._base_url_with_uid}/search"
 
@@ -830,6 +839,7 @@ class AsyncIndex(_BaseIndex):
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
                 vector=vector,
+                hybrid=hybrid,
             )
 
         if self._concurrent_search_plugins:
@@ -4760,6 +4770,7 @@ class Index(_BaseIndex):
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
                 vector=vector,
+                hybrid=hybrid,
             )
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
@@ -7574,16 +7585,15 @@ def _process_search_parameters(
     if vector:
         body["vector"] = vector
 
-    # TODO: hybrid is not implemented yet. Add this back when adding hybrid search
-    # if hybrid:
-    #     if is_pydantic_2():
-    #         body["hybrid"] = hybrid.model_dump(by_alias=True)  # type: ignore[attr-defined]
-    #     else:  # pragma: no cover
-    #         warn(
-    #             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-    #             DeprecationWarning,
-    #         )
-    #         body["hybrid"] = hybrid.dict(by_alias=True)  # type: ignore[attr-defined]
+    if hybrid:
+        if is_pydantic_2():
+            body["hybrid"] = hybrid.model_dump(by_alias=True)  # type: ignore[attr-defined]
+        else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
+            body["hybrid"] = hybrid.dict(by_alias=True)  # type: ignore[attr-defined]
 
     return body
 
