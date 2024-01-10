@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from warnings import warn
 
 import pydantic
@@ -62,6 +62,29 @@ class Pagination(CamelBase):
     max_total_hits: int
 
 
+class OpenAiEmbedder(CamelBase):
+    source: str = "openAi"
+    model: str
+    api_key: str
+    document_template: str
+
+
+class HuggingFaceEmbedder(CamelBase):
+    source: str = "huggingFace"
+    model: str
+    revision: str
+    document_template: str
+
+
+class UserProvidedEmbedder(CamelBase):
+    source: str = "userProvided"
+    dimensions: int
+
+
+class Embedders(CamelBase):
+    embedders: Dict[str, Union[OpenAiEmbedder, HuggingFaceEmbedder, UserProvidedEmbedder]]
+
+
 class ProximityPrecision(str, Enum):
     BY_WORD = "byWord"
     BY_ATTRIBUTE = "byAttribute"
@@ -83,4 +106,6 @@ class MeilisearchSettings(CamelBase):
     separator_tokens: Optional[List[str]] = None
     non_separator_tokens: Optional[List[str]] = None
     dictionary: Optional[List[str]] = None
-    embedders: Optional[JsonDict] = None
+    embedders: Optional[
+        Dict[str, Union[OpenAiEmbedder, HuggingFaceEmbedder, UserProvidedEmbedder]]
+    ] = None  # Optional[Embedders] = None

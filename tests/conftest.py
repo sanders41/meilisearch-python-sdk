@@ -15,6 +15,7 @@ from meilisearch_python_sdk.models.settings import (
     Pagination,
     ProximityPrecision,
     TypoTolerance,
+    UserProvidedEmbedder,
 )
 
 MASTER_KEY = "masterKey"
@@ -212,7 +213,7 @@ def index_with_documents_and_vectors(empty_index, small_movies):
     def index_maker(documents=small_movies):
         index = empty_index()
         response = index.update_settings(
-            MeilisearchSettings(embedders={"default": {"source": "userProvided", "dimensions": 2}})
+            MeilisearchSettings(embedders={"default": UserProvidedEmbedder(dimensions=2)})
         )
         wait_for_task(index.http_client, response.task_uid)
         response = index.add_documents(documents)
@@ -274,7 +275,7 @@ def new_settings():
         non_separator_tokens=["#", "@"],
         dictionary=["S.O", "S.O.S"],
         embedders={
-            "default": {"source": "userProvided", "dimensions": 512},
+            "default": UserProvidedEmbedder(dimensions=512),
         },
         proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
     )

@@ -22,6 +22,7 @@ from meilisearch_python_sdk.models.documents import DocumentsInfo
 from meilisearch_python_sdk.models.index import IndexStats
 from meilisearch_python_sdk.models.search import FacetSearchResults, Hybrid, SearchResults
 from meilisearch_python_sdk.models.settings import (
+    Embedders,
     Faceting,
     MeilisearchSettings,
     Pagination,
@@ -3961,7 +3962,7 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    async def get_embedders(self) -> JsonDict:
+    async def get_embedders(self) -> Embedders | None:
         """Get embedder settings for the index.
 
         Returns:
@@ -3982,9 +3983,12 @@ class AsyncIndex(_BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/embedders")
 
-        return response.json()
+        if not response.json():
+            return None
 
-    async def update_embedders(self, embedders: JsonDict) -> TaskInfo:
+        return Embedders(embedders=response.json())
+
+    async def update_embedders(self, embedders: Embedders) -> TaskInfo:
         """Update the embedders settings for an index.
 
         Args:
@@ -4003,13 +4007,31 @@ class AsyncIndex(_BaseIndex):
         Examples:
 
             >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.settings import Embedders, UserProvidedEmbedder
+            >>>
+            >>>
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.update_embedders(
-            >>>         {"embedders": {"source": "userProvided", "dimensions": 512}}
+            >>>         Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
             >>>     )
         """
-        response = await self._http_requests.patch(f"{self._settings_url}/embedders", embedders)
+        payload = {}
+        for key, embedder in embedders.embedders.items():
+            if is_pydantic_2():
+                payload[key] = {
+                    k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
+                }  # type: ignore[attr-defined]
+            else:  # pragma: no cover
+                warn(
+                    "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                    DeprecationWarning,
+                )
+                payload[key] = {
+                    k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
+                }  # type: ignore[attr-defined]
+
+        response = await self._http_requests.patch(f"{self._settings_url}/embedders", payload)
 
         return TaskInfo(**response.json())
 
@@ -7242,7 +7264,7 @@ class Index(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    def get_embedders(self) -> JsonDict:
+    def get_embedders(self) -> Embedders | None:
         """Get embedder settings for the index.
 
         Returns:
@@ -7263,9 +7285,12 @@ class Index(_BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/embedders")
 
-        return response.json()
+        if not response.json():
+            return None
 
-    def update_embedders(self, embedders: JsonDict) -> TaskInfo:
+        return Embedders(embedders=response.json())
+
+    def update_embedders(self, embedders: Embedders) -> TaskInfo:
         """Update the embedders settings for an index.
 
         Args:
@@ -7284,13 +7309,29 @@ class Index(_BaseIndex):
         Examples:
 
             >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.settings import Embedders, UserProvidedEmbedder
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
             >>> index.update_embedders(
-            >>>     {"embedders": {"source": "userProvided", "dimensions": 512}}
+            >>>     Embedders(embedders={dimensions=512)})
             >>> )
         """
-        response = self._http_requests.patch(f"{self._settings_url}/embedders", embedders)
+        payload = {}
+        for key, embedder in embedders.embedders.items():
+            if is_pydantic_2():
+                payload[key] = {
+                    k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
+                }  # type: ignore[attr-defined]
+            else:  # pragma: no cover
+                warn(
+                    "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                    DeprecationWarning,
+                )
+                payload[key] = {
+                    k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
+                }  # type: ignore[attr-defined]
+
+        response = self._http_requests.patch(f"{self._settings_url}/embedders", payload)
 
         return TaskInfo(**response.json())
 
