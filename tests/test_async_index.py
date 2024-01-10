@@ -5,11 +5,13 @@ from meilisearch_python_sdk._http_requests import AsyncHttpRequests
 from meilisearch_python_sdk._task import async_wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
+    Embedders,
     Faceting,
     MinWordSizeForTypos,
     Pagination,
     ProximityPrecision,
     TypoTolerance,
+    UserProvidedEmbedder,
 )
 
 
@@ -624,34 +626,38 @@ async def test_reset_proximity_precision(async_empty_index):
 async def test_get_embedders(async_empty_index):
     index = await async_empty_index()
     response = await index.get_embedders()
-    assert response == {}
+    assert response is None
 
 
 @pytest.mark.usefixtures("enable_vector_search")
 async def test_update_embedders(async_empty_index):
     index = await async_empty_index()
     response = await index.update_embedders(
-        {"default": {"source": "userProvided", "dimensions": 512}}
+        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
     )
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()
-    assert response == {"default": {"source": "userProvided", "dimensions": 512}}
+    assert response == Embedders(
+        embedders={"default": UserProvidedEmbedder(source="userProvided", dimensions=512)}
+    )
 
 
 @pytest.mark.usefixtures("enable_vector_search")
 async def test_reset_embedders(async_empty_index):
     index = await async_empty_index()
     response = await index.update_embedders(
-        {"default": {"source": "userProvided", "dimensions": 512}}
+        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
     )
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
     response = await index.get_embedders()
-    assert response == {"default": {"source": "userProvided", "dimensions": 512}}
+    assert response == Embedders(
+        embedders={"default": UserProvidedEmbedder(source="userProvided", dimensions=512)}
+    )
     response = await index.reset_embedders()
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()
-    assert response == {}
+    assert response is None
 
 
 @pytest.mark.parametrize(

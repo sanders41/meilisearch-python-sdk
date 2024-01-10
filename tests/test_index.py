@@ -5,11 +5,13 @@ from meilisearch_python_sdk._http_requests import HttpRequests
 from meilisearch_python_sdk._task import wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
+    Embedders,
     Faceting,
     MinWordSizeForTypos,
     Pagination,
     ProximityPrecision,
     TypoTolerance,
+    UserProvidedEmbedder,
 )
 
 
@@ -613,30 +615,36 @@ def test_reset_proximity_precision(empty_index):
 def test_get_embedders(empty_index):
     index = empty_index()
     response = index.get_embedders()
-    assert response == {}
+    assert response is None
 
 
 @pytest.mark.usefixtures("enable_vector_search")
 def test_update_embedders(empty_index):
     index = empty_index()
-    response = index.update_embedders({"default": {"source": "userProvided", "dimensions": 512}})
+    response = index.update_embedders(
+        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    )
     wait_for_task(index.http_client, response.task_uid)
     response = index.get_embedders()
-    assert response == {"default": {"source": "userProvided", "dimensions": 512}}
+    assert response == Embedders(
+        embedders={"default": UserProvidedEmbedder(source="userProvided", dimensions=512)}
+    )
 
 
 @pytest.mark.usefixtures("enable_vector_search")
 def test_reset_embedders(empty_index):
     index = empty_index()
-    response = index.update_embedders({"default": {"source": "userProvided", "dimensions": 512}})
+    response = index.update_embedders(
+        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    )
     update = wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
     response = index.get_embedders()
-    assert response == {"default": {"source": "userProvided", "dimensions": 512}}
+    assert response == Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
     response = index.reset_embedders()
     wait_for_task(index.http_client, response.task_uid)
     response = index.get_embedders()
-    assert response == {}
+    assert response is None
 
 
 @pytest.mark.parametrize(
