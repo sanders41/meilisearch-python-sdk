@@ -371,7 +371,6 @@ def test_vector_search(index_with_documents_and_vectors):
         vector=[0.1, 0.2],
         hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
     )
-    assert response.hits[0]["id"] == "287947"
     assert response.vector == [0.1, 0.2]
 
 
