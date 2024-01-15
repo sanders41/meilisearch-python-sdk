@@ -5,27 +5,14 @@ from meilisearch_python_sdk._http_requests import HttpRequests
 from meilisearch_python_sdk._task import wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
+    Embedders,
     Faceting,
-    MeilisearchSettings,
     MinWordSizeForTypos,
     Pagination,
+    ProximityPrecision,
     TypoTolerance,
+    UserProvidedEmbedder,
 )
-
-
-@pytest.fixture
-def new_settings():
-    return MeilisearchSettings(
-        ranking_rules=["typo", "words"],
-        searchable_attributes=["title", "overview"],
-        sortable_attributes=["genre", "title"],
-        typo_tolerance=TypoTolerance(enabled=False),
-        faceting=Faceting(max_values_per_facet=123),
-        pagination=Pagination(max_total_hits=17),
-        separator_tokens=["&sep", "/", "|"],
-        non_separator_tokens=["#", "@"],
-        dictionary=["S.O", "S.O.S"],
-    )
 
 
 @pytest.fixture
@@ -124,6 +111,7 @@ def test_get_stats(empty_index, small_movies):
     assert response.number_of_documents == 30
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 def test_get_settings_default(
     empty_index, default_ranking_rules, default_faceting, default_pagination
 ):
@@ -139,11 +127,14 @@ def test_get_settings_default(
     assert response.typo_tolerance.enabled is True
     assert response.faceting == default_faceting
     assert response.pagination == default_pagination
+    assert response.proximity_precision is ProximityPrecision.BY_WORD
     assert response.separator_tokens == []
     assert response.non_separator_tokens == []
     assert response.dictionary == []
+    assert response.embedders is None
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 def test_update_settings(empty_index, new_settings):
     index = empty_index()
     response = index.update_settings(new_settings)
@@ -162,11 +153,14 @@ def test_update_settings(empty_index, new_settings):
         response.faceting.max_values_per_facet == new_settings.faceting.max_values_per_facet == 123
     )
     assert response.pagination == new_settings.pagination
+    assert response.proximity_precision == new_settings.proximity_precision
     assert response.separator_tokens == new_settings.separator_tokens
     assert response.non_separator_tokens == new_settings.non_separator_tokens
     assert response.dictionary == new_settings.dictionary
+    assert response.embedders == new_settings.embedders
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     index = empty_index()
     response = index.update_settings(new_settings)
@@ -182,6 +176,8 @@ def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.sortable_attributes == new_settings.sortable_attributes
     assert response.typo_tolerance.enabled is False
     assert response.pagination == new_settings.pagination
+    assert response.proximity_precision == new_settings.proximity_precision
+    assert response.embedders == new_settings.embedders
     response = index.reset_settings()
     update = wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
@@ -196,6 +192,8 @@ def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.typo_tolerance.enabled is True
     assert response.faceting.max_values_per_facet == 100
     assert response.pagination.max_total_hits == 1000
+    assert response.proximity_precision is ProximityPrecision.BY_WORD
+    assert response.embedders is None
 
 
 def test_get_ranking_rules_default(empty_index, default_ranking_rules):
@@ -585,6 +583,69 @@ def test_update_faceting(empty_index):
     expected = faceting.model_dump()
     expected["sort_facet_values_by"] = {"*": "alpha"}
     assert response.model_dump() == expected
+
+
+def test_get_proximity_precision(empty_index):
+    index = empty_index()
+    response = index.get_proximity_precision()
+    assert response is ProximityPrecision.BY_WORD
+
+
+def test_update_proximity_precision(empty_index):
+    index = empty_index()
+    response = index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_proximity_precision()
+    assert response == ProximityPrecision.BY_ATTRIBUTE
+
+
+def test_reset_proximity_precision(empty_index):
+    index = empty_index()
+    response = index.update_proximity_precision(ProximityPrecision.BY_WORD)
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = index.get_proximity_precision()
+    assert response == ProximityPrecision.BY_WORD
+    response = index.reset_proximity_precision()
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_proximity_precision()
+    assert response is ProximityPrecision.BY_WORD
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+def test_get_embedders(empty_index):
+    index = empty_index()
+    response = index.get_embedders()
+    assert response is None
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+def test_update_embedders(empty_index):
+    index = empty_index()
+    response = index.update_embedders(
+        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    )
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_embedders()
+    assert response == Embedders(
+        embedders={"default": UserProvidedEmbedder(source="userProvided", dimensions=512)}
+    )
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+def test_reset_embedders(empty_index):
+    index = empty_index()
+    response = index.update_embedders(
+        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    )
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = index.get_embedders()
+    assert response == Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    response = index.reset_embedders()
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_embedders()
+    assert response is None
 
 
 @pytest.mark.parametrize(

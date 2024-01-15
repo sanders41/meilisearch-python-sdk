@@ -5,10 +5,13 @@ from meilisearch_python_sdk._http_requests import AsyncHttpRequests
 from meilisearch_python_sdk._task import async_wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
+    Embedders,
     Faceting,
     MinWordSizeForTypos,
     Pagination,
+    ProximityPrecision,
     TypoTolerance,
+    UserProvidedEmbedder,
 )
 
 
@@ -68,6 +71,11 @@ def default_pagination():
 
 
 @pytest.fixture
+def new_proximity_precision():
+    return ProximityPrecision.BY_ATTRIBUTE
+
+
+@pytest.fixture
 def sortable_attributes():
     return ["genre", "title"]
 
@@ -108,8 +116,12 @@ async def test_get_stats(async_empty_index, small_movies):
     assert response.number_of_documents == 30
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 async def test_get_settings_default(
-    async_empty_index, default_ranking_rules, default_faceting, default_pagination
+    async_empty_index,
+    default_ranking_rules,
+    default_faceting,
+    default_pagination,
 ):
     index = await async_empty_index()
     response = await index.get_settings()
@@ -123,11 +135,14 @@ async def test_get_settings_default(
     assert response.typo_tolerance.enabled is True
     assert response.faceting == default_faceting
     assert response.pagination == default_pagination
+    assert response.proximity_precision is ProximityPrecision.BY_WORD
     assert response.separator_tokens == []
     assert response.non_separator_tokens == []
     assert response.dictionary == []
+    assert response.embedders is None
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 async def test_update_settings(async_empty_index, new_settings):
     index = await async_empty_index()
     response = await index.update_settings(new_settings)
@@ -146,11 +161,14 @@ async def test_update_settings(async_empty_index, new_settings):
         response.faceting.max_values_per_facet == new_settings.faceting.max_values_per_facet == 123
     )
     assert response.pagination == new_settings.pagination
+    assert response.proximity_precision == new_settings.proximity_precision
     assert response.separator_tokens == new_settings.separator_tokens
     assert response.non_separator_tokens == new_settings.non_separator_tokens
     assert response.dictionary == new_settings.dictionary
+    assert response.embedders == new_settings.embedders
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 async def test_reset_settings(async_empty_index, new_settings, default_ranking_rules):
     index = await async_empty_index()
     response = await index.update_settings(new_settings)
@@ -166,6 +184,8 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.sortable_attributes == new_settings.sortable_attributes
     assert response.typo_tolerance.enabled is False
     assert response.pagination == new_settings.pagination
+    assert response.proximity_precision == new_settings.proximity_precision
+    assert response.embedders == new_settings.embedders
     response = await index.reset_settings()
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
@@ -180,6 +200,8 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.typo_tolerance.enabled is True
     assert response.faceting.max_values_per_facet == 100
     assert response.pagination.max_total_hits == 1000
+    assert response.proximity_precision is ProximityPrecision.BY_WORD
+    assert response.embedders is None
 
 
 async def test_get_ranking_rules_default(async_empty_index, default_ranking_rules):
@@ -572,6 +594,71 @@ async def test_update_faceting(async_empty_index):
     expected = faceting.model_dump()
     expected["sort_facet_values_by"] = {"*": "alpha"}
     assert response.model_dump() == expected
+
+
+async def test_get_proximity_precision(async_empty_index):
+    index = await async_empty_index()
+    response = await index.get_proximity_precision()
+    assert response == ProximityPrecision.BY_WORD
+
+
+async def test_update_proximity_precision(async_empty_index):
+    index = await async_empty_index()
+    response = await index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_proximity_precision()
+    assert response == ProximityPrecision.BY_ATTRIBUTE
+
+
+async def test_reset_proximity_precision(async_empty_index):
+    index = await async_empty_index()
+    response = await index.update_proximity_precision(ProximityPrecision.BY_WORD)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_proximity_precision()
+    assert response == ProximityPrecision.BY_WORD
+    response = await index.reset_proximity_precision()
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_proximity_precision()
+    assert response is ProximityPrecision.BY_WORD
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_get_embedders(async_empty_index):
+    index = await async_empty_index()
+    response = await index.get_embedders()
+    assert response is None
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_update_embedders(async_empty_index):
+    index = await async_empty_index()
+    response = await index.update_embedders(
+        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    )
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_embedders()
+    assert response == Embedders(
+        embedders={"default": UserProvidedEmbedder(source="userProvided", dimensions=512)}
+    )
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_reset_embedders(async_empty_index):
+    index = await async_empty_index()
+    response = await index.update_embedders(
+        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    )
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_embedders()
+    assert response == Embedders(
+        embedders={"default": UserProvidedEmbedder(source="userProvided", dimensions=512)}
+    )
+    response = await index.reset_embedders()
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_embedders()
+    assert response is None
 
 
 @pytest.mark.parametrize(

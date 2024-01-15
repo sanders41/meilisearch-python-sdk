@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 from warnings import warn
 
 import aiofiles
+from camel_converter import to_snake
 from httpx import AsyncClient, Client
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
@@ -19,11 +20,13 @@ from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time, use_t
 from meilisearch_python_sdk.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_sdk.models.documents import DocumentsInfo
 from meilisearch_python_sdk.models.index import IndexStats
-from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
+from meilisearch_python_sdk.models.search import FacetSearchResults, Hybrid, SearchResults
 from meilisearch_python_sdk.models.settings import (
+    Embedders,
     Faceting,
     MeilisearchSettings,
     Pagination,
+    ProximityPrecision,
     TypoTolerance,
 )
 from meilisearch_python_sdk.models.task import TaskInfo
@@ -715,6 +718,7 @@ class AsyncIndex(_BaseIndex):
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
         vector: list[float] | None = None,
+        hybrid: Hybrid | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -759,6 +763,13 @@ class AsyncIndex(_BaseIndex):
                 { "vectorStore": true }. Because this feature is experimental it may be removed or
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
+            hybrid: Hybrid search information. Defaults to None. Note: This parameter can
+                only be used with Meilisearch >= v1.6.0, and is experimental in Meilisearch v1.6.0.
+                In order to use this feature in Meilisearch v1.6.0 you first need to enable the
+                feature by sending a PATCH request to /experimental-features with
+                { "vectorStore": true }. Because this feature is experimental it may be removed or
+                updated causing breaking changes in this library without a major version bump so use
+                with caution.
 
         Returns:
 
@@ -799,6 +810,7 @@ class AsyncIndex(_BaseIndex):
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
+            hybrid=hybrid,
         )
         search_url = f"{self._base_url_with_uid}/search"
 
@@ -827,6 +839,7 @@ class AsyncIndex(_BaseIndex):
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
                 vector=vector,
+                hybrid=hybrid,
             )
 
         if self._concurrent_search_plugins:
@@ -3589,7 +3602,7 @@ class AsyncIndex(_BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     pagination_settings = await index.get_pagination()
@@ -3651,7 +3664,7 @@ class AsyncIndex(_BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_pagination()
@@ -3674,7 +3687,7 @@ class AsyncIndex(_BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     separator_token_settings = await index.get_separator_tokens()
@@ -3726,7 +3739,7 @@ class AsyncIndex(_BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_separator_tokens()
@@ -3749,7 +3762,7 @@ class AsyncIndex(_BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     non_separator_token_settings = await index.get_non_separator_tokens()
@@ -3801,7 +3814,7 @@ class AsyncIndex(_BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_non_separator_tokens()
@@ -3824,7 +3837,7 @@ class AsyncIndex(_BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     word_dictionary = await index.get_word_dictionary()
@@ -3874,12 +3887,184 @@ class AsyncIndex(_BaseIndex):
 
         Examples:
 
-            >>> from meilisearch_async_client import Client
+            >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.reset_word_dictionary()
         """
         response = await self._http_requests.delete(f"{self._settings_url}/dictionary")
+
+        return TaskInfo(**response.json())
+
+    async def get_proximity_precision(self) -> ProximityPrecision:
+        """Get proximity precision settings for the index.
+
+        Returns:
+
+            Proximity precision for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     proximity_precision = await index.get_proximity_precision()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/proximity-precision")
+
+        return ProximityPrecision[to_snake(response.json()).upper()]
+
+    async def update_proximity_precision(self, proximity_precision: ProximityPrecision) -> TaskInfo:
+        """Update the proximity precision settings for an index.
+
+        Args:
+
+            proximity_precision: The proximity precision value.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.settings import ProximityPrecision
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+        """
+        response = await self._http_requests.put(
+            f"{self._settings_url}/proximity-precision", proximity_precision.value
+        )
+
+        return TaskInfo(**response.json())
+
+    async def reset_proximity_precision(self) -> TaskInfo:
+        """Reset an index's proximity precision settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_proximity_precision()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/proximity-precision")
+
+        return TaskInfo(**response.json())
+
+    async def get_embedders(self) -> Embedders | None:
+        """Get embedder settings for the index.
+
+        Returns:
+
+            Embedders for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     embedders = await index.get_embedders()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/embedders")
+
+        if not response.json():
+            return None
+
+        return Embedders(embedders=response.json())
+
+    async def update_embedders(self, embedders: Embedders) -> TaskInfo:
+        """Update the embedders settings for an index.
+
+        Args:
+
+            embedders: The embedders value.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.settings import Embedders, UserProvidedEmbedder
+            >>>
+            >>>
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_embedders(
+            >>>         Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+            >>>     )
+        """
+        payload = {}
+        for key, embedder in embedders.embedders.items():
+            if is_pydantic_2():
+                payload[key] = {
+                    k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
+                }  # type: ignore[attr-defined]
+            else:  # pragma: no cover
+                warn(
+                    "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                    DeprecationWarning,
+                )
+                payload[key] = {
+                    k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
+                }  # type: ignore[attr-defined]
+
+        response = await self._http_requests.patch(f"{self._settings_url}/embedders", payload)
+
+        return TaskInfo(**response.json())
+
+    async def reset_embedders(self) -> TaskInfo:
+        """Reset an index's embedders settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_embedders()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/embedders")
 
         return TaskInfo(**response.json())
 
@@ -4466,6 +4651,7 @@ class Index(_BaseIndex):
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
         vector: list[float] | None = None,
+        hybrid: Hybrid | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -4510,6 +4696,13 @@ class Index(_BaseIndex):
                 { "vectorStore": true }. Because this feature is experimental it may be removed or
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
+            hybrid: Hybrid search information. Defaults to None. Note: This parameter can
+                only be used with Meilisearch >= v1.6.0, and is experimental in Meilisearch v1.6.0.
+                In order to use this feature in Meilisearch v1.6.0 you first need to enable the
+                feature by sending a PATCH request to /experimental-features with
+                { "vectorStore": true }. Because this feature is experimental it may be removed or
+                updated causing breaking changes in this library without a major version bump so use
+                with caution.
 
         Returns:
 
@@ -4549,6 +4742,7 @@ class Index(_BaseIndex):
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
+            hybrid=hybrid,
         )
 
         if self._pre_search_plugins:
@@ -4576,6 +4770,7 @@ class Index(_BaseIndex):
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
                 vector=vector,
+                hybrid=hybrid,
             )
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
@@ -7004,6 +7199,176 @@ class Index(_BaseIndex):
 
         return TaskInfo(**response.json())
 
+    def get_proximity_precision(self) -> ProximityPrecision:
+        """Get proximity precision settings for the index.
+
+        Returns:
+
+            Proximity precision for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> proximity_precision = index.get_proximity_precision()
+        """
+        response = self._http_requests.get(f"{self._settings_url}/proximity-precision")
+
+        return ProximityPrecision[to_snake(response.json()).upper()]
+
+    def update_proximity_precision(self, proximity_precision: ProximityPrecision) -> TaskInfo:
+        """Update the proximity precision settings for an index.
+
+        Args:
+
+            proximity_precision: The proximity precision value.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.settings import ProximityPrecision
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+        """
+        response = self._http_requests.put(
+            f"{self._settings_url}/proximity-precision", proximity_precision.value
+        )
+
+        return TaskInfo(**response.json())
+
+    def reset_proximity_precision(self) -> TaskInfo:
+        """Reset an index's proximity precision settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.reset_proximity_precision()
+        """
+        response = self._http_requests.delete(f"{self._settings_url}/proximity-precision")
+
+        return TaskInfo(**response.json())
+
+    def get_embedders(self) -> Embedders | None:
+        """Get embedder settings for the index.
+
+        Returns:
+
+            Embedders for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> embedders = await index.get_embedders()
+        """
+        response = self._http_requests.get(f"{self._settings_url}/embedders")
+
+        if not response.json():
+            return None
+
+        return Embedders(embedders=response.json())
+
+    def update_embedders(self, embedders: Embedders) -> TaskInfo:
+        """Update the embedders settings for an index.
+
+        Args:
+
+            embedders: The embedders value.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.settings import Embedders, UserProvidedEmbedder
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.update_embedders(
+            >>>     Embedders(embedders={dimensions=512)})
+            >>> )
+        """
+        payload = {}
+        for key, embedder in embedders.embedders.items():
+            if is_pydantic_2():
+                payload[key] = {
+                    k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
+                }  # type: ignore[attr-defined]
+            else:  # pragma: no cover
+                warn(
+                    "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                    DeprecationWarning,
+                )
+                payload[key] = {
+                    k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
+                }  # type: ignore[attr-defined]
+
+        response = self._http_requests.patch(f"{self._settings_url}/embedders", payload)
+
+        return TaskInfo(**response.json())
+
+    def reset_embedders(self) -> TaskInfo:
+        """Reset an index's embedders settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = AsyncClient("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.reset_embedders()
+        """
+        response = self._http_requests.delete(f"{self._settings_url}/embedders")
+
+        return TaskInfo(**response.json())
+
     @staticmethod
     def _run_plugins(
         plugins: Sequence[Plugin | DocumentPlugin | PostSearchPlugin],
@@ -7184,6 +7549,7 @@ def _process_search_parameters(
     show_ranking_score: bool = False,
     show_ranking_score_details: bool = False,
     vector: list[float] | None = None,
+    hybrid: Hybrid | None = None,
 ) -> JsonDict:
     body: JsonDict = {
         "q": q,
@@ -7218,6 +7584,16 @@ def _process_search_parameters(
 
     if vector:
         body["vector"] = vector
+
+    if hybrid:
+        if is_pydantic_2():
+            body["hybrid"] = hybrid.model_dump(by_alias=True)  # type: ignore[attr-defined]
+        else:  # pragma: no cover
+            warn(
+                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
+                DeprecationWarning,
+            )
+            body["hybrid"] = hybrid.dict(by_alias=True)  # type: ignore[attr-defined]
 
     return body
 

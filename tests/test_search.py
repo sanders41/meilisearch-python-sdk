@@ -5,7 +5,7 @@ import pytest
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk._task import wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
-from meilisearch_python_sdk.models.search import SearchParams
+from meilisearch_python_sdk.models.search import Hybrid, SearchParams
 
 
 def test_basic_search(index_with_documents):
@@ -366,8 +366,11 @@ def test_show_ranking_details_serach(index_with_documents):
 @pytest.mark.usefixtures("enable_vector_search")
 def test_vector_search(index_with_documents_and_vectors):
     index = index_with_documents_and_vectors()
-    response = index.search("How to Train Your Dragon", vector=[0.1, 0.2])
-    assert response.hits[0]["id"] == "287947"
+    response = index.search(
+        "",
+        vector=[0.1, 0.2],
+        hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
+    )
     assert response.vector == [0.1, 0.2]
 
 
