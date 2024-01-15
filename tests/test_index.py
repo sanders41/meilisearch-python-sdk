@@ -111,6 +111,7 @@ def test_get_stats(empty_index, small_movies):
     assert response.number_of_documents == 30
 
 
+@pytest.mark.usefixtures("enable_vector_search")
 def test_get_settings_default(
     empty_index, default_ranking_rules, default_faceting, default_pagination
 ):
@@ -130,7 +131,7 @@ def test_get_settings_default(
     assert response.separator_tokens == []
     assert response.non_separator_tokens == []
     assert response.dictionary == []
-    assert response.embedders == {}
+    assert response.embedders is None
 
 
 @pytest.mark.usefixtures("enable_vector_search")
@@ -192,7 +193,7 @@ def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.faceting.max_values_per_facet == 100
     assert response.pagination.max_total_hits == 1000
     assert response.proximity_precision is ProximityPrecision.BY_WORD
-    assert response.embedders == {}
+    assert response.embedders is None
 
 
 def test_get_ranking_rules_default(empty_index, default_ranking_rules):
