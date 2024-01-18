@@ -193,6 +193,7 @@ class AsyncClient(BaseClient):
         primary_key: str | None = None,
         *,
         settings: MeilisearchSettings | None = None,
+        wait: bool = True,
         plugins: AsyncIndexPlugins | None = None,
     ) -> AsyncIndex:
         """Creates a new index.
@@ -206,6 +207,9 @@ class AsyncClient(BaseClient):
                 adding documents will cause the documents to be re-indexed. Because of this it will be
                 faster to update them before adding documents. Defaults to None (i.e. default
                 Meilisearch index settings).
+            wait: If set to True and settings are being updated, the index will be returned after
+                the settings update has completed. If False it will not wait for settings to complete.
+                Default: True
             plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
@@ -224,7 +228,7 @@ class AsyncClient(BaseClient):
             >>>     index = await client.create_index("movies")
         """
         return await AsyncIndex.create(
-            self.http_client, uid, primary_key, settings=settings, plugins=plugins
+            self.http_client, uid, primary_key, settings=settings, wait=wait, plugins=plugins
         )
 
     async def create_snapshot(self) -> TaskInfo:
@@ -1048,6 +1052,7 @@ class Client(BaseClient):
         primary_key: str | None = None,
         *,
         settings: MeilisearchSettings | None = None,
+        wait: bool = True,
         plugins: IndexPlugins | None = None,
     ) -> Index:
         """Creates a new index.
@@ -1061,6 +1066,9 @@ class Client(BaseClient):
                 adding documents will cause the documents to be re-indexed. Because of this it will be
                 faster to update them before adding documents. Defaults to None (i.e. default
                 Meilisearch index settings).
+            wait: If set to True and settings are being updated, the index will be returned after
+                the settings update has completed. If False it will not wait for settings to complete.
+                Default: True
             plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
@@ -1078,7 +1086,9 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.create_index("movies")
         """
-        return Index.create(self.http_client, uid, primary_key, settings=settings, plugins=plugins)
+        return Index.create(
+            self.http_client, uid, primary_key, settings=settings, wait=wait, plugins=plugins
+        )
 
     def create_snapshot(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch snapshot.

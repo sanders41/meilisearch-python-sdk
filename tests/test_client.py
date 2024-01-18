@@ -123,6 +123,13 @@ def test_create_index_with_settings(client, new_settings):
     assert response.dictionary == new_settings.dictionary
 
 
+@pytest.mark.usefixtures("enable_vector_search")
+def test_create_index_with_settings_no_wait(client, new_settings):
+    uid = str(uuid4())
+    index = client.create_index(uid=uid, settings=new_settings, wait=False)
+    assert index.uid == uid
+
+
 def test_create_keys_with_wildcarded_actions(client, test_key_info):
     test_key_info.actions = ["documents.*"]
     key = client.create_key(test_key_info)

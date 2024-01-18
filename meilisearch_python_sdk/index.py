@@ -609,6 +609,7 @@ class AsyncIndex(_BaseIndex):
         primary_key: str | None = None,
         *,
         settings: MeilisearchSettings | None = None,
+        wait: bool = True,
         plugins: AsyncIndexPlugins | None = None,
     ) -> AsyncIndex:
         """Creates a new index.
@@ -627,6 +628,9 @@ class AsyncIndex(_BaseIndex):
                 adding documents will cause the documents to be re-indexed. Because of this it will be
                 faster to update them before adding documents. Defaults to None (i.e. default
                 Meilisearch index settings).
+            wait: If set to True and settings are being updated, the index will be returned after
+                the settings update has completed. If False it will not wait for settings to complete.
+                Default: True
             plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
@@ -652,7 +656,7 @@ class AsyncIndex(_BaseIndex):
         url = "indexes"
         http_request = AsyncHttpRequests(http_client)
         response = await http_request.post(url, payload)
-        await async_wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=100000)
+        await async_wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=None)
 
         index_response = await http_request.get(f"{url}/{uid}")
         index_dict = index_response.json()
@@ -667,7 +671,8 @@ class AsyncIndex(_BaseIndex):
 
         if settings:
             settings_task = await index.update_settings(settings)
-            await async_wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=100000)
+            if wait:
+                await async_wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=None)
 
         return index
 
@@ -4543,6 +4548,7 @@ class Index(_BaseIndex):
         primary_key: str | None = None,
         *,
         settings: MeilisearchSettings | None = None,
+        wait: bool = True,
         plugins: IndexPlugins | None = None,
     ) -> Index:
         """Creates a new index.
@@ -4561,6 +4567,9 @@ class Index(_BaseIndex):
                 adding documents will cause the documents to be re-indexed. Because of this it will be
                 faster to update them before adding documents. Defaults to None (i.e. default
                 Meilisearch index settings).
+            wait: If set to True and settings are being updated, the index will be returned after
+                the settings update has completed. If False it will not wait for settings to complete.
+                Default: True
             plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
@@ -4586,7 +4595,7 @@ class Index(_BaseIndex):
         url = "indexes"
         http_request = HttpRequests(http_client)
         response = http_request.post(url, payload)
-        wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=100000)
+        wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=None)
         index_response = http_request.get(f"{url}/{uid}")
         index_dict = index_response.json()
         index = cls(
@@ -4600,7 +4609,8 @@ class Index(_BaseIndex):
 
         if settings:
             settings_task = index.update_settings(settings)
-            wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=10000)
+            if wait:
+                wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=None)
 
         return index
 
