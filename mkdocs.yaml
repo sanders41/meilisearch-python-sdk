@@ -39,3 +39,4 @@ nav:
 
 plugins:
   - mkdocstrings
+  - search
