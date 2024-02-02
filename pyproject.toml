@@ -71,10 +71,15 @@ module = ["aiocache.*"]
 ignore_missing_imports = true
 
 [tool.ruff]
+line-length = 100
+target-version = "py38"
+fix = true
+
+[tool.ruff.lint]
 select=["E", "F", "UP", "I001", "T201", "T203"]
 ignore=[
-  "E501",
   # Recommened ignores by ruff when using formatter
+  "E501",
   "W191",
   "E111",
   "E114",
@@ -90,6 +95,3 @@ ignore=[
   "ISC001",
   "ISC002",
 ]
-line-length = 100
-target-version = "py38"
-fix = true
