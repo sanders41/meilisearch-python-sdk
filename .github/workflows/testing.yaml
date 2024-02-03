@@ -3,30 +3,30 @@ name: Testing
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
 jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Install Poetry
-      run: pipx install poetry
-    - name: Configure poetry
-      run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-    - name: install Just
-      uses: taiki-e/install-action@just
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.8
-        cache: "poetry"
-    - name: Install Dependencies
-      run: just install
-    - name: mypy check
-      run: just mypy
+      - uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Configure poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+      - name: install Just
+        uses: taiki-e/install-action@just
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8
+          cache: "poetry"
+      - name: Install Dependencies
+        run: just install
+      - name: mypy check
+        run: just mypy
 
   testing:
     strategy:
@@ -35,48 +35,48 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Install Poetry
-      run: pipx install poetry
-    - name: Configure poetry
-      run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-    - name: install Just
-      uses: taiki-e/install-action@just
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: "poetry"
-    - name: Install Dependencies
-      run: just install
-    - name: Test with pytest
-      run: just test-ci
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
+      - uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Configure poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+      - name: install Just
+        uses: taiki-e/install-action@just
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+      - name: Install Dependencies
+        run: just install
+      - name: Test with pytest
+        run: just test-ci
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
 
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Install Poetry
-      run: pipx install poetry
-    - name: Configure poetry
-      run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-    - name: install Just
-      uses: taiki-e/install-action@just
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: "poetry"
-    - name: Install Dependencies
-      run: just install
-    - name: Test Docs Build
-      run: just build-docs
+      - uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Configure poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+      - name: install Just
+        uses: taiki-e/install-action@just
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+      - name: Install Dependencies
+        run: just install
+      - name: Test Docs Build
+        run: just build-docs
