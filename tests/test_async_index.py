@@ -7,7 +7,9 @@ from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
+    HuggingFaceEmbedder,
     MinWordSizeForTypos,
+    OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
     TypoTolerance,
@@ -165,7 +167,9 @@ async def test_update_settings(async_empty_index, new_settings):
     assert response.separator_tokens == new_settings.separator_tokens
     assert response.non_separator_tokens == new_settings.non_separator_tokens
     assert response.dictionary == new_settings.dictionary
-    assert response.embedders == new_settings.embedders
+    assert response.embedders["default"].source == "userProvided"
+    assert response.embedders["test1"].source == "huggingFace"
+    assert response.embedders["test2"].source == "openAi"
 
 
 @pytest.mark.usefixtures("enable_vector_search")
@@ -185,7 +189,9 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.typo_tolerance.enabled is False
     assert response.pagination == new_settings.pagination
     assert response.proximity_precision == new_settings.proximity_precision
-    assert response.embedders == new_settings.embedders
+    assert response.embedders["default"].source == "userProvided"
+    assert response.embedders["test1"].source == "huggingFace"
+    assert response.embedders["test2"].source == "openAi"
     response = await index.reset_settings()
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
@@ -632,29 +638,39 @@ async def test_get_embedders(async_empty_index):
 
 @pytest.mark.usefixtures("enable_vector_search")
 async def test_update_embedders(async_empty_index):
-    index = await async_empty_index()
-    response = await index.update_embedders(
-        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    embedders = Embedders(
+        embedders={
+            "default": UserProvidedEmbedder(dimensions=512),
+            "test1": HuggingFaceEmbedder(),
+            "test2": OpenAiEmbedder(),
+        }
     )
+    index = await async_empty_index()
+    response = await index.update_embedders(embedders)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()
-    assert response == Embedders(
-        embedders={"default": UserProvidedEmbedder(source="userProvided", dimensions=512)}
-    )
+    assert response.embedders["default"].source == "userProvided"
+    assert response.embedders["test1"].source == "huggingFace"
+    assert response.embedders["test2"].source == "openAi"
 
 
 @pytest.mark.usefixtures("enable_vector_search")
 async def test_reset_embedders(async_empty_index):
-    index = await async_empty_index()
-    response = await index.update_embedders(
-        Embedders(embedders={"default": UserProvidedEmbedder(dimensions=512)})
+    embedders = Embedders(
+        embedders={
+            "default": UserProvidedEmbedder(dimensions=512),
+            "test1": HuggingFaceEmbedder(),
+            "test2": OpenAiEmbedder(),
+        }
     )
+    index = await async_empty_index()
+    response = await index.update_embedders(embedders)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
     response = await index.get_embedders()
-    assert response == Embedders(
-        embedders={"default": UserProvidedEmbedder(source="userProvided", dimensions=512)}
-    )
+    assert response.embedders["default"].source == "userProvided"
+    assert response.embedders["test1"].source == "huggingFace"
+    assert response.embedders["test2"].source == "openAi"
     response = await index.reset_embedders()
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()

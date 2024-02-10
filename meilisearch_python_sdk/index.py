@@ -24,10 +24,13 @@ from meilisearch_python_sdk.models.search import FacetSearchResults, Hybrid, Sea
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
+    HuggingFaceEmbedder,
     MeilisearchSettings,
+    OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
     TypoTolerance,
+    UserProvidedEmbedder,
 )
 from meilisearch_python_sdk.models.task import TaskInfo
 from meilisearch_python_sdk.plugins import (
@@ -2723,8 +2726,13 @@ class AsyncIndex(_BaseIndex):
             >>>     settings = await index.get_settings()
         """
         response = await self._http_requests.get(self._settings_url)
+        response_json = response.json()
+        settings = MeilisearchSettings(**response_json)
 
-        return MeilisearchSettings(**response.json())
+        if response_json.get("embedders"):
+            settings.embedders = _embedder_json_to_settings_model(response_json["embedders"])
+
+        return settings
 
     async def update_settings(self, body: MeilisearchSettings) -> TaskInfo:
         """Update settings of the index.
@@ -3998,10 +4006,7 @@ class AsyncIndex(_BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/embedders")
 
-        if not response.json():
-            return None
-
-        return Embedders(embedders=response.json())
+        return _embedder_json_to_embedders_model(response.json())
 
     async def update_embedders(self, embedders: Embedders) -> TaskInfo:
         """Update the embedders settings for an index.
@@ -6037,8 +6042,13 @@ class Index(_BaseIndex):
             >>> settings = index.get_settings()
         """
         response = self._http_requests.get(self._settings_url)
+        response_json = response.json()
+        settings = MeilisearchSettings(**response_json)
 
-        return MeilisearchSettings(**response.json())
+        if response_json.get("embedders"):
+            settings.embedders = _embedder_json_to_settings_model(response_json["embedders"])
+
+        return settings
 
     def update_settings(self, body: MeilisearchSettings) -> TaskInfo:
         """Update settings of the index.
@@ -7306,10 +7316,7 @@ class Index(_BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/embedders")
 
-        if not response.json():
-            return None
-
-        return Embedders(embedders=response.json())
+        return _embedder_json_to_embedders_model(response.json())
 
     def update_embedders(self, embedders: Embedders) -> TaskInfo:
         """Update the embedders settings for an index.
@@ -7610,6 +7617,40 @@ def _process_search_parameters(
 
 def _build_encoded_url(base_url: str, params: JsonMapping) -> str:
     return f"{base_url}?{urlencode(params)}"
+
+
+def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedders | None:
+    if not embedder_json:  # pragma: no cover
+        return None
+
+    embedders: dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] = {}
+    for k, v in embedder_json.items():
+        if v.get("source") == "openAi":
+            embedders[k] = OpenAiEmbedder(**v)
+        elif v.get("source") == "huggingFace":
+            embedders[k] = HuggingFaceEmbedder(**v)
+        else:
+            embedders[k] = UserProvidedEmbedder(**v)
+
+    return Embedders(embedders=embedders)
+
+
+def _embedder_json_to_settings_model(
+    embedder_json: JsonDict | None,
+) -> dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] | None:
+    if not embedder_json:  # pragma: no cover
+        return None
+
+    embedders: dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] = {}
+    for k, v in embedder_json.items():
+        if v.get("source") == "openAi":
+            embedders[k] = OpenAiEmbedder(**v)
+        elif v.get("source") == "huggingFace":
+            embedders[k] = HuggingFaceEmbedder(**v)
+        else:
+            embedders[k] = UserProvidedEmbedder(**v)
+
+    return embedders
 
 
 def _validate_file_type(file_path: Path) -> None:
