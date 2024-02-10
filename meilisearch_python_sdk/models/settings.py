@@ -64,16 +64,16 @@ class Pagination(CamelBase):
 
 class OpenAiEmbedder(CamelBase):
     source: str = "openAi"
-    model: str
-    api_key: str
-    document_template: str
+    model: Optional[str] = None  # Defaults to text-embedding-ada-002
+    api_key: Optional[str] = None  # Can be provided through a CLI option or environment variable
+    document_template: Optional[str] = None
 
 
 class HuggingFaceEmbedder(CamelBase):
     source: str = "huggingFace"
-    model: str
-    revision: str
-    document_template: str
+    model: Optional[str] = None  # Defaults to BAAI/bge-base-en-v1.5
+    revision: Optional[str] = None
+    document_template: Optional[str] = None
 
 
 class UserProvidedEmbedder(CamelBase):
