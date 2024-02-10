@@ -12,7 +12,9 @@ from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
+    HuggingFaceEmbedder,
     MeilisearchSettings,
+    OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
     TypoTolerance,
@@ -286,6 +288,8 @@ def new_settings():
         dictionary=["S.O", "S.O.S"],
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),
+            "test1": HuggingFaceEmbedder(),
+            "test2": OpenAiEmbedder(),
         },
         proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
     )

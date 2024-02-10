@@ -7620,7 +7620,7 @@ def _build_encoded_url(base_url: str, params: JsonMapping) -> str:
 
 
 def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedders | None:
-    if not embedder_json:
+    if not embedder_json:  # pragma: no cover
         return None
 
     embedders: dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] = {}
@@ -7638,7 +7638,7 @@ def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedde
 def _embedder_json_to_settings_model(
     embedder_json: JsonDict | None,
 ) -> dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] | None:
-    if not embedder_json:
+    if not embedder_json:  # pragma: no cover
         return None
 
     embedders: dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] = {}
