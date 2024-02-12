@@ -30,7 +30,7 @@ class AsyncHttpRequests:
         http_method: Callable,
         path: str,
         body: Any | None = None,
-        content_type: str = "applicaton/json",
+        content_type: str = "application/json",
     ) -> Response:
         headers = build_headers(content_type)
         try:
