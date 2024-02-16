@@ -355,7 +355,6 @@ def test_show_ranking_score_serach(index_with_documents):
     assert "_rankingScore" in response.hits[0]
 
 
-@pytest.mark.usefixtures("enable_score_details")
 def test_show_ranking_details_serach(index_with_documents):
     index = index_with_documents()
     response = index.search("How to Train Your Dragon", show_ranking_score_details=True)
