@@ -1282,7 +1282,11 @@ class AsyncIndex(_BaseIndex):
         return DocumentsInfo(**response.json())
 
     async def add_documents(
-        self, documents: Sequence[JsonMapping], primary_key: str | None = None
+        self,
+        documents: Sequence[JsonMapping],
+        primary_key: str | None = None,
+        *,
+        compress: bool = False,
     ) -> TaskInfo:
         """Add documents to the index.
 
@@ -1291,6 +1295,7 @@ class AsyncIndex(_BaseIndex):
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1348,7 +1353,7 @@ class AsyncIndex(_BaseIndex):
                             )
                         )
 
-                tasks.append(self._http_requests.post(url, documents))
+                tasks.append(self._http_requests.post(url, documents, compress=compress))
 
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
@@ -1383,7 +1388,9 @@ class AsyncIndex(_BaseIndex):
                             )
                         )
 
-                response_coroutine = tg.create_task(self._http_requests.post(url, documents))
+                response_coroutine = tg.create_task(
+                    self._http_requests.post(url, documents, compress=compress)
+                )
 
             response = await response_coroutine
             result = TaskInfo(**response.json())
@@ -1400,7 +1407,8 @@ class AsyncIndex(_BaseIndex):
 
             return result
 
-        response = await self._http_requests.post(url, documents)
+        response = await self._http_requests.post(url, documents, compress=compress)
+
         result = TaskInfo(**response.json())
         if self._post_add_documents_plugins:
             post = await AsyncIndex._run_plugins(
@@ -1421,6 +1429,7 @@ class AsyncIndex(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
@@ -1431,6 +1440,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1453,12 +1463,15 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.add_documents_in_batches(documents)
         """
         if not use_task_groups():
-            batches = [self.add_documents(x, primary_key) for x in _batch(documents, batch_size)]
+            batches = [
+                self.add_documents(x, primary_key, compress=compress)
+                for x in _batch(documents, batch_size)
+            ]
             return await asyncio.gather(*batches)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
-                tg.create_task(self.add_documents(x, primary_key))
+                tg.create_task(self.add_documents(x, primary_key, compress=compress))
                 for x in _batch(documents, batch_size)
             ]
 
@@ -1472,6 +1485,7 @@ class AsyncIndex(_BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index.
 
@@ -1487,6 +1501,7 @@ class AsyncIndex(_BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1522,7 +1537,7 @@ class AsyncIndex(_BaseIndex):
             loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
-            response = await self.add_documents(combined, primary_key)
+            response = await self.add_documents(combined, primary_key, compress=compress)
 
             return [response]
 
@@ -1531,7 +1546,9 @@ class AsyncIndex(_BaseIndex):
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
-                    add_documents.append(self.add_documents(documents, primary_key))
+                    add_documents.append(
+                        self.add_documents(documents, primary_key, compress=compress)
+                    )
 
             _raise_on_no_documents(add_documents, document_type, directory_path)
 
@@ -1554,9 +1571,13 @@ class AsyncIndex(_BaseIndex):
                 if path.suffix == f".{document_type}":
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
                     if i == 0:
-                        all_results = [await self.add_documents(documents)]
+                        all_results = [await self.add_documents(documents, compress=compress)]
                     else:
-                        tasks.append(tg.create_task(self.add_documents(documents, primary_key)))
+                        tasks.append(
+                            tg.create_task(
+                                self.add_documents(documents, primary_key, compress=compress)
+                            )
+                        )
 
         results = [x.result() for x in tasks]
         all_results = [*all_results, *results]
@@ -1572,6 +1593,7 @@ class AsyncIndex(_BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index in batches.
 
@@ -1589,6 +1611,7 @@ class AsyncIndex(_BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1627,7 +1650,7 @@ class AsyncIndex(_BaseIndex):
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
             return await self.add_documents_in_batches(
-                combined, batch_size=batch_size, primary_key=primary_key
+                combined, batch_size=batch_size, primary_key=primary_key, compress=compress
             )
 
         responses: list[TaskInfo] = []
@@ -1638,7 +1661,7 @@ class AsyncIndex(_BaseIndex):
                 documents = await _async_load_documents_from_file(path, csv_delimiter)
                 add_documents.append(
                     self.add_documents_in_batches(
-                        documents, batch_size=batch_size, primary_key=primary_key
+                        documents, batch_size=batch_size, primary_key=primary_key, compress=compress
                     )
                 )
 
@@ -1656,7 +1679,7 @@ class AsyncIndex(_BaseIndex):
         return responses
 
     async def add_documents_from_file(
-        self, file_path: Path | str, primary_key: str | None = None
+        self, file_path: Path | str, primary_key: str | None = None, *, compress: bool = False
     ) -> TaskInfo:
         """Add documents to the index from a json file.
 
@@ -1665,6 +1688,7 @@ class AsyncIndex(_BaseIndex):
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1688,7 +1712,7 @@ class AsyncIndex(_BaseIndex):
         """
         documents = await _async_load_documents_from_file(file_path)
 
-        return await self.add_documents(documents, primary_key=primary_key)
+        return await self.add_documents(documents, primary_key=primary_key, compress=compress)
 
     async def add_documents_from_file_in_batches(
         self,
@@ -1697,6 +1721,7 @@ class AsyncIndex(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -1709,6 +1734,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1733,7 +1759,7 @@ class AsyncIndex(_BaseIndex):
         documents = await _async_load_documents_from_file(file_path, csv_delimiter)
 
         return await self.add_documents_in_batches(
-            documents, batch_size=batch_size, primary_key=primary_key
+            documents, batch_size=batch_size, primary_key=primary_key, compress=compress
         )
 
     async def add_documents_from_raw_file(
@@ -1742,6 +1768,7 @@ class AsyncIndex(_BaseIndex):
         primary_key: str | None = None,
         *,
         csv_delimiter: str | None = None,
+        compress: bool = False,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -1756,6 +1783,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1812,12 +1840,18 @@ class AsyncIndex(_BaseIndex):
         async with aiofiles.open(upload_path, "r") as f:
             data = await f.read()
 
-        response = await self._http_requests.post(url, body=data, content_type=content_type)
+        response = await self._http_requests.post(
+            url, body=data, content_type=content_type, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
     async def update_documents(
-        self, documents: Sequence[JsonMapping], primary_key: str | None = None
+        self,
+        documents: Sequence[JsonMapping],
+        primary_key: str | None = None,
+        *,
+        compress: bool = False,
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -1826,6 +1860,7 @@ class AsyncIndex(_BaseIndex):
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1883,7 +1918,7 @@ class AsyncIndex(_BaseIndex):
                             )
                         )
 
-                tasks.append(self._http_requests.put(url, documents))
+                tasks.append(self._http_requests.put(url, documents, compress=compress))
 
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
@@ -1919,7 +1954,9 @@ class AsyncIndex(_BaseIndex):
                             )
                         )
 
-                response_coroutine = tg.create_task(self._http_requests.put(url, documents))
+                response_coroutine = tg.create_task(
+                    self._http_requests.put(url, documents, compress=compress)
+                )
 
             response = await response_coroutine
             result = TaskInfo(**response.json())
@@ -1937,7 +1974,7 @@ class AsyncIndex(_BaseIndex):
 
             return result
 
-        response = await self._http_requests.put(url, documents)
+        response = await self._http_requests.put(url, documents, compress=compress)
         result = TaskInfo(**response.json())
         if self._post_update_documents_plugins:
             post = await AsyncIndex._run_plugins(
@@ -1958,6 +1995,7 @@ class AsyncIndex(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
 
@@ -1970,6 +2008,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -1992,12 +2031,15 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.update_documents_in_batches(documents)
         """
         if not use_task_groups():
-            batches = [self.update_documents(x, primary_key) for x in _batch(documents, batch_size)]
+            batches = [
+                self.update_documents(x, primary_key, compress=compress)
+                for x in _batch(documents, batch_size)
+            ]
             return await asyncio.gather(*batches)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
-                tg.create_task(self.update_documents(x, primary_key))
+                tg.create_task(self.update_documents(x, primary_key, compress=compress))
                 for x in _batch(documents, batch_size)
             ]
         return [x.result() for x in tasks]
@@ -2010,6 +2052,7 @@ class AsyncIndex(_BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -2025,6 +2068,7 @@ class AsyncIndex(_BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -2060,7 +2104,7 @@ class AsyncIndex(_BaseIndex):
             loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
-            response = await self.update_documents(combined, primary_key)
+            response = await self.update_documents(combined, primary_key, compress=compress)
             return [response]
 
         if not use_task_groups():
@@ -2068,7 +2112,9 @@ class AsyncIndex(_BaseIndex):
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
-                    update_documents.append(self.update_documents(documents, primary_key))
+                    update_documents.append(
+                        self.update_documents(documents, primary_key, compress=compress)
+                    )
 
             _raise_on_no_documents(update_documents, document_type, directory_path)
 
@@ -2090,9 +2136,15 @@ class AsyncIndex(_BaseIndex):
                 if path.suffix == f".{document_type}":
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
                     if i == 0:
-                        results = [await self.update_documents(documents, primary_key)]
+                        results = [
+                            await self.update_documents(documents, primary_key, compress=compress)
+                        ]
                     else:
-                        tasks.append(tg.create_task(self.update_documents(documents, primary_key)))
+                        tasks.append(
+                            tg.create_task(
+                                self.update_documents(documents, primary_key, compress=compress)
+                            )
+                        )
 
         results = [*results, *[x.result() for x in tasks]]
         _raise_on_no_documents(results, document_type, directory_path)
@@ -2107,6 +2159,7 @@ class AsyncIndex(_BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -2124,6 +2177,7 @@ class AsyncIndex(_BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -2160,7 +2214,7 @@ class AsyncIndex(_BaseIndex):
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
             return await self.update_documents_in_batches(
-                combined, batch_size=batch_size, primary_key=primary_key
+                combined, batch_size=batch_size, primary_key=primary_key, compress=compress
             )
 
         if not use_task_groups():
@@ -2172,7 +2226,10 @@ class AsyncIndex(_BaseIndex):
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
                     update_documents.append(
                         self.update_documents_in_batches(
-                            documents, batch_size=batch_size, primary_key=primary_key
+                            documents,
+                            batch_size=batch_size,
+                            primary_key=primary_key,
+                            compress=compress,
                         )
                     )
 
@@ -2197,13 +2254,19 @@ class AsyncIndex(_BaseIndex):
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
                     if i == 0:
                         results = await self.update_documents_in_batches(
-                            documents, batch_size=batch_size, primary_key=primary_key
+                            documents,
+                            batch_size=batch_size,
+                            primary_key=primary_key,
+                            compress=compress,
                         )
                     else:
                         tasks.append(
                             tg.create_task(
                                 self.update_documents_in_batches(
-                                    documents, batch_size=batch_size, primary_key=primary_key
+                                    documents,
+                                    batch_size=batch_size,
+                                    primary_key=primary_key,
+                                    compress=compress,
                                 )
                             )
                         )
@@ -2217,6 +2280,8 @@ class AsyncIndex(_BaseIndex):
         file_path: Path | str,
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
+        *,
+        compress: bool = False,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
 
@@ -2227,6 +2292,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -2248,10 +2314,15 @@ class AsyncIndex(_BaseIndex):
         """
         documents = await _async_load_documents_from_file(file_path, csv_delimiter)
 
-        return await self.update_documents(documents, primary_key=primary_key)
+        return await self.update_documents(documents, primary_key=primary_key, compress=compress)
 
     async def update_documents_from_file_in_batches(
-        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
+        self,
+        file_path: Path | str,
+        *,
+        batch_size: int = 1000,
+        primary_key: str | None = None,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -2262,6 +2333,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -2284,7 +2356,7 @@ class AsyncIndex(_BaseIndex):
         documents = await _async_load_documents_from_file(file_path)
 
         return await self.update_documents_in_batches(
-            documents, batch_size=batch_size, primary_key=primary_key
+            documents, batch_size=batch_size, primary_key=primary_key, compress=compress
         )
 
     async def update_documents_from_raw_file(
@@ -2292,6 +2364,8 @@ class AsyncIndex(_BaseIndex):
         file_path: Path | str,
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
+        *,
+        compress: bool = False,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -2306,6 +2380,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -2362,7 +2437,9 @@ class AsyncIndex(_BaseIndex):
         async with aiofiles.open(upload_path, "r") as f:
             data = await f.read()
 
-        response = await self._http_requests.put(url, body=data, content_type=content_type)
+        response = await self._http_requests.put(
+            url, body=data, content_type=content_type, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -2734,12 +2811,15 @@ class AsyncIndex(_BaseIndex):
 
         return settings
 
-    async def update_settings(self, body: MeilisearchSettings) -> TaskInfo:
+    async def update_settings(
+        self, body: MeilisearchSettings, *, compress: bool = False
+    ) -> TaskInfo:
         """Update settings of the index.
 
         Args:
 
             body: Settings of the index.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -2786,7 +2866,7 @@ class AsyncIndex(_BaseIndex):
             )
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
-        response = await self._http_requests.patch(self._settings_url, body_dict)
+        response = await self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
         return TaskInfo(**response.json())
 
@@ -2836,12 +2916,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_ranking_rules(self, ranking_rules: list[str]) -> TaskInfo:
+    async def update_ranking_rules(
+        self, ranking_rules: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update ranking rules of the index.
 
         Args:
 
             ranking_rules: List containing the ranking rules.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -2870,7 +2953,7 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.update_ranking_rules(ranking_rules)
         """
         response = await self._http_requests.put(
-            f"{self._settings_url}/ranking-rules", ranking_rules
+            f"{self._settings_url}/ranking-rules", ranking_rules, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -2925,12 +3008,13 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_distinct_attribute(self, body: str) -> TaskInfo:
+    async def update_distinct_attribute(self, body: str, *, compress: bool = False) -> TaskInfo:
         """Update distinct attribute of the index.
 
         Args:
 
             body: Distinct attribute.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -2948,7 +3032,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_distinct_attribute("url")
         """
-        response = await self._http_requests.put(f"{self._settings_url}/distinct-attribute", body)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/distinct-attribute", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -2998,12 +3084,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_searchable_attributes(self, body: list[str]) -> TaskInfo:
+    async def update_searchable_attributes(
+        self, body: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update searchable attributes of the index.
 
         Args:
 
             body: List containing the searchable attributes.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3022,7 +3111,7 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.update_searchable_attributes(["title", "description", "genre"])
         """
         response = await self._http_requests.put(
-            f"{self._settings_url}/searchable-attributes", body
+            f"{self._settings_url}/searchable-attributes", body, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -3073,12 +3162,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_displayed_attributes(self, body: list[str]) -> TaskInfo:
+    async def update_displayed_attributes(
+        self, body: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update displayed attributes of the index.
 
         Args:
 
             body: List containing the displayed attributes.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3098,7 +3190,9 @@ class AsyncIndex(_BaseIndex):
             >>>         ["title", "description", "genre", "release_date"]
             >>>     )
         """
-        response = await self._http_requests.put(f"{self._settings_url}/displayed-attributes", body)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/displayed-attributes", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -3151,12 +3245,13 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_stop_words(self, body: list[str]) -> TaskInfo:
+    async def update_stop_words(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update stop words of the index.
 
         Args:
 
             body: List containing the stop words of the index.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3174,7 +3269,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_stop_words(["the", "a", "an"])
         """
-        response = await self._http_requests.put(f"{self._settings_url}/stop-words", body)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/stop-words", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -3227,12 +3324,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_synonyms(self, body: dict[str, list[str]]) -> TaskInfo:
+    async def update_synonyms(
+        self, body: dict[str, list[str]], *, compress: bool = False
+    ) -> TaskInfo:
         """Update synonyms of the index.
 
         Args:
 
             body: The synonyms of the index.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3252,7 +3352,9 @@ class AsyncIndex(_BaseIndex):
             >>>         {"wolverine": ["xmen", "logan"], "logan": ["wolverine"]}
             >>>     )
         """
-        response = await self._http_requests.put(f"{self._settings_url}/synonyms", body)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/synonyms", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -3305,12 +3407,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_filterable_attributes(self, body: list[str]) -> TaskInfo:
+    async def update_filterable_attributes(
+        self, body: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update filterable attributes of the index.
 
         Args:
 
             body: List containing the filterable attributes of the index.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3329,7 +3434,7 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.update_filterable_attributes(["genre", "director"])
         """
         response = await self._http_requests.put(
-            f"{self._settings_url}/filterable-attributes", body
+            f"{self._settings_url}/filterable-attributes", body, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -3380,12 +3485,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskInfo:
+    async def update_sortable_attributes(
+        self, sortable_attributes: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Get sortable attributes of the AsyncIndex.
 
         Args:
 
             sortable_attributes: List of attributes for searching.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3404,7 +3512,7 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.update_sortable_attributes(["title", "release_date"])
         """
         response = await self._http_requests.put(
-            f"{self._settings_url}/sortable-attributes", sortable_attributes
+            f"{self._settings_url}/sortable-attributes", sortable_attributes, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -3455,12 +3563,15 @@ class AsyncIndex(_BaseIndex):
 
         return TypoTolerance(**response.json())
 
-    async def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskInfo:
+    async def update_typo_tolerance(
+        self, typo_tolerance: TypoTolerance, *, compress: bool = False
+    ) -> TaskInfo:
         """Update typo tolerance.
 
         Args:
 
             typo_tolerance: Typo tolerance settings.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3481,7 +3592,9 @@ class AsyncIndex(_BaseIndex):
         """
         if is_pydantic_2():
             response = await self._http_requests.patch(
-                f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True)
+                f"{self._settings_url}/typo-tolerance",
+                typo_tolerance.model_dump(by_alias=True),
+                compress=compress,
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             warn(
@@ -3489,7 +3602,9 @@ class AsyncIndex(_BaseIndex):
                 DeprecationWarning,
             )
             response = await self._http_requests.patch(
-                f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True)
+                f"{self._settings_url}/typo-tolerance",
+                typo_tolerance.dict(by_alias=True),
+                compress=compress,
             )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
@@ -3540,12 +3655,13 @@ class AsyncIndex(_BaseIndex):
 
         return Faceting(**response.json())
 
-    async def update_faceting(self, faceting: Faceting) -> TaskInfo:
+    async def update_faceting(self, faceting: Faceting, *, compress: bool = False) -> TaskInfo:
         """Partially update the faceting settings for an index.
 
         Args:
 
             faceting: Faceting values.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3565,7 +3681,9 @@ class AsyncIndex(_BaseIndex):
         """
         if is_pydantic_2():
             response = await self._http_requests.patch(
-                f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True)
+                f"{self._settings_url}/faceting",
+                faceting.model_dump(by_alias=True),
+                compress=compress,
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             warn(
@@ -3573,7 +3691,7 @@ class AsyncIndex(_BaseIndex):
                 DeprecationWarning,
             )
             response = await self._http_requests.patch(
-                f"{self._settings_url}/faceting", faceting.dict(by_alias=True)
+                f"{self._settings_url}/faceting", faceting.dict(by_alias=True), compress=compress
             )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
@@ -3624,12 +3742,13 @@ class AsyncIndex(_BaseIndex):
 
         return Pagination(**response.json())
 
-    async def update_pagination(self, settings: Pagination) -> TaskInfo:
+    async def update_pagination(self, settings: Pagination, *, compress: bool = False) -> TaskInfo:
         """Partially update the pagination settings for an index.
 
         Args:
 
             settings: settings for pagination.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3650,7 +3769,9 @@ class AsyncIndex(_BaseIndex):
         """
         if is_pydantic_2():
             response = await self._http_requests.patch(
-                f"{self._settings_url}/pagination", settings.model_dump(by_alias=True)
+                f"{self._settings_url}/pagination",
+                settings.model_dump(by_alias=True),
+                compress=compress,
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             warn(
@@ -3658,7 +3779,7 @@ class AsyncIndex(_BaseIndex):
                 DeprecationWarning,
             )
             response = await self._http_requests.patch(
-                f"{self._settings_url}/pagination", settings.dict(by_alias=True)
+                f"{self._settings_url}/pagination", settings.dict(by_alias=True), compress=compress
             )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
@@ -3709,12 +3830,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_separator_tokens(self, separator_tokens: list[str]) -> TaskInfo:
+    async def update_separator_tokens(
+        self, separator_tokens: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update the separator tokens settings for an index.
 
         Args:
 
             separator_tokens: List of separator tokens.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3733,7 +3857,7 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.update_separator_tokens(separator_tokenes=["|", "/")
         """
         response = await self._http_requests.put(
-            f"{self._settings_url}/separator-tokens", separator_tokens
+            f"{self._settings_url}/separator-tokens", separator_tokens, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -3784,12 +3908,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_non_separator_tokens(self, non_separator_tokens: list[str]) -> TaskInfo:
+    async def update_non_separator_tokens(
+        self, non_separator_tokens: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update the non-separator tokens settings for an index.
 
         Args:
 
             non_separator_tokens: List of non-separator tokens.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3808,7 +3935,7 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.update_non_separator_tokens(non_separator_tokens=["@", "#")
         """
         response = await self._http_requests.put(
-            f"{self._settings_url}/non-separator-tokens", non_separator_tokens
+            f"{self._settings_url}/non-separator-tokens", non_separator_tokens, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -3859,12 +3986,15 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-    async def update_word_dictionary(self, dictionary: list[str]) -> TaskInfo:
+    async def update_word_dictionary(
+        self, dictionary: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update the word dictionary settings for an index.
 
         Args:
 
             dictionary: List of dictionary values.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3882,7 +4012,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_word_dictionary(dictionary=["S.O.S", "S.O")
         """
-        response = await self._http_requests.put(f"{self._settings_url}/dictionary", dictionary)
+        response = await self._http_requests.put(
+            f"{self._settings_url}/dictionary", dictionary, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -3932,12 +4064,15 @@ class AsyncIndex(_BaseIndex):
 
         return ProximityPrecision[to_snake(response.json()).upper()]
 
-    async def update_proximity_precision(self, proximity_precision: ProximityPrecision) -> TaskInfo:
+    async def update_proximity_precision(
+        self, proximity_precision: ProximityPrecision, *, compress: bool = False
+    ) -> TaskInfo:
         """Update the proximity precision settings for an index.
 
         Args:
 
             proximity_precision: The proximity precision value.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -3957,7 +4092,9 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
         """
         response = await self._http_requests.put(
-            f"{self._settings_url}/proximity-precision", proximity_precision.value
+            f"{self._settings_url}/proximity-precision",
+            proximity_precision.value,
+            compress=compress,
         )
 
         return TaskInfo(**response.json())
@@ -4008,12 +4145,13 @@ class AsyncIndex(_BaseIndex):
 
         return _embedder_json_to_embedders_model(response.json())
 
-    async def update_embedders(self, embedders: Embedders) -> TaskInfo:
+    async def update_embedders(self, embedders: Embedders, *, compress: bool = False) -> TaskInfo:
         """Update the embedders settings for an index.
 
         Args:
 
             embedders: The embedders value.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -4051,7 +4189,9 @@ class AsyncIndex(_BaseIndex):
                     k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
                 }  # type: ignore[attr-defined]
 
-        response = await self._http_requests.patch(f"{self._settings_url}/embedders", payload)
+        response = await self._http_requests.patch(
+            f"{self._settings_url}/embedders", payload, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -5038,7 +5178,11 @@ class Index(_BaseIndex):
         return DocumentsInfo(**response.json())
 
     def add_documents(
-        self, documents: Sequence[JsonMapping], primary_key: str | None = None
+        self,
+        documents: Sequence[JsonMapping],
+        primary_key: str | None = None,
+        *,
+        compress: bool = False,
     ) -> TaskInfo:
         """Add documents to the index.
 
@@ -5047,6 +5191,7 @@ class Index(_BaseIndex):
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5083,7 +5228,7 @@ class Index(_BaseIndex):
             if pre.get("document_result"):
                 documents = pre["document_result"]
 
-        response = self._http_requests.post(url, documents)
+        response = self._http_requests.post(url, documents, compress=compress)
         result = TaskInfo(**response.json())
         if self._post_add_documents_plugins:
             post = Index._run_plugins(self._post_add_documents_plugins, Event.POST, result=result)
@@ -5098,6 +5243,7 @@ class Index(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
@@ -5108,6 +5254,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5129,7 +5276,10 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.add_documents_in_batches(documents)
         """
-        return [self.add_documents(x, primary_key) for x in _batch(documents, batch_size)]
+        return [
+            self.add_documents(x, primary_key, compress=compress)
+            for x in _batch(documents, batch_size)
+        ]
 
     def add_documents_from_directory(
         self,
@@ -5139,6 +5289,7 @@ class Index(_BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index.
 
@@ -5154,6 +5305,7 @@ class Index(_BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5188,7 +5340,7 @@ class Index(_BaseIndex):
 
             combined = _combine_documents(all_documents)
 
-            response = self.add_documents(combined, primary_key)
+            response = self.add_documents(combined, primary_key, compress=compress)
 
             return [response]
 
@@ -5196,7 +5348,7 @@ class Index(_BaseIndex):
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = _load_documents_from_file(path, csv_delimiter)
-                responses.append(self.add_documents(documents, primary_key))
+                responses.append(self.add_documents(documents, primary_key, compress=compress))
 
         _raise_on_no_documents(responses, document_type, directory_path)
 
@@ -5211,6 +5363,7 @@ class Index(_BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index in batches.
 
@@ -5228,6 +5381,7 @@ class Index(_BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5263,7 +5417,7 @@ class Index(_BaseIndex):
             combined = _combine_documents(all_documents)
 
             return self.add_documents_in_batches(
-                combined, batch_size=batch_size, primary_key=primary_key
+                combined, batch_size=batch_size, primary_key=primary_key, compress=compress
             )
 
         responses: list[TaskInfo] = []
@@ -5272,7 +5426,7 @@ class Index(_BaseIndex):
                 documents = _load_documents_from_file(path, csv_delimiter)
                 responses.extend(
                     self.add_documents_in_batches(
-                        documents, batch_size=batch_size, primary_key=primary_key
+                        documents, batch_size=batch_size, primary_key=primary_key, compress=compress
                     )
                 )
 
@@ -5281,7 +5435,7 @@ class Index(_BaseIndex):
         return responses
 
     def add_documents_from_file(
-        self, file_path: Path | str, primary_key: str | None = None
+        self, file_path: Path | str, primary_key: str | None = None, *, compress: bool = False
     ) -> TaskInfo:
         """Add documents to the index from a json file.
 
@@ -5290,6 +5444,7 @@ class Index(_BaseIndex):
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5313,7 +5468,7 @@ class Index(_BaseIndex):
         """
         documents = _load_documents_from_file(file_path)
 
-        return self.add_documents(documents, primary_key=primary_key)
+        return self.add_documents(documents, primary_key=primary_key, compress=compress)
 
     def add_documents_from_file_in_batches(
         self,
@@ -5322,6 +5477,7 @@ class Index(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -5334,6 +5490,7 @@ class Index(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5358,7 +5515,7 @@ class Index(_BaseIndex):
         documents = _load_documents_from_file(file_path, csv_delimiter)
 
         return self.add_documents_in_batches(
-            documents, batch_size=batch_size, primary_key=primary_key
+            documents, batch_size=batch_size, primary_key=primary_key, compress=compress
         )
 
     def add_documents_from_raw_file(
@@ -5367,6 +5524,7 @@ class Index(_BaseIndex):
         primary_key: str | None = None,
         *,
         csv_delimiter: str | None = None,
+        compress: bool = False,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -5381,6 +5539,7 @@ class Index(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5437,12 +5596,18 @@ class Index(_BaseIndex):
         with open(upload_path) as f:
             data = f.read()
 
-        response = self._http_requests.post(url, body=data, content_type=content_type)
+        response = self._http_requests.post(
+            url, body=data, content_type=content_type, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
     def update_documents(
-        self, documents: Sequence[JsonMapping], primary_key: str | None = None
+        self,
+        documents: Sequence[JsonMapping],
+        primary_key: str | None = None,
+        *,
+        compress: bool = False,
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -5451,6 +5616,7 @@ class Index(_BaseIndex):
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5487,7 +5653,7 @@ class Index(_BaseIndex):
             if pre.get("document_result"):
                 documents = pre["document_result"]
 
-        response = self._http_requests.put(url, documents)
+        response = self._http_requests.put(url, documents, compress=compress)
         result = TaskInfo(**response.json())
         if self._post_update_documents_plugins:
             post = Index._run_plugins(
@@ -5504,6 +5670,7 @@ class Index(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
 
@@ -5516,6 +5683,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5537,7 +5705,10 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_documents_in_batches(documents)
         """
-        return [self.update_documents(x, primary_key) for x in _batch(documents, batch_size)]
+        return [
+            self.update_documents(x, primary_key, compress=compress)
+            for x in _batch(documents, batch_size)
+        ]
 
     def update_documents_from_directory(
         self,
@@ -5547,6 +5718,7 @@ class Index(_BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -5562,6 +5734,7 @@ class Index(_BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5596,14 +5769,14 @@ class Index(_BaseIndex):
 
             combined = _combine_documents(all_documents)
 
-            response = self.update_documents(combined, primary_key)
+            response = self.update_documents(combined, primary_key, compress=compress)
             return [response]
 
         responses = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = _load_documents_from_file(path, csv_delimiter)
-                responses.append(self.update_documents(documents, primary_key))
+                responses.append(self.update_documents(documents, primary_key, compress=compress))
 
         _raise_on_no_documents(responses, document_type, directory_path)
 
@@ -5618,6 +5791,7 @@ class Index(_BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -5635,6 +5809,7 @@ class Index(_BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5670,7 +5845,7 @@ class Index(_BaseIndex):
             combined = _combine_documents(all_documents)
 
             return self.update_documents_in_batches(
-                combined, batch_size=batch_size, primary_key=primary_key
+                combined, batch_size=batch_size, primary_key=primary_key, compress=compress
             )
 
         responses: list[TaskInfo] = []
@@ -5680,7 +5855,7 @@ class Index(_BaseIndex):
                 documents = _load_documents_from_file(path, csv_delimiter)
                 responses.extend(
                     self.update_documents_in_batches(
-                        documents, batch_size=batch_size, primary_key=primary_key
+                        documents, batch_size=batch_size, primary_key=primary_key, compress=compress
                     )
                 )
 
@@ -5693,6 +5868,8 @@ class Index(_BaseIndex):
         file_path: Path | str,
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
+        *,
+        compress: bool = False,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
 
@@ -5703,6 +5880,7 @@ class Index(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5724,10 +5902,15 @@ class Index(_BaseIndex):
         """
         documents = _load_documents_from_file(file_path, csv_delimiter)
 
-        return self.update_documents(documents, primary_key=primary_key)
+        return self.update_documents(documents, primary_key=primary_key, compress=compress)
 
     def update_documents_from_file_in_batches(
-        self, file_path: Path | str, *, batch_size: int = 1000, primary_key: str | None = None
+        self,
+        file_path: Path | str,
+        *,
+        batch_size: int = 1000,
+        primary_key: str | None = None,
+        compress: bool = False,
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -5738,6 +5921,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5760,7 +5944,7 @@ class Index(_BaseIndex):
         documents = _load_documents_from_file(file_path)
 
         return self.update_documents_in_batches(
-            documents, batch_size=batch_size, primary_key=primary_key
+            documents, batch_size=batch_size, primary_key=primary_key, compress=compress
         )
 
     def update_documents_from_raw_file(
@@ -5768,6 +5952,8 @@ class Index(_BaseIndex):
         file_path: Path | str,
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
+        *,
+        compress: bool = False,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -5782,6 +5968,7 @@ class Index(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -5838,7 +6025,9 @@ class Index(_BaseIndex):
         with open(upload_path) as f:
             data = f.read()
 
-        response = self._http_requests.put(url, body=data, content_type=content_type)
+        response = self._http_requests.put(
+            url, body=data, content_type=content_type, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -6050,12 +6239,13 @@ class Index(_BaseIndex):
 
         return settings
 
-    def update_settings(self, body: MeilisearchSettings) -> TaskInfo:
+    def update_settings(self, body: MeilisearchSettings, *, compress: bool = False) -> TaskInfo:
         """Update settings of the index.
 
         Args:
 
             body: Settings of the index.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6102,7 +6292,7 @@ class Index(_BaseIndex):
             )
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
-        response = self._http_requests.patch(self._settings_url, body_dict)
+        response = self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
         return TaskInfo(**response.json())
 
@@ -6152,12 +6342,13 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_ranking_rules(self, ranking_rules: list[str]) -> TaskInfo:
+    def update_ranking_rules(self, ranking_rules: list[str], *, compress: bool = False) -> TaskInfo:
         """Update ranking rules of the index.
 
         Args:
 
             ranking_rules: List containing the ranking rules.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6185,7 +6376,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_ranking_rules(ranking_rules)
         """
-        response = self._http_requests.put(f"{self._settings_url}/ranking-rules", ranking_rules)
+        response = self._http_requests.put(
+            f"{self._settings_url}/ranking-rules", ranking_rules, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -6239,12 +6432,13 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_distinct_attribute(self, body: str) -> TaskInfo:
+    def update_distinct_attribute(self, body: str, *, compress: bool = False) -> TaskInfo:
         """Update distinct attribute of the index.
 
         Args:
 
             body: Distinct attribute.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6262,7 +6456,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_distinct_attribute("url")
         """
-        response = self._http_requests.put(f"{self._settings_url}/distinct-attribute", body)
+        response = self._http_requests.put(
+            f"{self._settings_url}/distinct-attribute", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -6312,12 +6508,13 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_searchable_attributes(self, body: list[str]) -> TaskInfo:
+    def update_searchable_attributes(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update searchable attributes of the index.
 
         Args:
 
             body: List containing the searchable attributes.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6335,7 +6532,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_searchable_attributes(["title", "description", "genre"])
         """
-        response = self._http_requests.put(f"{self._settings_url}/searchable-attributes", body)
+        response = self._http_requests.put(
+            f"{self._settings_url}/searchable-attributes", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -6385,12 +6584,13 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_displayed_attributes(self, body: list[str]) -> TaskInfo:
+    def update_displayed_attributes(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update displayed attributes of the index.
 
         Args:
 
             body: List containing the displayed attributes.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6410,7 +6610,9 @@ class Index(_BaseIndex):
             >>>     ["title", "description", "genre", "release_date"]
             >>> )
         """
-        response = self._http_requests.put(f"{self._settings_url}/displayed-attributes", body)
+        response = self._http_requests.put(
+            f"{self._settings_url}/displayed-attributes", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -6463,12 +6665,13 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_stop_words(self, body: list[str]) -> TaskInfo:
+    def update_stop_words(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update stop words of the index.
 
         Args:
 
             body: List containing the stop words of the index.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6486,7 +6689,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_stop_words(["the", "a", "an"])
         """
-        response = self._http_requests.put(f"{self._settings_url}/stop-words", body)
+        response = self._http_requests.put(
+            f"{self._settings_url}/stop-words", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -6539,7 +6744,7 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_synonyms(self, body: dict[str, list[str]]) -> TaskInfo:
+    def update_synonyms(self, body: dict[str, list[str]], *, compress: bool = False) -> TaskInfo:
         """Update synonyms of the index.
 
         Args:
@@ -6564,7 +6769,9 @@ class Index(_BaseIndex):
             >>>     {"wolverine": ["xmen", "logan"], "logan": ["wolverine"]}
             >>> )
         """
-        response = self._http_requests.put(f"{self._settings_url}/synonyms", body)
+        response = self._http_requests.put(
+            f"{self._settings_url}/synonyms", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -6617,12 +6824,13 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_filterable_attributes(self, body: list[str]) -> TaskInfo:
+    def update_filterable_attributes(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update filterable attributes of the index.
 
         Args:
 
             body: List containing the filterable attributes of the index.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6640,7 +6848,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_filterable_attributes(["genre", "director"])
         """
-        response = self._http_requests.put(f"{self._settings_url}/filterable-attributes", body)
+        response = self._http_requests.put(
+            f"{self._settings_url}/filterable-attributes", body, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -6690,12 +6900,15 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_sortable_attributes(self, sortable_attributes: list[str]) -> TaskInfo:
+    def update_sortable_attributes(
+        self, sortable_attributes: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Get sortable attributes of the AsyncIndex.
 
         Args:
 
             sortable_attributes: List of attributes for searching.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6714,7 +6927,7 @@ class Index(_BaseIndex):
             >>> index.update_sortable_attributes(["title", "release_date"])
         """
         response = self._http_requests.put(
-            f"{self._settings_url}/sortable-attributes", sortable_attributes
+            f"{self._settings_url}/sortable-attributes", sortable_attributes, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -6765,12 +6978,15 @@ class Index(_BaseIndex):
 
         return TypoTolerance(**response.json())
 
-    def update_typo_tolerance(self, typo_tolerance: TypoTolerance) -> TaskInfo:
+    def update_typo_tolerance(
+        self, typo_tolerance: TypoTolerance, *, compress: bool = False
+    ) -> TaskInfo:
         """Update typo tolerance.
 
         Args:
 
             typo_tolerance: Typo tolerance settings.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6791,7 +7007,9 @@ class Index(_BaseIndex):
         """
         if is_pydantic_2():
             response = self._http_requests.patch(
-                f"{self._settings_url}/typo-tolerance", typo_tolerance.model_dump(by_alias=True)
+                f"{self._settings_url}/typo-tolerance",
+                typo_tolerance.model_dump(by_alias=True),
+                compress=compress,
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             warn(
@@ -6799,7 +7017,9 @@ class Index(_BaseIndex):
                 DeprecationWarning,
             )
             response = self._http_requests.patch(
-                f"{self._settings_url}/typo-tolerance", typo_tolerance.dict(by_alias=True)
+                f"{self._settings_url}/typo-tolerance",
+                typo_tolerance.dict(by_alias=True),
+                compress=compress,
             )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
@@ -6850,12 +7070,13 @@ class Index(_BaseIndex):
 
         return Faceting(**response.json())
 
-    def update_faceting(self, faceting: Faceting) -> TaskInfo:
+    def update_faceting(self, faceting: Faceting, *, compress: bool = False) -> TaskInfo:
         """Partially update the faceting settings for an index.
 
         Args:
 
             faceting: Faceting values.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6875,7 +7096,9 @@ class Index(_BaseIndex):
         """
         if is_pydantic_2():
             response = self._http_requests.patch(
-                f"{self._settings_url}/faceting", faceting.model_dump(by_alias=True)
+                f"{self._settings_url}/faceting",
+                faceting.model_dump(by_alias=True),
+                compress=compress,
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             warn(
@@ -6883,7 +7106,7 @@ class Index(_BaseIndex):
                 DeprecationWarning,
             )
             response = self._http_requests.patch(
-                f"{self._settings_url}/faceting", faceting.dict(by_alias=True)
+                f"{self._settings_url}/faceting", faceting.dict(by_alias=True), compress=compress
             )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
@@ -6934,12 +7157,13 @@ class Index(_BaseIndex):
 
         return Pagination(**response.json())
 
-    def update_pagination(self, settings: Pagination) -> TaskInfo:
+    def update_pagination(self, settings: Pagination, *, compress: bool = False) -> TaskInfo:
         """Partially update the pagination settings for an index.
 
         Args:
 
             settings: settings for pagination.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -6960,7 +7184,9 @@ class Index(_BaseIndex):
         """
         if is_pydantic_2():
             response = self._http_requests.patch(
-                f"{self._settings_url}/pagination", settings.model_dump(by_alias=True)
+                f"{self._settings_url}/pagination",
+                settings.model_dump(by_alias=True),
+                compress=compress,
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             warn(
@@ -6968,7 +7194,7 @@ class Index(_BaseIndex):
                 DeprecationWarning,
             )
             response = self._http_requests.patch(
-                f"{self._settings_url}/pagination", settings.dict(by_alias=True)
+                f"{self._settings_url}/pagination", settings.dict(by_alias=True), compress=compress
             )  # type: ignore[attr-defined]
 
         return TaskInfo(**response.json())
@@ -7019,12 +7245,15 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_separator_tokens(self, separator_tokens: list[str]) -> TaskInfo:
+    def update_separator_tokens(
+        self, separator_tokens: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update the separator tokens settings for an index.
 
         Args:
 
             separator_tokens: List of separator tokens.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -7043,7 +7272,7 @@ class Index(_BaseIndex):
             >>> index.update_separator_tokens(separator_tokenes=["|", "/")
         """
         response = self._http_requests.put(
-            f"{self._settings_url}/separator-tokens", separator_tokens
+            f"{self._settings_url}/separator-tokens", separator_tokens, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -7094,12 +7323,15 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_non_separator_tokens(self, non_separator_tokens: list[str]) -> TaskInfo:
+    def update_non_separator_tokens(
+        self, non_separator_tokens: list[str], *, compress: bool = False
+    ) -> TaskInfo:
         """Update the non-separator tokens settings for an index.
 
         Args:
 
             non_separator_tokens: List of non-separator tokens.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -7118,7 +7350,7 @@ class Index(_BaseIndex):
             >>> index.update_non_separator_tokens(non_separator_tokens=["@", "#")
         """
         response = self._http_requests.put(
-            f"{self._settings_url}/non-separator-tokens", non_separator_tokens
+            f"{self._settings_url}/non-separator-tokens", non_separator_tokens, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -7169,12 +7401,13 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_word_dictionary(self, dictionary: list[str]) -> TaskInfo:
+    def update_word_dictionary(self, dictionary: list[str], *, compress: bool = False) -> TaskInfo:
         """Update the word dictionary settings for an index.
 
         Args:
 
             dictionary: List of dictionary values.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -7192,7 +7425,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_word_dictionary(dictionary=["S.O.S", "S.O")
         """
-        response = self._http_requests.put(f"{self._settings_url}/dictionary", dictionary)
+        response = self._http_requests.put(
+            f"{self._settings_url}/dictionary", dictionary, compress=compress
+        )
 
         return TaskInfo(**response.json())
 
@@ -7242,12 +7477,15 @@ class Index(_BaseIndex):
 
         return ProximityPrecision[to_snake(response.json()).upper()]
 
-    def update_proximity_precision(self, proximity_precision: ProximityPrecision) -> TaskInfo:
+    def update_proximity_precision(
+        self, proximity_precision: ProximityPrecision, *, compress: bool = False
+    ) -> TaskInfo:
         """Update the proximity precision settings for an index.
 
         Args:
 
             proximity_precision: The proximity precision value.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -7267,7 +7505,9 @@ class Index(_BaseIndex):
             >>> index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
         """
         response = self._http_requests.put(
-            f"{self._settings_url}/proximity-precision", proximity_precision.value
+            f"{self._settings_url}/proximity-precision",
+            proximity_precision.value,
+            compress=compress,
         )
 
         return TaskInfo(**response.json())
@@ -7318,12 +7558,13 @@ class Index(_BaseIndex):
 
         return _embedder_json_to_embedders_model(response.json())
 
-    def update_embedders(self, embedders: Embedders) -> TaskInfo:
+    def update_embedders(self, embedders: Embedders, *, compress: bool = False) -> TaskInfo:
         """Update the embedders settings for an index.
 
         Args:
 
             embedders: The embedders value.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
 
@@ -7359,7 +7600,9 @@ class Index(_BaseIndex):
                     k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
                 }  # type: ignore[attr-defined]
 
-        response = self._http_requests.patch(f"{self._settings_url}/embedders", payload)
+        response = self._http_requests.patch(
+            f"{self._settings_url}/embedders", payload, compress=compress
+        )
 
         return TaskInfo(**response.json())
 

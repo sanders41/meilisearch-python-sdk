@@ -144,10 +144,11 @@ async def test_get_settings_default(
     assert response.embedders is None
 
 
+@pytest.mark.parametrize("compress", (True, False))
 @pytest.mark.usefixtures("enable_vector_search")
-async def test_update_settings(async_empty_index, new_settings):
+async def test_update_settings(compress, async_empty_index, new_settings):
     index = await async_empty_index()
-    response = await index.update_settings(new_settings)
+    response = await index.update_settings(new_settings, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
     response = await index.get_settings()
@@ -216,9 +217,10 @@ async def test_get_ranking_rules_default(async_empty_index, default_ranking_rule
     assert response == default_ranking_rules
 
 
-async def test_update_ranking_rules(async_empty_index, new_ranking_rules):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_ranking_rules(compress, async_empty_index, new_ranking_rules):
     index = await async_empty_index()
-    response = await index.update_ranking_rules(new_ranking_rules)
+    response = await index.update_ranking_rules(new_ranking_rules, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_ranking_rules()
     assert response == new_ranking_rules
@@ -243,9 +245,10 @@ async def test_get_distinct_attribute(async_empty_index, default_distinct_attrib
     assert response == default_distinct_attribute
 
 
-async def test_update_distinct_attribute(async_empty_index, new_distinct_attribute):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_distinct_attribute(compress, async_empty_index, new_distinct_attribute):
     index = await async_empty_index()
-    response = await index.update_distinct_attribute(new_distinct_attribute)
+    response = await index.update_distinct_attribute(new_distinct_attribute, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_distinct_attribute()
     assert response == new_distinct_attribute
@@ -276,9 +279,12 @@ async def test_get_searchable_attributes(async_empty_index, small_movies):
     assert get_attributes == ["*"]
 
 
-async def test_update_searchable_attributes(async_empty_index, new_searchable_attributes):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_searchable_attributes(compress, async_empty_index, new_searchable_attributes):
     index = await async_empty_index()
-    response = await index.update_searchable_attributes(new_searchable_attributes)
+    response = await index.update_searchable_attributes(
+        new_searchable_attributes, compress=compress
+    )
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_searchable_attributes()
     assert response == new_searchable_attributes
@@ -307,9 +313,10 @@ async def test_get_displayed_attributes(async_empty_index, small_movies):
     assert get_attributes == ["*"]
 
 
-async def test_update_displayed_attributes(async_empty_index, displayed_attributes):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_displayed_attributes(compress, async_empty_index, displayed_attributes):
     index = await async_empty_index()
-    response = await index.update_displayed_attributes(displayed_attributes)
+    response = await index.update_displayed_attributes(displayed_attributes, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_displayed_attributes()
     assert response == displayed_attributes
@@ -334,10 +341,11 @@ async def test_get_pagination(async_empty_index):
     assert response.max_total_hits == 1000
 
 
-async def test_update_pagination(async_empty_index):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_pagination(compress, async_empty_index):
     pagination = Pagination(max_total_hits=17)
     index = await async_empty_index()
-    response = await index.update_pagination(pagination)
+    response = await index.update_pagination(pagination, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_pagination()
     assert pagination.model_dump() == pagination.model_dump()
@@ -359,10 +367,11 @@ async def test_get_separator_tokens(async_empty_index):
     assert response == []
 
 
-async def test_update_separator_tokens(async_empty_index):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_separator_tokens(compress, async_empty_index):
     index = await async_empty_index()
     expected = ["/", "|"]
-    response = await index.update_separator_tokens(expected)
+    response = await index.update_separator_tokens(expected, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_separator_tokens()
     assert response == expected
@@ -389,10 +398,11 @@ async def test_get_non_separator_tokens(async_empty_index):
     assert response == []
 
 
-async def test_update_non_separator_tokens(async_empty_index):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_non_separator_tokens(compress, async_empty_index):
     index = await async_empty_index()
     expected = ["#", "@"]
-    response = await index.update_non_separator_tokens(expected)
+    response = await index.update_non_separator_tokens(expected, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_non_separator_tokens()
     assert response == expected
@@ -419,10 +429,11 @@ async def test_get_word_dictionary(async_empty_index):
     assert response == []
 
 
-async def test_update_word_dictionary(async_empty_index):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_word_dictionary(compress, async_empty_index):
     index = await async_empty_index()
     expected = ["S.O", "S.O.S"]
-    response = await index.update_word_dictionary(expected)
+    response = await index.update_word_dictionary(expected, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_word_dictionary()
     assert response == expected
@@ -449,9 +460,10 @@ async def test_get_stop_words_default(async_empty_index):
     assert response is None
 
 
-async def test_update_stop_words(async_empty_index, new_stop_words):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_stop_words(compress, async_empty_index, new_stop_words):
     index = await async_empty_index()
-    response = await index.update_stop_words(new_stop_words)
+    response = await index.update_stop_words(new_stop_words, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
     response = await index.get_stop_words()
@@ -478,9 +490,10 @@ async def test_get_synonyms_default(async_empty_index):
     assert response is None
 
 
-async def test_update_synonyms(async_empty_index, new_synonyms):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_synonyms(compress, async_empty_index, new_synonyms):
     index = await async_empty_index()
-    response = await index.update_synonyms(new_synonyms)
+    response = await index.update_synonyms(new_synonyms, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
     response = await index.get_synonyms()
@@ -507,9 +520,10 @@ async def test_get_filterable_attributes(async_empty_index):
     assert response is None
 
 
-async def test_update_filterable_attributes(async_empty_index, filterable_attributes):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_filterable_attributes(compress, async_empty_index, filterable_attributes):
     index = await async_empty_index()
-    response = await index.update_filterable_attributes(filterable_attributes)
+    response = await index.update_filterable_attributes(filterable_attributes, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_filterable_attributes()
     assert sorted(response) == filterable_attributes
@@ -534,9 +548,10 @@ async def test_get_sortable_attributes(async_empty_index):
     assert response == []
 
 
-async def test_update_sortable_attributes(async_empty_index, sortable_attributes):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_sortable_attributes(compress, async_empty_index, sortable_attributes):
     index = await async_empty_index()
-    response = await index.update_sortable_attributes(sortable_attributes)
+    response = await index.update_sortable_attributes(sortable_attributes, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_sortable_attributes()
     assert sorted(response) == sortable_attributes
@@ -561,7 +576,8 @@ async def test_get_typo_tolerance(async_empty_index):
     assert response.enabled is True
 
 
-async def test_update_typo_tolerance(async_empty_index):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_typo_tolerance(compress, async_empty_index):
     typo_tolerance = TypoTolerance(
         enabled=True,
         disable_on_attributes=["title"],
@@ -569,7 +585,7 @@ async def test_update_typo_tolerance(async_empty_index):
         min_word_size_for_typos=MinWordSizeForTypos(one_typo=10, two_typos=20),
     )
     index = await async_empty_index()
-    response = await index.update_typo_tolerance(typo_tolerance)
+    response = await index.update_typo_tolerance(typo_tolerance, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_typo_tolerance()
     assert response.model_dump() == typo_tolerance.model_dump()
@@ -591,10 +607,11 @@ async def test_get_faceting(async_empty_index):
     assert response.max_values_per_facet == 100
 
 
-async def test_update_faceting(async_empty_index):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_faceting(compress, async_empty_index):
     faceting = Faceting(max_values_per_facet=17)
     index = await async_empty_index()
-    response = await index.update_faceting(faceting)
+    response = await index.update_faceting(faceting, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_faceting()
     expected = faceting.model_dump()
@@ -608,9 +625,12 @@ async def test_get_proximity_precision(async_empty_index):
     assert response == ProximityPrecision.BY_WORD
 
 
-async def test_update_proximity_precision(async_empty_index):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_proximity_precision(compress, async_empty_index):
     index = await async_empty_index()
-    response = await index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+    response = await index.update_proximity_precision(
+        ProximityPrecision.BY_ATTRIBUTE, compress=compress
+    )
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_proximity_precision()
     assert response == ProximityPrecision.BY_ATTRIBUTE
@@ -636,8 +656,9 @@ async def test_get_embedders(async_empty_index):
     assert response is None
 
 
+@pytest.mark.parametrize("compress", (True, False))
 @pytest.mark.usefixtures("enable_vector_search")
-async def test_update_embedders(async_empty_index):
+async def test_update_embedders(compress, async_empty_index):
     embedders = Embedders(
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),
@@ -646,7 +667,7 @@ async def test_update_embedders(async_empty_index):
         }
     )
     index = await async_empty_index()
-    response = await index.update_embedders(embedders)
+    response = await index.update_embedders(embedders, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
@@ -696,15 +717,16 @@ async def test_reset_embedders(async_empty_index):
         ),
     ),
 )
+@pytest.mark.parametrize("compress", (True, False))
 async def test_update_faceting_sort_facet_values(
-    index_name, facet_order, max_values_per_facet, expected, async_empty_index
+    index_name, facet_order, max_values_per_facet, expected, compress, async_empty_index
 ):
     faceting = Faceting(
         max_values_per_facet=max_values_per_facet,
         sort_facet_values_by={index_name: facet_order},
     )
     index = await async_empty_index()
-    response = await index.update_faceting(faceting)
+    response = await index.update_faceting(faceting, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_faceting()
     assert response.model_dump() == expected
