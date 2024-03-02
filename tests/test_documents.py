@@ -80,11 +80,12 @@ def test_get_documents_default(empty_index):
 
 
 @pytest.mark.parametrize(
-    "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
+    "primary_key, expected_primary_key, compress",
+    (("release_date", "release_date", True), (None, "id", False)),
 )
-def test_add_documents(primary_key, expected_primary_key, empty_index, small_movies):
+def test_add_documents(primary_key, expected_primary_key, compress, empty_index, small_movies):
     index = empty_index()
-    response = index.add_documents(small_movies, primary_key)
+    response = index.add_documents(small_movies, primary_key, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
@@ -94,12 +95,13 @@ def test_add_documents(primary_key, expected_primary_key, empty_index, small_mov
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_in_batches(
-    batch_size, primary_key, expected_primary_key, empty_index, small_movies
+    batch_size, primary_key, expected_primary_key, compress, empty_index, small_movies
 ):
     index = empty_index()
     response = index.add_documents_in_batches(
-        small_movies, batch_size=batch_size, primary_key=primary_key
+        small_movies, batch_size=batch_size, primary_key=primary_key, compress=compress
     )
     assert ceil(len(small_movies) / batch_size) == len(response)
 
@@ -113,12 +115,14 @@ def test_add_documents_in_batches(
 @pytest.mark.parametrize(
     "number_of_files, documents_per_file, total_documents", ((1, 50, 50), (2, 50, 100))
 )
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_directory(
     path_type,
     combine_documents,
     number_of_files,
     documents_per_file,
     total_documents,
+    compress,
     client,
     tmp_path,
 ):
@@ -127,7 +131,9 @@ def test_add_documents_from_directory(
 
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
-    responses = index.add_documents_from_directory(path, combine_documents=combine_documents)
+    responses = index.add_documents_from_directory(
+        path, combine_documents=combine_documents, compress=compress
+    )
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
     stats = index.get_stats()
     assert stats.number_of_documents == total_documents
@@ -135,13 +141,16 @@ def test_add_documents_from_directory(
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
-def test_add_documents_from_directory_csv_path(path_type, combine_documents, client, tmp_path):
+@pytest.mark.parametrize("compress", (True, False))
+def test_add_documents_from_directory_csv_path(
+    path_type, combine_documents, compress, client, tmp_path
+):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory(
-        path, combine_documents=combine_documents, document_type="csv"
+        path, combine_documents=combine_documents, document_type="csv", compress=compress
     )
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
     stats = index.get_stats()
@@ -150,15 +159,20 @@ def test_add_documents_from_directory_csv_path(path_type, combine_documents, cli
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_directory_csv_path_with_delimiter(
-    path_type, combine_documents, client, tmp_path
+    path_type, combine_documents, compress, client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory(
-        path, combine_documents=combine_documents, document_type="csv", csv_delimiter=";"
+        path,
+        combine_documents=combine_documents,
+        document_type="csv",
+        csv_delimiter=";",
+        compress=compress,
     )
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
     stats = index.get_stats()
@@ -167,13 +181,16 @@ def test_add_documents_from_directory_csv_path_with_delimiter(
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
-def test_add_documents_from_directory_ndjson(path_type, combine_documents, client, tmp_path):
+@pytest.mark.parametrize("compress", (True, False))
+def test_add_documents_from_directory_ndjson(
+    path_type, combine_documents, compress, client, tmp_path
+):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory(
-        path, combine_documents=combine_documents, document_type="ndjson"
+        path, combine_documents=combine_documents, document_type="ndjson", compress=compress
     )
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
     stats = index.get_stats()
@@ -181,13 +198,16 @@ def test_add_documents_from_directory_ndjson(path_type, combine_documents, clien
 
 
 @pytest.mark.parametrize("combine_documents", (True, False))
-def test_add_documents_from_directory_no_documents(combine_documents, client, tmp_path):
+@pytest.mark.parametrize("compress", (True, False))
+def test_add_documents_from_directory_no_documents(combine_documents, compress, client, tmp_path):
     with open(tmp_path / "test.txt", "w") as f:
         f.write("nothing")
 
     with pytest.raises(MeilisearchError):
         index = client.index("movies")
-        index.add_documents_from_directory(tmp_path, combine_documents=combine_documents)
+        index.add_documents_from_directory(
+            tmp_path, combine_documents=combine_documents, compress=compress
+        )
 
 
 @pytest.mark.parametrize("delimiter", (";;", "😀"))
@@ -204,6 +224,7 @@ def test_add_documents_from_directory_csv_delimiter_invalid(delimiter, client, t
     "batch_size, number_of_files, documents_per_file, total_documents",
     [(25, 1, 50, 50), (50, 2, 50, 100)],
 )
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_directory_in_batchs(
     path_type,
     combine_documents,
@@ -211,6 +232,7 @@ def test_add_documents_from_directory_in_batchs(
     number_of_files,
     documents_per_file,
     total_documents,
+    compress,
     client,
     tmp_path,
 ):
@@ -220,7 +242,7 @@ def test_add_documents_from_directory_in_batchs(
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory_in_batches(
-        path, batch_size=batch_size, combine_documents=combine_documents
+        path, batch_size=batch_size, combine_documents=combine_documents, compress=compress
     )
 
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
@@ -231,15 +253,20 @@ def test_add_documents_from_directory_in_batchs(
 @pytest.mark.parametrize("batch_size", (10, 25))
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_directory_in_batchs_csv(
-    path_type, combine_documents, batch_size, client, tmp_path
+    path_type, combine_documents, batch_size, compress, client, tmp_path
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory_in_batches(
-        path, batch_size=batch_size, combine_documents=combine_documents, document_type="csv"
+        path,
+        batch_size=batch_size,
+        combine_documents=combine_documents,
+        document_type="csv",
+        compress=compress,
     )
 
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
@@ -250,15 +277,20 @@ def test_add_documents_from_directory_in_batchs_csv(
 @pytest.mark.parametrize("batch_size", (10, 25))
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_directory_in_batchs_ndjson(
-    path_type, combine_documents, batch_size, client, tmp_path
+    path_type, combine_documents, batch_size, compress, client, tmp_path
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory_in_batches(
-        path, batch_size=batch_size, combine_documents=combine_documents, document_type="ndjson"
+        path,
+        batch_size=batch_size,
+        combine_documents=combine_documents,
+        document_type="ndjson",
+        compress=compress,
     )
 
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
@@ -270,12 +302,13 @@ def test_add_documents_from_directory_in_batchs_ndjson(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_file(
-    path_type, primary_key, expected_primary_key, client, small_movies_path
+    path_type, primary_key, expected_primary_key, compress, client, small_movies_path
 ):
     index = client.index("movies")
     path = str(small_movies_path) if path_type == "str" else small_movies_path
-    response = index.add_documents_from_file(path, primary_key)
+    response = index.add_documents_from_file(path, primary_key, compress=compress)
 
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == expected_primary_key
@@ -286,12 +319,13 @@ def test_add_documents_from_file(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_file_csv(
-    path_type, primary_key, expected_primary_key, client, small_movies_csv_path
+    path_type, primary_key, expected_primary_key, compress, client, small_movies_csv_path
 ):
     index = client.index("movies")
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
-    response = index.add_documents_from_file(path, primary_key)
+    response = index.add_documents_from_file(path, primary_key, compress=compress)
 
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == expected_primary_key
@@ -302,12 +336,13 @@ def test_add_documents_from_file_csv(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_raw_file_csv(
-    path_type, primary_key, expected_primary_key, client, small_movies_csv_path
+    path_type, primary_key, expected_primary_key, compress, client, small_movies_csv_path
 ):
     index = client.index("movies")
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
-    response = index.add_documents_from_raw_file(path, primary_key)
+    response = index.add_documents_from_raw_file(path, primary_key, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
@@ -316,11 +351,13 @@ def test_add_documents_raw_file_csv(
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
+@pytest.mark.parametrize("compress", (True, False))
 @pytest.mark.parametrize("path_type", ("path", "str"))
 def test_add_documents_raw_file_csv_delimiter(
     path_type,
     primary_key,
     expected_primary_key,
+    compress,
     client,
     small_movies_csv_path_semicolon_delimiter,
 ):
@@ -330,7 +367,9 @@ def test_add_documents_raw_file_csv_delimiter(
         if path_type == "str"
         else small_movies_csv_path_semicolon_delimiter
     )
-    response = index.add_documents_from_raw_file(path, primary_key, csv_delimiter=";")
+    response = index.add_documents_from_raw_file(
+        path, primary_key, csv_delimiter=";", compress=compress
+    )
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
@@ -340,12 +379,13 @@ def test_add_documents_raw_file_csv_delimiter(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_raw_file_ndjson(
-    path_type, primary_key, expected_primary_key, client, small_movies_ndjson_path
+    path_type, primary_key, expected_primary_key, compress, client, small_movies_ndjson_path
 ):
     index = client.index("movies")
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
-    response = index.add_documents_from_raw_file(path, primary_key)
+    response = index.add_documents_from_raw_file(path, primary_key, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
@@ -384,12 +424,13 @@ def test_add_documents_raw_file_csv_delimiter_invalid(delimiter, client, small_m
     "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_file_ndjson(
-    path_type, primary_key, expected_primary_key, client, small_movies_ndjson_path
+    path_type, primary_key, expected_primary_key, compress, client, small_movies_ndjson_path
 ):
     index = client.index("movies")
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
-    response = index.add_documents_from_file(path, primary_key)
+    response = index.add_documents_from_file(path, primary_key, compress=compress)
 
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == expected_primary_key
@@ -408,11 +449,13 @@ def test_add_documents_from_file_invalid_extension(client):
     "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_file_in_batches(
     path_type,
     batch_size,
     primary_key,
     expected_primary_key,
+    compress,
     client,
     small_movies_path,
     small_movies,
@@ -420,7 +463,7 @@ def test_add_documents_from_file_in_batches(
     index = client.index("movies")
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = index.add_documents_from_file_in_batches(
-        path, batch_size=batch_size, primary_key=primary_key
+        path, batch_size=batch_size, primary_key=primary_key, compress=compress
     )
 
     assert ceil(len(small_movies) / batch_size) == len(response)
@@ -435,11 +478,13 @@ def test_add_documents_from_file_in_batches(
     "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_file_in_batches_csv(
     path_type,
     batch_size,
     primary_key,
     expected_primary_key,
+    compress,
     client,
     small_movies_csv_path,
     small_movies,
@@ -447,7 +492,7 @@ def test_add_documents_from_file_in_batches_csv(
     index = client.index("movies")
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = index.add_documents_from_file_in_batches(
-        path, batch_size=batch_size, primary_key=primary_key
+        path, batch_size=batch_size, primary_key=primary_key, compress=compress
     )
 
     assert ceil(len(small_movies) / batch_size) == len(response)
@@ -462,11 +507,13 @@ def test_add_documents_from_file_in_batches_csv(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_file_in_batches_csv_with_delimiter(
     path_type,
     batch_size,
     primary_key,
     expected_primary_key,
+    compress,
     client,
     small_movies_csv_path_semicolon_delimiter,
     small_movies,
@@ -478,7 +525,7 @@ def test_add_documents_from_file_in_batches_csv_with_delimiter(
         else small_movies_csv_path_semicolon_delimiter
     )
     response = index.add_documents_from_file_in_batches(
-        path, batch_size=batch_size, primary_key=primary_key, csv_delimiter=";"
+        path, batch_size=batch_size, primary_key=primary_key, csv_delimiter=";", compress=compress
     )
 
     assert ceil(len(small_movies) / batch_size) == len(response)
@@ -502,11 +549,13 @@ def test_add_documents_from_file_in_batches_csv_with_delimiter_invalid(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_from_file_in_batches_ndjson(
     path_type,
     batch_size,
     primary_key,
     expected_primary_key,
+    compress,
     client,
     small_movies_ndjson_path,
     small_movies,
@@ -514,7 +563,7 @@ def test_add_documents_from_file_in_batches_ndjson(
     index = client.index("movies")
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = index.add_documents_from_file_in_batches(
-        path, batch_size=batch_size, primary_key=primary_key
+        path, batch_size=batch_size, primary_key=primary_key, compress=compress
     )
 
     assert ceil(len(small_movies) / batch_size) == len(response)
@@ -579,12 +628,13 @@ def test_get_documents_filter_with_fields(index_with_documents):
     assert next(iter(genres)) == "action"
 
 
-def test_update_documents(index_with_documents, small_movies):
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_documents(compress, index_with_documents, small_movies):
     index = index_with_documents()
     response = index.get_documents()
     doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
-    update = index.update_documents([response.results[0]])
+    update = index.update_documents([response.results[0]], compress=compress)
     wait_for_task(index.http_client, update.task_uid)
     response = index.get_document(doc_id)
     assert response["title"] == "Some title"
@@ -594,26 +644,29 @@ def test_update_documents(index_with_documents, small_movies):
     assert response["title"] != "Some title"
 
 
-def test_update_documents_with_primary_key(client, small_movies):
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_documents_with_primary_key(compress, client, small_movies):
     primary_key = "release_date"
     index = client.index("movies")
-    update = index.update_documents(small_movies, primary_key=primary_key)
+    update = index.update_documents(small_movies, primary_key=primary_key, compress=compress)
     wait_for_task(index.http_client, update.task_uid)
     assert index.get_primary_key() == primary_key
 
 
-@pytest.mark.parametrize("batch_size", (100, 500))
-def test_update_documents_in_batches(batch_size, index_with_documents, small_movies):
+@pytest.mark.parametrize("batch_size, compress", ((100, True), (500, False)))
+def test_update_documents_in_batches(batch_size, compress, index_with_documents, small_movies):
     index = index_with_documents()
     response = index.get_documents()
     doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
-    update = index.update_documents([response.results[0]])
+    update = index.update_documents([response.results[0]], compress=compress)
     wait_for_task(index.http_client, update.task_uid)
 
     response = index.get_document(doc_id)
     assert response["title"] == "Some title"
-    updates = index.update_documents_in_batches(small_movies, batch_size=batch_size)
+    updates = index.update_documents_in_batches(
+        small_movies, batch_size=batch_size, compress=compress
+    )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     [wait_for_task(index.http_client, x.task_uid) for x in updates]
@@ -622,12 +675,12 @@ def test_update_documents_in_batches(batch_size, index_with_documents, small_mov
     assert response["title"] != "Some title"
 
 
-@pytest.mark.parametrize("batch_size", (100, 500))
-def test_update_documents_in_batches_with_primary_key(batch_size, client, small_movies):
+@pytest.mark.parametrize("batch_size, compress", ((100, False), (500, True)))
+def test_update_documents_in_batches_with_primary_key(batch_size, compress, client, small_movies):
     primary_key = "release_date"
     index = client.index("movies")
     updates = index.update_documents_in_batches(
-        small_movies, batch_size=batch_size, primary_key=primary_key
+        small_movies, batch_size=batch_size, primary_key=primary_key, compress=compress
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
@@ -641,12 +694,14 @@ def test_update_documents_in_batches_with_primary_key(batch_size, client, small_
 @pytest.mark.parametrize(
     "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (10, 50, 500)]
 )
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_directory(
     path_type,
     combine_documents,
     number_of_files,
     documents_per_file,
     total_documents,
+    compress,
     client,
     tmp_path,
 ):
@@ -655,7 +710,9 @@ def test_update_documents_from_directory(
 
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
-    responses = index.update_documents_from_directory(path, combine_documents=combine_documents)
+    responses = index.update_documents_from_directory(
+        path, combine_documents=combine_documents, compress=compress
+    )
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
     stats = index.get_stats()
     assert stats.number_of_documents == total_documents
@@ -663,13 +720,16 @@ def test_update_documents_from_directory(
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
-def test_update_documents_from_directory_csv(path_type, combine_documents, client, tmp_path):
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_documents_from_directory_csv(
+    path_type, combine_documents, compress, client, tmp_path
+):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory(
-        path, combine_documents=combine_documents, document_type="csv"
+        path, combine_documents=combine_documents, document_type="csv", compress=compress
     )
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
     stats = index.get_stats()
@@ -678,15 +738,20 @@ def test_update_documents_from_directory_csv(path_type, combine_documents, clien
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_directory_csv_with_delimiter(
-    path_type, combine_documents, client, tmp_path
+    path_type, combine_documents, compress, client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory(
-        path, combine_documents=combine_documents, document_type="csv", csv_delimiter=";"
+        path,
+        combine_documents=combine_documents,
+        document_type="csv",
+        csv_delimiter=";",
+        compress=compress,
     )
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
     stats = index.get_stats()
@@ -705,13 +770,16 @@ def test_update_documents_from_directory_csv_delimiter_invalid(delimiter, client
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
-def test_update_documents_from_directory_ndjson(path_type, combine_documents, client, tmp_path):
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_documents_from_directory_ndjson(
+    path_type, combine_documents, compress, client, tmp_path
+):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory(
-        path, combine_documents=combine_documents, document_type="ndjson"
+        path, combine_documents=combine_documents, document_type="ndjson", compress=compress
     )
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
     stats = index.get_stats()
@@ -724,6 +792,7 @@ def test_update_documents_from_directory_ndjson(path_type, combine_documents, cl
     "batch_size, number_of_files, documents_per_file, total_documents",
     [(25, 1, 50, 50), (50, 2, 50, 100)],
 )
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_directory_in_batchs(
     path_type,
     combine_documents,
@@ -731,6 +800,7 @@ def test_update_documents_from_directory_in_batchs(
     number_of_files,
     documents_per_file,
     total_documents,
+    compress,
     client,
     tmp_path,
 ):
@@ -740,7 +810,7 @@ def test_update_documents_from_directory_in_batchs(
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory_in_batches(
-        path, batch_size=batch_size, combine_documents=combine_documents
+        path, batch_size=batch_size, combine_documents=combine_documents, compress=compress
     )
 
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
@@ -751,15 +821,20 @@ def test_update_documents_from_directory_in_batchs(
 @pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_directory_in_batchs_csv(
-    path_type, combine_documents, batch_size, client, tmp_path
+    path_type, combine_documents, batch_size, compress, client, tmp_path
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory_in_batches(
-        path, batch_size=batch_size, combine_documents=combine_documents, document_type="csv"
+        path,
+        batch_size=batch_size,
+        combine_documents=combine_documents,
+        document_type="csv",
+        compress=compress,
     )
 
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
@@ -770,8 +845,9 @@ def test_update_documents_from_directory_in_batchs_csv(
 @pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_directory_in_batchs_csv_delimiter(
-    path_type, combine_documents, batch_size, client, tmp_path
+    path_type, combine_documents, batch_size, compress, client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
@@ -783,6 +859,7 @@ def test_update_documents_from_directory_in_batchs_csv_delimiter(
         combine_documents=combine_documents,
         document_type="csv",
         csv_delimiter=";",
+        compress=compress,
     )
 
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
@@ -805,15 +882,20 @@ def test_update_documents_from_directory_in_batches_csv_delimiter_invalid(
 @pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_directory_in_batchs_ndjson(
-    path_type, combine_documents, batch_size, client, tmp_path
+    path_type, combine_documents, batch_size, compress, client, tmp_path
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
     index = client.index("movies")
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory_in_batches(
-        path, batch_size=batch_size, combine_documents=combine_documents, document_type="ndjson"
+        path,
+        batch_size=batch_size,
+        combine_documents=combine_documents,
+        document_type="ndjson",
+        compress=compress,
     )
 
     [wait_for_task(index.http_client, x.task_uid) for x in responses]
@@ -822,18 +904,19 @@ def test_update_documents_from_directory_in_batchs_ndjson(
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
-def test_update_documents_from_file(path_type, client, small_movies, small_movies_path):
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_documents_from_file(path_type, compress, client, small_movies, small_movies_path):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_path) if path_type == "str" else small_movies_path
-    update = index.update_documents_from_file(path)
+    update = index.update_documents_from_file(path, compress=compress)
     update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
@@ -841,18 +924,21 @@ def test_update_documents_from_file(path_type, client, small_movies, small_movie
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
-def test_update_documents_from_file_csv(path_type, client, small_movies, small_movies_csv_path):
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_documents_from_file_csv(
+    path_type, compress, client, small_movies, small_movies_csv_path
+):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
-    update = index.update_documents_from_file(path)
+    update = index.update_documents_from_file(path, compress=compress)
     update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
@@ -860,13 +946,14 @@ def test_update_documents_from_file_csv(path_type, client, small_movies, small_m
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_file_csv_with_delimiter(
-    path_type, client, small_movies, small_movies_csv_path_semicolon_delimiter
+    path_type, compress, client, small_movies, small_movies_csv_path_semicolon_delimiter
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
@@ -877,7 +964,7 @@ def test_update_documents_from_file_csv_with_delimiter(
         if path_type == "str"
         else small_movies_csv_path_semicolon_delimiter
     )
-    update = index.update_documents_from_file(path, csv_delimiter=";")
+    update = index.update_documents_from_file(path, csv_delimiter=";", compress=compress)
     update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
@@ -896,30 +983,34 @@ def test_update_documents_from_file_csv_delimiter_invalid(
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_file_ndjson(
-    path_type, client, small_movies, small_movies_ndjson_path
+    path_type, compress, client, small_movies, small_movies_ndjson_path
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
-    update = index.update_documents_from_file(path)
+    update = index.update_documents_from_file(path, compress=compress)
     update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
 
 
-def test_update_documents_from_file_with_primary_key(client, small_movies_path):
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_documents_from_file_with_primary_key(compress, client, small_movies_path):
     primary_key = "release_date"
     index = client.index("movies")
-    update = index.update_documents_from_file(small_movies_path, primary_key=primary_key)
+    update = index.update_documents_from_file(
+        small_movies_path, primary_key=primary_key, compress=compress
+    )
     wait_for_task(index.http_client, update.task_uid)
     assert index.get_primary_key() == primary_key
 
@@ -933,20 +1024,23 @@ def test_update_documents_from_file_invalid_extension(client):
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("batch_size", (100, 500))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_file_in_batches(
-    path_type, batch_size, client, small_movies_path, small_movies
+    path_type, batch_size, compress, client, small_movies_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_path) if path_type == "str" else small_movies_path
-    updates = index.update_documents_from_file_in_batches(path, batch_size=batch_size)
+    updates = index.update_documents_from_file_in_batches(
+        path, batch_size=batch_size, compress=compress
+    )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     tasks = [wait_for_task(index.http_client, x.task_uid) for x in updates]
@@ -958,20 +1052,23 @@ def test_update_documents_from_file_in_batches(
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("batch_size", (100, 500))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_file_in_batches_csv(
-    path_type, batch_size, client, small_movies_csv_path, small_movies
+    path_type, batch_size, compress, client, small_movies_csv_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
-    updates = index.update_documents_from_file_in_batches(path, batch_size=batch_size)
+    updates = index.update_documents_from_file_in_batches(
+        path, batch_size=batch_size, compress=compress
+    )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     tasks = [wait_for_task(index.http_client, x.task_uid) for x in updates]
@@ -983,20 +1080,23 @@ def test_update_documents_from_file_in_batches_csv(
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("batch_size", (100, 500))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_file_in_batches_ndjson(
-    path_type, batch_size, client, small_movies_ndjson_path, small_movies
+    path_type, batch_size, compress, client, small_movies_ndjson_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
-    updates = index.update_documents_from_file_in_batches(path, batch_size=batch_size)
+    updates = index.update_documents_from_file_in_batches(
+        path, batch_size=batch_size, compress=compress
+    )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     tasks = [wait_for_task(index.http_client, x.task_uid) for x in updates]
@@ -1014,18 +1114,21 @@ def test_update_documents_from_file_in_batches_invalid_extension(client):
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
-def test_update_documents_raw_file_csv(path_type, client, small_movies_csv_path, small_movies):
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_documents_raw_file_csv(
+    path_type, compress, client, small_movies_csv_path, small_movies
+):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
-    update = index.update_documents_from_raw_file(path, primary_key="id")
+    update = index.update_documents_from_raw_file(path, primary_key="id", compress=compress)
     update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
@@ -1033,13 +1136,14 @@ def test_update_documents_raw_file_csv(path_type, client, small_movies_csv_path,
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_raw_file_csv_with_delimiter(
-    path_type, client, small_movies_csv_path_semicolon_delimiter, small_movies
+    path_type, compress, client, small_movies_csv_path_semicolon_delimiter, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
@@ -1050,7 +1154,9 @@ def test_update_documents_raw_file_csv_with_delimiter(
         if path_type == "str"
         else small_movies_csv_path_semicolon_delimiter
     )
-    update = index.update_documents_from_raw_file(path, primary_key="id", csv_delimiter=";")
+    update = index.update_documents_from_raw_file(
+        path, primary_key="id", csv_delimiter=";", compress=compress
+    )
     update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
@@ -1075,20 +1181,21 @@ def test_update_documents_from_raw_file_csv_delimiter_invalid(
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
+@pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_raw_file_ndjson(
-    path_type, client, small_movies_ndjson_path, small_movies
+    path_type, compress, client, small_movies_ndjson_path, small_movies
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
     index = client.index("movies")
-    response = index.add_documents(small_movies)
+    response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
-    update = index.update_documents_from_raw_file(path)
+    update = index.update_documents_from_raw_file(path, compress=compress)
     update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()

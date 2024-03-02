@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import gzip
+import json
 from functools import lru_cache
 from typing import Any, Callable
 
@@ -31,14 +33,21 @@ class AsyncHttpRequests:
         path: str,
         body: Any | None = None,
         content_type: str = "application/json",
+        compress: bool = False,
     ) -> Response:
-        headers = build_headers(content_type)
+        headers = build_headers(content_type, compress)
+
         try:
             if body is None:
                 response = await http_method(path)
-            elif content_type == "application/json":
+            elif content_type == "application/json" and not compress:
                 response = await http_method(path, json=body, headers=headers)
             else:
+                if body and compress:
+                    if content_type == "application/json":
+                        body = gzip.compress(json.dumps(body).encode("utf-8"))
+                    else:
+                        body = gzip.compress((body).encode("utf-8"))
                 response = await http_method(path, content=body, headers=headers)
 
             response.raise_for_status()
@@ -57,19 +66,31 @@ class AsyncHttpRequests:
         return await self._send_request(self.http_client.get, path)
 
     async def patch(
-        self, path: str, body: Any | None = None, content_type: str = "application/json"
+        self,
+        path: str,
+        body: Any | None = None,
+        content_type: str = "application/json",
+        compress: bool = False,
     ) -> Response:
-        return await self._send_request(self.http_client.patch, path, body, content_type)
+        return await self._send_request(self.http_client.patch, path, body, content_type, compress)
 
     async def post(
-        self, path: str, body: Any | None = None, content_type: str = "application/json"
+        self,
+        path: str,
+        body: Any | None = None,
+        content_type: str = "application/json",
+        compress: bool = False,
     ) -> Response:
-        return await self._send_request(self.http_client.post, path, body, content_type)
+        return await self._send_request(self.http_client.post, path, body, content_type, compress)
 
     async def put(
-        self, path: str, body: Any | None = None, content_type: str = "application/json"
+        self,
+        path: str,
+        body: Any | None = None,
+        content_type: str = "application/json",
+        compress: bool = False,
     ) -> Response:
-        return await self._send_request(self.http_client.put, path, body, content_type)
+        return await self._send_request(self.http_client.put, path, body, content_type, compress)
 
     async def delete(self, path: str, body: dict | None = None) -> Response:
         return await self._send_request(self.http_client.delete, path, body)
@@ -85,14 +106,20 @@ class HttpRequests:
         path: str,
         body: Any | None = None,
         content_type: str = "applicaton/json",
+        compress: bool = False,
     ) -> Response:
-        headers = build_headers(content_type)
+        headers = build_headers(content_type, compress)
         try:
             if not body:
                 response = http_method(path)
-            elif content_type == "application/json":
+            elif content_type == "application/json" and not compress:
                 response = http_method(path, json=body, headers=headers)
             else:
+                if body and compress:
+                    if content_type == "application/json":
+                        body = gzip.compress(json.dumps(body).encode("utf-8"))
+                    else:
+                        body = gzip.compress((body).encode("utf-8"))
                 response = http_method(path, content=body, headers=headers)
 
             response.raise_for_status()
@@ -111,26 +138,43 @@ class HttpRequests:
         return self._send_request(self.http_client.get, path)
 
     def patch(
-        self, path: str, body: Any | None = None, content_type: str = "application/json"
+        self,
+        path: str,
+        body: Any | None = None,
+        content_type: str = "application/json",
+        compress: bool = False,
     ) -> Response:
-        return self._send_request(self.http_client.patch, path, body, content_type)
+        return self._send_request(self.http_client.patch, path, body, content_type, compress)
 
     def post(
-        self, path: str, body: Any | None = None, content_type: str = "application/json"
+        self,
+        path: str,
+        body: Any | None = None,
+        content_type: str = "application/json",
+        compress: bool = False,
     ) -> Response:
-        return self._send_request(self.http_client.post, path, body, content_type)
+        return self._send_request(self.http_client.post, path, body, content_type, compress)
 
     def put(
-        self, path: str, body: Any | None = None, content_type: str = "application/json"
+        self,
+        path: str,
+        body: Any | None = None,
+        content_type: str = "application/json",
+        compress: bool = False,
     ) -> Response:
-        return self._send_request(self.http_client.put, path, body, content_type)
+        return self._send_request(self.http_client.put, path, body, content_type, compress)
 
     def delete(self, path: str, body: dict | None = None) -> Response:
         return self._send_request(self.http_client.delete, path, body)
 
 
-def build_headers(content_type: str) -> dict[str, str]:
-    return {"user-agent": user_agent(), "Content-Type": content_type}
+def build_headers(content_type: str, compress: bool) -> dict[str, str]:
+    headers = {"user-agent": user_agent(), "Content-Type": content_type}
+
+    if compress:
+        headers["Content-Encoding"] = "gzip"
+
+    return headers
 
 
 @lru_cache(maxsize=1)
