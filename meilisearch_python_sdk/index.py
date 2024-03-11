@@ -763,7 +763,8 @@ class AsyncIndex(_BaseIndex):
                 to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
                 sending a PATCH request to /experimental-features with { "scoreDetails": true }.
                 Because this feature is experimental it may be removed or updated causing breaking
-                changes in this library without a major version bump so use with caution.
+                changes in this library without a major version bump so use with caution. This
+                feature became stable in Meiliseach v1.7.0.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -1014,7 +1015,8 @@ class AsyncIndex(_BaseIndex):
                 to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
                 sending a PATCH request to /experimental-features with { "scoreDetails": true }.
                 Because this feature is experimental it may be removed or updated causing breaking
-                changes in this library without a major version bump so use with caution.
+                changes in this library without a major version bump so use with caution. This
+                feature became stable in Meiliseach v1.7.0.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -4843,7 +4845,8 @@ class Index(_BaseIndex):
                 to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
                 sending a PATCH request to /experimental-features with { "scoreDetails": true }.
                 Because this feature is experimental it may be removed or updated causing breaking
-                changes in this library without a major version bump so use with caution.
+                changes in this library without a major version bump so use with caution. This
+                feature became stable in Meiliseach v1.7.0.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -5001,7 +5004,8 @@ class Index(_BaseIndex):
                 to use this feature in Meilisearch v1.3.0 you first need to enable the feature by
                 sending a PATCH request to /experimental-features with { "scoreDetails": true }.
                 Because this feature is experimental it may be removed or updated causing breaking
-                changes in this library without a major version bump so use with caution.
+                changes in this library without a major version bump so use with caution. This
+                feature became stable in Meiliseach v1.7.0.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
