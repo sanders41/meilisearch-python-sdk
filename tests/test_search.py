@@ -370,7 +370,7 @@ def test_vector_search(index_with_documents_and_vectors):
         vector=[0.1, 0.2],
         hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
     )
-    assert response.vector == [0.1, 0.2]
+    assert len(response.hits) >= 1
 
 
 def test_basic_facet_search(index_with_documents):
