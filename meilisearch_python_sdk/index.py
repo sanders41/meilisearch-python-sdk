@@ -7912,6 +7912,10 @@ def _embedder_json_to_settings_model(
             embedders[k] = OpenAiEmbedder(**v)
         elif v.get("source") == "huggingFace":
             embedders[k] = HuggingFaceEmbedder(**v)
+        elif v.get("source") == "ollama":
+            embedders[k] = OllamaEmbedder(**v)
+        elif v.get("source") == "rest":
+            embedders[k] = RestEmbedder(**v)
         else:
             embedders[k] = UserProvidedEmbedder(**v)
 

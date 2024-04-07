@@ -9,9 +9,11 @@ from meilisearch_python_sdk.models.settings import (
     Faceting,
     HuggingFaceEmbedder,
     MinWordSizeForTypos,
+    OllamaEmbedder,
     OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
+    RestEmbedder,
     TypoTolerance,
     UserProvidedEmbedder,
 )
@@ -163,6 +165,8 @@ def test_update_settings(compress, empty_index, new_settings):
     assert response.embedders["default"].source == "userProvided"
     assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
+    assert response.embedders["test3"].source == "ollama"
+    assert response.embedders["test4"].source == "rest"
 
 
 @pytest.mark.usefixtures("enable_vector_search")
@@ -649,6 +653,8 @@ def test_update_embedders(compress, empty_index):
             "default": UserProvidedEmbedder(dimensions=512),
             "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
+            "test3": OllamaEmbedder(model="nomic-embed-text"),
+            "test4": RestEmbedder(url="https://myurl.com"),
         }
     )
     index = empty_index()
@@ -667,6 +673,8 @@ def test_reset_embedders(empty_index):
             "default": UserProvidedEmbedder(dimensions=512),
             "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
+            "test3": OllamaEmbedder(model="some_model"),
+            "test4": RestEmbedder(url="https://myurl.com"),
         }
     )
     index = empty_index()

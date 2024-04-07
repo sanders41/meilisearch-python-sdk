@@ -78,6 +78,7 @@ class HuggingFaceEmbedder(CamelBase):
 
 
 class OllamaEmbedder(CamelBase):
+    source: str = "ollama"
     url: Optional[str] = None
     api_key: Optional[str] = None
     model: str
@@ -85,6 +86,7 @@ class OllamaEmbedder(CamelBase):
 
 
 class RestEmbedder(CamelBase):
+    source: str = "rest"
     url: str
     api_key: Optional[str] = None
     dimensions: Optional[int] = None
@@ -102,7 +104,12 @@ class UserProvidedEmbedder(CamelBase):
 
 
 class Embedders(CamelBase):
-    embedders: Dict[str, Union[OpenAiEmbedder, HuggingFaceEmbedder, UserProvidedEmbedder]]
+    embedders: Dict[
+        str,
+        Union[
+            OpenAiEmbedder, HuggingFaceEmbedder, OllamaEmbedder, RestEmbedder, UserProvidedEmbedder
+        ],
+    ]
 
 
 class ProximityPrecision(str, Enum):
