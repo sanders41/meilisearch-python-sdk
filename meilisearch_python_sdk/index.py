@@ -29,6 +29,7 @@ from meilisearch_python_sdk.models.settings import (
     OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
+    RestEmbedder,
     TypoTolerance,
     UserProvidedEmbedder,
 )
@@ -7870,12 +7871,16 @@ def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedde
     if not embedder_json:  # pragma: no cover
         return None
 
-    embedders: dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] = {}
+    embedders: dict[
+        str, OpenAiEmbedder | HuggingFaceEmbedder | RestEmbedder | UserProvidedEmbedder
+    ] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
             embedders[k] = OpenAiEmbedder(**v)
         elif v.get("source") == "huggingFace":
             embedders[k] = HuggingFaceEmbedder(**v)
+        elif v.get("source") == "rest":
+            embedders[k] = RestEmbedder(**v)
         else:
             embedders[k] = UserProvidedEmbedder(**v)
 

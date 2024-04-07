@@ -77,6 +77,18 @@ class HuggingFaceEmbedder(CamelBase):
     document_template: Optional[str] = None
 
 
+class RestEmbedder(CamelBase):
+    url: str
+    api_key: Optional[str] = None
+    dimensions: Optional[int] = None
+    document_template: Optional[str] = None
+    input_field: Optional[List[str]] = None
+    input_type: str = "text"
+    query: JsonDict = {}
+    path_to_embeddings: Optional[List[str]] = None
+    embedding_object: Optional[List[str]] = None
+
+
 class UserProvidedEmbedder(CamelBase):
     source: str = "userProvided"
     dimensions: int
@@ -108,5 +120,5 @@ class MeilisearchSettings(CamelBase):
     non_separator_tokens: Optional[List[str]] = None
     dictionary: Optional[List[str]] = None
     embedders: Optional[
-        Dict[str, Union[OpenAiEmbedder, HuggingFaceEmbedder, UserProvidedEmbedder]]
+        Dict[str, Union[OpenAiEmbedder, HuggingFaceEmbedder, RestEmbedder, UserProvidedEmbedder]]
     ] = None  # Optional[Embedders] = None
