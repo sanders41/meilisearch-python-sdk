@@ -26,6 +26,7 @@ from meilisearch_python_sdk.models.settings import (
     Faceting,
     HuggingFaceEmbedder,
     MeilisearchSettings,
+    OllamaEmbedder,
     OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
@@ -7872,13 +7873,16 @@ def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedde
         return None
 
     embedders: dict[
-        str, OpenAiEmbedder | HuggingFaceEmbedder | RestEmbedder | UserProvidedEmbedder
+        str,
+        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
     ] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
             embedders[k] = OpenAiEmbedder(**v)
         elif v.get("source") == "huggingFace":
             embedders[k] = HuggingFaceEmbedder(**v)
+        elif v.get("source") == "ollama":
+            embedders[k] = OllamaEmbedder(**v)
         elif v.get("source") == "rest":
             embedders[k] = RestEmbedder(**v)
         else:

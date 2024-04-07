@@ -77,6 +77,13 @@ class HuggingFaceEmbedder(CamelBase):
     document_template: Optional[str] = None
 
 
+class OllamaEmbedder(CamelBase):
+    url: Optional[str] = None
+    api_key: Optional[str] = None
+    model: str
+    document_template: Optional[str] = None
+
+
 class RestEmbedder(CamelBase):
     url: str
     api_key: Optional[str] = None
