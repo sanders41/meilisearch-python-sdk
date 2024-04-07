@@ -127,5 +127,14 @@ class MeilisearchSettings(CamelBase):
     non_separator_tokens: Optional[List[str]] = None
     dictionary: Optional[List[str]] = None
     embedders: Optional[
-        Dict[str, Union[OpenAiEmbedder, HuggingFaceEmbedder, RestEmbedder, UserProvidedEmbedder]]
+        Dict[
+            str,
+            Union[
+                OpenAiEmbedder,
+                HuggingFaceEmbedder,
+                OllamaEmbedder,
+                RestEmbedder,
+                UserProvidedEmbedder,
+            ],
+        ]
     ] = None  # Optional[Embedders] = None

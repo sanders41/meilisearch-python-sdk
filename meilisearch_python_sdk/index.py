@@ -7893,11 +7893,20 @@ def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedde
 
 def _embedder_json_to_settings_model(
     embedder_json: JsonDict | None,
-) -> dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] | None:
+) -> (
+    dict[
+        str,
+        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+    ]
+    | None
+):
     if not embedder_json:  # pragma: no cover
         return None
 
-    embedders: dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] = {}
+    embedders: dict[
+        str,
+        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+    ] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
             embedders[k] = OpenAiEmbedder(**v)
