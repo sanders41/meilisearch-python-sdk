@@ -62,12 +62,18 @@ class Pagination(CamelBase):
     max_total_hits: int
 
 
+class Distribution(CamelBase):
+    mean: float
+    sigma: float
+
+
 class OpenAiEmbedder(CamelBase):
     source: str = "openAi"
     model: Optional[str] = None  # Defaults to text-embedding-ada-002
     dimensions: Optional[int] = None  # Uses the model default
     api_key: Optional[str] = None  # Can be provided through a CLI option or environment variable
     document_template: Optional[str] = None
+    distribution: Optional[Distribution] = None
 
 
 class HuggingFaceEmbedder(CamelBase):
@@ -75,6 +81,7 @@ class HuggingFaceEmbedder(CamelBase):
     model: Optional[str] = None  # Defaults to BAAI/bge-base-en-v1.5
     revision: Optional[str] = None
     document_template: Optional[str] = None
+    distribution: Optional[Distribution] = None
 
 
 class OllamaEmbedder(CamelBase):
@@ -83,6 +90,7 @@ class OllamaEmbedder(CamelBase):
     api_key: Optional[str] = None
     model: str
     document_template: Optional[str] = None
+    distribution: Optional[Distribution] = None
 
 
 class RestEmbedder(CamelBase):
@@ -96,11 +104,13 @@ class RestEmbedder(CamelBase):
     query: JsonDict = {}
     path_to_embeddings: Optional[List[str]] = None
     embedding_object: Optional[List[str]] = None
+    distribution: Optional[Distribution] = None
 
 
 class UserProvidedEmbedder(CamelBase):
     source: str = "userProvided"
     dimensions: int
+    distribution: Optional[Distribution] = None
 
 
 class Embedders(CamelBase):
