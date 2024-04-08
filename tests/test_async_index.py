@@ -9,9 +9,11 @@ from meilisearch_python_sdk.models.settings import (
     Faceting,
     HuggingFaceEmbedder,
     MinWordSizeForTypos,
+    OllamaEmbedder,
     OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
+    RestEmbedder,
     TypoTolerance,
     UserProvidedEmbedder,
 )
@@ -664,6 +666,8 @@ async def test_update_embedders(compress, async_empty_index):
             "default": UserProvidedEmbedder(dimensions=512),
             "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
+            "test3": OllamaEmbedder(model="nomic-embed-text"),
+            "test4": RestEmbedder(url="https://myurl.com"),
         }
     )
     index = await async_empty_index()
@@ -673,6 +677,8 @@ async def test_update_embedders(compress, async_empty_index):
     assert response.embedders["default"].source == "userProvided"
     assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
+    assert response.embedders["test3"].source == "ollama"
+    assert response.embedders["test4"].source == "rest"
 
 
 @pytest.mark.usefixtures("enable_vector_search")
@@ -682,6 +688,8 @@ async def test_reset_embedders(async_empty_index):
             "default": UserProvidedEmbedder(dimensions=512),
             "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
+            "test3": OllamaEmbedder(model="nomic-embed-text"),
+            "test4": RestEmbedder(url="https://myurl.com"),
         }
     )
     index = await async_empty_index()
@@ -692,6 +700,8 @@ async def test_reset_embedders(async_empty_index):
     assert response.embedders["default"].source == "userProvided"
     assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
+    assert response.embedders["test3"].source == "ollama"
+    assert response.embedders["test4"].source == "rest"
     response = await index.reset_embedders()
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()

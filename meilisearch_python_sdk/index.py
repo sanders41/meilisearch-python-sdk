@@ -26,9 +26,11 @@ from meilisearch_python_sdk.models.settings import (
     Faceting,
     HuggingFaceEmbedder,
     MeilisearchSettings,
+    OllamaEmbedder,
     OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
+    RestEmbedder,
     TypoTolerance,
     UserProvidedEmbedder,
 )
@@ -7870,12 +7872,19 @@ def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedde
     if not embedder_json:  # pragma: no cover
         return None
 
-    embedders: dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] = {}
+    embedders: dict[
+        str,
+        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+    ] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
             embedders[k] = OpenAiEmbedder(**v)
         elif v.get("source") == "huggingFace":
             embedders[k] = HuggingFaceEmbedder(**v)
+        elif v.get("source") == "ollama":
+            embedders[k] = OllamaEmbedder(**v)
+        elif v.get("source") == "rest":
+            embedders[k] = RestEmbedder(**v)
         else:
             embedders[k] = UserProvidedEmbedder(**v)
 
@@ -7884,16 +7893,29 @@ def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedde
 
 def _embedder_json_to_settings_model(
     embedder_json: JsonDict | None,
-) -> dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] | None:
+) -> (
+    dict[
+        str,
+        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+    ]
+    | None
+):
     if not embedder_json:  # pragma: no cover
         return None
 
-    embedders: dict[str, OpenAiEmbedder | HuggingFaceEmbedder | UserProvidedEmbedder] = {}
+    embedders: dict[
+        str,
+        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+    ] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
             embedders[k] = OpenAiEmbedder(**v)
         elif v.get("source") == "huggingFace":
             embedders[k] = HuggingFaceEmbedder(**v)
+        elif v.get("source") == "ollama":
+            embedders[k] = OllamaEmbedder(**v)
+        elif v.get("source") == "rest":
+            embedders[k] = RestEmbedder(**v)
         else:
             embedders[k] = UserProvidedEmbedder(**v)
 

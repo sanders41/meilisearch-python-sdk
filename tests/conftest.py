@@ -14,9 +14,11 @@ from meilisearch_python_sdk.models.settings import (
     Faceting,
     HuggingFaceEmbedder,
     MeilisearchSettings,
+    OllamaEmbedder,
     OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
+    RestEmbedder,
     TypoTolerance,
     UserProvidedEmbedder,
 )
@@ -280,6 +282,8 @@ def new_settings():
             "default": UserProvidedEmbedder(dimensions=512),
             "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
+            "test3": OllamaEmbedder(model="nomic-embed-text"),
+            "test4": RestEmbedder(url="https://myurl.com"),
         },
         proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
     )
