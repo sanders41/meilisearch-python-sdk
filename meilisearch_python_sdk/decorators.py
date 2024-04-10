@@ -68,7 +68,7 @@ def async_add_documents(
         >>> # with `ConnectionInfo`
         >>> @async_add_documents(
                 index_name="movies",
-                connection_info=ConnectionInfo(url="http://localhost:7700", api_key="masterKey",
+                connection_info=ConnectionInfo(url="http://localhost:7700", api_key="masterKey"),
             )
         >>> async def my_function() -> list[dict[str, Any]]:
         >>>     return [{"id": 1, "title": "Test 1"}, {"id": 2, "title": "Test 2"}]
