@@ -45,13 +45,13 @@ async def main() -> int:
     with open("datasets/small_movies.json") as f:
         documents = json.load(f)
 
-    client = AsyncClient("http://127.0.0.1:7700", "masterKey")
-    plugins = AsyncIndexPlugins(search_plugins=(SearchTrackerPlugin(),))
-    index = await client.create_index("movies", primary_key="id", plugins=plugins)
-    task = await index.add_documents(documents)
-    await client.wait_for_task(task.task_uid)
-    result = await index.search("Cars")
-    print(result)  # noqa: T201
+    async with AsyncClient("http://127.0.0.1:7700", "masterKey") as client:
+        plugins = AsyncIndexPlugins(search_plugins=(SearchTrackerPlugin(),))
+        index = await client.create_index("movies", primary_key="id", plugins=plugins)
+        task = await index.add_documents(documents)
+        await client.wait_for_task(task.task_uid)
+        result = await index.search("Cars")
+        print(result)  # noqa: T201
 
     return 0
 
