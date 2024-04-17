@@ -142,6 +142,7 @@ class MeilisearchSettings(CamelBase):
     proximity_precision: Optional[ProximityPrecision] = None
     separator_tokens: Optional[List[str]] = None
     non_separator_tokens: Optional[List[str]] = None
+    search_cutoff_ms: Optional[int] = None
     dictionary: Optional[List[str]] = None
     embedders: Optional[
         Dict[
