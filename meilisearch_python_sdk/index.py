@@ -3972,7 +3972,7 @@ class AsyncIndex(_BaseIndex):
 
         Returns:
 
-            Integer representing the search time in ms, or None.
+            Integer representing the search cutoff time in ms, or None.
 
         Raises:
 
@@ -3984,7 +3984,7 @@ class AsyncIndex(_BaseIndex):
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
-            >>>     separator_token_settings = await index.get_search_cutoff_ms()
+            >>>     search_cutoff_ms_settings = await index.get_search_cutoff_ms()
         """
         response = await self._http_requests.get(f"{self._settings_url}/search-cutoff-ms")
 
@@ -7467,7 +7467,7 @@ class Index(_BaseIndex):
 
         Returns:
 
-            Integer representing the search time in ms, or None.
+            Integer representing the search cutoff time in ms, or None.
 
         Raises:
 
