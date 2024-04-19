@@ -40,3 +40,6 @@ nav:
 plugins:
   - mkdocstrings
   - search
+
+extra_javascript:
+  - "js/umami.js"
