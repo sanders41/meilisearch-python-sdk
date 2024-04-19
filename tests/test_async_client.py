@@ -125,6 +125,7 @@ async def test_create_index_with_settings(async_client, new_settings):
     assert response.pagination == new_settings.pagination
     assert response.separator_tokens == new_settings.separator_tokens
     assert response.non_separator_tokens == new_settings.non_separator_tokens
+    assert response.search_cutoff_ms == new_settings.search_cutoff_ms
     assert response.dictionary == new_settings.dictionary
 
 
