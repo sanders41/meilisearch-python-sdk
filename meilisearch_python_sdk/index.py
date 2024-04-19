@@ -3990,7 +3990,7 @@ class AsyncIndex(_BaseIndex):
 
         return response.json()
 
-async def update_search_cutoff_ms(
+    async def update_search_cutoff_ms(
         self, search_cutoff_ms: int, *, compress: bool = False
     ) -> TaskInfo:
         """Update the search cutoff for an index.
@@ -4022,7 +4022,7 @@ async def update_search_cutoff_ms(
 
         return TaskInfo(**response.json())
 
- async def reset_search_cutoff_ms(self) -> TaskInfo:
+    async def reset_search_cutoff_ms(self) -> TaskInfo:
         """Reset the search cutoff time to the default value.
 
         Returns:
@@ -7485,9 +7485,7 @@ class Index(_BaseIndex):
 
         return response.json()
 
-    def update_search_cutoff_ms(
-        self, search_cutoff_ms: int, *, compress: bool = False
-    ) -> TaskInfo:
+    def update_search_cutoff_ms(self, search_cutoff_ms: int, *, compress: bool = False) -> TaskInfo:
         """Update the search cutoff for an index.
 
         Args:
