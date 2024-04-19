@@ -3967,6 +3967,84 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
+    async def get_search_cutoff_ms(self) -> int | None:
+        """Get search cutoff time in ms.
+
+        Returns:
+
+            Integer representing the search cutoff time in ms, or None.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_cutoff_ms_settings = await index.get_search_cutoff_ms()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/search-cutoff-ms")
+
+        return response.json()
+
+    async def update_search_cutoff_ms(
+        self, search_cutoff_ms: int, *, compress: bool = False
+    ) -> TaskInfo:
+        """Update the search cutoff for an index.
+
+        Args:
+
+            search_cutoff_ms: Integer value of the search cutoff time in ms.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_search_cutoff_ms(100)
+        """
+        response = await self._http_requests.put(
+            f"{self._settings_url}/search-cutoff-ms", search_cutoff_ms, compress=compress
+        )
+
+        return TaskInfo(**response.json())
+
+    async def reset_search_cutoff_ms(self) -> TaskInfo:
+        """Reset the search cutoff time to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_search_cutoff_ms()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/search-cutoff-ms")
+
+        return TaskInfo(**response.json())
+
     async def get_word_dictionary(self) -> list[str]:
         """Get word dictionary settings for the index.
 
@@ -7381,6 +7459,82 @@ class Index(_BaseIndex):
             >>> index.reset_non_separator_tokens()
         """
         response = self._http_requests.delete(f"{self._settings_url}/non-separator-tokens")
+
+        return TaskInfo(**response.json())
+
+    def get_search_cutoff_ms(self) -> int | None:
+        """Get search cutoff time in ms.
+
+        Returns:
+
+            Integer representing the search cutoff time in ms, or None.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> search_cutoff_ms_settings = index.get_search_cutoff_ms()
+        """
+        response = self._http_requests.get(f"{self._settings_url}/search-cutoff-ms")
+
+        return response.json()
+
+    def update_search_cutoff_ms(self, search_cutoff_ms: int, *, compress: bool = False) -> TaskInfo:
+        """Update the search cutoff for an index.
+
+        Args:
+
+            search_cutoff_ms: Integer value of the search cutoff time in ms.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.update_search_cutoff_ms(100)
+        """
+        response = self._http_requests.put(
+            f"{self._settings_url}/search-cutoff-ms", search_cutoff_ms, compress=compress
+        )
+
+        return TaskInfo(**response.json())
+
+    def reset_search_cutoff_ms(self) -> TaskInfo:
+        """Reset the search cutoff time to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.reset_search_cutoff_ms()
+        """
+        response = self._http_requests.delete(f"{self._settings_url}/search-cutoff-ms")
 
         return TaskInfo(**response.json())
 

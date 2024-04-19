@@ -277,6 +277,7 @@ def new_settings():
         pagination=Pagination(max_total_hits=17),
         separator_tokens=["&sep", "/", "|"],
         non_separator_tokens=["#", "@"],
+        search_cutoff_ms=100,
         dictionary=["S.O", "S.O.S"],
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),

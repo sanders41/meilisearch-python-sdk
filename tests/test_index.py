@@ -134,6 +134,7 @@ def test_get_settings_default(
     assert response.proximity_precision is ProximityPrecision.BY_WORD
     assert response.separator_tokens == []
     assert response.non_separator_tokens == []
+    assert response.search_cutoff_ms is None
     assert response.dictionary == []
     assert response.embedders is None
 
@@ -161,6 +162,7 @@ def test_update_settings(compress, empty_index, new_settings):
     assert response.proximity_precision == new_settings.proximity_precision
     assert response.separator_tokens == new_settings.separator_tokens
     assert response.non_separator_tokens == new_settings.non_separator_tokens
+    assert response.search_cutoff_ms == new_settings.search_cutoff_ms
     assert response.dictionary == new_settings.dictionary
     assert response.embedders["default"].source == "userProvided"
     assert response.embedders["test1"].source == "huggingFace"
@@ -412,6 +414,37 @@ def test_reset_non_separator_tokens(empty_index):
     assert update.status == "succeeded"
     response = index.get_non_separator_tokens()
     assert response == []
+
+
+def test_get_search_cutoff_ms(empty_index):
+    index = empty_index()
+    response = index.get_search_cutoff_ms()
+    assert response is None
+
+
+@pytest.mark.parametrize("compress", (True, False))
+def test_update_search_cutoff_ms(compress, empty_index):
+    index = empty_index()
+    expected = 100
+    response = index.update_search_cutoff_ms(expected, compress=compress)
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_search_cutoff_ms()
+    assert response == expected
+
+
+def test_reset_search_cutoff_ms(empty_index):
+    index = empty_index()
+    expected = 100
+    response = index.update_search_cutoff_ms(expected)
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = index.get_search_cutoff_ms()
+    assert response == expected
+    response = index.reset_search_cutoff_ms()
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = index.get_search_cutoff_ms()
+    assert response is None
 
 
 def test_get_word_dictionary(empty_index):
