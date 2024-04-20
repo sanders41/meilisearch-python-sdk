@@ -25,6 +25,7 @@ class ClientStats(CamelBase):
         warn(
             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         @pydantic.validator("last_update", pre=True)
@@ -53,6 +54,7 @@ class _KeyBase(CamelBase):
         warn(
             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         @pydantic.validator("expires_at", pre=True)
@@ -98,6 +100,7 @@ class Key(_KeyBase):
         warn(
             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         @pydantic.validator("created_at", pre=True)
@@ -130,6 +133,7 @@ class KeyCreate(CamelBase):
         warn(
             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         class Config:
@@ -159,6 +163,7 @@ class KeyUpdate(CamelBase):
         warn(
             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         class Config:

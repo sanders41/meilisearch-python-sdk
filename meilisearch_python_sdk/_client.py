@@ -470,6 +470,7 @@ class AsyncClient(BaseClient):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
 
@@ -625,6 +626,7 @@ class AsyncClient(BaseClient):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = await self._http_requests.post(
                 url,
@@ -1327,6 +1329,7 @@ class Client(BaseClient):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
 
@@ -1482,6 +1485,7 @@ class Client(BaseClient):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = self._http_requests.post(
                 url,
@@ -1875,6 +1879,7 @@ def _build_update_key_payload(key: KeyUpdate) -> JsonDict:
         warn(
             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
             DeprecationWarning,
+            stacklevel=2,
         )
         return {  # type: ignore[attr-defined]
             k: v
