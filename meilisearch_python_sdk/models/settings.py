@@ -43,6 +43,7 @@ class Faceting(CamelBase):
         warn(
             "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         @pydantic.validator("sort_facet_values_by")  # type: ignore[attr-defined]

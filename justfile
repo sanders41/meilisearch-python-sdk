@@ -7,7 +7,7 @@
   just --justfile {{justfile()}} ruff-format
 
 @mypy:
-  poetry run mypy .
+  poetry run mypy meilisearch_python_sdk tests
 
 @ruff:
   poetry run ruff check .
