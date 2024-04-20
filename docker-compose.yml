@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   meilisearch:
     image: getmeili/meilisearch:latest
