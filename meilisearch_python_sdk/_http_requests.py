@@ -60,7 +60,7 @@ class AsyncHttpRequests:
                 raise MeilisearchApiError(str(err), response) from err
             else:
                 # Fail safe just in case error happens before response is created
-                raise MeilisearchError(str(err))  # pragma: no cover
+                raise MeilisearchError(str(err)) from err  # pragma: no cover
 
     async def get(self, path: str) -> Response:
         return await self._send_request(self.http_client.get, path)
@@ -132,7 +132,7 @@ class HttpRequests:
                 raise MeilisearchApiError(str(err), response) from err
             else:
                 # Fail safe just in case error happens before response is created
-                raise MeilisearchError(str(err))  # pragma: no cover
+                raise MeilisearchError(str(err)) from err  # pragma: no cover
 
     def get(self, path: str) -> Response:
         return self._send_request(self.http_client.get, path)

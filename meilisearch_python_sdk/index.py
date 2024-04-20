@@ -710,7 +710,7 @@ class AsyncIndex(_BaseIndex):
         limit: int = 20,
         filter: Filter | None = None,
         facets: list[str] | None = None,
-        attributes_to_retrieve: list[str] = ["*"],
+        attributes_to_retrieve: list[str] | None = None,
         attributes_to_crop: list[str] | None = None,
         crop_length: int = 200,
         attributes_to_highlight: list[str] | None = None,
@@ -796,7 +796,6 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     search_results = await index.search("Tron")
         """
-
         body = _process_search_parameters(
             q=query,
             offset=offset,
@@ -961,7 +960,7 @@ class AsyncIndex(_BaseIndex):
         limit: int = 20,
         filter: Filter | None = None,
         facets: list[str] | None = None,
-        attributes_to_retrieve: list[str] = ["*"],
+        attributes_to_retrieve: list[str] | None = None,
         attributes_to_crop: list[str] | None = None,
         crop_length: int = 200,
         attributes_to_highlight: list[str] | None = None,
@@ -2865,6 +2864,7 @@ class AsyncIndex(_BaseIndex):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
@@ -3006,7 +3006,7 @@ class AsyncIndex(_BaseIndex):
         response = await self._http_requests.get(f"{self._settings_url}/distinct-attribute")
 
         if not response.json():
-            None
+            return None
 
         return response.json()
 
@@ -3602,6 +3602,7 @@ class AsyncIndex(_BaseIndex):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = await self._http_requests.patch(
                 f"{self._settings_url}/typo-tolerance",
@@ -3691,6 +3692,7 @@ class AsyncIndex(_BaseIndex):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = await self._http_requests.patch(
                 f"{self._settings_url}/faceting", faceting.dict(by_alias=True), compress=compress
@@ -3779,6 +3781,7 @@ class AsyncIndex(_BaseIndex):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = await self._http_requests.patch(
                 f"{self._settings_url}/pagination", settings.dict(by_alias=True), compress=compress
@@ -4186,6 +4189,7 @@ class AsyncIndex(_BaseIndex):
                 warn(
                     "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                     DeprecationWarning,
+                    stacklevel=2,
                 )
                 payload[key] = {
                     k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
@@ -4792,7 +4796,7 @@ class Index(_BaseIndex):
         limit: int = 20,
         filter: Filter | None = None,
         facets: list[str] | None = None,
-        attributes_to_retrieve: list[str] = ["*"],
+        attributes_to_retrieve: list[str] | None = None,
         attributes_to_crop: list[str] | None = None,
         crop_length: int = 200,
         attributes_to_highlight: list[str] | None = None,
@@ -4950,7 +4954,7 @@ class Index(_BaseIndex):
         limit: int = 20,
         filter: Filter | None = None,
         facets: list[str] | None = None,
-        attributes_to_retrieve: list[str] = ["*"],
+        attributes_to_retrieve: list[str] | None = None,
         attributes_to_crop: list[str] | None = None,
         crop_length: int = 200,
         attributes_to_highlight: list[str] | None = None,
@@ -6293,6 +6297,7 @@ class Index(_BaseIndex):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
 
@@ -6432,7 +6437,7 @@ class Index(_BaseIndex):
         response = self._http_requests.get(f"{self._settings_url}/distinct-attribute")
 
         if not response.json():
-            None
+            return None
 
         return response.json()
 
@@ -7019,6 +7024,7 @@ class Index(_BaseIndex):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = self._http_requests.patch(
                 f"{self._settings_url}/typo-tolerance",
@@ -7108,6 +7114,7 @@ class Index(_BaseIndex):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = self._http_requests.patch(
                 f"{self._settings_url}/faceting", faceting.dict(by_alias=True), compress=compress
@@ -7196,6 +7203,7 @@ class Index(_BaseIndex):
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             response = self._http_requests.patch(
                 f"{self._settings_url}/pagination", settings.dict(by_alias=True), compress=compress
@@ -7599,6 +7607,7 @@ class Index(_BaseIndex):
                 warn(
                     "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                     DeprecationWarning,
+                    stacklevel=2,
                 )
                 payload[key] = {
                     k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
@@ -7797,7 +7806,7 @@ def _process_search_parameters(
     limit: int = 20,
     filter: Filter | None = None,
     facets: list[str] | None = None,
-    attributes_to_retrieve: list[str] = ["*"],
+    attributes_to_retrieve: list[str] | None = None,
     attributes_to_crop: list[str] | None = None,
     crop_length: int = 200,
     attributes_to_highlight: list[str] | None = None,
@@ -7815,6 +7824,9 @@ def _process_search_parameters(
     vector: list[float] | None = None,
     hybrid: Hybrid | None = None,
 ) -> JsonDict:
+    if attributes_to_retrieve is None:
+        attributes_to_retrieve = ["*"]
+
     body: JsonDict = {
         "q": q,
         "offset": offset,
@@ -7856,6 +7868,7 @@ def _process_search_parameters(
             warn(
                 "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
                 DeprecationWarning,
+                stacklevel=2,
             )
             body["hybrid"] = hybrid.dict(by_alias=True)  # type: ignore[attr-defined]
 

@@ -250,7 +250,7 @@ def test_delete_all_documents(plugins, expected, client, small_movies, capsys):
     index = client.create_index(str(uuid4()), plugins=use_plugins)
     response = index.add_documents(small_movies)
     update = client.wait_for_task(response.task_uid)
-    update.status == "succeeded"
+    assert update.status == "succeeded"
 
     response = index.delete_all_documents()
     client.wait_for_task(response.task_uid)
