@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, NamedTuple, Protocol, Sequence
+from typing import TYPE_CHECKING, Any, NamedTuple, Protocol, Sequence
 
-from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
-from meilisearch_python_sdk.models.task import TaskInfo
-from meilisearch_python_sdk.types import JsonDict, JsonMapping
+if TYPE_CHECKING:
+    from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
+    from meilisearch_python_sdk.models.task import TaskInfo
+    from meilisearch_python_sdk.types import JsonDict, JsonMapping
 
 
 class AsyncEvent(Enum):
