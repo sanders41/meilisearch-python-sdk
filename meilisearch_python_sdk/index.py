@@ -46,7 +46,7 @@ from meilisearch_python_sdk.plugins import (
     PostSearchPlugin,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from meilisearch_python_sdk.types import Filter, JsonDict, JsonMapping
 
 

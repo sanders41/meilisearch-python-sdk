@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING, Any, NamedTuple, Protocol, Sequence
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
     from meilisearch_python_sdk.models.task import TaskInfo
     from meilisearch_python_sdk.types import JsonDict, JsonMapping
