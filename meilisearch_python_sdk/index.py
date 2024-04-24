@@ -6,7 +6,7 @@ from csv import DictReader
 from datetime import datetime
 from functools import cached_property, partial
 from pathlib import Path
-from typing import Any, Generator, MutableMapping, Sequence
+from typing import TYPE_CHECKING, Any, Generator, MutableMapping, Sequence
 from urllib.parse import urlencode
 from warnings import warn
 
@@ -45,7 +45,9 @@ from meilisearch_python_sdk.plugins import (
     Plugin,
     PostSearchPlugin,
 )
-from meilisearch_python_sdk.types import Filter, JsonDict, JsonMapping
+
+if TYPE_CHECKING:  # pragma: no cover
+    from meilisearch_python_sdk.types import Filter, JsonDict, JsonMapping
 
 
 class _BaseIndex:
