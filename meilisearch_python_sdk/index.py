@@ -2812,7 +2812,10 @@ class AsyncIndex(_BaseIndex):
         settings = MeilisearchSettings(**response_json)
 
         if response_json.get("embedders"):
-            settings.embedders = _embedder_json_to_settings_model(response_json["embedders"])
+            # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+            settings.embedders = _embedder_json_to_settings_model(  # pragma: no cover
+                response_json["embedders"]
+            )
 
         return settings
 
@@ -4283,7 +4286,8 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    async def reset_embedders(self) -> TaskInfo:
+    # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+    async def reset_embedders(self) -> TaskInfo:  # pragma: no cover
         """Reset an index's embedders settings to the default value.
 
         Returns:
@@ -6325,7 +6329,10 @@ class Index(_BaseIndex):
         settings = MeilisearchSettings(**response_json)
 
         if response_json.get("embedders"):
-            settings.embedders = _embedder_json_to_settings_model(response_json["embedders"])
+            # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+            settings.embedders = _embedder_json_to_settings_model(  # pragma: no cover
+                response_json["embedders"]
+            )
 
         return settings
 
@@ -7777,7 +7784,8 @@ class Index(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    def reset_embedders(self) -> TaskInfo:
+    # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+    def reset_embedders(self) -> TaskInfo:  # pragma: no cover
         """Reset an index's embedders settings to the default value.
 
         Returns:
@@ -8037,7 +8045,10 @@ def _build_encoded_url(base_url: str, params: JsonMapping) -> str:
     return f"{base_url}?{urlencode(params)}"
 
 
-def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedders | None:
+# TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+def _embedder_json_to_embedders_model(  # pragma: no cover
+    embedder_json: JsonDict | None,
+) -> Embedders | None:
     if not embedder_json:  # pragma: no cover
         return None
 
@@ -8060,7 +8071,8 @@ def _embedder_json_to_embedders_model(embedder_json: JsonDict | None) -> Embedde
     return Embedders(embedders=embedders)
 
 
-def _embedder_json_to_settings_model(
+# TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+def _embedder_json_to_settings_model(  # pragma: no cover
     embedder_json: JsonDict | None,
 ) -> (
     dict[
