@@ -161,7 +161,7 @@ def small_movies_path():
 @pytest.fixture
 async def async_empty_index(async_client):
     async def index_maker():
-        return await async_client.create_index(uid=str(uuid4()))
+        return await async_client.create_index(uid=str(uuid4()), timeout_in_ms=5000)
 
     return index_maker
 
@@ -169,7 +169,7 @@ async def async_empty_index(async_client):
 @pytest.fixture
 def empty_index(client):
     def index_maker():
-        return client.create_index(uid=str(uuid4()))
+        return client.create_index(uid=str(uuid4()), timeout_in_ms=5000)
 
     return index_maker
 
