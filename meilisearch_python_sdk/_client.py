@@ -872,14 +872,14 @@ class AsyncClient(BaseClient):
 
         Args:
 
-            uids: A list of task UIDs to cancel.
-            index_uids: A list of index UIDs for which to cancel tasks.
-            statuses: A list of statuses to cancel.
-            types: A list of types to cancel.
-            before_enqueued_at: Cancel tasks that were enqueued before the specified date time.
-            after_enqueued_at: Cancel tasks that were enqueued after the specified date time.
-            before_started_at: Cancel tasks that were started before the specified date time.
-            after_finished_at: Cancel tasks that were finished after the specified date time.
+            uids: A list of task UIDs to delete.
+            index_uids: A list of index UIDs for which to delete tasks.
+            statuses: A list of statuses to delete.
+            types: A list of types to delete.
+            before_enqueued_at: Delete tasks that were enqueued before the specified date time.
+            after_enqueued_at: Delete tasks that were enqueued after the specified date time.
+            before_started_at: Delete tasks that were started before the specified date time.
+            after_finished_at: Delete tasks that were finished after the specified date time.
 
         Returns:
 
@@ -1705,14 +1705,14 @@ class Client(BaseClient):
 
         Args:
 
-            uids: A list of task UIDs to cancel.
-            index_uids: A list of index UIDs for which to cancel tasks.
-            statuses: A list of statuses to cancel.
-            types: A list of types to cancel.
-            before_enqueued_at: Cancel tasks that were enqueued before the specified date time.
-            after_enqueued_at: Cancel tasks that were enqueued after the specified date time.
-            before_started_at: Cancel tasks that were started before the specified date time.
-            after_finished_at: Cancel tasks that were finished after the specified date time.
+            uids: A list of task UIDs to delete.
+            index_uids: A list of index UIDs for which to delete tasks.
+            statuses: A list of statuses to delete.
+            types: A list of types to delete.
+            before_enqueued_at: Delete tasks that were enqueued before the specified date time.
+            after_enqueued_at: Delete tasks that were enqueued after the specified date time.
+            before_started_at: Delete tasks that were started before the specified date time.
+            after_finished_at: Delete tasks that were finished after the specified date time.
 
         Returns:
 
