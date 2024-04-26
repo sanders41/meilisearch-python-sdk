@@ -617,6 +617,7 @@ class AsyncIndex(_BaseIndex):
         *,
         settings: MeilisearchSettings | None = None,
         wait: bool = True,
+        timeout_in_ms: int | None = None,
         plugins: AsyncIndexPlugins | None = None,
     ) -> AsyncIndex:
         """Creates a new index.
@@ -638,6 +639,9 @@ class AsyncIndex(_BaseIndex):
             wait: If set to True and settings are being updated, the index will be returned after
                 the settings update has completed. If False it will not wait for settings to complete.
                 Default: True
+            timeout_in_ms: Amount of time in milliseconds to wait before raising a
+                MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
+                if the `None` option is used the wait time could be very long. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
@@ -663,7 +667,9 @@ class AsyncIndex(_BaseIndex):
         url = "indexes"
         http_request = AsyncHttpRequests(http_client)
         response = await http_request.post(url, payload)
-        await async_wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=None)
+        await async_wait_for_task(
+            http_client, response.json()["taskUid"], timeout_in_ms=timeout_in_ms
+        )
 
         index_response = await http_request.get(f"{url}/{uid}")
         index_dict = index_response.json()
@@ -679,7 +685,9 @@ class AsyncIndex(_BaseIndex):
         if settings:
             settings_task = await index.update_settings(settings)
             if wait:
-                await async_wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=None)
+                await async_wait_for_task(
+                    http_client, settings_task.task_uid, timeout_in_ms=timeout_in_ms
+                )
 
         return index
 
@@ -4786,6 +4794,7 @@ class Index(_BaseIndex):
         *,
         settings: MeilisearchSettings | None = None,
         wait: bool = True,
+        timeout_in_ms: int | None = None,
         plugins: IndexPlugins | None = None,
     ) -> Index:
         """Creates a new index.
@@ -4807,6 +4816,9 @@ class Index(_BaseIndex):
             wait: If set to True and settings are being updated, the index will be returned after
                 the settings update has completed. If False it will not wait for settings to complete.
                 Default: True
+            timeout_in_ms: Amount of time in milliseconds to wait before raising a
+                MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
+                if the `None` option is used the wait time could be very long. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
@@ -4832,7 +4844,7 @@ class Index(_BaseIndex):
         url = "indexes"
         http_request = HttpRequests(http_client)
         response = http_request.post(url, payload)
-        wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=None)
+        wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=timeout_in_ms)
         index_response = http_request.get(f"{url}/{uid}")
         index_dict = index_response.json()
         index = cls(
@@ -4847,7 +4859,7 @@ class Index(_BaseIndex):
         if settings:
             settings_task = index.update_settings(settings)
             if wait:
-                wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=None)
+                wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=timeout_in_ms)
 
         return index
 

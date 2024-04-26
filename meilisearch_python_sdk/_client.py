@@ -194,6 +194,7 @@ class AsyncClient(BaseClient):
         *,
         settings: MeilisearchSettings | None = None,
         wait: bool = True,
+        timeout_in_ms: int | None = None,
         plugins: AsyncIndexPlugins | None = None,
     ) -> AsyncIndex:
         """Creates a new index.
@@ -210,6 +211,9 @@ class AsyncClient(BaseClient):
             wait: If set to True and settings are being updated, the index will be returned after
                 the settings update has completed. If False it will not wait for settings to complete.
                 Default: True
+            timeout_in_ms: Amount of time in milliseconds to wait before raising a
+                MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
+                if the `None` option is used the wait time could be very long. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
@@ -228,7 +232,13 @@ class AsyncClient(BaseClient):
             >>>     index = await client.create_index("movies")
         """
         return await AsyncIndex.create(
-            self.http_client, uid, primary_key, settings=settings, wait=wait, plugins=plugins
+            self.http_client,
+            uid,
+            primary_key,
+            settings=settings,
+            wait=wait,
+            timeout_in_ms=timeout_in_ms,
+            plugins=plugins,
         )
 
     async def create_snapshot(self) -> TaskInfo:
@@ -872,14 +882,14 @@ class AsyncClient(BaseClient):
 
         Args:
 
-            uids: A list of task UIDs to cancel.
-            index_uids: A list of index UIDs for which to cancel tasks.
-            statuses: A list of statuses to cancel.
-            types: A list of types to cancel.
-            before_enqueued_at: Cancel tasks that were enqueued before the specified date time.
-            after_enqueued_at: Cancel tasks that were enqueued after the specified date time.
-            before_started_at: Cancel tasks that were started before the specified date time.
-            after_finished_at: Cancel tasks that were finished after the specified date time.
+            uids: A list of task UIDs to delete.
+            index_uids: A list of index UIDs for which to delete tasks.
+            statuses: A list of statuses to delete.
+            types: A list of types to delete.
+            before_enqueued_at: Delete tasks that were enqueued before the specified date time.
+            after_enqueued_at: Delete tasks that were enqueued after the specified date time.
+            before_started_at: Delete tasks that were started before the specified date time.
+            after_finished_at: Delete tasks that were finished after the specified date time.
 
         Returns:
 
@@ -1055,6 +1065,7 @@ class Client(BaseClient):
         *,
         settings: MeilisearchSettings | None = None,
         wait: bool = True,
+        timeout_in_ms: int | None = None,
         plugins: IndexPlugins | None = None,
     ) -> Index:
         """Creates a new index.
@@ -1071,6 +1082,9 @@ class Client(BaseClient):
             wait: If set to True and settings are being updated, the index will be returned after
                 the settings update has completed. If False it will not wait for settings to complete.
                 Default: True
+            timeout_in_ms: Amount of time in milliseconds to wait before raising a
+                MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
+                if the `None` option is used the wait time could be very long. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
 
         Returns:
@@ -1089,7 +1103,13 @@ class Client(BaseClient):
             >>> index = client.create_index("movies")
         """
         return Index.create(
-            self.http_client, uid, primary_key, settings=settings, wait=wait, plugins=plugins
+            self.http_client,
+            uid,
+            primary_key,
+            settings=settings,
+            wait=wait,
+            timeout_in_ms=timeout_in_ms,
+            plugins=plugins,
         )
 
     def create_snapshot(self) -> TaskInfo:
@@ -1705,14 +1725,14 @@ class Client(BaseClient):
 
         Args:
 
-            uids: A list of task UIDs to cancel.
-            index_uids: A list of index UIDs for which to cancel tasks.
-            statuses: A list of statuses to cancel.
-            types: A list of types to cancel.
-            before_enqueued_at: Cancel tasks that were enqueued before the specified date time.
-            after_enqueued_at: Cancel tasks that were enqueued after the specified date time.
-            before_started_at: Cancel tasks that were started before the specified date time.
-            after_finished_at: Cancel tasks that were finished after the specified date time.
+            uids: A list of task UIDs to delete.
+            index_uids: A list of index UIDs for which to delete tasks.
+            statuses: A list of statuses to delete.
+            types: A list of types to delete.
+            before_enqueued_at: Delete tasks that were enqueued before the specified date time.
+            after_enqueued_at: Delete tasks that were enqueued after the specified date time.
+            before_started_at: Delete tasks that were started before the specified date time.
+            after_finished_at: Delete tasks that were finished after the specified date time.
 
         Returns:
 
