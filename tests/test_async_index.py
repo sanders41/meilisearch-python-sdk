@@ -7,9 +7,7 @@ from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
-    HuggingFaceEmbedder,
     MinWordSizeForTypos,
-    OllamaEmbedder,
     OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
@@ -697,44 +695,39 @@ async def test_get_embedders(async_empty_index):
     assert response is None
 
 
-@pytest.mark.parametrize("compress", (True, False))
+# NOTE: Compressing embedder settings is broken in Meilisearch 1.8.0-rc.1+ so skip testing compressing
+# @pytest.mark.parametrize("compress", (True, False))
 @pytest.mark.usefixtures("enable_vector_search")
-@pytest.mark.skip(
-    reason="TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585"
-)
-async def test_update_embedders(compress, async_empty_index):
+async def test_update_embedders(async_empty_index):
     embedders = Embedders(
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),
-            "test1": HuggingFaceEmbedder(),
+            # "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
-            "test3": OllamaEmbedder(model="nomic-embed-text"),
-            "test4": RestEmbedder(url="https://myurl.com"),
+            # "test3": OllamaEmbedder(model="nomic-embed-text"),
+            "test4": RestEmbedder(url="https://myurl.com", dimensions=512),
         }
     )
     index = await async_empty_index()
-    response = await index.update_embedders(embedders, compress=compress)
+    response = await index.update_embedders(embedders)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
-    assert response.embedders["test1"].source == "huggingFace"
+    # assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
-    assert response.embedders["test3"].source == "ollama"
+    # assert response.embedders["test3"].source == "ollama"
     assert response.embedders["test4"].source == "rest"
 
 
 @pytest.mark.usefixtures("enable_vector_search")
-@pytest.mark.skip(
-    reason="TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585"
-)
 async def test_reset_embedders(async_empty_index):
     embedders = Embedders(
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),
-            "test1": HuggingFaceEmbedder(),
+            # "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
-            "test3": OllamaEmbedder(model="nomic-embed-text"),
-            "test4": RestEmbedder(url="https://myurl.com"),
+            # "test3": OllamaEmbedder(model="nomic-embed-text"),
+            "test4": RestEmbedder(url="https://myurl.com", dimensions=512),
         }
     )
     index = await async_empty_index()
@@ -743,9 +736,9 @@ async def test_reset_embedders(async_empty_index):
     assert update.status == "succeeded"
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
-    assert response.embedders["test1"].source == "huggingFace"
+    # assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
-    assert response.embedders["test3"].source == "ollama"
+    # assert response.embedders["test3"].source == "ollama"
     assert response.embedders["test4"].source == "rest"
     response = await index.reset_embedders()
     await async_wait_for_task(index.http_client, response.task_uid)

@@ -98,7 +98,7 @@ class RestEmbedder(CamelBase):
     source: str = "rest"
     url: str
     api_key: Optional[str] = None
-    dimensions: Optional[int] = None
+    dimensions: int
     document_template: Optional[str] = None
     input_field: Optional[List[str]] = None
     input_type: str = "text"
