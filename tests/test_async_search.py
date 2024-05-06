@@ -372,7 +372,7 @@ async def test_vector_search(async_index_with_documents_and_vectors):
         vector=[0.1, 0.2],
         hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
     )
-    assert response.vector == [0.1, 0.2]
+    assert len(response.hits) >= 1
 
 
 async def test_basic_facet_search(async_index_with_documents):

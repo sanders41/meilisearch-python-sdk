@@ -63,12 +63,18 @@ class Pagination(CamelBase):
     max_total_hits: int
 
 
+class Distribution(CamelBase):
+    mean: float
+    sigma: float
+
+
 class OpenAiEmbedder(CamelBase):
     source: str = "openAi"
     model: Optional[str] = None  # Defaults to text-embedding-ada-002
     dimensions: Optional[int] = None  # Uses the model default
     api_key: Optional[str] = None  # Can be provided through a CLI option or environment variable
     document_template: Optional[str] = None
+    distribution: Optional[Distribution] = None
 
 
 class HuggingFaceEmbedder(CamelBase):
@@ -76,15 +82,45 @@ class HuggingFaceEmbedder(CamelBase):
     model: Optional[str] = None  # Defaults to BAAI/bge-base-en-v1.5
     revision: Optional[str] = None
     document_template: Optional[str] = None
+    distribution: Optional[Distribution] = None
+
+
+class OllamaEmbedder(CamelBase):
+    source: str = "ollama"
+    url: Optional[str] = None
+    api_key: Optional[str] = None
+    model: str
+    document_template: Optional[str] = None
+    distribution: Optional[Distribution] = None
+
+
+class RestEmbedder(CamelBase):
+    source: str = "rest"
+    url: str
+    api_key: Optional[str] = None
+    dimensions: int
+    document_template: Optional[str] = None
+    input_field: Optional[List[str]] = None
+    input_type: str = "text"
+    query: JsonDict = {}
+    path_to_embeddings: Optional[List[str]] = None
+    embedding_object: Optional[List[str]] = None
+    distribution: Optional[Distribution] = None
 
 
 class UserProvidedEmbedder(CamelBase):
     source: str = "userProvided"
     dimensions: int
+    distribution: Optional[Distribution] = None
 
 
 class Embedders(CamelBase):
-    embedders: Dict[str, Union[OpenAiEmbedder, HuggingFaceEmbedder, UserProvidedEmbedder]]
+    embedders: Dict[
+        str,
+        Union[
+            OpenAiEmbedder, HuggingFaceEmbedder, OllamaEmbedder, RestEmbedder, UserProvidedEmbedder
+        ],
+    ]
 
 
 class ProximityPrecision(str, Enum):
@@ -107,7 +143,17 @@ class MeilisearchSettings(CamelBase):
     proximity_precision: Optional[ProximityPrecision] = None
     separator_tokens: Optional[List[str]] = None
     non_separator_tokens: Optional[List[str]] = None
+    search_cutoff_ms: Optional[int] = None
     dictionary: Optional[List[str]] = None
     embedders: Optional[
-        Dict[str, Union[OpenAiEmbedder, HuggingFaceEmbedder, UserProvidedEmbedder]]
+        Dict[
+            str,
+            Union[
+                OpenAiEmbedder,
+                HuggingFaceEmbedder,
+                OllamaEmbedder,
+                RestEmbedder,
+                UserProvidedEmbedder,
+            ],
+        ]
     ] = None  # Optional[Embedders] = None

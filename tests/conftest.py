@@ -12,11 +12,13 @@ from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
-    HuggingFaceEmbedder,
+    # HuggingFaceEmbedder,
     MeilisearchSettings,
-    OpenAiEmbedder,
+    # OllamaEmbedder,
+    # OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
+    # RestEmbedder,
     TypoTolerance,
     UserProvidedEmbedder,
 )
@@ -275,11 +277,15 @@ def new_settings():
         pagination=Pagination(max_total_hits=17),
         separator_tokens=["&sep", "/", "|"],
         non_separator_tokens=["#", "@"],
+        search_cutoff_ms=100,
         dictionary=["S.O", "S.O.S"],
-        embedders={
-            "default": UserProvidedEmbedder(dimensions=512),
-            "test1": HuggingFaceEmbedder(),
-            "test2": OpenAiEmbedder(),
-        },
+        # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+        # embedders={
+        #     "default": UserProvidedEmbedder(dimensions=512),
+        #     # "test1": HuggingFaceEmbedder(),
+        #     "test2": OpenAiEmbedder(),
+        #     # "test3": OllamaEmbedder(model="nomic-embed-text"),
+        #     "test4": RestEmbedder(url="https://myurl.com"),
+        # },
         proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
     )
