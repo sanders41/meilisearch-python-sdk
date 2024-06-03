@@ -113,12 +113,12 @@ def test_custom_search_params_with_simple_string(index_with_documents):
 def test_custom_search_params_with_string_list(index_with_documents):
     index = index_with_documents()
     response = index.search(
-        "a",
+        "Shazam!",
         limit=5,
         attributes_to_retrieve=["title", "overview"],
         attributes_to_highlight=["title"],
     )
-    assert len(response.hits) == 5
+    assert len(response.hits) == 1
     assert "title" in response.hits[0]
     assert "overview" in response.hits[0]
     assert "release_date" not in response.hits[0]
