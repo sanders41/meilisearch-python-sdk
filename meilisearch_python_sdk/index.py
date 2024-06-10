@@ -1300,6 +1300,7 @@ class AsyncIndex(_BaseIndex):
         primary_key: str | None = None,
         *,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Add documents to the index.
 
@@ -1309,6 +1310,8 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -1366,7 +1369,11 @@ class AsyncIndex(_BaseIndex):
                             )
                         )
 
-                tasks.append(self._http_requests.post(url, documents, compress=compress))
+                tasks.append(
+                    self._http_requests.post(
+                        url, documents, compress=compress, serializer=serializer
+                    )
+                )
 
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
@@ -1402,7 +1409,9 @@ class AsyncIndex(_BaseIndex):
                         )
 
                 response_coroutine = tg.create_task(
-                    self._http_requests.post(url, documents, compress=compress)
+                    self._http_requests.post(
+                        url, documents, compress=compress, serializer=serializer
+                    )
                 )
 
             response = await response_coroutine
@@ -1420,7 +1429,9 @@ class AsyncIndex(_BaseIndex):
 
             return result
 
-        response = await self._http_requests.post(url, documents, compress=compress)
+        response = await self._http_requests.post(
+            url, documents, compress=compress, serializer=serializer
+        )
 
         result = TaskInfo(**response.json())
         if self._post_add_documents_plugins:
@@ -1443,6 +1454,7 @@ class AsyncIndex(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
@@ -1454,6 +1466,8 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -1477,14 +1491,16 @@ class AsyncIndex(_BaseIndex):
         """
         if not use_task_groups():
             batches = [
-                self.add_documents(x, primary_key, compress=compress)
+                self.add_documents(x, primary_key, compress=compress, serializer=serializer)
                 for x in _batch(documents, batch_size)
             ]
             return await asyncio.gather(*batches)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
-                tg.create_task(self.add_documents(x, primary_key, compress=compress))
+                tg.create_task(
+                    self.add_documents(x, primary_key, compress=compress, serializer=serializer)
+                )
                 for x in _batch(documents, batch_size)
             ]
 
@@ -1499,6 +1515,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index.
 
@@ -1515,6 +1532,8 @@ class AsyncIndex(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -1550,7 +1569,9 @@ class AsyncIndex(_BaseIndex):
             loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
-            response = await self.add_documents(combined, primary_key, compress=compress)
+            response = await self.add_documents(
+                combined, primary_key, compress=compress, serializer=serializer
+            )
 
             return [response]
 
@@ -1560,7 +1581,9 @@ class AsyncIndex(_BaseIndex):
                 if path.suffix == f".{document_type}":
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
                     add_documents.append(
-                        self.add_documents(documents, primary_key, compress=compress)
+                        self.add_documents(
+                            documents, primary_key, compress=compress, serializer=serializer
+                        )
                     )
 
             _raise_on_no_documents(add_documents, document_type, directory_path)
@@ -1584,11 +1607,17 @@ class AsyncIndex(_BaseIndex):
                 if path.suffix == f".{document_type}":
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
                     if i == 0:
-                        all_results = [await self.add_documents(documents, compress=compress)]
+                        all_results = [
+                            await self.add_documents(
+                                documents, compress=compress, serializer=serializer
+                            )
+                        ]
                     else:
                         tasks.append(
                             tg.create_task(
-                                self.add_documents(documents, primary_key, compress=compress)
+                                self.add_documents(
+                                    documents, primary_key, compress=compress, serializer=serializer
+                                )
                             )
                         )
 
@@ -1607,6 +1636,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index in batches.
 
@@ -1625,6 +1655,8 @@ class AsyncIndex(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -1663,7 +1695,11 @@ class AsyncIndex(_BaseIndex):
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
             return await self.add_documents_in_batches(
-                combined, batch_size=batch_size, primary_key=primary_key, compress=compress
+                combined,
+                batch_size=batch_size,
+                primary_key=primary_key,
+                compress=compress,
+                serializer=serializer,
             )
 
         responses: list[TaskInfo] = []
@@ -1674,7 +1710,11 @@ class AsyncIndex(_BaseIndex):
                 documents = await _async_load_documents_from_file(path, csv_delimiter)
                 add_documents.append(
                     self.add_documents_in_batches(
-                        documents, batch_size=batch_size, primary_key=primary_key, compress=compress
+                        documents,
+                        batch_size=batch_size,
+                        primary_key=primary_key,
+                        compress=compress,
+                        serializer=serializer,
                     )
                 )
 
@@ -1692,7 +1732,12 @@ class AsyncIndex(_BaseIndex):
         return responses
 
     async def add_documents_from_file(
-        self, file_path: Path | str, primary_key: str | None = None, *, compress: bool = False
+        self,
+        file_path: Path | str,
+        primary_key: str | None = None,
+        *,
+        compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Add documents to the index from a json file.
 
@@ -1702,6 +1747,8 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -1725,7 +1772,9 @@ class AsyncIndex(_BaseIndex):
         """
         documents = await _async_load_documents_from_file(file_path)
 
-        return await self.add_documents(documents, primary_key=primary_key, compress=compress)
+        return await self.add_documents(
+            documents, primary_key=primary_key, compress=compress, serializer=serializer
+        )
 
     async def add_documents_from_file_in_batches(
         self,
@@ -1735,6 +1784,7 @@ class AsyncIndex(_BaseIndex):
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -1748,6 +1798,8 @@ class AsyncIndex(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -1772,7 +1824,11 @@ class AsyncIndex(_BaseIndex):
         documents = await _async_load_documents_from_file(file_path, csv_delimiter)
 
         return await self.add_documents_in_batches(
-            documents, batch_size=batch_size, primary_key=primary_key, compress=compress
+            documents,
+            batch_size=batch_size,
+            primary_key=primary_key,
+            compress=compress,
+            serializer=serializer,
         )
 
     async def add_documents_from_raw_file(
@@ -1782,6 +1838,7 @@ class AsyncIndex(_BaseIndex):
         *,
         csv_delimiter: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -1797,6 +1854,8 @@ class AsyncIndex(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -1854,7 +1913,7 @@ class AsyncIndex(_BaseIndex):
             data = await f.read()
 
         response = await self._http_requests.post(
-            url, body=data, content_type=content_type, compress=compress
+            url, body=data, content_type=content_type, compress=compress, serializer=serializer
         )
 
         return TaskInfo(**response.json())
@@ -1865,6 +1924,7 @@ class AsyncIndex(_BaseIndex):
         primary_key: str | None = None,
         *,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -1874,6 +1934,8 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -1968,7 +2030,9 @@ class AsyncIndex(_BaseIndex):
                         )
 
                 response_coroutine = tg.create_task(
-                    self._http_requests.put(url, documents, compress=compress)
+                    self._http_requests.put(
+                        url, documents, compress=compress, serializer=serializer
+                    )
                 )
 
             response = await response_coroutine
@@ -1987,7 +2051,9 @@ class AsyncIndex(_BaseIndex):
 
             return result
 
-        response = await self._http_requests.put(url, documents, compress=compress)
+        response = await self._http_requests.put(
+            url, documents, compress=compress, serializer=serializer
+        )
         result = TaskInfo(**response.json())
         if self._post_update_documents_plugins:
             post = await AsyncIndex._run_plugins(
@@ -2009,6 +2075,7 @@ class AsyncIndex(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
 
@@ -2022,6 +2089,8 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -2045,7 +2114,7 @@ class AsyncIndex(_BaseIndex):
         """
         if not use_task_groups():
             batches = [
-                self.update_documents(x, primary_key, compress=compress)
+                self.update_documents(x, primary_key, compress=compress, serializer=serializer)
                 for x in _batch(documents, batch_size)
             ]
             return await asyncio.gather(*batches)
@@ -2066,6 +2135,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -2082,6 +2152,8 @@ class AsyncIndex(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -2117,7 +2189,9 @@ class AsyncIndex(_BaseIndex):
             loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
-            response = await self.update_documents(combined, primary_key, compress=compress)
+            response = await self.update_documents(
+                combined, primary_key, compress=compress, serializer=serializer
+            )
             return [response]
 
         if not use_task_groups():
@@ -2126,7 +2200,9 @@ class AsyncIndex(_BaseIndex):
                 if path.suffix == f".{document_type}":
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
                     update_documents.append(
-                        self.update_documents(documents, primary_key, compress=compress)
+                        self.update_documents(
+                            documents, primary_key, compress=compress, serializer=serializer
+                        )
                     )
 
             _raise_on_no_documents(update_documents, document_type, directory_path)
@@ -2150,12 +2226,16 @@ class AsyncIndex(_BaseIndex):
                     documents = await _async_load_documents_from_file(path, csv_delimiter)
                     if i == 0:
                         results = [
-                            await self.update_documents(documents, primary_key, compress=compress)
+                            await self.update_documents(
+                                documents, primary_key, compress=compress, serializer=serializer
+                            )
                         ]
                     else:
                         tasks.append(
                             tg.create_task(
-                                self.update_documents(documents, primary_key, compress=compress)
+                                self.update_documents(
+                                    documents, primary_key, compress=compress, serializer=serializer
+                                )
                             )
                         )
 
@@ -2173,6 +2253,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -2191,6 +2272,8 @@ class AsyncIndex(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -2227,7 +2310,11 @@ class AsyncIndex(_BaseIndex):
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
             return await self.update_documents_in_batches(
-                combined, batch_size=batch_size, primary_key=primary_key, compress=compress
+                combined,
+                batch_size=batch_size,
+                primary_key=primary_key,
+                compress=compress,
+                serializer=serializer,
             )
 
         if not use_task_groups():
@@ -2243,6 +2330,7 @@ class AsyncIndex(_BaseIndex):
                             batch_size=batch_size,
                             primary_key=primary_key,
                             compress=compress,
+                            serializer=serializer,
                         )
                     )
 
@@ -2271,6 +2359,7 @@ class AsyncIndex(_BaseIndex):
                             batch_size=batch_size,
                             primary_key=primary_key,
                             compress=compress,
+                            serializer=serializer,
                         )
                     else:
                         tasks.append(
@@ -2280,6 +2369,7 @@ class AsyncIndex(_BaseIndex):
                                     batch_size=batch_size,
                                     primary_key=primary_key,
                                     compress=compress,
+                                    serializer=serializer,
                                 )
                             )
                         )
@@ -2295,6 +2385,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         *,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
 
@@ -2306,6 +2397,8 @@ class AsyncIndex(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -2327,7 +2420,9 @@ class AsyncIndex(_BaseIndex):
         """
         documents = await _async_load_documents_from_file(file_path, csv_delimiter)
 
-        return await self.update_documents(documents, primary_key=primary_key, compress=compress)
+        return await self.update_documents(
+            documents, primary_key=primary_key, compress=compress, serializer=serializer
+        )
 
     async def update_documents_from_file_in_batches(
         self,
@@ -2336,6 +2431,7 @@ class AsyncIndex(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -2347,6 +2443,8 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -2369,7 +2467,11 @@ class AsyncIndex(_BaseIndex):
         documents = await _async_load_documents_from_file(file_path)
 
         return await self.update_documents_in_batches(
-            documents, batch_size=batch_size, primary_key=primary_key, compress=compress
+            documents,
+            batch_size=batch_size,
+            primary_key=primary_key,
+            compress=compress,
+            serializer=serializer,
         )
 
     async def update_documents_from_raw_file(
@@ -2379,6 +2481,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         *,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -2394,6 +2497,8 @@ class AsyncIndex(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -2451,7 +2556,7 @@ class AsyncIndex(_BaseIndex):
             data = await f.read()
 
         response = await self._http_requests.put(
-            url, body=data, content_type=content_type, compress=compress
+            url, body=data, content_type=content_type, compress=compress, serializer=serializer
         )
 
         return TaskInfo(**response.json())
@@ -5289,6 +5394,7 @@ class Index(_BaseIndex):
         primary_key: str | None = None,
         *,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Add documents to the index.
 
@@ -5298,6 +5404,8 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5334,7 +5442,9 @@ class Index(_BaseIndex):
             if pre.get("document_result"):
                 documents = pre["document_result"]
 
-        response = self._http_requests.post(url, documents, compress=compress)
+        response = self._http_requests.post(
+            url, documents, compress=compress, serializer=serializer
+        )
         result = TaskInfo(**response.json())
         if self._post_add_documents_plugins:
             post = Index._run_plugins(self._post_add_documents_plugins, Event.POST, result=result)
@@ -5350,6 +5460,7 @@ class Index(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
@@ -5361,6 +5472,8 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5383,7 +5496,7 @@ class Index(_BaseIndex):
             >>> index.add_documents_in_batches(documents)
         """
         return [
-            self.add_documents(x, primary_key, compress=compress)
+            self.add_documents(x, primary_key, compress=compress, serializer=serializer)
             for x in _batch(documents, batch_size)
         ]
 
@@ -5396,6 +5509,7 @@ class Index(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index.
 
@@ -5412,6 +5526,8 @@ class Index(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5446,7 +5562,9 @@ class Index(_BaseIndex):
 
             combined = _combine_documents(all_documents)
 
-            response = self.add_documents(combined, primary_key, compress=compress)
+            response = self.add_documents(
+                combined, primary_key, compress=compress, serializer=serializer
+            )
 
             return [response]
 
@@ -5454,7 +5572,11 @@ class Index(_BaseIndex):
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = _load_documents_from_file(path, csv_delimiter)
-                responses.append(self.add_documents(documents, primary_key, compress=compress))
+                responses.append(
+                    self.add_documents(
+                        documents, primary_key, compress=compress, serializer=serializer
+                    )
+                )
 
         _raise_on_no_documents(responses, document_type, directory_path)
 
@@ -5470,6 +5592,7 @@ class Index(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index in batches.
 
@@ -5488,6 +5611,8 @@ class Index(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5523,7 +5648,11 @@ class Index(_BaseIndex):
             combined = _combine_documents(all_documents)
 
             return self.add_documents_in_batches(
-                combined, batch_size=batch_size, primary_key=primary_key, compress=compress
+                combined,
+                batch_size=batch_size,
+                primary_key=primary_key,
+                compress=compress,
+                serializer=serializer,
             )
 
         responses: list[TaskInfo] = []
@@ -5532,7 +5661,11 @@ class Index(_BaseIndex):
                 documents = _load_documents_from_file(path, csv_delimiter)
                 responses.extend(
                     self.add_documents_in_batches(
-                        documents, batch_size=batch_size, primary_key=primary_key, compress=compress
+                        documents,
+                        batch_size=batch_size,
+                        primary_key=primary_key,
+                        compress=compress,
+                        serializer=serializer,
                     )
                 )
 
@@ -5541,7 +5674,12 @@ class Index(_BaseIndex):
         return responses
 
     def add_documents_from_file(
-        self, file_path: Path | str, primary_key: str | None = None, *, compress: bool = False
+        self,
+        file_path: Path | str,
+        primary_key: str | None = None,
+        *,
+        compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Add documents to the index from a json file.
 
@@ -5551,6 +5689,8 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5574,7 +5714,9 @@ class Index(_BaseIndex):
         """
         documents = _load_documents_from_file(file_path)
 
-        return self.add_documents(documents, primary_key=primary_key, compress=compress)
+        return self.add_documents(
+            documents, primary_key=primary_key, compress=compress, serializer=serializer
+        )
 
     def add_documents_from_file_in_batches(
         self,
@@ -5584,6 +5726,7 @@ class Index(_BaseIndex):
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -5597,6 +5740,8 @@ class Index(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5621,7 +5766,11 @@ class Index(_BaseIndex):
         documents = _load_documents_from_file(file_path, csv_delimiter)
 
         return self.add_documents_in_batches(
-            documents, batch_size=batch_size, primary_key=primary_key, compress=compress
+            documents,
+            batch_size=batch_size,
+            primary_key=primary_key,
+            compress=compress,
+            serializer=serializer,
         )
 
     def add_documents_from_raw_file(
@@ -5631,6 +5780,7 @@ class Index(_BaseIndex):
         *,
         csv_delimiter: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -5646,6 +5796,8 @@ class Index(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5703,7 +5855,7 @@ class Index(_BaseIndex):
             data = f.read()
 
         response = self._http_requests.post(
-            url, body=data, content_type=content_type, compress=compress
+            url, body=data, content_type=content_type, compress=compress, serializer=serializer
         )
 
         return TaskInfo(**response.json())
@@ -5714,6 +5866,7 @@ class Index(_BaseIndex):
         primary_key: str | None = None,
         *,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Update documents in the index.
 
@@ -5723,6 +5876,8 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5759,7 +5914,7 @@ class Index(_BaseIndex):
             if pre.get("document_result"):
                 documents = pre["document_result"]
 
-        response = self._http_requests.put(url, documents, compress=compress)
+        response = self._http_requests.put(url, documents, compress=compress, serializer=serializer)
         result = TaskInfo(**response.json())
         if self._post_update_documents_plugins:
             post = Index._run_plugins(
@@ -5777,6 +5932,7 @@ class Index(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
 
@@ -5790,6 +5946,8 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5812,7 +5970,7 @@ class Index(_BaseIndex):
             >>> index.update_documents_in_batches(documents)
         """
         return [
-            self.update_documents(x, primary_key, compress=compress)
+            self.update_documents(x, primary_key, compress=compress, serializer=serializer)
             for x in _batch(documents, batch_size)
         ]
 
@@ -5825,6 +5983,7 @@ class Index(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -5841,6 +6000,8 @@ class Index(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5875,14 +6036,20 @@ class Index(_BaseIndex):
 
             combined = _combine_documents(all_documents)
 
-            response = self.update_documents(combined, primary_key, compress=compress)
+            response = self.update_documents(
+                combined, primary_key, compress=compress, serializer=serializer
+            )
             return [response]
 
         responses = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
                 documents = _load_documents_from_file(path, csv_delimiter)
-                responses.append(self.update_documents(documents, primary_key, compress=compress))
+                responses.append(
+                    self.update_documents(
+                        documents, primary_key, compress=compress, serializer=serializer
+                    )
+                )
 
         _raise_on_no_documents(responses, document_type, directory_path)
 
@@ -5898,6 +6065,7 @@ class Index(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -5916,6 +6084,8 @@ class Index(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -5951,7 +6121,11 @@ class Index(_BaseIndex):
             combined = _combine_documents(all_documents)
 
             return self.update_documents_in_batches(
-                combined, batch_size=batch_size, primary_key=primary_key, compress=compress
+                combined,
+                batch_size=batch_size,
+                primary_key=primary_key,
+                compress=compress,
+                serializer=serializer,
             )
 
         responses: list[TaskInfo] = []
@@ -5961,7 +6135,11 @@ class Index(_BaseIndex):
                 documents = _load_documents_from_file(path, csv_delimiter)
                 responses.extend(
                     self.update_documents_in_batches(
-                        documents, batch_size=batch_size, primary_key=primary_key, compress=compress
+                        documents,
+                        batch_size=batch_size,
+                        primary_key=primary_key,
+                        compress=compress,
+                        serializer=serializer,
                     )
                 )
 
@@ -5976,6 +6154,7 @@ class Index(_BaseIndex):
         csv_delimiter: str | None = None,
         *,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
 
@@ -5987,6 +6166,8 @@ class Index(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -6008,7 +6189,9 @@ class Index(_BaseIndex):
         """
         documents = _load_documents_from_file(file_path, csv_delimiter)
 
-        return self.update_documents(documents, primary_key=primary_key, compress=compress)
+        return self.update_documents(
+            documents, primary_key=primary_key, compress=compress, serializer=serializer
+        )
 
     def update_documents_from_file_in_batches(
         self,
@@ -6017,6 +6200,7 @@ class Index(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -6028,6 +6212,8 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -6050,7 +6236,11 @@ class Index(_BaseIndex):
         documents = _load_documents_from_file(file_path)
 
         return self.update_documents_in_batches(
-            documents, batch_size=batch_size, primary_key=primary_key, compress=compress
+            documents,
+            batch_size=batch_size,
+            primary_key=primary_key,
+            compress=compress,
+            serializer=serializer,
         )
 
     def update_documents_from_raw_file(
@@ -6060,6 +6250,7 @@ class Index(_BaseIndex):
         csv_delimiter: str | None = None,
         *,
         compress: bool = False,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
 
@@ -6075,6 +6266,8 @@ class Index(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            serializer: A custom JSONEncode to handle serializing fields that the build in
+                json.dumps cannot handle, for example UUID and datetime. Defaults to None.
 
         Returns:
 
@@ -6132,7 +6325,7 @@ class Index(_BaseIndex):
             data = f.read()
 
         response = self._http_requests.put(
-            url, body=data, content_type=content_type, compress=compress
+            url, body=data, content_type=content_type, compress=compress, serializer=serializer
         )
 
         return TaskInfo(**response.json())
