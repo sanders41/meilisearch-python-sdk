@@ -35,6 +35,7 @@ nav:
       - Index: index_api.md
       - Decorators: decorators_api.md
   - Plugins: plugins.md
+  - Custom Serializer: custom_serializer.md
   - Pydantic: pydantic.md
 
 plugins:

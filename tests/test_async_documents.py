@@ -1,7 +1,9 @@
 import asyncio
 import csv
 import json
+from datetime import datetime
 from math import ceil
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -12,6 +14,15 @@ from meilisearch_python_sdk.errors import (
     MeilisearchError,
 )
 from meilisearch_python_sdk.index import _async_load_documents_from_file, _combine_documents
+
+
+class CustomEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, (UUID, datetime)):
+            return str(o)
+
+        # Let the base class default method raise the TypeError
+        return super().default(o)
 
 
 def generate_test_movies(num_movies=50, id_start=0):
@@ -1344,3 +1355,15 @@ def test_combine_documents():
 
     assert len(combined) == 3
     assert [1, 2, 3] == [x["id"] for x in combined]
+
+
+@pytest.mark.parametrize("compress", (True, False))
+async def test_add_documents_custom_serializer(compress, async_empty_index):
+    documents = [
+        {"id": uuid4(), "title": "test 1", "when": datetime.now()},
+        {"id": uuid4(), "title": "Test 2", "when": datetime.now()},
+    ]
+    index = await async_empty_index()
+    response = await index.add_documents(documents, compress=compress, serializer=CustomEncoder)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
