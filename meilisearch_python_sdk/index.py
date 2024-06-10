@@ -6,7 +6,7 @@ from csv import DictReader
 from datetime import datetime
 from functools import cached_property, partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generator, MutableMapping, Sequence
+from typing import TYPE_CHECKING, Any, Generator, Literal, MutableMapping, Sequence
 from urllib.parse import urlencode
 from warnings import warn
 
@@ -981,7 +981,7 @@ class AsyncIndex(_BaseIndex):
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
-        matching_strategy: str = "all",
+        matching_strategy: Literal["all", "last", "frequency"] = "all",
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
@@ -4903,7 +4903,7 @@ class Index(_BaseIndex):
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
-        matching_strategy: str = "all",
+        matching_strategy: Literal["all", "last", "frequency"] = "all",
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
