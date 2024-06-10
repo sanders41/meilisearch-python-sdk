@@ -395,8 +395,8 @@ def test_basic_facet_search_not_found(index_with_documents):
     assert response.facet_hits == []
 
 
-def test_custom_facet_search(index_with_documents_and_vectors):
-    index = index_with_documents_and_vectors()
+def test_custom_facet_search(index_with_documents):
+    index = index_with_documents()
     update = index.update_filterable_attributes(["genre"])
     wait_for_task(index.http_client, update.task_uid)
     response = index.facet_search(
