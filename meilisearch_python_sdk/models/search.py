@@ -5,7 +5,6 @@ import pydantic
 from camel_converter.pydantic_base import CamelBase
 
 from meilisearch_python_sdk._utils import is_pydantic_2
-from meilisearch_python_sdk.errors import MeilisearchError
 from meilisearch_python_sdk.types import Filter, JsonDict
 
 
@@ -57,7 +56,9 @@ class SearchParams(CamelBase):
         @classmethod
         def validate_ranking_score_threshold(cls, v: Optional[bool]) -> Optional[bool]:
             if v and 0.0 > v > 1.0:
-                raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
+                raise pydantic.ValidationError(
+                    "ranking_score_threshold must be between 0.0 and 1.0"
+                )
 
             return v
 
@@ -72,7 +73,9 @@ class SearchParams(CamelBase):
         @classmethod
         def validate_expires_at(cls, v: Optional[float]) -> Optional[float]:
             if v and 0.0 > v > 1.0:
-                raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
+                raise pydantic.ValidationError(
+                    "ranking_score_threshold must be between 0.0 and 1.0"
+                )
 
             return v
 
