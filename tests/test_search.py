@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from pydantic import ValidationError
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk._task import wait_for_task
-from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchError
 from meilisearch_python_sdk.models.search import Hybrid, SearchParams
 
 
@@ -406,3 +407,25 @@ def test_custom_facet_search(index_with_documents):
     )
     assert response.facet_hits[0].value == "cartoon"
     assert response.facet_hits[0].count == 1
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+def test_search_invalid_ranking_score_threshold(ranking_score_threshold, index_with_documents):
+    index = index_with_documents()
+    with pytest.raises(MeilisearchError):
+        index.search("", ranking_score_threshold=ranking_score_threshold)
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+def test_multi_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, client, index_with_documents
+):
+    index1 = index_with_documents()
+    with pytest.raises(ValidationError):
+        client.multi_search(
+            [
+                SearchParams(
+                    index_uid=index1.uid, query="", ranking_score_threshold=ranking_score_threshold
+                ),
+            ]
+        )
