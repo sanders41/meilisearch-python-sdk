@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from pydantic import ValidationError
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk._task import wait_for_task
@@ -426,7 +425,7 @@ def test_multi_search_invalid_ranking_score_threshold(
     ranking_score_threshold, client, index_with_documents
 ):
     index1 = index_with_documents()
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(MeilisearchError) as e:
         client.multi_search(
             [
                 SearchParams(

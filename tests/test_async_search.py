@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from pydantic import ValidationError
 
 from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk._task import async_wait_for_task
@@ -425,7 +424,7 @@ async def test_multi_search_invalid_ranking_score_threshold(
     ranking_score_threshold, async_client, async_index_with_documents
 ):
     index1 = await async_index_with_documents()
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(MeilisearchError) as e:
         await async_client.multi_search(
             [
                 SearchParams(

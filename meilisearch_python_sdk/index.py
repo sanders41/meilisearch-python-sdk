@@ -8139,5 +8139,5 @@ def _validate_file_type(file_path: Path) -> None:
 
 
 def _validate_ranking_score_threshold(ranking_score_threshold: float) -> None:
-    if 0.0 > ranking_score_threshold > 1.0:
+    if not 0.0 <= ranking_score_threshold <= 1.0:
         raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
