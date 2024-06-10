@@ -47,7 +47,7 @@ class SearchParams(CamelBase):
     attributes_to_search_on: Optional[List[str]] = None
     show_ranking_score: bool = False
     show_ranking_score_details: bool = False
-    ranking_score_threshold: Optional[bool] = None
+    ranking_score_threshold: Optional[float] = None
     vector: Optional[List[float]] = None
     hybrid: Optional[Hybrid] = None
 

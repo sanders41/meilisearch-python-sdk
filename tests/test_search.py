@@ -419,6 +419,13 @@ def test_search_invalid_ranking_score_threshold(
         assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
 
 
+@pytest.mark.usefixtures("enable_vector_search")
+def test_search_ranking_score_threshold(index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
+    result = index.search("", ranking_score_threshold=0.5)
+    assert len(result.hits) > 0
+
+
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
 @pytest.mark.usefixtures("enable_vector_search")
 def test_multi_search_invalid_ranking_score_threshold(
@@ -434,3 +441,14 @@ def test_multi_search_invalid_ranking_score_threshold(
             ]
         )
         assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+def test_multi_search_ranking_score_threshold(client, index_with_documents):
+    index1 = index_with_documents()
+    result = client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="", ranking_score_threshold=0.5),
+        ]
+    )
+    assert len(result[0].hits) > 0
