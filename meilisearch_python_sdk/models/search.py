@@ -70,7 +70,7 @@ class SearchParams(CamelBase):
 
         @pydantic.validator("ranking_score_threshold", pre=True)
         @classmethod
-        def validate_expires_at(cls, v: float | None) -> float | None:
+        def validate_expires_at(cls, v: Optional[float]) -> Optional[float]:
             if v and 0.0 > v > 1.0:
                 raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
 
