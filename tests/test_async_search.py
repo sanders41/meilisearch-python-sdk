@@ -414,8 +414,9 @@ async def test_search_invalid_ranking_score_threshold(
     ranking_score_threshold, async_index_with_documents
 ):
     index = await async_index_with_documents()
-    with pytest.raises(MeilisearchError):
+    with pytest.raises(MeilisearchError) as e:
         await index.search("", ranking_score_threshold=ranking_score_threshold)
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
 
 
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
@@ -424,7 +425,7 @@ async def test_multi_search_invalid_ranking_score_threshold(
     ranking_score_threshold, async_client, async_index_with_documents
 ):
     index1 = await async_index_with_documents()
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as e:
         await async_client.multi_search(
             [
                 SearchParams(
@@ -432,3 +433,4 @@ async def test_multi_search_invalid_ranking_score_threshold(
                 ),
             ]
         )
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
