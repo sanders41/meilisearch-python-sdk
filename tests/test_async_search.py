@@ -4,7 +4,7 @@ import pytest
 
 from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk._task import async_wait_for_task
-from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchError
 from meilisearch_python_sdk.models.search import Hybrid, SearchParams
 
 
@@ -405,3 +405,49 @@ async def test_custom_facet_search(async_index_with_documents):
     )
     assert response.facet_hits[0].value == "cartoon"
     assert response.facet_hits[0].count == 1
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, async_index_with_documents
+):
+    index = await async_index_with_documents()
+    with pytest.raises(MeilisearchError) as e:
+        await index.search("", ranking_score_threshold=ranking_score_threshold)
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_search_ranking_score_threshold(async_index_with_documents_and_vectors):
+    index = await async_index_with_documents_and_vectors()
+    result = await index.search("", ranking_score_threshold=0.5)
+    assert len(result.hits) > 0
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_multi_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, async_client, async_index_with_documents
+):
+    index1 = await async_index_with_documents()
+    with pytest.raises(MeilisearchError) as e:
+        await async_client.multi_search(
+            [
+                SearchParams(
+                    index_uid=index1.uid, query="", ranking_score_threshold=ranking_score_threshold
+                ),
+            ]
+        )
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_multi_search_ranking_score_threshold(async_client, async_index_with_documents):
+    index1 = await async_index_with_documents()
+    result = await async_client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="", ranking_score_threshold=0.5),
+        ]
+    )
+    assert len(result[0].hits) > 0

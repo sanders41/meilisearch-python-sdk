@@ -737,6 +737,7 @@ class AsyncIndex(_BaseIndex):
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
     ) -> SearchResults:
@@ -777,6 +778,9 @@ class AsyncIndex(_BaseIndex):
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution. This
                 feature became stable in Meiliseach v1.7.0.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -808,6 +812,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     search_results = await index.search("Tron")
         """
+        if ranking_score_threshold:
+            _validate_ranking_score_threshold(ranking_score_threshold)
+
         body = _process_search_parameters(
             q=query,
             offset=offset,
@@ -831,6 +838,7 @@ class AsyncIndex(_BaseIndex):
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
             hybrid=hybrid,
+            ranking_score_threshold=ranking_score_threshold,
         )
         search_url = f"{self._base_url_with_uid}/search"
 
@@ -4909,6 +4917,7 @@ class Index(_BaseIndex):
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
     ) -> SearchResults:
@@ -4949,6 +4958,9 @@ class Index(_BaseIndex):
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution. This
                 feature became stable in Meiliseach v1.7.0.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -4980,6 +4992,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> search_results = index.search("Tron")
         """
+        if ranking_score_threshold:
+            _validate_ranking_score_threshold(ranking_score_threshold)
+
         body = _process_search_parameters(
             q=query,
             offset=offset,
@@ -5003,6 +5018,7 @@ class Index(_BaseIndex):
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
             hybrid=hybrid,
+            ranking_score_threshold=ranking_score_threshold,
         )
 
         if self._pre_search_plugins:
@@ -7999,6 +8015,7 @@ def _process_search_parameters(
     attributes_to_search_on: list[str] | None = None,
     show_ranking_score: bool = False,
     show_ranking_score_details: bool = False,
+    ranking_score_threshold: float | None = None,
     vector: list[float] | None = None,
     hybrid: Hybrid | None = None,
 ) -> JsonDict:
@@ -8025,6 +8042,7 @@ def _process_search_parameters(
         "page": page,
         "attributesToSearchOn": attributes_to_search_on,
         "showRankingScore": show_ranking_score,
+        "rankingScoreThreshold": ranking_score_threshold,
     }
 
     if facet_name:
@@ -8118,3 +8136,8 @@ def _embedder_json_to_settings_model(  # pragma: no cover
 def _validate_file_type(file_path: Path) -> None:
     if file_path.suffix not in (".json", ".csv", ".ndjson"):
         raise MeilisearchError("File must be a json, ndjson, or csv file")
+
+
+def _validate_ranking_score_threshold(ranking_score_threshold: float) -> None:
+    if not 0.0 <= ranking_score_threshold <= 1.0:
+        raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
