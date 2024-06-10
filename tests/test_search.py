@@ -395,8 +395,8 @@ def test_basic_facet_search_not_found(index_with_documents):
     assert response.facet_hits == []
 
 
-def test_custom_facet_search(index_with_documents):
-    index = index_with_documents()
+def test_custom_facet_search(index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
     update = index.update_filterable_attributes(["genre"])
     wait_for_task(index.http_client, update.task_uid)
     response = index.facet_search(
@@ -410,13 +410,17 @@ def test_custom_facet_search(index_with_documents):
 
 
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
-def test_search_invalid_ranking_score_threshold(ranking_score_threshold, index_with_documents):
-    index = index_with_documents()
+@pytest.mark.usefixtures("enable_vector_search")
+def test_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, index_with_documents_and_vectors
+):
+    index = index_with_documents_and_vectors()
     with pytest.raises(MeilisearchError):
         index.search("", ranking_score_threshold=ranking_score_threshold)
 
 
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+@pytest.mark.usefixtures("enable_vector_search")
 def test_multi_search_invalid_ranking_score_threshold(
     ranking_score_threshold, client, index_with_documents
 ):

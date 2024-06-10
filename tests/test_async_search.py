@@ -409,6 +409,7 @@ async def test_custom_facet_search(async_index_with_documents):
 
 
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+@pytest.mark.usefixtures("enable_vector_search")
 async def test_search_invalid_ranking_score_threshold(
     ranking_score_threshold, async_index_with_documents
 ):
@@ -418,6 +419,7 @@ async def test_search_invalid_ranking_score_threshold(
 
 
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+@pytest.mark.usefixtures("enable_vector_search")
 async def test_multi_search_invalid_ranking_score_threshold(
     ranking_score_threshold, async_client, async_index_with_documents
 ):
