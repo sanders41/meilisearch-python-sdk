@@ -1224,6 +1224,7 @@ class AsyncIndex(_BaseIndex):
     async def search_similar_documents(
         self,
         id: str,
+        *,
         offset: int | None = None,
         limit: int | None = None,
         filter: str | None = None,
@@ -5290,6 +5291,7 @@ class Index(_BaseIndex):
     def search_similar_documents(
         self,
         id: str,
+        *,
         offset: int | None = None,
         limit: int | None = None,
         filter: str | None = None,
