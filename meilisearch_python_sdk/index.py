@@ -1000,6 +1000,7 @@ class AsyncIndex(_BaseIndex):
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
     ) -> FacetSearchResults:
         """Search the index.
@@ -1041,6 +1042,9 @@ class AsyncIndex(_BaseIndex):
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution. This
                 feature became stable in Meiliseach v1.7.0.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -1069,6 +1073,9 @@ class AsyncIndex(_BaseIndex):
             >>>         facet_query="Sci-fi"
             >>>     )
         """
+        if ranking_score_threshold:
+            _validate_ranking_score_threshold(ranking_score_threshold)
+
         body = _process_search_parameters(
             q=query,
             facet_name=facet_name,
@@ -1092,6 +1099,7 @@ class AsyncIndex(_BaseIndex):
             attributes_to_search_on=attributes_to_search_on,
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
+            ranking_score_threshold=ranking_score_threshold,
             vector=vector,
         )
         search_url = f"{self._base_url_with_uid}/facet-search"
@@ -1120,6 +1128,7 @@ class AsyncIndex(_BaseIndex):
                 attributes_to_search_on=attributes_to_search_on,
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
+                ranking_score_threshold=ranking_score_threshold,
                 vector=vector,
             )
 
@@ -1151,6 +1160,7 @@ class AsyncIndex(_BaseIndex):
                                 attributes_to_search_on=attributes_to_search_on,
                                 show_ranking_score=show_ranking_score,
                                 show_ranking_score_details=show_ranking_score_details,
+                                ranking_score_threshold=ranking_score_threshold,
                                 vector=vector,
                             )
                         )
@@ -1193,6 +1203,7 @@ class AsyncIndex(_BaseIndex):
                                 attributes_to_search_on=attributes_to_search_on,
                                 show_ranking_score=show_ranking_score,
                                 show_ranking_score_details=show_ranking_score_details,
+                                ranking_score_threshold=ranking_score_threshold,
                                 vector=vector,
                             )
                         )
@@ -5157,6 +5168,7 @@ class Index(_BaseIndex):
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
     ) -> FacetSearchResults:
         """Search the index.
@@ -5198,6 +5210,9 @@ class Index(_BaseIndex):
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution. This
                 feature became stable in Meiliseach v1.7.0.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -5226,6 +5241,9 @@ class Index(_BaseIndex):
             >>>     facet_query="Sci-fi"
             >>> )
         """
+        if ranking_score_threshold:
+            _validate_ranking_score_threshold(ranking_score_threshold)
+
         body = _process_search_parameters(
             q=query,
             facet_name=facet_name,
@@ -5249,6 +5267,7 @@ class Index(_BaseIndex):
             attributes_to_search_on=attributes_to_search_on,
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
+            ranking_score_threshold=ranking_score_threshold,
             vector=vector,
         )
 
@@ -5276,6 +5295,7 @@ class Index(_BaseIndex):
                 attributes_to_search_on=attributes_to_search_on,
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
+                ranking_score_threshold=ranking_score_threshold,
                 vector=vector,
             )
 
