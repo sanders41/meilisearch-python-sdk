@@ -94,3 +94,12 @@ class SearchResults(CamelBase):
 
 class SearchResultsWithUID(SearchResults):
     index_uid: str
+
+
+class SimilarSearchResults(CamelBase):
+    hits: List[JsonDict]
+    id: str
+    processing_time_ms: int
+    limit: Optional[int] = None
+    offset: Optional[int] = None
+    estimated_total_hits: Optional[int] = None

@@ -20,7 +20,12 @@ from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time, use_t
 from meilisearch_python_sdk.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_sdk.models.documents import DocumentsInfo
 from meilisearch_python_sdk.models.index import IndexStats
-from meilisearch_python_sdk.models.search import FacetSearchResults, Hybrid, SearchResults
+from meilisearch_python_sdk.models.search import (
+    FacetSearchResults,
+    Hybrid,
+    SearchResults,
+    SimilarSearchResults,
+)
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
@@ -1215,6 +1220,74 @@ class AsyncIndex(_BaseIndex):
                 result = post["generic_result"]
 
         return result
+
+    async def search_similar_documents(
+        self,
+        id: str,
+        offset: int | None = None,
+        limit: int | None = None,
+        filter: str | None = None,
+        embedder: str = "default",
+        attributes_to_retrieve: list[str] | None = None,
+        show_ranking_score: bool = False,
+        show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
+    ) -> SimilarSearchResults:
+        """Search the index.
+
+        Args:
+            id: The id for the target document that is being used to find similar documents.
+            offset: Number of documents to skip. Defaults to 0.
+            limit: Maximum number of documents returned. Defaults to 20.
+            filter: Filter queries by an attribute value. Defaults to None.
+            embedder: The vector DB to use for the search.
+            attributes_to_retrieve: Attributes to display in the returned documents.
+                Defaults to ["*"].
+            show_ranking_score: If set to True the ranking score will be returned with each document
+                in the search. Defaults to False.
+            show_ranking_score_details: If set to True the ranking details will be returned with
+                each document in the search. Defaults to False.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
+
+        Returns:
+
+            Results of the search
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_results = await index.search_similar_documents("123")
+        """
+        payload = {
+            "id": id,
+            "filter": filter,
+            "embedder": embedder,
+            "attributesToRetrieve": attributes_to_retrieve,
+            "showRankingScore": show_ranking_score,
+            "showRankingScoreDetails": show_ranking_score_details,
+            "rankingScoreThreshold": ranking_score_threshold,
+        }
+
+        if offset:
+            payload["offset"] = offset
+
+        if limit:
+            payload["limit"] = limit
+
+        response = await self._http_requests.post(
+            f"{self._base_url_with_uid}/similar", body=payload
+        )
+
+        return SimilarSearchResults(**response.json())
 
     async def get_document(self, document_id: str) -> JsonDict:
         """Get one document with given document identifier.
@@ -5213,6 +5286,72 @@ class Index(_BaseIndex):
                 result = post["generic_result"]
 
         return result
+
+    def search_similar_documents(
+        self,
+        id: str,
+        offset: int | None = None,
+        limit: int | None = None,
+        filter: str | None = None,
+        embedder: str = "default",
+        attributes_to_retrieve: list[str] | None = None,
+        show_ranking_score: bool = False,
+        show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
+    ) -> SimilarSearchResults:
+        """Search the index.
+
+        Args:
+            id: The id for the target document that is being used to find similar documents.
+            offset: Number of documents to skip. Defaults to 0.
+            limit: Maximum number of documents returned. Defaults to 20.
+            filter: Filter queries by an attribute value. Defaults to None.
+            embedder: The vector DB to use for the search.
+            attributes_to_retrieve: Attributes to display in the returned documents.
+                Defaults to ["*"].
+            show_ranking_score: If set to True the ranking score will be returned with each document
+                in the search. Defaults to False.
+            show_ranking_score_details: If set to True the ranking details will be returned with
+                each document in the search. Defaults to False.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
+
+        Returns:
+
+            Results of the search
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> search_results = index.search_similar_documents("123")
+        """
+        payload = {
+            "id": id,
+            "filter": filter,
+            "embedder": embedder,
+            "attributesToRetrieve": attributes_to_retrieve,
+            "showRankingScore": show_ranking_score,
+            "showRankingScoreDetails": show_ranking_score_details,
+            "rankingScoreThreshold": ranking_score_threshold,
+        }
+
+        if offset:
+            payload["offset"] = offset
+
+        if limit:
+            payload["limit"] = limit
+
+        response = self._http_requests.post(f"{self._base_url_with_uid}/similar", body=payload)
+
+        return SimilarSearchResults(**response.json())
 
     def get_document(self, document_id: str) -> JsonDict:
         """Get one document with given document identifier.
