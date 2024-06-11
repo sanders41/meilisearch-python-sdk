@@ -454,8 +454,9 @@ def test_multi_search_ranking_score_threshold(client, index_with_documents):
     assert len(result[0].hits) > 0
 
 
+@pytest.mark.parametrize("limit, offset", ((1, 1), (None, None)))
 @pytest.mark.usefixtures("enable_vector_search")
-def test_similar_search(index_with_documents_and_vectors):
+def test_similar_search(limit, offset, index_with_documents_and_vectors):
     index = index_with_documents_and_vectors()
-    response = index.search_similar_documents("287947")
+    response = index.search_similar_documents("287947", limit=limit, offset=offset)
     assert len(response.hits) >= 1
