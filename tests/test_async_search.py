@@ -453,6 +453,38 @@ async def test_multi_search_ranking_score_threshold(async_client, async_index_wi
     assert len(result[0].hits) > 0
 
 
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_facet_search_ranking_score_threshold(async_index_with_documents_and_vectors):
+    index = await async_index_with_documents_and_vectors()
+    update = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon",
+        facet_name="genre",
+        facet_query="cartoon",
+        ranking_score_threshold=0.5,
+    )
+    assert len(response.facet_hits) > 0
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+@pytest.mark.usefixtures("enable_vector_search")
+async def test_facet_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, async_index_with_documents_and_vectors
+):
+    index = await async_index_with_documents_and_vectors()
+    update = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, update.task_uid)
+    with pytest.raises(MeilisearchError) as e:
+        await index.facet_search(
+            "How to Train Your Dragon",
+            facet_name="genre",
+            facet_query="cartoon",
+            ranking_score_threshold=ranking_score_threshold,
+        )
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
 @pytest.mark.parametrize("limit, offset", ((1, 1), (None, None)))
 @pytest.mark.usefixtures("enable_vector_search")
 async def test_similar_search(limit, offset, async_index_with_documents_and_vectors):
