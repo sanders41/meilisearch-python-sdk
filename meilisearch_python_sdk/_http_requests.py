@@ -44,7 +44,7 @@ class AsyncHttpRequests:
                 response = await http_method(path)
             elif content_type == "application/json" and not compress:
                 response = await http_method(
-                    path, data=json.dumps(body, cls=serializer), headers=headers
+                    path, content=json.dumps(body, cls=serializer), headers=headers
                 )
             else:
                 if body and compress:
@@ -127,7 +127,9 @@ class HttpRequests:
             if not body:
                 response = http_method(path)
             elif content_type == "application/json" and not compress:
-                response = http_method(path, data=json.dumps(body, cls=serializer), headers=headers)
+                response = http_method(
+                    path, content=json.dumps(body, cls=serializer), headers=headers
+                )
             else:
                 if body and compress:
                     if content_type == "application/json":
