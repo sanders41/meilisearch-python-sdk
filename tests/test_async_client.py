@@ -105,7 +105,6 @@ async def test_create_index_no_primary_key(async_client):
     assert isinstance(index.updated_at, datetime)
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 async def test_create_index_with_settings(async_client, new_settings):
     uid = str(uuid4())
     index = await async_client.create_index(uid=uid, settings=new_settings)
@@ -129,7 +128,6 @@ async def test_create_index_with_settings(async_client, new_settings):
     assert response.dictionary == new_settings.dictionary
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 async def test_create_index_with_settings_no_wait(async_client, new_settings):
     uid = str(uuid4())
     index = await async_client.create_index(uid=uid, settings=new_settings, wait=False)

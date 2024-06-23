@@ -51,7 +51,6 @@ def test_key(client):
 
 
 @pytest.fixture
-@pytest.mark.no_parallel
 def test_key_info(client):
     key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
 
@@ -101,7 +100,6 @@ def test_create_index_no_primary_key(client):
     assert isinstance(index.updated_at, datetime)
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_create_index_with_settings(client, new_settings):
     uid = str(uuid4())
     index = client.create_index(uid=uid, settings=new_settings)
@@ -124,7 +122,6 @@ def test_create_index_with_settings(client, new_settings):
     assert response.dictionary == new_settings.dictionary
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_create_index_with_settings_no_wait(client, new_settings):
     uid = str(uuid4())
     index = client.create_index(uid=uid, settings=new_settings, wait=False)

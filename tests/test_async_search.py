@@ -364,7 +364,6 @@ async def test_show_ranking_details_serach(async_index_with_documents):
     assert "_rankingScoreDetails" in response.hits[0]
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 async def test_vector_search(async_index_with_documents_and_vectors):
     index = await async_index_with_documents_and_vectors()
     response = await index.search(

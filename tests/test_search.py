@@ -362,7 +362,6 @@ def test_show_ranking_details_serach(index_with_documents):
     assert "_rankingScoreDetails" in response.hits[0]
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_vector_search(index_with_documents_and_vectors):
     index = index_with_documents_and_vectors()
     response = index.search(

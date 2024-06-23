@@ -110,7 +110,6 @@ def test_get_stats(empty_index, small_movies):
     assert response.number_of_documents == 30
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_get_settings_default(
     empty_index, default_ranking_rules, default_faceting, default_pagination
 ):
@@ -135,7 +134,6 @@ def test_get_settings_default(
 
 
 @pytest.mark.parametrize("compress", (True, False))
-@pytest.mark.usefixtures("enable_vector_search")
 def test_update_settings(compress, empty_index, new_settings):
     index = empty_index()
     response = index.update_settings(new_settings, compress=compress)
@@ -167,7 +165,6 @@ def test_update_settings(compress, empty_index, new_settings):
     # assert response.embedders["test4"].source == "rest"
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     index = empty_index()
     response = index.update_settings(new_settings)
@@ -670,7 +667,6 @@ def test_reset_proximity_precision(empty_index):
     assert response is ProximityPrecision.BY_WORD
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_get_embedders(empty_index):
     index = empty_index()
     response = index.get_embedders()
@@ -679,7 +675,6 @@ def test_get_embedders(empty_index):
 
 # NOTE: Compressing embedder settings is broken in Meilisearch 1.8.0-rc.1+ so skip testing compressing
 # @pytest.mark.parametrize("compress", (True, False))
-@pytest.mark.usefixtures("enable_vector_search")
 def test_update_embedders(empty_index):
     embedders = Embedders(
         embedders={
@@ -701,7 +696,6 @@ def test_update_embedders(empty_index):
     assert response.embedders["test4"].source == "rest"
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_reset_embedders(empty_index):
     embedders = Embedders(
         embedders={
