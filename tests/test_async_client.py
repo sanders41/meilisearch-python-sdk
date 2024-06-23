@@ -136,6 +136,7 @@ async def test_create_index_with_settings_no_wait(async_client, new_settings):
     assert index.uid == uid
 
 
+@pytest.mark.no_parallel
 async def test_create_keys_with_wildcarded_actions(async_client, test_key_info):
     test_key_info.actions = ["documents.*"]
     key = await async_client.create_key(test_key_info)
@@ -187,8 +188,9 @@ async def test_generate_tenant_token_invalid_restriction(test_key_info, async_cl
         async_client.generate_tenant_token(payload, api_key=key)
 
 
-@pytest.mark.usefixtures("async_indexes_sample")
-async def test_get_indexes(async_client, index_uid, index_uid2):
+@pytest.mark.no_parallel
+async def test_get_indexes(async_client, async_indexes_sample):
+    _, index_uid, index_uid2 = async_indexes_sample
     response = await async_client.get_indexes()
     response_uids = [x.uid for x in response]
 
@@ -204,6 +206,7 @@ async def test_get_indexes_offset_and_limit(async_client):
 
 
 @pytest.mark.usefixtures("async_indexes_sample")
+@pytest.mark.no_parallel
 async def test_get_indexes_offset(async_client):
     response = await async_client.get_indexes(offset=1)
     assert len(response) >= 1 and len(response) <= 20
@@ -215,14 +218,16 @@ async def test_get_indexes_limit(async_client):
     assert len(response) == 1
 
 
+@pytest.mark.no_parallel
 async def test_get_indexes_none(async_client):
     response = await async_client.get_indexes()
 
     assert response is None
 
 
-@pytest.mark.usefixtures("async_indexes_sample")
-async def test_get_index(async_client, index_uid):
+@pytest.mark.no_parallel
+async def test_get_index(async_client, async_indexes_sample):
+    _, index_uid, _ = async_indexes_sample
     response = await async_client.get_index(index_uid)
 
     assert response.uid == index_uid
@@ -282,16 +287,16 @@ async def test_get_or_create_index_api_error(async_client, monkeypatch):
         await async_client.get_or_create_index("test")
 
 
-@pytest.mark.usefixtures("async_indexes_sample")
-async def test_get_all_stats(async_client, index_uid, index_uid2):
+async def test_get_all_stats(async_client, async_indexes_sample):
+    _, index_uid, index_uid2 = async_indexes_sample
     response = await async_client.get_all_stats()
 
     assert index_uid in response.indexes
     assert index_uid2 in response.indexes
 
 
-@pytest.mark.usefixtures("async_indexes_sample")
-async def test_get_raw_index(async_client, index_uid):
+async def test_get_raw_index(async_client, async_indexes_sample):
+    _, index_uid, _ = async_indexes_sample
     response = await async_client.get_raw_index(index_uid)
 
     assert response.uid == index_uid
@@ -304,8 +309,9 @@ async def test_get_raw_index_none(async_client):
     assert response is None
 
 
-@pytest.mark.usefixtures("async_indexes_sample")
-async def test_get_raw_indexes(async_client, index_uid, index_uid2):
+@pytest.mark.no_parallel
+async def test_get_raw_indexes(async_client, async_indexes_sample):
+    _, index_uid, index_uid2 = async_indexes_sample
     response = await async_client.get_raw_indexes()
     response_uids = [x.uid for x in response]
 
@@ -315,7 +321,7 @@ async def test_get_raw_indexes(async_client, index_uid, index_uid2):
 
 
 @pytest.mark.usefixtures("async_indexes_sample")
-async def test_get_raw_indexes_offset_and_limit(async_client):
+async def test_get_raw_indexes_offset_and_limit(async_client, async_indexes_sample):
     response = await async_client.get_raw_indexes(offset=1, limit=1)
     assert len(response) == 1
 
@@ -332,6 +338,7 @@ async def test_get_raw_indexes_limit(async_client):
     assert len(response) == 1
 
 
+@pytest.mark.no_parallel
 async def test_get_raw_indexes_none(async_client):
     response = await async_client.get_raw_indexes()
 
@@ -372,31 +379,37 @@ async def test_delete_key(test_key, async_client):
         await async_client.get_key(test_key.key)
 
 
+@pytest.mark.no_parallel
 async def test_get_keys(async_client):
     response = await async_client.get_keys()
     assert len(response.results) == 2
 
 
+@pytest.mark.no_parallel
 async def test_get_keys_offset_and_limit(async_client):
     response = await async_client.get_keys(offset=1, limit=1)
     assert len(response.results) == 1
 
 
+@pytest.mark.no_parallel
 async def test_get_keys_offset(async_client):
     response = await async_client.get_keys(offset=1)
     assert len(response.results) >= 1 and len(response.results) <= 20
 
 
+@pytest.mark.no_parallel
 async def test_get_keys_limit(async_client):
     response = await async_client.get_keys(limit=1)
     assert len(response.results) == 1
 
 
+@pytest.mark.no_parallel
 async def test_get_key(test_key, async_client):
     key = await async_client.get_key(test_key.key)
     assert key.description == test_key.description
 
 
+@pytest.mark.no_parallel
 async def test_update_key(test_key, async_client):
     update_key_info = KeyUpdate(
         key=test_key.key,
@@ -417,6 +430,7 @@ async def test_get_version(async_client):
     assert isinstance(response, Version)
 
 
+@pytest.mark.no_parallel
 async def test_create_dump(async_client, async_index_with_documents):
     index = await async_index_with_documents()
     response = await async_client.create_dump()
@@ -427,6 +441,7 @@ async def test_create_dump(async_client, async_index_with_documents):
     assert dump_status.task_type == "dumpCreation"
 
 
+@pytest.mark.no_parallel
 async def test_create_snapshot(async_client, async_index_with_documents):
     index = await async_index_with_documents()
     response = await async_client.create_snapshot()
@@ -473,6 +488,7 @@ async def test_connection_timeout(async_client, monkeypatch):
         await async_client.create_index("some_index")
 
 
+@pytest.mark.no_parallel
 async def test_swap_indexes(async_client, async_empty_index):
     index_a = await async_empty_index()
     index_b = await async_empty_index()
@@ -491,7 +507,8 @@ async def test_swap_indexes(async_client, async_empty_index):
 
 
 @pytest.mark.usefixtures("create_tasks")
-async def test_cancel_statuses(async_client):
+@pytest.mark.no_parallel
+async def test_cancel_task_statuses(async_client):
     task = await async_client.cancel_tasks(statuses=["enqueued", "processing"])
     await async_client.wait_for_task(task.task_uid)
     completed_task = await async_client.get_task(task.task_uid)
@@ -505,6 +522,7 @@ async def test_cancel_statuses(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_cancel_tasks_uids(async_client):
     task = await async_client.cancel_tasks(uids=["1", "2"])
     await async_client.wait_for_task(task.task_uid)
@@ -518,6 +536,7 @@ async def test_cancel_tasks_uids(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_cancel_tasks_index_uids(async_client):
     task = await async_client.cancel_tasks(index_uids=["1"])
 
@@ -532,6 +551,7 @@ async def test_cancel_tasks_index_uids(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_cancel_tasks_types(async_client):
     task = await async_client.cancel_tasks(types=["taskDeletion"])
     await async_client.wait_for_task(task.task_uid)
@@ -545,6 +565,7 @@ async def test_cancel_tasks_types(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_cancel_tasks_before_enqueued_at(async_client):
     before = datetime.now()
     task = await async_client.cancel_tasks(before_enqueued_at=before)
@@ -562,6 +583,7 @@ async def test_cancel_tasks_before_enqueued_at(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_cancel_tasks_after_enqueued_at(async_client):
     after = datetime.now()
     task = await async_client.cancel_tasks(after_enqueued_at=after)
@@ -579,6 +601,7 @@ async def test_cancel_tasks_after_enqueued_at(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_cancel_tasks_before_started_at(async_client):
     before = datetime.now()
     task = await async_client.cancel_tasks(before_started_at=before)
@@ -596,6 +619,7 @@ async def test_cancel_tasks_before_started_at(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_cancel_tasks_after_finished_at(async_client):
     after = datetime.now()
     task = await async_client.cancel_tasks(after_finished_at=after)
@@ -613,6 +637,7 @@ async def test_cancel_tasks_after_finished_at(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_cancel_task_no_params(async_client):
     task = await async_client.cancel_tasks()
     await async_client.wait_for_task(task.task_uid)
@@ -626,6 +651,7 @@ async def test_cancel_task_no_params(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_statuses(async_client):
     task = await async_client.delete_tasks(statuses=["enqueued", "processing"])
     await async_client.wait_for_task(task.task_uid)
@@ -639,6 +665,7 @@ async def test_delete_statuses(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_tasks(async_client):
     task = await async_client.delete_tasks(uids=["1", "2"])
     await async_client.wait_for_task(task.task_uid)
@@ -652,6 +679,7 @@ async def test_delete_tasks(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_tasks_index_uids(async_client):
     task = await async_client.delete_tasks(index_uids=["1"])
     await async_client.wait_for_task(task.task_uid)
@@ -665,6 +693,7 @@ async def test_delete_tasks_index_uids(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_tasks_types(async_client):
     task = await async_client.delete_tasks(types=["taskDeletion"])
     await async_client.wait_for_task(task.task_uid)
@@ -678,6 +707,7 @@ async def test_delete_tasks_types(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_tasks_before_enqueued_at(async_client):
     before = datetime.now()
     task = await async_client.delete_tasks(before_enqueued_at=before)
@@ -695,6 +725,7 @@ async def test_delete_tasks_before_enqueued_at(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_tasks_after_enqueued_at(async_client):
     after = datetime.now()
     task = await async_client.delete_tasks(after_enqueued_at=after)
@@ -712,6 +743,7 @@ async def test_delete_tasks_after_enqueued_at(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_tasks_before_started_at(async_client):
     before = datetime.now()
     task = await async_client.delete_tasks(before_started_at=before)
@@ -729,6 +761,7 @@ async def test_delete_tasks_before_started_at(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_tasks_after_finished_at(async_client):
     after = datetime.now()
     task = await async_client.delete_tasks(after_finished_at=after)
@@ -746,6 +779,7 @@ async def test_delete_tasks_after_finished_at(async_client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 async def test_delete_no_params(async_client):
     task = await async_client.delete_tasks()
     await async_client.wait_for_task(task.task_uid)
@@ -761,6 +795,7 @@ async def test_delete_no_params(async_client):
     )
 
 
+@pytest.mark.no_parallel
 async def test_get_tasks(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     tasks = await async_client.get_tasks()
@@ -773,6 +808,7 @@ async def test_get_tasks(async_client, async_empty_index, small_movies):
     assert len(response.results) >= current_tasks
 
 
+@pytest.mark.no_parallel
 async def test_get_tasks_for_index(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     tasks = await async_client.get_tasks(index_ids=[index.uid])
@@ -788,6 +824,7 @@ async def test_get_tasks_for_index(async_client, async_empty_index, small_movies
     assert next(iter(uid)) == index.uid
 
 
+@pytest.mark.no_parallel
 async def test_get_task(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     response = await index.add_documents(small_movies)
@@ -796,6 +833,7 @@ async def test_get_task(async_client, async_empty_index, small_movies):
     assert update.status == "succeeded"
 
 
+@pytest.mark.no_parallel
 async def test_wait_for_task(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     response = await index.add_documents(small_movies)
@@ -803,6 +841,7 @@ async def test_wait_for_task(async_client, async_empty_index, small_movies):
     assert update.status == "succeeded"
 
 
+@pytest.mark.no_parallel
 async def test_wait_for_task_no_timeout(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     response = await index.add_documents(small_movies)
@@ -810,6 +849,7 @@ async def test_wait_for_task_no_timeout(async_client, async_empty_index, small_m
     assert update.status == "succeeded"
 
 
+@pytest.mark.no_parallel
 async def test_wait_for_pending_update_time_out(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     with pytest.raises(MeilisearchTimeoutError):
@@ -821,6 +861,7 @@ async def test_wait_for_pending_update_time_out(async_client, async_empty_index,
     )
 
 
+@pytest.mark.no_parallel
 async def test_wait_for_task_raise_for_status_true(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     response = await index.add_documents(small_movies)
@@ -828,6 +869,7 @@ async def test_wait_for_task_raise_for_status_true(async_client, async_empty_ind
     assert update.status == "succeeded"
 
 
+@pytest.mark.no_parallel
 async def test_wait_for_task_raise_for_status_true_no_timeout(
     async_client, async_empty_index, small_movies, base_url, monkeypatch
 ):
@@ -857,6 +899,7 @@ async def test_wait_for_task_raise_for_status_true_no_timeout(
         )
 
 
+@pytest.mark.no_parallel
 async def test_wait_for_task_raise_for_status_false(
     async_client, async_empty_index, small_movies, base_url, monkeypatch
 ):

@@ -15,11 +15,23 @@
 @ruff-format:
   poetry run ruff format meilisearch_python_sdk tests
 
-@test: start-meilisearch-detached && stop-meilisearch
+@test:
   -poetry run pytest -x
+
+@test-parallel:
+  -poetry run pytest -n auto -x -m "not no_parallel"
+
+@test-no-parallel:
+  -poetry run pytest -x -m "no_parallel"
 
 @test-ci: start-meilisearch-detached && stop-meilisearch
   poetry run pytest --cov=meilisearch_python_sdk --cov-report=xml
+
+@test-parallel-ci: start-meilisearch-detached && stop-meilisearch
+  poetry run pytest --cov=meilisearch_python_sdk --cov-report=xml -n auto -m "not no_parallel"
+
+@test-no-parallel-ci: start-meilisearch-detached && stop-meilisearch
+  poetry run pytest --cov=meilisearch_python_sdk --cov-report=xml -m "no_parallel"
 
 @start-meilisearch:
   docker compose up

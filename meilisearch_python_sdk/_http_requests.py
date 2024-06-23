@@ -34,6 +34,8 @@ class AsyncHttpRequests:
         body: Any | None = None,
         content_type: str = "application/json",
         compress: bool = False,
+        *,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> Response:
         headers = build_headers(content_type, compress)
 
@@ -41,11 +43,13 @@ class AsyncHttpRequests:
             if body is None:
                 response = await http_method(path)
             elif content_type == "application/json" and not compress:
-                response = await http_method(path, json=body, headers=headers)
+                response = await http_method(
+                    path, content=json.dumps(body, cls=serializer), headers=headers
+                )
             else:
                 if body and compress:
                     if content_type == "application/json":
-                        body = gzip.compress(json.dumps(body).encode("utf-8"))
+                        body = gzip.compress(json.dumps(body, cls=serializer).encode("utf-8"))
                     else:
                         body = gzip.compress((body).encode("utf-8"))
                 response = await http_method(path, content=body, headers=headers)
@@ -80,8 +84,12 @@ class AsyncHttpRequests:
         body: Any | None = None,
         content_type: str = "application/json",
         compress: bool = False,
+        *,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> Response:
-        return await self._send_request(self.http_client.post, path, body, content_type, compress)
+        return await self._send_request(
+            self.http_client.post, path, body, content_type, compress, serializer=serializer
+        )
 
     async def put(
         self,
@@ -89,8 +97,12 @@ class AsyncHttpRequests:
         body: Any | None = None,
         content_type: str = "application/json",
         compress: bool = False,
+        *,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> Response:
-        return await self._send_request(self.http_client.put, path, body, content_type, compress)
+        return await self._send_request(
+            self.http_client.put, path, body, content_type, compress, serializer=serializer
+        )
 
     async def delete(self, path: str, body: dict | None = None) -> Response:
         return await self._send_request(self.http_client.delete, path, body)
@@ -107,17 +119,21 @@ class HttpRequests:
         body: Any | None = None,
         content_type: str = "applicaton/json",
         compress: bool = False,
+        *,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> Response:
         headers = build_headers(content_type, compress)
         try:
             if not body:
                 response = http_method(path)
             elif content_type == "application/json" and not compress:
-                response = http_method(path, json=body, headers=headers)
+                response = http_method(
+                    path, content=json.dumps(body, cls=serializer), headers=headers
+                )
             else:
                 if body and compress:
                     if content_type == "application/json":
-                        body = gzip.compress(json.dumps(body).encode("utf-8"))
+                        body = gzip.compress(json.dumps(body, cls=serializer).encode("utf-8"))
                     else:
                         body = gzip.compress((body).encode("utf-8"))
                 response = http_method(path, content=body, headers=headers)
@@ -152,8 +168,12 @@ class HttpRequests:
         body: Any | None = None,
         content_type: str = "application/json",
         compress: bool = False,
+        *,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> Response:
-        return self._send_request(self.http_client.post, path, body, content_type, compress)
+        return self._send_request(
+            self.http_client.post, path, body, content_type, compress, serializer=serializer
+        )
 
     def put(
         self,
@@ -161,8 +181,12 @@ class HttpRequests:
         body: Any | None = None,
         content_type: str = "application/json",
         compress: bool = False,
+        *,
+        serializer: type[json.JSONEncoder] | None = None,
     ) -> Response:
-        return self._send_request(self.http_client.put, path, body, content_type, compress)
+        return self._send_request(
+            self.http_client.put, path, body, content_type, compress, serializer=serializer
+        )
 
     def delete(self, path: str, body: dict | None = None) -> Response:
         return self._send_request(self.http_client.delete, path, body)

@@ -77,8 +77,8 @@ def sortable_attributes():
     return ["genre", "title"]
 
 
-@pytest.mark.usefixtures("indexes_sample")
-def test_delete_index(client, index_uid, index_uid2):
+def test_delete_index(client, indexes_sample):
+    _, index_uid, index_uid2 = indexes_sample
     response = client.index(uid=index_uid).delete()
     wait_for_task(client, response.task_uid)
 
@@ -91,12 +91,9 @@ def test_delete_index(client, index_uid, index_uid2):
     with pytest.raises(MeilisearchApiError):
         client.get_index(uid=index_uid2)
 
-    indexes = client.get_indexes()
-    assert indexes is None
 
-
-@pytest.mark.usefixtures("indexes_sample")
-def test_update_index(client, index_uid):
+def test_update_index(client, indexes_sample):
+    _, index_uid, _ = indexes_sample
     index = client.index(uid=index_uid)
     index.update(primary_key="objectID")
 
@@ -803,8 +800,8 @@ def test_repr(empty_index):
     assert "updated_at" in got
 
 
-@pytest.mark.usefixtures("indexes_sample")
-def test_delete_if_exists(client, index_uid):
+def test_delete_if_exists(client, indexes_sample):
+    _, index_uid, _ = indexes_sample
     assert client.get_index(uid=index_uid)
     deleted = client.index(index_uid).delete_if_exists()
     assert deleted is True
@@ -820,18 +817,18 @@ def test_delete_if_exists_no_delete(client):
     assert deleted is False
 
 
-@pytest.mark.usefixtures("indexes_sample")
-def test_delete_if_exists_error(client, index_uid, monkeypatch):
+def test_delete_if_exists_error(client, indexes_sample, monkeypatch):
     def mock_response(*args, **kwargs):
         raise MeilisearchApiError("test", Response(status_code=404))
 
+    _, index_uid, _ = indexes_sample
     monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
     with pytest.raises(MeilisearchApiError):
         client.index(index_uid).delete_if_exists()
 
 
-@pytest.mark.usefixtures("indexes_sample")
-def test_delete_index_if_exists(client, index_uid):
+def test_delete_index_if_exists(client, indexes_sample):
+    _, index_uid, _ = indexes_sample
     assert client.get_index(uid=index_uid)
     deleted = client.delete_index_if_exists(index_uid)
     assert deleted is True
@@ -847,11 +844,11 @@ def test_delete_index_if_exists_no_delete(client):
     assert deleted is False
 
 
-@pytest.mark.usefixtures("indexes_sample")
-def test_delete_index_if_exists_error(client, index_uid, monkeypatch):
+def test_delete_index_if_exists_error(client, indexes_sample, monkeypatch):
     def mock_response(*args, **kwargs):
         raise MeilisearchApiError("test", Response(status_code=404))
 
+    _, index_uid, _ = indexes_sample
     monkeypatch.setattr(HttpRequests, "_send_request", mock_response)
     with pytest.raises(MeilisearchApiError):
         client.delete_index_if_exists(index_uid)

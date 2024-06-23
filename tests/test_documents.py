@@ -1,6 +1,8 @@
 import csv
 import json
+from datetime import datetime
 from math import ceil
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -11,6 +13,15 @@ from meilisearch_python_sdk.errors import (
     MeilisearchError,
 )
 from meilisearch_python_sdk.index import _combine_documents, _load_documents_from_file
+
+
+class CustomEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, (UUID, datetime)):
+            return str(o)
+
+        # Let the base class default method raise the TypeError
+        return super().default(o)
 
 
 def generate_test_movies(num_movies=50, id_start=0):
@@ -129,7 +140,7 @@ def test_add_documents_from_directory(
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory(
         path, combine_documents=combine_documents, compress=compress
@@ -147,7 +158,7 @@ def test_add_documents_from_directory_csv_path(
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", compress=compress
@@ -165,7 +176,7 @@ def test_add_documents_from_directory_csv_path_with_delimiter(
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory(
         path,
@@ -187,7 +198,7 @@ def test_add_documents_from_directory_ndjson(
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson", compress=compress
@@ -204,7 +215,7 @@ def test_add_documents_from_directory_no_documents(combine_documents, compress, 
         f.write("nothing")
 
     with pytest.raises(MeilisearchError):
-        index = client.index("movies")
+        index = client.index(str(uuid4()))
         index.add_documents_from_directory(
             tmp_path, combine_documents=combine_documents, compress=compress
         )
@@ -213,7 +224,7 @@ def test_add_documents_from_directory_no_documents(combine_documents, compress, 
 @pytest.mark.parametrize("delimiter", (";;", "😀"))
 def test_add_documents_from_directory_csv_delimiter_invalid(delimiter, client, tmp_path):
     add_csv_file(tmp_path / "test1.csv", 1, 0)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.add_documents_from_directory(tmp_path, document_type="csv", csv_delimiter=delimiter)
 
@@ -239,7 +250,7 @@ def test_add_documents_from_directory_in_batchs(
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents, compress=compress
@@ -259,7 +270,7 @@ def test_add_documents_from_directory_in_batchs_csv(
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory_in_batches(
         path,
@@ -283,7 +294,7 @@ def test_add_documents_from_directory_in_batchs_ndjson(
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.add_documents_from_directory_in_batches(
         path,
@@ -306,7 +317,7 @@ def test_add_documents_from_directory_in_batchs_ndjson(
 def test_add_documents_from_file(
     path_type, primary_key, expected_primary_key, compress, client, small_movies_path
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = index.add_documents_from_file(path, primary_key, compress=compress)
 
@@ -323,7 +334,7 @@ def test_add_documents_from_file(
 def test_add_documents_from_file_csv(
     path_type, primary_key, expected_primary_key, compress, client, small_movies_csv_path
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = index.add_documents_from_file(path, primary_key, compress=compress)
 
@@ -340,7 +351,7 @@ def test_add_documents_from_file_csv(
 def test_add_documents_raw_file_csv(
     path_type, primary_key, expected_primary_key, compress, client, small_movies_csv_path
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = index.add_documents_from_raw_file(path, primary_key, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
@@ -361,7 +372,7 @@ def test_add_documents_raw_file_csv_delimiter(
     client,
     small_movies_csv_path_semicolon_delimiter,
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = (
         str(small_movies_csv_path_semicolon_delimiter)
         if path_type == "str"
@@ -383,7 +394,7 @@ def test_add_documents_raw_file_csv_delimiter(
 def test_add_documents_raw_file_ndjson(
     path_type, primary_key, expected_primary_key, compress, client, small_movies_ndjson_path
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = index.add_documents_from_raw_file(path, primary_key, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
@@ -393,7 +404,7 @@ def test_add_documents_raw_file_ndjson(
 
 def test_add_documents_raw_file_not_found_error(client, tmp_path):
     with pytest.raises(MeilisearchError):
-        index = client.index("movies")
+        index = client.index(str(uuid4()))
         index.add_documents_from_raw_file(tmp_path / "file.csv")
 
 
@@ -403,19 +414,19 @@ def test_add_document_raw_file_extension_error(client, tmp_path):
         f.write("test")
 
     with pytest.raises(ValueError):
-        index = client.index("movies")
+        index = client.index(str(uuid4()))
         index.add_documents_from_raw_file(file_path)
 
 
 def test_add_documents_raw_file_csv_delimiter_non_csv_error(client, small_movies_ndjson_path):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.add_documents_from_raw_file(small_movies_ndjson_path, csv_delimiter=";")
 
 
 @pytest.mark.parametrize("delimiter", (";;", "😀"))
 def test_add_documents_raw_file_csv_delimiter_invalid(delimiter, client, small_movies_csv_path):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.add_documents_from_raw_file(small_movies_csv_path, csv_delimiter=delimiter)
 
@@ -428,7 +439,7 @@ def test_add_documents_raw_file_csv_delimiter_invalid(delimiter, client, small_m
 def test_add_documents_from_file_ndjson(
     path_type, primary_key, expected_primary_key, compress, client, small_movies_ndjson_path
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = index.add_documents_from_file(path, primary_key, compress=compress)
 
@@ -438,7 +449,7 @@ def test_add_documents_from_file_ndjson(
 
 
 def test_add_documents_from_file_invalid_extension(client):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
 
     with pytest.raises(MeilisearchError):
         index.add_documents_from_file("test.bad")
@@ -460,7 +471,7 @@ def test_add_documents_from_file_in_batches(
     small_movies_path,
     small_movies,
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key, compress=compress
@@ -489,7 +500,7 @@ def test_add_documents_from_file_in_batches_csv(
     small_movies_csv_path,
     small_movies,
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key, compress=compress
@@ -518,7 +529,7 @@ def test_add_documents_from_file_in_batches_csv_with_delimiter(
     small_movies_csv_path_semicolon_delimiter,
     small_movies,
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = (
         str(small_movies_csv_path_semicolon_delimiter)
         if path_type == "str"
@@ -539,7 +550,7 @@ def test_add_documents_from_file_in_batches_csv_with_delimiter(
 def test_add_documents_from_file_in_batches_csv_with_delimiter_invalid(
     delimiter, client, small_movies_csv_path
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.add_documents_from_file_in_batches(small_movies_csv_path, csv_delimiter=delimiter)
 
@@ -560,7 +571,7 @@ def test_add_documents_from_file_in_batches_ndjson(
     small_movies_ndjson_path,
     small_movies,
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key, compress=compress
@@ -574,7 +585,7 @@ def test_add_documents_from_file_in_batches_ndjson(
 
 
 def test_add_documents_from_file_in_batches_invalid_extension(client):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
 
     with pytest.raises(MeilisearchError):
         index.add_documents_from_file_in_batches("test.bad")
@@ -647,7 +658,7 @@ def test_update_documents(compress, index_with_documents, small_movies):
 @pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_with_primary_key(compress, client, small_movies):
     primary_key = "release_date"
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     update = index.update_documents(small_movies, primary_key=primary_key, compress=compress)
     wait_for_task(index.http_client, update.task_uid)
     assert index.get_primary_key() == primary_key
@@ -678,7 +689,7 @@ def test_update_documents_in_batches(batch_size, compress, index_with_documents,
 @pytest.mark.parametrize("batch_size, compress", ((100, False), (500, True)))
 def test_update_documents_in_batches_with_primary_key(batch_size, compress, client, small_movies):
     primary_key = "release_date"
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     updates = index.update_documents_in_batches(
         small_movies, batch_size=batch_size, primary_key=primary_key, compress=compress
     )
@@ -708,7 +719,7 @@ def test_update_documents_from_directory(
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory(
         path, combine_documents=combine_documents, compress=compress
@@ -726,7 +737,7 @@ def test_update_documents_from_directory_csv(
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", compress=compress
@@ -744,7 +755,7 @@ def test_update_documents_from_directory_csv_with_delimiter(
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory(
         path,
@@ -761,7 +772,7 @@ def test_update_documents_from_directory_csv_with_delimiter(
 @pytest.mark.parametrize("delimiter", (";;", "😀"))
 def test_update_documents_from_directory_csv_delimiter_invalid(delimiter, client, tmp_path):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 1, 0)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.update_documents_from_directory(
             tmp_path, document_type="csv", csv_delimiter=delimiter
@@ -776,7 +787,7 @@ def test_update_documents_from_directory_ndjson(
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson", compress=compress
@@ -807,7 +818,7 @@ def test_update_documents_from_directory_in_batchs(
     for i in range(number_of_files):
         add_json_file(tmp_path / f"text{i}.json", documents_per_file, i * documents_per_file)
 
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents, compress=compress
@@ -827,7 +838,7 @@ def test_update_documents_from_directory_in_batchs_csv(
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory_in_batches(
         path,
@@ -851,7 +862,7 @@ def test_update_documents_from_directory_in_batchs_csv_delimiter(
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory_in_batches(
         path,
@@ -872,7 +883,7 @@ def test_update_documents_from_directory_in_batches_csv_delimiter_invalid(
     delimiter, client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 1, 0)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.update_documents_from_directory_in_batches(
             tmp_path, document_type="csv", csv_delimiter=delimiter
@@ -888,7 +899,7 @@ def test_update_documents_from_directory_in_batchs_ndjson(
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = index.update_documents_from_directory_in_batches(
         path,
@@ -908,7 +919,7 @@ def test_update_documents_from_directory_in_batchs_ndjson(
 def test_update_documents_from_file(path_type, compress, client, small_movies, small_movies_path):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -930,7 +941,7 @@ def test_update_documents_from_file_csv(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -952,7 +963,7 @@ def test_update_documents_from_file_csv_with_delimiter(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -975,7 +986,7 @@ def test_update_documents_from_file_csv_with_delimiter(
 def test_update_documents_from_file_csv_delimiter_invalid(
     delimiter, client, small_movies_csv_path_semicolon_delimiter
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.update_documents_from_file(
             small_movies_csv_path_semicolon_delimiter, csv_delimiter=delimiter
@@ -989,7 +1000,7 @@ def test_update_documents_from_file_ndjson(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -1007,7 +1018,7 @@ def test_update_documents_from_file_ndjson(
 @pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_from_file_with_primary_key(compress, client, small_movies_path):
     primary_key = "release_date"
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     update = index.update_documents_from_file(
         small_movies_path, primary_key=primary_key, compress=compress
     )
@@ -1016,7 +1027,7 @@ def test_update_documents_from_file_with_primary_key(compress, client, small_mov
 
 
 def test_update_documents_from_file_invalid_extension(client):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
 
     with pytest.raises(MeilisearchError):
         index.update_documents_from_file("test.bad")
@@ -1030,7 +1041,7 @@ def test_update_documents_from_file_in_batches(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -1058,7 +1069,7 @@ def test_update_documents_from_file_in_batches_csv(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -1086,7 +1097,7 @@ def test_update_documents_from_file_in_batches_ndjson(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -1107,7 +1118,7 @@ def test_update_documents_from_file_in_batches_ndjson(
 
 
 def test_update_documents_from_file_in_batches_invalid_extension(client):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
 
     with pytest.raises(MeilisearchError):
         index.update_documents_from_file_in_batches("test.bad")
@@ -1120,7 +1131,7 @@ def test_update_documents_raw_file_csv(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -1142,7 +1153,7 @@ def test_update_documents_raw_file_csv_with_delimiter(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -1164,7 +1175,7 @@ def test_update_documents_raw_file_csv_with_delimiter(
 
 
 def test_update_documents_from_raw_file_csv_delimiter_non_csv(client, small_movies_ndjson_path):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.update_documents_from_raw_file(small_movies_ndjson_path, csv_delimiter=";")
 
@@ -1173,7 +1184,7 @@ def test_update_documents_from_raw_file_csv_delimiter_non_csv(client, small_movi
 def test_update_documents_from_raw_file_csv_delimiter_invalid(
     delimiter, client, small_movies_csv_path_semicolon_delimiter
 ):
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     with pytest.raises(ValueError):
         index.update_documents_from_raw_file(
             small_movies_csv_path_semicolon_delimiter, csv_delimiter=delimiter
@@ -1187,7 +1198,7 @@ def test_update_documents_raw_file_ndjson(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = client.index("movies")
+    index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == "id"
@@ -1204,7 +1215,7 @@ def test_update_documents_raw_file_ndjson(
 
 def test_update_documents_raw_file_not_found_error(client, tmp_path):
     with pytest.raises(MeilisearchError):
-        index = client.index("movies")
+        index = client.index(str(uuid4()))
         index.update_documents_from_raw_file(tmp_path / "file.csv")
 
 
@@ -1214,7 +1225,7 @@ def test_update_document_raw_file_extension_error(client, tmp_path):
         f.write("test")
 
     with pytest.raises(ValueError):
-        index = client.index("movies")
+        index = client.index(str(uuid4()))
         index.update_documents_from_raw_file(file_path)
 
 
@@ -1299,3 +1310,15 @@ def test_combine_documents():
 
     assert len(combined) == 3
     assert [1, 2, 3] == [x["id"] for x in combined]
+
+
+@pytest.mark.parametrize("compress", (True, False))
+def test_add_documents_custom_serializer(compress, empty_index):
+    documents = [
+        {"id": uuid4(), "title": "test 1", "when": datetime.now()},
+        {"id": uuid4(), "title": "Test 2", "when": datetime.now()},
+    ]
+    index = empty_index()
+    response = index.add_documents(documents, compress=compress, serializer=CustomEncoder)
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"

@@ -51,6 +51,7 @@ def test_key(client):
 
 
 @pytest.fixture
+@pytest.mark.no_parallel
 def test_key_info(client):
     key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
 
@@ -130,6 +131,7 @@ def test_create_index_with_settings_no_wait(client, new_settings):
     assert index.uid == uid
 
 
+@pytest.mark.no_parallel
 def test_create_keys_with_wildcarded_actions(client, test_key_info):
     test_key_info.actions = ["documents.*"]
     key = client.create_key(test_key_info)
@@ -181,8 +183,9 @@ def test_generate_tenant_token_invalid_restriction(test_key_info, client):
         client.generate_tenant_token(payload, api_key=key)
 
 
-@pytest.mark.usefixtures("indexes_sample")
-def test_get_indexes(client, index_uid, index_uid2):
+@pytest.mark.no_parallel
+def test_get_indexes(client, indexes_sample):
+    _, index_uid, index_uid2 = indexes_sample
     response = client.get_indexes()
     response_uids = [x.uid for x in response]
 
@@ -198,6 +201,7 @@ def test_get_indexes_offset_and_limit(client):
 
 
 @pytest.mark.usefixtures("indexes_sample")
+@pytest.mark.no_parallel
 def test_get_indexes_offset(client):
     response = client.get_indexes(offset=1)
     assert len(response) >= 1 and len(response) <= 20
@@ -209,6 +213,7 @@ def test_get_indexes_limit(client):
     assert len(response) == 1
 
 
+@pytest.mark.no_parallel
 def test_get_indexes_none(client):
     response = client.get_indexes()
 
@@ -216,7 +221,9 @@ def test_get_indexes_none(client):
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_index(client, index_uid):
+@pytest.mark.no_parallel
+def test_get_index(client, indexes_sample):
+    _, index_uid, _ = indexes_sample
     response = client.get_index(index_uid)
 
     assert response.uid == index_uid
@@ -276,8 +283,9 @@ def test_get_or_create_index_api_error(client, monkeypatch):
         client.get_or_create_index("test")
 
 
-@pytest.mark.usefixtures("indexes_sample")
-def test_get_all_stats(client, index_uid, index_uid2):
+@pytest.mark.no_parallel
+def test_get_all_stats(client, indexes_sample):
+    _, index_uid, index_uid2 = indexes_sample
     response = client.get_all_stats()
 
     assert index_uid in response.indexes
@@ -285,7 +293,9 @@ def test_get_all_stats(client, index_uid, index_uid2):
 
 
 @pytest.mark.usefixtures("indexes_sample")
-def test_get_raw_index(client, index_uid):
+@pytest.mark.no_parallel
+def test_get_raw_index(client, indexes_sample):
+    _, index_uid, _ = indexes_sample
     response = client.get_raw_index(index_uid)
 
     assert response.uid == index_uid
@@ -298,8 +308,9 @@ def test_get_raw_index_none(client):
     assert response is None
 
 
-@pytest.mark.usefixtures("indexes_sample")
-def test_get_raw_indexes(client, index_uid, index_uid2):
+@pytest.mark.no_parallel
+def test_get_raw_indexes(client, indexes_sample):
+    _, index_uid, index_uid2 = indexes_sample
     response = client.get_raw_indexes()
     response_uids = [x.uid for x in response]
 
@@ -326,6 +337,7 @@ def test_get_raw_indexes_limit(client):
     assert len(response) == 1
 
 
+@pytest.mark.no_parallel
 def test_get_raw_indexes_none(client):
     response = client.get_raw_indexes()
 
@@ -366,6 +378,7 @@ def test_delete_key(test_key, client):
         client.get_key(test_key.key)
 
 
+@pytest.mark.no_parallel
 def test_get_keys(client):
     response = client.get_keys()
     assert len(response.results) == 2
@@ -376,6 +389,7 @@ def test_get_keys_offset_and_limit(client):
     assert len(response.results) == 1
 
 
+@pytest.mark.no_parallel
 def test_get_keys_offset(client):
     response = client.get_keys(offset=1)
     assert len(response.results) >= 1 and len(response.results) <= 20
@@ -386,11 +400,13 @@ def test_get_keys_limit(client):
     assert len(response.results) == 1
 
 
+@pytest.mark.no_parallel
 def test_get_key(test_key, client):
     key = client.get_key(test_key.key)
     assert key.description == test_key.description
 
 
+@pytest.mark.no_parallel
 def test_update_key(test_key, client):
     update_key_info = KeyUpdate(
         key=test_key.key,
@@ -411,6 +427,7 @@ def test_get_version(client):
     assert isinstance(response, Version)
 
 
+@pytest.mark.no_parallel
 def test_create_dump(client, index_with_documents):
     index_with_documents()
     response = client.create_dump()
@@ -421,6 +438,7 @@ def test_create_dump(client, index_with_documents):
     assert dump_status.task_type == "dumpCreation"
 
 
+@pytest.mark.no_parallel
 def test_create_snapshot(client, index_with_documents):
     index_with_documents()
     response = client.create_snapshot()
@@ -467,6 +485,7 @@ def test_connection_timeout(client, monkeypatch):
         client.create_index("some_index")
 
 
+@pytest.mark.no_parallel
 def test_swap_indexes(client, empty_index):
     index_a = empty_index()
     index_b = empty_index()
@@ -485,6 +504,7 @@ def test_swap_indexes(client, empty_index):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_cancel_statuses(client):
     task = client.cancel_tasks(statuses=["enqueued", "processing"])
     client.wait_for_task(task.task_uid)
@@ -512,6 +532,7 @@ def test_cancel_tasks_uids(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_cancel_tasks_index_uids(client):
     task = client.cancel_tasks(index_uids=["1"])
 
@@ -526,6 +547,7 @@ def test_cancel_tasks_index_uids(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_cancel_tasks_types(client):
     task = client.cancel_tasks(types=["taskDeletion"])
     client.wait_for_task(task.task_uid)
@@ -539,6 +561,7 @@ def test_cancel_tasks_types(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_cancel_tasks_before_enqueued_at(client):
     before = datetime.now()
     task = client.cancel_tasks(before_enqueued_at=before)
@@ -556,6 +579,7 @@ def test_cancel_tasks_before_enqueued_at(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_cancel_tasks_after_enqueued_at(client):
     after = datetime.now()
     task = client.cancel_tasks(after_enqueued_at=after)
@@ -573,6 +597,7 @@ def test_cancel_tasks_after_enqueued_at(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_cancel_tasks_before_started_at(client):
     before = datetime.now()
     task = client.cancel_tasks(before_started_at=before)
@@ -590,6 +615,7 @@ def test_cancel_tasks_before_started_at(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_cancel_tasks_after_finished_at(client):
     after = datetime.now()
     task = client.cancel_tasks(after_finished_at=after)
@@ -607,6 +633,7 @@ def test_cancel_tasks_after_finished_at(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_cancel_task_no_params(client):
     task = client.cancel_tasks()
     client.wait_for_task(task.task_uid)
@@ -620,6 +647,7 @@ def test_cancel_task_no_params(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_statuses(client):
     task = client.delete_tasks(statuses=["enqueued", "processing"])
     client.wait_for_task(task.task_uid)
@@ -633,6 +661,7 @@ def test_delete_statuses(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_tasks(client):
     task = client.delete_tasks(uids=["1", "2"])
     client.wait_for_task(task.task_uid)
@@ -646,6 +675,7 @@ def test_delete_tasks(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_tasks_index_uids(client):
     task = client.delete_tasks(index_uids=["1"])
     client.wait_for_task(task.task_uid)
@@ -659,6 +689,7 @@ def test_delete_tasks_index_uids(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_tasks_types(client):
     task = client.delete_tasks(types=["taskDeletion"])
     client.wait_for_task(task.task_uid)
@@ -672,6 +703,7 @@ def test_delete_tasks_types(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_tasks_before_enqueued_at(client):
     before = datetime.now()
     task = client.delete_tasks(before_enqueued_at=before)
@@ -689,6 +721,7 @@ def test_delete_tasks_before_enqueued_at(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_tasks_after_enqueued_at(client):
     after = datetime.now()
     task = client.delete_tasks(after_enqueued_at=after)
@@ -706,6 +739,7 @@ def test_delete_tasks_after_enqueued_at(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_tasks_before_started_at(client):
     before = datetime.now()
     task = client.delete_tasks(before_started_at=before)
@@ -723,6 +757,7 @@ def test_delete_tasks_before_started_at(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_tasks_after_finished_at(client):
     after = datetime.now()
     task = client.delete_tasks(after_finished_at=after)
@@ -740,7 +775,8 @@ def test_delete_tasks_after_finished_at(client):
 
 
 @pytest.mark.usefixtures("create_tasks")
-def test_delete_no_params(client):
+@pytest.mark.no_parallel
+def test_delete_tasks_no_params(client):
     task = client.delete_tasks()
     client.wait_for_task(task.task_uid)
     deleted_tasks = client.get_task(task.task_uid)
