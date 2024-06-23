@@ -145,7 +145,7 @@ async def test_add_documents_from_directory(
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, compress=compress
@@ -163,7 +163,7 @@ async def test_add_documents_from_directory_csv_path(
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", compress=compress
@@ -181,7 +181,7 @@ async def test_add_documents_from_directory_csv_path_with_delimiter(
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
         path,
@@ -203,7 +203,7 @@ async def test_add_documents_from_directory_ndjson(
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson", compress=compress
@@ -222,7 +222,7 @@ async def test_add_documents_from_directory_no_documents(
         f.write("nothing")
 
     with pytest.raises(MeilisearchError):
-        index = async_client.index("movies")
+        index = async_client.index(str(uuid4()))
         await index.add_documents_from_directory(
             tmp_path, combine_documents=combine_documents, compress=compress
         )
@@ -233,7 +233,7 @@ async def test_add_documents_from_directory_csv_delimiter_invalid(
     delimiter, async_client, tmp_path
 ):
     add_csv_file(tmp_path / "test1.csv", 1, 0)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.add_documents_from_directory(
             tmp_path, document_type="csv", csv_delimiter=delimiter
@@ -261,7 +261,7 @@ async def test_add_documents_from_directory_in_batchs(
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents, compress=compress
@@ -281,7 +281,7 @@ async def test_add_documents_from_directory_in_batchs_csv(
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
         path,
@@ -305,7 +305,7 @@ async def test_add_documents_from_directory_in_batchs_ndjson(
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory_in_batches(
         path,
@@ -328,7 +328,7 @@ async def test_add_documents_from_directory_in_batchs_ndjson(
 async def test_add_documents_from_file(
     path_type, primary_key, expected_primary_key, compress, async_client, small_movies_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = await index.add_documents_from_file(path, primary_key, compress=compress)
 
@@ -345,7 +345,7 @@ async def test_add_documents_from_file(
 async def test_add_documents_from_file_csv(
     path_type, primary_key, expected_primary_key, compress, async_client, small_movies_csv_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = await index.add_documents_from_file(path, primary_key, compress=compress)
 
@@ -362,7 +362,7 @@ async def test_add_documents_from_file_csv(
 async def test_add_documents_raw_file_csv(
     path_type, primary_key, expected_primary_key, compress, async_client, small_movies_csv_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = await index.add_documents_from_raw_file(path, primary_key, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
@@ -383,7 +383,7 @@ async def test_add_documents_raw_file_csv_delimiter(
     async_client,
     small_movies_csv_path_semicolon_delimiter,
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = (
         str(small_movies_csv_path_semicolon_delimiter)
         if path_type == "str"
@@ -405,7 +405,7 @@ async def test_add_documents_raw_file_csv_delimiter(
 async def test_add_documents_raw_file_ndjson(
     path_type, primary_key, expected_primary_key, compress, async_client, small_movies_ndjson_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = await index.add_documents_from_raw_file(path, primary_key, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
@@ -415,7 +415,7 @@ async def test_add_documents_raw_file_ndjson(
 
 async def test_add_documents_raw_file_not_found_error(async_client, tmp_path):
     with pytest.raises(MeilisearchError):
-        index = async_client.index("movies")
+        index = async_client.index(str(uuid4()))
         await index.add_documents_from_raw_file(tmp_path / "file.csv")
 
 
@@ -425,14 +425,14 @@ async def test_add_document_raw_file_extension_error(async_client, tmp_path):
         f.write("test")
 
     with pytest.raises(ValueError):
-        index = async_client.index("movies")
+        index = async_client.index(str(uuid4()))
         await index.add_documents_from_raw_file(file_path)
 
 
 async def test_add_documents_raw_file_csv_delimiter_non_csv_error(
     async_client, small_movies_ndjson_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.add_documents_from_raw_file(small_movies_ndjson_path, csv_delimiter=";")
 
@@ -441,7 +441,7 @@ async def test_add_documents_raw_file_csv_delimiter_non_csv_error(
 async def test_add_documents_raw_file_csv_delimiter_invalid(
     delimiter, async_client, small_movies_csv_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.add_documents_from_raw_file(small_movies_csv_path, csv_delimiter=delimiter)
 
@@ -454,7 +454,7 @@ async def test_add_documents_raw_file_csv_delimiter_invalid(
 async def test_add_documents_from_file_ndjson(
     path_type, primary_key, expected_primary_key, compress, async_client, small_movies_ndjson_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = await index.add_documents_from_file(path, primary_key, compress=compress)
 
@@ -464,7 +464,7 @@ async def test_add_documents_from_file_ndjson(
 
 
 async def test_add_documents_from_file_invalid_extension(async_client):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
 
     with pytest.raises(MeilisearchError):
         await index.add_documents_from_file("test.bad")
@@ -486,7 +486,7 @@ async def test_add_documents_from_file_in_batches(
     small_movies_path,
     small_movies,
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = await index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key, compress=compress
@@ -517,7 +517,7 @@ async def test_add_documents_from_file_in_batches_csv(
     small_movies_csv_path,
     small_movies,
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = await index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key, compress=compress
@@ -548,7 +548,7 @@ async def test_add_documents_from_file_in_batches_csv_with_delimiter(
     small_movies_csv_path_semicolon_delimiter,
     small_movies,
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = (
         str(small_movies_csv_path_semicolon_delimiter)
         if path_type == "str"
@@ -571,7 +571,7 @@ async def test_add_documents_from_file_in_batches_csv_with_delimiter(
 async def test_add_documents_from_file_in_batches_csv_with_delimiter_invalid(
     delimiter, async_client, small_movies_csv_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.add_documents_from_file_in_batches(
             small_movies_csv_path, csv_delimiter=delimiter
@@ -594,7 +594,7 @@ async def test_add_documents_from_file_in_batches_ndjson(
     small_movies_ndjson_path,
     small_movies,
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = await index.add_documents_from_file_in_batches(
         path, batch_size=batch_size, primary_key=primary_key, compress=compress
@@ -610,7 +610,7 @@ async def test_add_documents_from_file_in_batches_ndjson(
 
 
 async def test_add_documents_from_file_in_batches_invalid_extension(async_client):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
 
     with pytest.raises(MeilisearchError):
         await index.add_documents_from_file_in_batches("test.bad")
@@ -685,7 +685,7 @@ async def test_update_documents(compress, async_index_with_documents, small_movi
 @pytest.mark.parametrize("compress", (True, False))
 async def test_update_documents_with_primary_key(compress, async_client, small_movies):
     primary_key = "release_date"
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     update = await index.update_documents(small_movies, primary_key=primary_key, compress=compress)
     await async_wait_for_task(index.http_client, update.task_uid)
     assert await index.get_primary_key() == primary_key
@@ -718,7 +718,7 @@ async def test_update_documents_in_batches_with_primary_key(
     batch_size, compress, async_client, small_movies
 ):
     primary_key = "release_date"
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     updates = await index.update_documents_in_batches(
         small_movies, batch_size=batch_size, primary_key=primary_key, compress=compress
     )
@@ -750,7 +750,7 @@ async def test_update_documents_from_directory(
     for i in range(number_of_files):
         add_json_file(tmp_path / f"test{i}.json", documents_per_file, i * documents_per_file)
 
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, compress=compress
@@ -768,7 +768,7 @@ async def test_update_documents_from_directory_csv(
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", compress=compress
@@ -786,7 +786,7 @@ async def test_update_documents_from_directory_csv_with_delimiter(
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
         path,
@@ -805,7 +805,7 @@ async def test_update_documents_from_directory_csv_delimiter_invalid(
     delimiter, async_client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 1, 0)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.update_documents_from_directory(
             tmp_path, document_type="csv", csv_delimiter=delimiter
@@ -820,7 +820,7 @@ async def test_update_documents_from_directory_ndjson(
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson", compress=compress
@@ -851,7 +851,7 @@ async def test_update_documents_from_directory_in_batchs(
     for i in range(number_of_files):
         add_json_file(tmp_path / f"text{i}.json", documents_per_file, i * documents_per_file)
 
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
         path, batch_size=batch_size, combine_documents=combine_documents, compress=compress
@@ -871,7 +871,7 @@ async def test_update_documents_from_directory_in_batchs_csv(
 ):
     add_csv_file(tmp_path / "test1.csv", 10, 0)
     add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
         path,
@@ -895,7 +895,7 @@ async def test_update_documents_from_directory_in_batchs_csv_delimiter(
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 10, 0)
     add_csv_file_semicolon_delimiter(tmp_path / "test2.csv", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
         path,
@@ -916,7 +916,7 @@ async def test_update_documents_from_directory_in_batches_csv_delimiter_invalid(
     delimiter, async_client, tmp_path
 ):
     add_csv_file_semicolon_delimiter(tmp_path / "test1.csv", 1, 0)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.update_documents_from_directory_in_batches(
             tmp_path, document_type="csv", csv_delimiter=delimiter
@@ -932,7 +932,7 @@ async def test_update_documents_from_directory_in_batchs_ndjson(
 ):
     add_ndjson_file(tmp_path / "test1.ndjson", 10, 0)
     add_ndjson_file(tmp_path / "test2.ndjson", 10, 11)
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.update_documents_from_directory_in_batches(
         path,
@@ -954,7 +954,7 @@ async def test_update_documents_from_file(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -976,7 +976,7 @@ async def test_update_documents_from_file_csv(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -998,7 +998,7 @@ async def test_update_documents_from_file_csv_with_delimiter(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -1021,7 +1021,7 @@ async def test_update_documents_from_file_csv_with_delimiter(
 async def test_update_documents_from_file_csv_delimiter_invalid(
     delimiter, async_client, small_movies_csv_path_semicolon_delimiter
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.update_documents_from_file(
             small_movies_csv_path_semicolon_delimiter, csv_delimiter=delimiter
@@ -1035,7 +1035,7 @@ async def test_update_documents_from_file_ndjson(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -1055,7 +1055,7 @@ async def test_update_documents_from_file_with_primary_key(
     compress, async_client, small_movies_path
 ):
     primary_key = "release_date"
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     update = await index.update_documents_from_file(
         small_movies_path, primary_key=primary_key, compress=compress
     )
@@ -1064,7 +1064,7 @@ async def test_update_documents_from_file_with_primary_key(
 
 
 async def test_update_documents_from_file_invalid_extension(async_client):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
 
     with pytest.raises(MeilisearchError):
         await index.update_documents_from_file("test.bad")
@@ -1078,7 +1078,7 @@ async def test_update_documents_from_file_in_batches(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -1108,7 +1108,7 @@ async def test_update_documents_from_file_in_batches_csv(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -1138,7 +1138,7 @@ async def test_update_documents_from_file_in_batches_ndjson(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -1161,7 +1161,7 @@ async def test_update_documents_from_file_in_batches_ndjson(
 
 
 async def test_update_documents_from_file_in_batches_invalid_extension(async_client):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
 
     with pytest.raises(MeilisearchError):
         await index.update_documents_from_file_in_batches("test.bad")
@@ -1174,7 +1174,7 @@ async def test_update_documents_raw_file_csv(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -1196,7 +1196,7 @@ async def test_update_documents_raw_file_csv_with_delimiter(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -1220,7 +1220,7 @@ async def test_update_documents_raw_file_csv_with_delimiter(
 async def test_update_documents_from_raw_file_csv_delimiter_non_csv(
     async_client, small_movies_ndjson_path
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.update_documents_from_raw_file(small_movies_ndjson_path, csv_delimiter=";")
 
@@ -1229,7 +1229,7 @@ async def test_update_documents_from_raw_file_csv_delimiter_non_csv(
 async def test_update_documents_from_raw_file_csv_delimiter_invalid(
     delimiter, async_client, small_movies_csv_path_semicolon_delimiter
 ):
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     with pytest.raises(ValueError):
         await index.update_documents_from_raw_file(
             small_movies_csv_path_semicolon_delimiter, csv_delimiter=delimiter
@@ -1243,7 +1243,7 @@ async def test_update_documents_raw_file_ndjson(
 ):
     small_movies[0]["title"] = "Some title"
     movie_id = small_movies[0]["id"]
-    index = async_client.index("movies")
+    index = async_client.index(str(uuid4()))
     response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert await index.get_primary_key() == "id"
@@ -1260,7 +1260,7 @@ async def test_update_documents_raw_file_ndjson(
 
 async def test_update_documents_raw_file_not_found_error(async_client, tmp_path):
     with pytest.raises(MeilisearchError):
-        index = async_client.index("movies")
+        index = async_client.index(str(uuid4()))
         await index.update_documents_from_raw_file(tmp_path / "file.csv")
 
 
@@ -1270,7 +1270,7 @@ async def test_update_document_raw_file_extension_error(async_client, tmp_path):
         f.write("test")
 
     with pytest.raises(ValueError):
-        index = async_client.index("movies")
+        index = async_client.index(str(uuid4()))
         await index.update_documents_from_raw_file(file_path)
 
 

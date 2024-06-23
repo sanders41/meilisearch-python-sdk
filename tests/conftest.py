@@ -12,28 +12,15 @@ from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
-    # HuggingFaceEmbedder,
     MeilisearchSettings,
-    # OllamaEmbedder,
-    # OpenAiEmbedder,
     Pagination,
     ProximityPrecision,
-    # RestEmbedder,
     TypoTolerance,
     UserProvidedEmbedder,
 )
 
 MASTER_KEY = "masterKey"
 BASE_URL = "http://127.0.0.1:7700"
-INDEX_UID = "indexUID"
-INDEX_UID2 = "indexUID2"
-INDEX_UID3 = "indexUID3"
-INDEX_UID4 = "indexUID4"
-
-INDEX_FIXTURE = [
-    {"uid": INDEX_UID},
-    {"uid": INDEX_UID2, "primary_key": "book_id"},
-]
 
 ROOT_PATH = Path().absolute()
 SMALL_MOVIES_PATH = ROOT_PATH / "datasets" / "small_movies.json"
@@ -57,13 +44,19 @@ def client():
 
 
 @pytest.fixture(autouse=True)
-async def clear_indexes(async_client):
-    """Auto-clears the indexes after each test function run."""
+async def clear_indexes(async_client, request, pytestconfig):
+    """Auto-clears the indexes after each test function run if not a parallel test."""
+    if "no_parallel" in request.keywords and "not no_parallel" not in request.keywords:
+        indexes = await async_client.get_indexes()
+        if indexes:
+            tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
+            await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in tasks])
     yield
-    indexes = await async_client.get_indexes()
-    if indexes:
-        tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
-        await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in tasks])
+    if "no_parallel" in request.keywords and "not no_parallel" not in request.keywords:
+        indexes = await async_client.get_indexes()
+        if indexes:
+            tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
+            await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in tasks])
 
 
 @pytest.fixture(scope="session")
@@ -77,41 +70,29 @@ def base_url():
 
 
 @pytest.fixture
-def index_uid():
-    return INDEX_UID
-
-
-@pytest.fixture
-def index_uid2():
-    return INDEX_UID2
-
-
-@pytest.fixture
-def index_uid3():
-    return INDEX_UID3
-
-
-@pytest.fixture
-def index_uid4():
-    return INDEX_UID4
-
-
-@pytest.fixture
 async def async_indexes_sample(async_client):
+    index_info = [
+        {"uid": str(uuid4())},
+        {"uid": str(uuid4()), "primary_key": "book_id"},
+    ]
     indexes = []
-    for index_args in INDEX_FIXTURE:
+    for index_args in index_info:
         index = await async_client.create_index(**index_args)
         indexes.append(index)
-    yield indexes
+    yield indexes, index_info[0]["uid"], index_info[1]["uid"]
 
 
 @pytest.fixture
 def indexes_sample(client):
+    index_info = [
+        {"uid": str(uuid4())},
+        {"uid": str(uuid4()), "primary_key": "book_id"},
+    ]
     indexes = []
-    for index_args in INDEX_FIXTURE:
+    for index_args in index_info:
         index = client.create_index(**index_args)
         indexes.append(index)
-    yield indexes
+    yield indexes, index_info[0]["uid"], index_info[1]["uid"]
 
 
 @pytest.fixture

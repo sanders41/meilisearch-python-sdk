@@ -28,7 +28,7 @@ jobs:
       - name: mypy check
         run: just mypy
 
-  testing:
+  parallel-testing:
     strategy:
       fail-fast: false
       matrix:
@@ -52,7 +52,38 @@ jobs:
       - name: Install Dependencies
         run: just install
       - name: Test with pytest
-        run: just test-ci
+        run: just test-parallel-ci
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+
+  no-parallel-testing:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Configure poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+      - name: install Just
+        uses: taiki-e/install-action@just
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+      - name: Install Dependencies
+        run: just install
+      - name: Test with pytest
+        run: just test-no-parallel-ci
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
