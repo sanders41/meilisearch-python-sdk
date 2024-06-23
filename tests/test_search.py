@@ -408,7 +408,6 @@ def test_custom_facet_search(index_with_documents):
 
 
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
-@pytest.mark.usefixtures("enable_vector_search")
 def test_search_invalid_ranking_score_threshold(
     ranking_score_threshold, index_with_documents_and_vectors
 ):
@@ -418,7 +417,6 @@ def test_search_invalid_ranking_score_threshold(
         assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_search_ranking_score_threshold(index_with_documents_and_vectors):
     index = index_with_documents_and_vectors()
     result = index.search("", ranking_score_threshold=0.5)
@@ -426,7 +424,6 @@ def test_search_ranking_score_threshold(index_with_documents_and_vectors):
 
 
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
-@pytest.mark.usefixtures("enable_vector_search")
 def test_multi_search_invalid_ranking_score_threshold(
     ranking_score_threshold, client, index_with_documents
 ):
@@ -442,7 +439,6 @@ def test_multi_search_invalid_ranking_score_threshold(
         assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_multi_search_ranking_score_threshold(client, index_with_documents):
     index1 = index_with_documents()
     result = client.multi_search(
@@ -453,7 +449,6 @@ def test_multi_search_ranking_score_threshold(client, index_with_documents):
     assert len(result[0].hits) > 0
 
 
-@pytest.mark.usefixtures("enable_vector_search")
 def test_facet_search_ranking_score_threshold(index_with_documents_and_vectors):
     index = index_with_documents_and_vectors()
     update = index.update_filterable_attributes(["genre"])
@@ -468,7 +463,6 @@ def test_facet_search_ranking_score_threshold(index_with_documents_and_vectors):
 
 
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
-@pytest.mark.usefixtures("enable_vector_search")
 def test_facet_search_invalid_ranking_score_threshold(
     ranking_score_threshold, index_with_documents_and_vectors
 ):
@@ -486,7 +480,6 @@ def test_facet_search_invalid_ranking_score_threshold(
 
 
 @pytest.mark.parametrize("limit, offset", ((1, 1), (None, None)))
-@pytest.mark.usefixtures("enable_vector_search")
 def test_similar_search(limit, offset, index_with_documents_and_vectors):
     index = index_with_documents_and_vectors()
     response = index.search_similar_documents("287947", limit=limit, offset=offset)
