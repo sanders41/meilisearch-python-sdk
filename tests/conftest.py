@@ -227,14 +227,13 @@ async def default_search_key(async_client):
             return key
 
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 async def enable_vector_search():
     async with HttpxAsyncClient(
         base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
     ) as client:
         await client.patch("/experimental-features", json={"vectorStore": True})
         yield
-        await client.patch("/experimental-features", json={"vectorStore": False})
 
 
 @pytest.fixture
