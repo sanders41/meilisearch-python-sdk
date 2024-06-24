@@ -44,19 +44,15 @@ def client():
 
 
 @pytest.fixture(autouse=True)
-async def clear_indexes(async_client, request, pytestconfig):
+async def clear_indexes(async_client, pytestconfig):
     """Auto-clears the indexes after each test function run if not a parallel test."""
-    if "no_parallel" in request.keywords and "not no_parallel" not in request.keywords:
+    if "not no_parallel" != pytestconfig.getoption("-m"):
         indexes = await async_client.get_indexes()
         if indexes:
             tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
             await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in tasks])
     yield
-    if (
-        "no_parallel" in request.keywords
-        and "not no_parallel" not in request.keywords
-        or "no_parallel" not in request.keywords
-    ):
+    if "not no_parallel" != pytestconfig.getoption("-m"):
         indexes = await async_client.get_indexes()
         if indexes:
             tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
