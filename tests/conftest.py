@@ -52,7 +52,11 @@ async def clear_indexes(async_client, request, pytestconfig):
             tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
             await asyncio.gather(*[async_client.wait_for_task(x.task_uid) for x in tasks])
     yield
-    if "no_parallel" in request.keywords and "not no_parallel" not in request.keywords:
+    if (
+        "no_parallel" in request.keywords
+        and "not no_parallel" not in request.keywords
+        or "no_parallel" not in request.keywords
+    ):
         indexes = await async_client.get_indexes()
         if indexes:
             tasks = await asyncio.gather(*[async_client.index(x.uid).delete() for x in indexes])
