@@ -78,7 +78,16 @@ target-version = "py38"
 fix = true
 
 [tool.ruff.lint]
-select=["E", "B", "F", "UP", "I001", "T201", "T203"]
+select=[
+  "E",  # pycodestyle
+  "B",  #
+  "F",  # pyflakes
+  "UP",  # pyupgrade
+  "I001",  # unsorted-imports
+  "T201",
+  "T203",
+  "ASYNC"  # flake8-async
+]
 ignore=[
   # Recommened ignores by ruff when using formatter
   "E501",
