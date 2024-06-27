@@ -1,13 +1,16 @@
 import asyncio
 import json
 
+import aiofiles
+
 from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk.models.settings import MeilisearchSettings
 
 
 async def main() -> int:
-    with open("datasets/small_movies.json") as f:
-        documents = json.load(f)
+    async with aiofiles.open("datasets/small_movies.json") as f:
+        data = await f.read()
+        documents = json.loads(data)
 
     async with AsyncClient("http://127.0.0.1:7700", "masterKey") as client:
         index = await client.create_index("movies", primary_key="id")

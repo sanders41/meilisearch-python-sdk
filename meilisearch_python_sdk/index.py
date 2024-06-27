@@ -8249,7 +8249,7 @@ async def _async_load_documents_from_file(
             and not csv_delimiter.isascii()
         ):
             raise ValueError("csv_delimiter must be a single ascii character")
-        with open(file_path) as f:
+        with open(file_path) as f:  # noqa: ASYNC101 ASYNC230
             if csv_delimiter:
                 documents = await loop.run_in_executor(
                     None, partial(DictReader, f, delimiter=csv_delimiter)
@@ -8259,7 +8259,7 @@ async def _async_load_documents_from_file(
             return list(documents)
 
     if file_path.suffix == ".ndjson":
-        with open(file_path) as f:
+        with open(file_path) as f:  # noqa: ASYNC101 ASYNC230
             return [await loop.run_in_executor(None, partial(json.loads, x)) for x in f]
 
     async with aiofiles.open(file_path, mode="r") as f:  # type: ignore

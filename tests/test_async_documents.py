@@ -5,6 +5,7 @@ from datetime import datetime
 from math import ceil
 from uuid import UUID, uuid4
 
+import aiofiles
 import pytest
 
 from meilisearch_python_sdk._task import async_wait_for_task
@@ -218,8 +219,8 @@ async def test_add_documents_from_directory_ndjson(
 async def test_add_documents_from_directory_no_documents(
     combine_documents, compress, async_client, tmp_path
 ):
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("nothing")
+    async with aiofiles.open(tmp_path / "test.txt", "w") as f:
+        await f.write("nothing")
 
     with pytest.raises(MeilisearchError):
         index = async_client.index(str(uuid4()))
@@ -421,8 +422,8 @@ async def test_add_documents_raw_file_not_found_error(async_client, tmp_path):
 
 async def test_add_document_raw_file_extension_error(async_client, tmp_path):
     file_path = tmp_path / "file.bad"
-    with open(file_path, "w") as f:
-        f.write("test")
+    async with aiofiles.open(file_path, "w") as f:
+        await f.write("test")
 
     with pytest.raises(ValueError):
         index = async_client.index(str(uuid4()))
@@ -1266,8 +1267,8 @@ async def test_update_documents_raw_file_not_found_error(async_client, tmp_path)
 
 async def test_update_document_raw_file_extension_error(async_client, tmp_path):
     file_path = tmp_path / "file.bad"
-    with open(file_path, "w") as f:
-        f.write("test")
+    async with aiofiles.open(file_path, "w") as f:
+        await f.write("test")
 
     with pytest.raises(ValueError):
         index = async_client.index(str(uuid4()))
@@ -1338,7 +1339,7 @@ async def test_delete_all_documents(async_index_with_documents):
 async def test_async_load_documents_from_file_invalid_document(tmp_path):
     doc = {"id": 1, "name": "test"}
     file_path = tmp_path / "test.json"
-    with open(file_path, "w") as f:
+    with open(file_path, "w") as f:  # noqa ASYNC101 ASYNC230
         json.dump(doc, f)
 
     with pytest.raises(InvalidDocumentError):
