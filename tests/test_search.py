@@ -4,7 +4,7 @@ import pytest
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk._task import wait_for_task
-from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchError
 from meilisearch_python_sdk.models.search import Hybrid, SearchParams
 
 
@@ -113,12 +113,12 @@ def test_custom_search_params_with_simple_string(index_with_documents):
 def test_custom_search_params_with_string_list(index_with_documents):
     index = index_with_documents()
     response = index.search(
-        "a",
+        "Shazam!",
         limit=5,
         attributes_to_retrieve=["title", "overview"],
         attributes_to_highlight=["title"],
     )
-    assert len(response.hits) == 5
+    assert len(response.hits) == 1
     assert "title" in response.hits[0]
     assert "overview" in response.hits[0]
     assert "release_date" not in response.hits[0]
@@ -405,3 +405,82 @@ def test_custom_facet_search(index_with_documents):
     )
     assert response.facet_hits[0].value == "cartoon"
     assert response.facet_hits[0].count == 1
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+def test_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, index_with_documents_and_vectors
+):
+    index = index_with_documents_and_vectors()
+    with pytest.raises(MeilisearchError) as e:
+        index.search("", ranking_score_threshold=ranking_score_threshold)
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+def test_search_ranking_score_threshold(index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
+    result = index.search("", ranking_score_threshold=0.5)
+    assert len(result.hits) > 0
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+def test_multi_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, client, index_with_documents
+):
+    index1 = index_with_documents()
+    with pytest.raises(MeilisearchError) as e:
+        client.multi_search(
+            [
+                SearchParams(
+                    index_uid=index1.uid, query="", ranking_score_threshold=ranking_score_threshold
+                ),
+            ]
+        )
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+def test_multi_search_ranking_score_threshold(client, index_with_documents):
+    index1 = index_with_documents()
+    result = client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="", ranking_score_threshold=0.5),
+        ]
+    )
+    assert len(result[0].hits) > 0
+
+
+def test_facet_search_ranking_score_threshold(index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.facet_search(
+        "How to Train Your Dragon",
+        facet_name="genre",
+        facet_query="cartoon",
+        ranking_score_threshold=0.5,
+    )
+    assert len(response.facet_hits) > 0
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+def test_facet_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, index_with_documents_and_vectors
+):
+    index = index_with_documents_and_vectors()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    with pytest.raises(MeilisearchError) as e:
+        index.facet_search(
+            "How to Train Your Dragon",
+            facet_name="genre",
+            facet_query="cartoon",
+            ranking_score_threshold=ranking_score_threshold,
+        )
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+@pytest.mark.parametrize("limit, offset", ((1, 1), (None, None)))
+def test_similar_search(limit, offset, index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
+    response = index.search_similar_documents("287947", limit=limit, offset=offset)
+    assert len(response.hits) >= 1

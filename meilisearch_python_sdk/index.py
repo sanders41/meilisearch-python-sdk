@@ -6,7 +6,7 @@ from csv import DictReader
 from datetime import datetime
 from functools import cached_property, partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generator, MutableMapping, Sequence
+from typing import TYPE_CHECKING, Any, Generator, Literal, MutableMapping, Sequence
 from urllib.parse import urlencode
 from warnings import warn
 
@@ -20,7 +20,12 @@ from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time, use_t
 from meilisearch_python_sdk.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_sdk.models.documents import DocumentsInfo
 from meilisearch_python_sdk.models.index import IndexStats
-from meilisearch_python_sdk.models.search import FacetSearchResults, Hybrid, SearchResults
+from meilisearch_python_sdk.models.search import (
+    FacetSearchResults,
+    Hybrid,
+    SearchResults,
+    SimilarSearchResults,
+)
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
@@ -737,6 +742,7 @@ class AsyncIndex(_BaseIndex):
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
     ) -> SearchResults:
@@ -777,6 +783,9 @@ class AsyncIndex(_BaseIndex):
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution. This
                 feature became stable in Meiliseach v1.7.0.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -808,6 +817,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     search_results = await index.search("Tron")
         """
+        if ranking_score_threshold:
+            _validate_ranking_score_threshold(ranking_score_threshold)
+
         body = _process_search_parameters(
             q=query,
             offset=offset,
@@ -831,6 +843,7 @@ class AsyncIndex(_BaseIndex):
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
             hybrid=hybrid,
+            ranking_score_threshold=ranking_score_threshold,
         )
         search_url = f"{self._base_url_with_uid}/search"
 
@@ -981,12 +994,13 @@ class AsyncIndex(_BaseIndex):
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
-        matching_strategy: str = "all",
+        matching_strategy: Literal["all", "last", "frequency"] = "all",
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
     ) -> FacetSearchResults:
         """Search the index.
@@ -1028,6 +1042,9 @@ class AsyncIndex(_BaseIndex):
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution. This
                 feature became stable in Meiliseach v1.7.0.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -1056,6 +1073,9 @@ class AsyncIndex(_BaseIndex):
             >>>         facet_query="Sci-fi"
             >>>     )
         """
+        if ranking_score_threshold:
+            _validate_ranking_score_threshold(ranking_score_threshold)
+
         body = _process_search_parameters(
             q=query,
             facet_name=facet_name,
@@ -1079,6 +1099,7 @@ class AsyncIndex(_BaseIndex):
             attributes_to_search_on=attributes_to_search_on,
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
+            ranking_score_threshold=ranking_score_threshold,
             vector=vector,
         )
         search_url = f"{self._base_url_with_uid}/facet-search"
@@ -1107,6 +1128,7 @@ class AsyncIndex(_BaseIndex):
                 attributes_to_search_on=attributes_to_search_on,
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
+                ranking_score_threshold=ranking_score_threshold,
                 vector=vector,
             )
 
@@ -1138,6 +1160,7 @@ class AsyncIndex(_BaseIndex):
                                 attributes_to_search_on=attributes_to_search_on,
                                 show_ranking_score=show_ranking_score,
                                 show_ranking_score_details=show_ranking_score_details,
+                                ranking_score_threshold=ranking_score_threshold,
                                 vector=vector,
                             )
                         )
@@ -1180,6 +1203,7 @@ class AsyncIndex(_BaseIndex):
                                 attributes_to_search_on=attributes_to_search_on,
                                 show_ranking_score=show_ranking_score,
                                 show_ranking_score_details=show_ranking_score_details,
+                                ranking_score_threshold=ranking_score_threshold,
                                 vector=vector,
                             )
                         )
@@ -1207,6 +1231,75 @@ class AsyncIndex(_BaseIndex):
                 result = post["generic_result"]
 
         return result
+
+    async def search_similar_documents(
+        self,
+        id: str,
+        *,
+        offset: int | None = None,
+        limit: int | None = None,
+        filter: str | None = None,
+        embedder: str = "default",
+        attributes_to_retrieve: list[str] | None = None,
+        show_ranking_score: bool = False,
+        show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
+    ) -> SimilarSearchResults:
+        """Search the index.
+
+        Args:
+            id: The id for the target document that is being used to find similar documents.
+            offset: Number of documents to skip. Defaults to 0.
+            limit: Maximum number of documents returned. Defaults to 20.
+            filter: Filter queries by an attribute value. Defaults to None.
+            embedder: The vector DB to use for the search.
+            attributes_to_retrieve: Attributes to display in the returned documents.
+                Defaults to ["*"].
+            show_ranking_score: If set to True the ranking score will be returned with each document
+                in the search. Defaults to False.
+            show_ranking_score_details: If set to True the ranking details will be returned with
+                each document in the search. Defaults to False.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
+
+        Returns:
+
+            Results of the search
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_results = await index.search_similar_documents("123")
+        """
+        payload = {
+            "id": id,
+            "filter": filter,
+            "embedder": embedder,
+            "attributesToRetrieve": attributes_to_retrieve,
+            "showRankingScore": show_ranking_score,
+            "showRankingScoreDetails": show_ranking_score_details,
+            "rankingScoreThreshold": ranking_score_threshold,
+        }
+
+        if offset:
+            payload["offset"] = offset
+
+        if limit:
+            payload["limit"] = limit
+
+        response = await self._http_requests.post(
+            f"{self._base_url_with_uid}/similar", body=payload
+        )
+
+        return SimilarSearchResults(**response.json())
 
     async def get_document(self, document_id: str) -> JsonDict:
         """Get one document with given document identifier.
@@ -5008,12 +5101,13 @@ class Index(_BaseIndex):
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
-        matching_strategy: str = "all",
+        matching_strategy: Literal["all", "last", "frequency"] = "all",
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
     ) -> SearchResults:
@@ -5054,6 +5148,9 @@ class Index(_BaseIndex):
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution. This
                 feature became stable in Meiliseach v1.7.0.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -5085,6 +5182,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> search_results = index.search("Tron")
         """
+        if ranking_score_threshold:
+            _validate_ranking_score_threshold(ranking_score_threshold)
+
         body = _process_search_parameters(
             q=query,
             offset=offset,
@@ -5108,6 +5208,7 @@ class Index(_BaseIndex):
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
             hybrid=hybrid,
+            ranking_score_threshold=ranking_score_threshold,
         )
 
         if self._pre_search_plugins:
@@ -5172,6 +5273,7 @@ class Index(_BaseIndex):
         attributes_to_search_on: list[str] | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
     ) -> FacetSearchResults:
         """Search the index.
@@ -5213,6 +5315,9 @@ class Index(_BaseIndex):
                 Because this feature is experimental it may be removed or updated causing breaking
                 changes in this library without a major version bump so use with caution. This
                 feature became stable in Meiliseach v1.7.0.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
             vector: List of vectors for vector search. Defaults to None. Note: This parameter can
                 only be used with Meilisearch >= v1.3.0, and is experimental in Meilisearch v1.3.0.
                 In order to use this feature in Meilisearch v1.3.0 you first need to enable the
@@ -5241,6 +5346,9 @@ class Index(_BaseIndex):
             >>>     facet_query="Sci-fi"
             >>> )
         """
+        if ranking_score_threshold:
+            _validate_ranking_score_threshold(ranking_score_threshold)
+
         body = _process_search_parameters(
             q=query,
             facet_name=facet_name,
@@ -5264,6 +5372,7 @@ class Index(_BaseIndex):
             attributes_to_search_on=attributes_to_search_on,
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
+            ranking_score_threshold=ranking_score_threshold,
             vector=vector,
         )
 
@@ -5291,6 +5400,7 @@ class Index(_BaseIndex):
                 attributes_to_search_on=attributes_to_search_on,
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
+                ranking_score_threshold=ranking_score_threshold,
                 vector=vector,
             )
 
@@ -5302,6 +5412,73 @@ class Index(_BaseIndex):
                 result = post["generic_result"]
 
         return result
+
+    def search_similar_documents(
+        self,
+        id: str,
+        *,
+        offset: int | None = None,
+        limit: int | None = None,
+        filter: str | None = None,
+        embedder: str = "default",
+        attributes_to_retrieve: list[str] | None = None,
+        show_ranking_score: bool = False,
+        show_ranking_score_details: bool = False,
+        ranking_score_threshold: float | None = None,
+    ) -> SimilarSearchResults:
+        """Search the index.
+
+        Args:
+            id: The id for the target document that is being used to find similar documents.
+            offset: Number of documents to skip. Defaults to 0.
+            limit: Maximum number of documents returned. Defaults to 20.
+            filter: Filter queries by an attribute value. Defaults to None.
+            embedder: The vector DB to use for the search.
+            attributes_to_retrieve: Attributes to display in the returned documents.
+                Defaults to ["*"].
+            show_ranking_score: If set to True the ranking score will be returned with each document
+                in the search. Defaults to False.
+            show_ranking_score_details: If set to True the ranking details will be returned with
+                each document in the search. Defaults to False.
+            ranking_score_threshold: If set, no document whose _rankingScore is under the
+                rankingScoreThreshold is returned. The value must be between 0.0 and 1.0. Defaults
+                to None.
+
+        Returns:
+
+            Results of the search
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> search_results = index.search_similar_documents("123")
+        """
+        payload = {
+            "id": id,
+            "filter": filter,
+            "embedder": embedder,
+            "attributesToRetrieve": attributes_to_retrieve,
+            "showRankingScore": show_ranking_score,
+            "showRankingScoreDetails": show_ranking_score_details,
+            "rankingScoreThreshold": ranking_score_threshold,
+        }
+
+        if offset:
+            payload["offset"] = offset
+
+        if limit:
+            payload["limit"] = limit
+
+        response = self._http_requests.post(f"{self._base_url_with_uid}/similar", body=payload)
+
+        return SimilarSearchResults(**response.json())
 
     def get_document(self, document_id: str) -> JsonDict:
         """Get one document with given document identifier.
@@ -8192,6 +8369,7 @@ def _process_search_parameters(
     attributes_to_search_on: list[str] | None = None,
     show_ranking_score: bool = False,
     show_ranking_score_details: bool = False,
+    ranking_score_threshold: float | None = None,
     vector: list[float] | None = None,
     hybrid: Hybrid | None = None,
 ) -> JsonDict:
@@ -8218,6 +8396,7 @@ def _process_search_parameters(
         "page": page,
         "attributesToSearchOn": attributes_to_search_on,
         "showRankingScore": show_ranking_score,
+        "rankingScoreThreshold": ranking_score_threshold,
     }
 
     if facet_name:
@@ -8311,3 +8490,8 @@ def _embedder_json_to_settings_model(  # pragma: no cover
 def _validate_file_type(file_path: Path) -> None:
     if file_path.suffix not in (".json", ".csv", ".ndjson"):
         raise MeilisearchError("File must be a json, ndjson, or csv file")
+
+
+def _validate_ranking_score_threshold(ranking_score_threshold: float) -> None:
+    if not 0.0 <= ranking_score_threshold <= 1.0:
+        raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")

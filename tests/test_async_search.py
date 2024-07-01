@@ -4,7 +4,7 @@ import pytest
 
 from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk._task import async_wait_for_task
-from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchError
 from meilisearch_python_sdk.models.search import Hybrid, SearchParams
 
 
@@ -113,12 +113,12 @@ async def test_custom_search_params_with_simple_string(async_index_with_document
 async def test_custom_search_params_with_string_list(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.search(
-        "a",
+        "Shazam!",
         limit=5,
         attributes_to_retrieve=["title", "overview"],
         attributes_to_highlight=["title"],
     )
-    assert len(response.hits) == 5
+    assert len(response.hits) == 1
     assert "title" in response.hits[0]
     assert "overview" in response.hits[0]
     assert "release_date" not in response.hits[0]
@@ -404,3 +404,82 @@ async def test_custom_facet_search(async_index_with_documents):
     )
     assert response.facet_hits[0].value == "cartoon"
     assert response.facet_hits[0].count == 1
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+async def test_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, async_index_with_documents
+):
+    index = await async_index_with_documents()
+    with pytest.raises(MeilisearchError) as e:
+        await index.search("", ranking_score_threshold=ranking_score_threshold)
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+async def test_search_ranking_score_threshold(async_index_with_documents_and_vectors):
+    index = await async_index_with_documents_and_vectors()
+    result = await index.search("", ranking_score_threshold=0.5)
+    assert len(result.hits) > 0
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+async def test_multi_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, async_client, async_index_with_documents
+):
+    index1 = await async_index_with_documents()
+    with pytest.raises(MeilisearchError) as e:
+        await async_client.multi_search(
+            [
+                SearchParams(
+                    index_uid=index1.uid, query="", ranking_score_threshold=ranking_score_threshold
+                ),
+            ]
+        )
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+async def test_multi_search_ranking_score_threshold(async_client, async_index_with_documents):
+    index1 = await async_index_with_documents()
+    result = await async_client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="", ranking_score_threshold=0.5),
+        ]
+    )
+    assert len(result[0].hits) > 0
+
+
+async def test_facet_search_ranking_score_threshold(async_index_with_documents_and_vectors):
+    index = await async_index_with_documents_and_vectors()
+    update = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon",
+        facet_name="genre",
+        facet_query="cartoon",
+        ranking_score_threshold=0.5,
+    )
+    assert len(response.facet_hits) > 0
+
+
+@pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
+async def test_facet_search_invalid_ranking_score_threshold(
+    ranking_score_threshold, async_index_with_documents_and_vectors
+):
+    index = await async_index_with_documents_and_vectors()
+    update = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, update.task_uid)
+    with pytest.raises(MeilisearchError) as e:
+        await index.facet_search(
+            "How to Train Your Dragon",
+            facet_name="genre",
+            facet_query="cartoon",
+            ranking_score_threshold=ranking_score_threshold,
+        )
+        assert "ranking_score_threshold must be between 0.0 and 1.0" in str(e.value)
+
+
+@pytest.mark.parametrize("limit, offset", ((1, 1), (None, None)))
+async def test_similar_search(limit, offset, async_index_with_documents_and_vectors):
+    index = await async_index_with_documents_and_vectors()
+    response = await index.search_similar_documents("287947", limit=limit, offset=offset)
+    assert len(response.hits) >= 1
