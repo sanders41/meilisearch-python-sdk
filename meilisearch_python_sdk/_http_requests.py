@@ -61,7 +61,10 @@ class AsyncHttpRequests:
             raise MeilisearchCommunicationError(str(err)) from err
         except HTTPError as err:
             if "response" in locals():
-                raise MeilisearchApiError(str(err), response) from err
+                if "application/json" in response.headers.get("content-type", ""):
+                    raise MeilisearchApiError(str(err), response) from err
+                else:
+                    raise
             else:
                 # Fail safe just in case error happens before response is created
                 raise MeilisearchError(str(err)) from err  # pragma: no cover
@@ -145,7 +148,10 @@ class HttpRequests:
             raise MeilisearchCommunicationError(str(err)) from err
         except HTTPError as err:
             if "response" in locals():
-                raise MeilisearchApiError(str(err), response) from err
+                if "application/json" in response.headers.get("content-type", ""):
+                    raise MeilisearchApiError(str(err), response) from err
+                else:
+                    raise
             else:
                 # Fail safe just in case error happens before response is created
                 raise MeilisearchError(str(err)) from err  # pragma: no cover
