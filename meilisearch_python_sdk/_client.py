@@ -31,7 +31,7 @@ from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
 from meilisearch_python_sdk.plugins import AsyncIndexPlugins, IndexPlugins
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import sys
 
     from meilisearch_python_sdk.types import JsonDict, JsonMapping
