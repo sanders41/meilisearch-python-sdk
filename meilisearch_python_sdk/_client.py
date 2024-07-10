@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from ssl import SSLContext
 from types import TracebackType
+from typing import TYPE_CHECKING
 from warnings import warn
 
 import jwt
@@ -29,7 +30,16 @@ from meilisearch_python_sdk.models.settings import MeilisearchSettings
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
 from meilisearch_python_sdk.plugins import AsyncIndexPlugins, IndexPlugins
-from meilisearch_python_sdk.types import JsonDict, JsonMapping
+
+if TYPE_CHECKING:
+    import sys
+
+    from meilisearch_python_sdk.types import JsonDict, JsonMapping
+
+    if sys.version_info >= (3, 11):
+        from typing import Self
+    else:
+        from typing_extensions import Self
 
 
 class BaseClient:
@@ -147,7 +157,7 @@ class AsyncClient(BaseClient):
         )
         self._http_requests = AsyncHttpRequests(self.http_client)
 
-    async def __aenter__(self) -> AsyncClient:
+    async def __aenter__(self) -> Self:
         return self
 
     async def __aexit__(

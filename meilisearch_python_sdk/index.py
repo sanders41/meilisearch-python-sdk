@@ -54,7 +54,14 @@ from meilisearch_python_sdk.plugins import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover
+    import sys
+
     from meilisearch_python_sdk.types import Filter, JsonDict, JsonMapping
+
+    if sys.version_info >= (3, 11):
+        from typing import Self
+    else:
+        from typing_extensions import Self
 
 
 class _BaseIndex:
@@ -533,7 +540,7 @@ class AsyncIndex(_BaseIndex):
 
         return False
 
-    async def update(self, primary_key: str) -> AsyncIndex:
+    async def update(self, primary_key: str) -> Self:
         """Update the index primary key.
 
         Args:
@@ -565,7 +572,7 @@ class AsyncIndex(_BaseIndex):
         self.primary_key = index_response.json()["primaryKey"]
         return self
 
-    async def fetch_info(self) -> AsyncIndex:
+    async def fetch_info(self) -> Self:
         """Gets the infromation about the index.
 
         Returns:
@@ -624,7 +631,7 @@ class AsyncIndex(_BaseIndex):
         wait: bool = True,
         timeout_in_ms: int | None = None,
         plugins: AsyncIndexPlugins | None = None,
-    ) -> AsyncIndex:
+    ) -> Self:
         """Creates a new index.
 
         In general this method should not be used directly and instead the index should be created
@@ -4905,7 +4912,7 @@ class Index(_BaseIndex):
 
         return False
 
-    def update(self, primary_key: str) -> Index:
+    def update(self, primary_key: str) -> Self:
         """Update the index primary key.
 
         Args:
@@ -4935,7 +4942,7 @@ class Index(_BaseIndex):
         self.primary_key = index_response.json()["primaryKey"]
         return self
 
-    def fetch_info(self) -> Index:
+    def fetch_info(self) -> Self:
         """Gets the infromation about the index.
 
         Returns:
@@ -4994,7 +5001,7 @@ class Index(_BaseIndex):
         wait: bool = True,
         timeout_in_ms: int | None = None,
         plugins: IndexPlugins | None = None,
-    ) -> Index:
+    ) -> Self:
         """Creates a new index.
 
         In general this method should not be used directly and instead the index should be created

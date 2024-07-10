@@ -44,6 +44,7 @@ pytest-xdist = ">=3.6.1"
 ruff = ">=0.1.2"
 tomli = {version = ">=2.0.1", python = "<3.11"}
 types-aiofiles = ">=22.1.0"
+typing-extensions = ">=4.12.2"
 
 [tool.poetry.group.benchmark.dependencies]
 meilisearch = ">=0.26.0"
