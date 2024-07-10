@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from ssl import SSLContext
-from types import TracebackType
 from typing import TYPE_CHECKING
 from warnings import warn
 
@@ -33,6 +32,7 @@ from meilisearch_python_sdk.plugins import AsyncIndexPlugins, IndexPlugins
 
 if TYPE_CHECKING:  # pragma: no cover
     import sys
+    from types import TracebackType
 
     from meilisearch_python_sdk.types import JsonDict, JsonMapping
 
