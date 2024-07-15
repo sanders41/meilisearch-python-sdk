@@ -1,11 +1,9 @@
 from enum import Enum
 from typing import Dict, List, Optional, Union
-from warnings import warn
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 
-from meilisearch_python_sdk._utils import is_pydantic_2
 from meilisearch_python_sdk.types import JsonDict
 
 
@@ -25,38 +23,17 @@ class Faceting(CamelBase):
     max_values_per_facet: int
     sort_facet_values_by: Optional[Dict[str, str]] = None
 
-    if is_pydantic_2():
+    @pydantic.field_validator("sort_facet_values_by")  # type: ignore[attr-defined]
+    @classmethod
+    def validate_facet_order(cls, v: Optional[Dict[str, str]]) -> Optional[Dict[str, str]]:
+        if not v:  # pragma: no cover
+            return None
 
-        @pydantic.field_validator("sort_facet_values_by")  # type: ignore[attr-defined]
-        @classmethod
-        def validate_facet_order(cls, v: Optional[Dict[str, str]]) -> Optional[Dict[str, str]]:
-            if not v:  # pragma: no cover
-                return None
+        for _, value in v.items():
+            if value not in ("alpha", "count"):
+                raise ValueError('facet_order must be either "alpha" or "count"')
 
-            for _, value in v.items():
-                if value not in ("alpha", "count"):
-                    raise ValueError('facet_order must be either "alpha" or "count"')
-
-            return v
-
-    else:  # pragma: no cover
-        warn(
-            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        @pydantic.validator("sort_facet_values_by")  # type: ignore[attr-defined]
-        @classmethod
-        def validate_facet_order(cls, v: Optional[Dict[str, str]]) -> Optional[Dict[str, str]]:
-            if not v:
-                return None
-
-            for _, value in v.items():
-                if value not in ("alpha", "count"):
-                    raise ValueError('facet_order must be either "alpha" or "count"')
-
-            return v
+        return v
 
 
 class Pagination(CamelBase):

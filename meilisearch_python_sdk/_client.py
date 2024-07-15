@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from ssl import SSLContext
 from typing import TYPE_CHECKING
-from warnings import warn
 
 import jwt
 from httpx import AsyncClient as HttpxAsyncClient
@@ -11,7 +10,6 @@ from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk import _task
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_sdk._utils import is_pydantic_2
 from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_sdk.index import AsyncIndex, Index
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
@@ -493,19 +491,9 @@ class AsyncClient(BaseClient):
             >>>     )
             >>>     keys = await client.create_key(key_info)
         """
-        if is_pydantic_2():
-            response = await self._http_requests.post(
-                "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = await self._http_requests.post(
-                "keys", self.json_handler.loads(key.json(by_alias=True))
-            )  # type: ignore[attr-defined]
+        response = await self._http_requests.post(
+            "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
+        )  # type: ignore[attr-defined]
 
         return Key(**response.json())
 
@@ -650,21 +638,10 @@ class AsyncClient(BaseClient):
             >>>     search_results = await client.search(queries)
         """
         url = "multi-search"
-        if is_pydantic_2():
-            response = await self._http_requests.post(
-                url,
-                body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
-            )
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = await self._http_requests.post(
-                url,
-                body={"queries": [x.dict(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
-            )
+        response = await self._http_requests.post(
+            url,
+            body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
+        )
 
         return [SearchResultsWithUID(**x) for x in response.json()["results"]]
 
@@ -1371,19 +1348,9 @@ class Client(BaseClient):
             >>> )
             >>> keys = client.create_key(key_info)
         """
-        if is_pydantic_2():
-            response = self._http_requests.post(
-                "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = self._http_requests.post(
-                "keys", self.json_handler.loads(key.json(by_alias=True))
-            )  # type: ignore[attr-defined]
+        response = self._http_requests.post(
+            "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
+        )  # type: ignore[attr-defined]
 
         return Key(**response.json())
 
@@ -1528,21 +1495,10 @@ class Client(BaseClient):
             >>> search_results = client.search(queries)
         """
         url = "multi-search"
-        if is_pydantic_2():
-            response = self._http_requests.post(
-                url,
-                body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
-            )
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = self._http_requests.post(
-                url,
-                body={"queries": [x.dict(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
-            )
+        response = self._http_requests.post(
+            url,
+            body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
+        )
 
         return [SearchResultsWithUID(**x) for x in response.json()["results"]]
 
@@ -1923,20 +1879,8 @@ def _build_update_key_payload(
 ) -> JsonDict:
     # The json_handler.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
     # but can when converting to a json string.
-    if is_pydantic_2():
-        return {  # type: ignore[attr-defined]
-            k: v
-            for k, v in json_handler.loads(key.model_dump_json(by_alias=True)).items()
-            if v is not None and k != "key"
-        }
-    else:  # pragma: no cover
-        warn(
-            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return {  # type: ignore[attr-defined]
-            k: v
-            for k, v in json_handler.loads(key.json(by_alias=True)).items()
-            if v is not None and k != "key"
-        }
+    return {  # type: ignore[attr-defined]
+        k: v
+        for k, v in json_handler.loads(key.model_dump_json(by_alias=True)).items()
+        if v is not None and k != "key"
+    }
