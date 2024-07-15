@@ -15,6 +15,7 @@ from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequest
 from meilisearch_python_sdk._utils import is_pydantic_2
 from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_sdk.index import AsyncIndex, Index
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
 from meilisearch_python_sdk.models.client import (
     ClientStats,
     Key,
@@ -46,8 +47,10 @@ class BaseClient:
     def __init__(
         self,
         api_key: str | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
     ) -> None:
         self._headers: dict[str, str] | None
+        self.json_handler = json_handler if json_handler else BuiltinHandler()
         if api_key:
             self._headers = {"Authorization": f"Bearer {api_key}"}
         else:
@@ -137,6 +140,7 @@ class AsyncClient(BaseClient):
         *,
         timeout: int | None = None,
         verify: str | bool | SSLContext = True,
+        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
     ) -> None:
         """Class initializer.
 
@@ -149,13 +153,17 @@ class AsyncClient(BaseClient):
             verify: SSL certificates (a.k.a CA bundle) used to
                 verify the identity of requested hosts. Either `True` (default CA bundle),
                 a path to an SSL certificate file, or `False` (disable verification)
+            json_handler: The module to use for json operations. The options are BuiltinHandler
+                (uses the json module from the standard library), OrjsonHandler (uses orjson), or
+                UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
+                extra needs to be included. Default: BuiltinHandler.
         """
-        super().__init__(api_key)
+        super().__init__(api_key, json_handler=json_handler)
 
         self.http_client = HttpxAsyncClient(
             base_url=url, timeout=timeout, headers=self._headers, verify=verify
         )
-        self._http_requests = AsyncHttpRequests(self.http_client)
+        self._http_requests = AsyncHttpRequests(self.http_client, json_handler=self.json_handler)
 
     async def __aenter__(self) -> Self:
         return self
@@ -249,6 +257,7 @@ class AsyncClient(BaseClient):
             wait=wait,
             timeout_in_ms=timeout_in_ms,
             plugins=plugins,
+            json_handler=self.json_handler,
         )
 
     async def create_snapshot(self) -> TaskInfo:
@@ -340,6 +349,7 @@ class AsyncClient(BaseClient):
                 primary_key=x["primaryKey"],
                 created_at=x["createdAt"],
                 updated_at=x["updatedAt"],
+                json_handler=self.json_handler,
             )
             for x in response.json()["results"]
         ]
@@ -366,7 +376,7 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_index()
         """
-        return await AsyncIndex(self.http_client, uid).fetch_info()
+        return await AsyncIndex(self.http_client, uid, json_handler=self.json_handler).fetch_info()
 
     def index(self, uid: str, *, plugins: AsyncIndexPlugins | None = None) -> AsyncIndex:
         """Create a local reference to an index identified by UID, without making an HTTP call.
@@ -393,7 +403,9 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
         """
-        return AsyncIndex(self.http_client, uid=uid, plugins=plugins)
+        return AsyncIndex(
+            self.http_client, uid=uid, plugins=plugins, json_handler=self.json_handler
+        )
 
     async def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.
@@ -1026,6 +1038,7 @@ class Client(BaseClient):
         *,
         timeout: int | None = None,
         verify: str | bool | SSLContext = True,
+        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
     ) -> None:
         """Class initializer.
 
@@ -1038,13 +1051,17 @@ class Client(BaseClient):
             verify: SSL certificates (a.k.a CA bundle) used to
                 verify the identity of requested hosts. Either `True` (default CA bundle),
                 a path to an SSL certificate file, or `False` (disable verification)
+            json_handler: The module to use for json operations. The options are BuiltinHandler
+                (uses the json module from the standard library), OrjsonHandler (uses orjson), or
+                UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
+                extra needs to be included. Default: BuiltinHandler.
         """
-        super().__init__(api_key)
+        super().__init__(api_key, json_handler=json_handler)
 
         self.http_client = HttpxClient(
             base_url=url, timeout=timeout, headers=self._headers, verify=verify
         )
-        self._http_requests = HttpRequests(self.http_client)
+        self._http_requests = HttpRequests(self.http_client, json_handler=self.json_handler)
 
     def create_dump(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch dump.
@@ -1120,6 +1137,7 @@ class Client(BaseClient):
             wait=wait,
             timeout_in_ms=timeout_in_ms,
             plugins=plugins,
+            json_handler=self.json_handler,
         )
 
     def create_snapshot(self) -> TaskInfo:
@@ -1211,6 +1229,7 @@ class Client(BaseClient):
                 primary_key=x["primaryKey"],
                 created_at=x["createdAt"],
                 updated_at=x["updatedAt"],
+                json_handler=self.json_handler,
             )
             for x in response.json()["results"]
         ]
@@ -1237,7 +1256,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.get_index()
         """
-        return Index(self.http_client, uid).fetch_info()
+        return Index(self.http_client, uid, json_handler=self.json_handler).fetch_info()
 
     def index(self, uid: str, *, plugins: IndexPlugins | None = None) -> Index:
         """Create a local reference to an index identified by UID, without making an HTTP call.
@@ -1262,7 +1281,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
         """
-        return Index(self.http_client, uid=uid, plugins=plugins)
+        return Index(self.http_client, uid=uid, plugins=plugins, json_handler=self.json_handler)
 
     def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.

@@ -15,6 +15,7 @@ from meilisearch_python_sdk.errors import (
     MeilisearchError,
 )
 from meilisearch_python_sdk.index import _async_load_documents_from_file, _combine_documents
+from meilisearch_python_sdk.json_handler import BuiltinHandler
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -1365,6 +1366,23 @@ async def test_add_documents_custom_serializer(compress, async_empty_index):
         {"id": uuid4(), "title": "Test 2", "when": datetime.now()},
     ]
     index = await async_empty_index()
-    response = await index.add_documents(documents, compress=compress, serializer=CustomEncoder)
+    index._json_handler = BuiltinHandler(serializer=CustomEncoder)
+    response = await index.add_documents(documents, compress=compress)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+
+
+@pytest.mark.parametrize("compress", (True, False))
+async def test_add_documents_orjson_handler(compress, async_client_orjson_handler, small_movies):
+    index = await async_client_orjson_handler.create_index(str(uuid4()))
+    response = await index.add_documents(small_movies, compress=compress)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+
+
+@pytest.mark.parametrize("compress", (True, False))
+async def test_add_documents_ujson_handler(compress, async_client_ujson_handler, small_movies):
+    index = await async_client_ujson_handler.create_index(str(uuid4()))
+    response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
