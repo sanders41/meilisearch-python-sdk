@@ -4,23 +4,6 @@ import sys
 from datetime import datetime
 from functools import lru_cache
 
-import pydantic
-
-
-@lru_cache(maxsize=1)
-def is_pydantic_2() -> bool:
-    try:
-        # __version__ was added with Pydantic 2 so we know if this errors the version is < 2.
-        # Still check the version as a fail safe incase __version__ gets added to verion 1.
-        if int(pydantic.__version__[:1]) >= 2:  # type: ignore[attr-defined]
-            return True
-        else:  # pragma: no cover
-            # Raise an AttributeError to match the AttributeError on __version__ because in either
-            # case we need to get to the same place.
-            raise AttributeError
-    except AttributeError:  # pragma: no cover
-        return False
-
 
 def iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:
     """Handle conversion of iso string to datetime.
