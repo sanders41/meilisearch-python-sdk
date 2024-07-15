@@ -2,11 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time
-
-
-def test_is_pydantic_2():
-    assert is_pydantic_2() is True
+from meilisearch_python_sdk._utils import iso_to_date_time
 
 
 @pytest.mark.parametrize(

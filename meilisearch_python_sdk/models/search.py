@@ -1,10 +1,8 @@
 from typing import List, Optional
-from warnings import warn
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 
-from meilisearch_python_sdk._utils import is_pydantic_2
 from meilisearch_python_sdk.errors import MeilisearchError
 from meilisearch_python_sdk.types import Filter, JsonDict
 
@@ -51,30 +49,13 @@ class SearchParams(CamelBase):
     vector: Optional[List[float]] = None
     hybrid: Optional[Hybrid] = None
 
-    if is_pydantic_2():
+    @pydantic.field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
+    @classmethod
+    def validate_ranking_score_threshold(cls, v: Optional[float]) -> Optional[float]:
+        if v and not 0.0 <= v <= 1.0:
+            raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
 
-        @pydantic.field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
-        @classmethod
-        def validate_ranking_score_threshold(cls, v: Optional[float]) -> Optional[float]:
-            if v and not 0.0 <= v <= 1.0:
-                raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
-
-            return v
-
-    else:  # pragma: no cover
-        warn(
-            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        @pydantic.validator("ranking_score_threshold", pre=True)
-        @classmethod
-        def validate_expires_at(cls, v: Optional[float]) -> Optional[float]:
-            if v and not 0.0 <= v <= 1.0:
-                raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
-
-            return v
+        return v
 
 
 class SearchResults(CamelBase):
