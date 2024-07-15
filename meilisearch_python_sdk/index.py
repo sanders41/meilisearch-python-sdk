@@ -7,7 +7,6 @@ from functools import cached_property, partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Generator, Literal, MutableMapping, Sequence
 from urllib.parse import urlencode
-from warnings import warn
 
 import aiofiles
 from camel_converter import to_snake
@@ -15,7 +14,7 @@ from httpx import AsyncClient, Client
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
-from meilisearch_python_sdk._utils import is_pydantic_2, iso_to_date_time, use_task_groups
+from meilisearch_python_sdk._utils import iso_to_date_time, use_task_groups
 from meilisearch_python_sdk.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
 from meilisearch_python_sdk.models.documents import DocumentsInfo
@@ -3036,16 +3035,7 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_settings(new_settings)
         """
-        if is_pydantic_2():
-            body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
-
+        body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}
         response = await self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
         return TaskInfo(**response.json())
@@ -3770,23 +3760,11 @@ class AsyncIndex(_BaseIndex):
             >>>     TypoTolerance(enabled=False)
             >>>     await index.update_typo_tolerance()
         """
-        if is_pydantic_2():
-            response = await self._http_requests.patch(
-                f"{self._settings_url}/typo-tolerance",
-                typo_tolerance.model_dump(by_alias=True),
-                compress=compress,
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = await self._http_requests.patch(
-                f"{self._settings_url}/typo-tolerance",
-                typo_tolerance.dict(by_alias=True),
-                compress=compress,
-            )  # type: ignore[attr-defined]
+        response = await self._http_requests.patch(
+            f"{self._settings_url}/typo-tolerance",
+            typo_tolerance.model_dump(by_alias=True),
+            compress=compress,
+        )
 
         return TaskInfo(**response.json())
 
@@ -3860,21 +3838,11 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
-        if is_pydantic_2():
-            response = await self._http_requests.patch(
-                f"{self._settings_url}/faceting",
-                faceting.model_dump(by_alias=True),
-                compress=compress,
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = await self._http_requests.patch(
-                f"{self._settings_url}/faceting", faceting.dict(by_alias=True), compress=compress
-            )  # type: ignore[attr-defined]
+        response = await self._http_requests.patch(
+            f"{self._settings_url}/faceting",
+            faceting.model_dump(by_alias=True),
+            compress=compress,
+        )
 
         return TaskInfo(**response.json())
 
@@ -3949,21 +3917,11 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_pagination(settings=Pagination(max_total_hits=123))
         """
-        if is_pydantic_2():
-            response = await self._http_requests.patch(
-                f"{self._settings_url}/pagination",
-                settings.model_dump(by_alias=True),
-                compress=compress,
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = await self._http_requests.patch(
-                f"{self._settings_url}/pagination", settings.dict(by_alias=True), compress=compress
-            )  # type: ignore[attr-defined]
+        response = await self._http_requests.patch(
+            f"{self._settings_url}/pagination",
+            settings.model_dump(by_alias=True),
+            compress=compress,
+        )
 
         return TaskInfo(**response.json())
 
@@ -4437,19 +4395,9 @@ class AsyncIndex(_BaseIndex):
         """
         payload = {}
         for key, embedder in embedders.embedders.items():
-            if is_pydantic_2():
-                payload[key] = {
-                    k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
-                }  # type: ignore[attr-defined]
-            else:  # pragma: no cover
-                warn(
-                    "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-                payload[key] = {
-                    k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
-                }  # type: ignore[attr-defined]
+            payload[key] = {
+                k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
+            }
 
         response = await self._http_requests.patch(
             f"{self._settings_url}/embedders", payload, compress=compress
@@ -6693,16 +6641,7 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_settings(new_settings)
         """
-        if is_pydantic_2():
-            body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            body_dict = {k: v for k, v in body.dict(by_alias=True).items() if v is not None}  # type: ignore[attr-defined]
-
+        body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}
         response = self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
         return TaskInfo(**response.json())
@@ -7416,23 +7355,11 @@ class Index(_BaseIndex):
             >>> TypoTolerance(enabled=False)
             >>> index.update_typo_tolerance()
         """
-        if is_pydantic_2():
-            response = self._http_requests.patch(
-                f"{self._settings_url}/typo-tolerance",
-                typo_tolerance.model_dump(by_alias=True),
-                compress=compress,
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = self._http_requests.patch(
-                f"{self._settings_url}/typo-tolerance",
-                typo_tolerance.dict(by_alias=True),
-                compress=compress,
-            )  # type: ignore[attr-defined]
+        response = self._http_requests.patch(
+            f"{self._settings_url}/typo-tolerance",
+            typo_tolerance.model_dump(by_alias=True),
+            compress=compress,
+        )
 
         return TaskInfo(**response.json())
 
@@ -7506,21 +7433,11 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
-        if is_pydantic_2():
-            response = self._http_requests.patch(
-                f"{self._settings_url}/faceting",
-                faceting.model_dump(by_alias=True),
-                compress=compress,
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = self._http_requests.patch(
-                f"{self._settings_url}/faceting", faceting.dict(by_alias=True), compress=compress
-            )  # type: ignore[attr-defined]
+        response = self._http_requests.patch(
+            f"{self._settings_url}/faceting",
+            faceting.model_dump(by_alias=True),
+            compress=compress,
+        )
 
         return TaskInfo(**response.json())
 
@@ -7595,21 +7512,11 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_pagination(settings=Pagination(max_total_hits=123))
         """
-        if is_pydantic_2():
-            response = self._http_requests.patch(
-                f"{self._settings_url}/pagination",
-                settings.model_dump(by_alias=True),
-                compress=compress,
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = self._http_requests.patch(
-                f"{self._settings_url}/pagination", settings.dict(by_alias=True), compress=compress
-            )  # type: ignore[attr-defined]
+        response = self._http_requests.patch(
+            f"{self._settings_url}/pagination",
+            settings.model_dump(by_alias=True),
+            compress=compress,
+        )
 
         return TaskInfo(**response.json())
 
@@ -8077,19 +7984,9 @@ class Index(_BaseIndex):
         """
         payload = {}
         for key, embedder in embedders.embedders.items():
-            if is_pydantic_2():
-                payload[key] = {
-                    k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
-                }  # type: ignore[attr-defined]
-            else:  # pragma: no cover
-                warn(
-                    "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-                payload[key] = {
-                    k: v for k, v in embedder.dict(by_alias=True).items() if v is not None
-                }  # type: ignore[attr-defined]
+            payload[key] = {
+                k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
+            }
 
         response = self._http_requests.patch(
             f"{self._settings_url}/embedders", payload, compress=compress
@@ -8347,15 +8244,7 @@ def _process_search_parameters(
         body["vector"] = vector
 
     if hybrid:
-        if is_pydantic_2():
-            body["hybrid"] = hybrid.model_dump(by_alias=True)  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            body["hybrid"] = hybrid.dict(by_alias=True)  # type: ignore[attr-defined]
+        body["hybrid"] = hybrid.model_dump(by_alias=True)
 
     return body
 
