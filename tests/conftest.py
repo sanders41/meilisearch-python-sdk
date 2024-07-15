@@ -9,6 +9,7 @@ from httpx import AsyncClient as HttpxAsyncClient
 
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
+from meilisearch_python_sdk.json_handler import OrjsonHandler, UjsonHandler
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
@@ -33,6 +34,18 @@ async def async_client():
 
 
 @pytest.fixture
+async def async_client_orjson_handler():
+    async with AsyncClient(BASE_URL, MASTER_KEY, json_handler=OrjsonHandler()) as client:
+        yield client
+
+
+@pytest.fixture
+async def async_client_ujson_handler():
+    async with AsyncClient(BASE_URL, MASTER_KEY, json_handler=UjsonHandler()) as client:
+        yield client
+
+
+@pytest.fixture
 async def async_client_with_plugins():
     async with AsyncClient(BASE_URL, MASTER_KEY) as client:
         yield client
@@ -41,6 +54,16 @@ async def async_client_with_plugins():
 @pytest.fixture
 def client():
     yield Client(BASE_URL, MASTER_KEY)
+
+
+@pytest.fixture
+def client_orjson_handler():
+    yield Client(BASE_URL, MASTER_KEY, json_handler=OrjsonHandler())
+
+
+@pytest.fixture
+def client_ujson_handler():
+    yield Client(BASE_URL, MASTER_KEY, json_handler=UjsonHandler())
 
 
 @pytest.fixture(autouse=True)
