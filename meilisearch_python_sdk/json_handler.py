@@ -51,7 +51,7 @@ class BuiltinHandler(_JsonHandler):
 
 class OrjsonHandler(_JsonHandler):
     def __init__(self) -> None:
-        if orjson is None:
+        if orjson is None:  # pragma: no cover
             raise ValueError("orjson must be installed to use the OrjsonHandler")
 
     @staticmethod
@@ -65,7 +65,7 @@ class OrjsonHandler(_JsonHandler):
 
 class UjsonHandler(_JsonHandler):
     def __init__(self) -> None:
-        if ujson is None:
+        if ujson is None:  # pragma: no cover
             raise ValueError("ujson must be installed to use the UjsonHandler")
 
     @staticmethod
