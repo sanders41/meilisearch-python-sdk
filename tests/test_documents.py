@@ -13,6 +13,7 @@ from meilisearch_python_sdk.errors import (
     MeilisearchError,
 )
 from meilisearch_python_sdk.index import _combine_documents, _load_documents_from_file
+from meilisearch_python_sdk.json_handler import BuiltinHandler
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -323,6 +324,28 @@ def test_add_documents_from_file(
 
     update = wait_for_task(index.http_client, response.task_uid)
     assert index.get_primary_key() == expected_primary_key
+    assert update.status == "succeeded"
+
+
+def test_add_documents_from_file_orjson_handler(
+    client_orjson_handler,
+    small_movies_path,
+):
+    index = client_orjson_handler.index(str(uuid4()))
+    response = index.add_documents_from_file(small_movies_path)
+
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+
+
+def test_add_documents_from_file_ujson_handler(
+    client_ujson_handler,
+    small_movies_path,
+):
+    index = client_ujson_handler.index(str(uuid4()))
+    response = index.add_documents_from_file(small_movies_path)
+
+    update = wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
 
 
@@ -1297,7 +1320,7 @@ def test_load_documents_from_file_invalid_document(tmp_path):
         json.dump(doc, f)
 
     with pytest.raises(InvalidDocumentError):
-        _load_documents_from_file(file_path)
+        _load_documents_from_file(file_path, json_handler=BuiltinHandler())
 
 
 def test_combine_documents():
@@ -1319,6 +1342,23 @@ def test_add_documents_custom_serializer(compress, empty_index):
         {"id": uuid4(), "title": "Test 2", "when": datetime.now()},
     ]
     index = empty_index()
-    response = index.add_documents(documents, compress=compress, serializer=CustomEncoder)
+    index._json_handler = BuiltinHandler(serializer=CustomEncoder)
+    response = index.add_documents(documents, compress=compress)
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+
+
+@pytest.mark.parametrize("compress", (True, False))
+def test_add_documents_orjson_handler(compress, client_orjson_handler, small_movies):
+    index = client_orjson_handler.create_index(str(uuid4()))
+    response = index.add_documents(small_movies, compress=compress)
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+
+
+@pytest.mark.parametrize("compress", (True, False))
+def test_add_documents_ujson_handler(compress, client_ujson_handler, small_movies):
+    index = client_ujson_handler.create_index(str(uuid4()))
+    response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"

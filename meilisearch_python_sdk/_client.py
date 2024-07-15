@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
 from ssl import SSLContext
 from typing import TYPE_CHECKING
-from warnings import warn
 
 import jwt
 from httpx import AsyncClient as HttpxAsyncClient
@@ -12,9 +10,9 @@ from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk import _task
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_sdk._utils import is_pydantic_2
 from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_sdk.index import AsyncIndex, Index
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
 from meilisearch_python_sdk.models.client import (
     ClientStats,
     Key,
@@ -47,7 +45,9 @@ class BaseClient:
         self,
         api_key: str | None = None,
         custom_headers: dict[str, str] | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
     ) -> None:
+        self.json_handler = json_handler if json_handler else BuiltinHandler()
         self._headers: dict[str, str] | None = None
         if api_key:
             self._headers = {"Authorization": f"Bearer {api_key}"}
@@ -143,6 +143,7 @@ class AsyncClient(BaseClient):
         timeout: int | None = None,
         verify: str | bool | SSLContext = True,
         custom_headers: dict[str, str] | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
     ) -> None:
         """Class initializer.
 
@@ -157,13 +158,17 @@ class AsyncClient(BaseClient):
                 a path to an SSL certificate file, or `False` (disable verification)
             custom_headers: Custom headers to add when sending data to Meilisearch. Defaults to
                 None.
+            json_handler: The module to use for json operations. The options are BuiltinHandler
+                (uses the json module from the standard library), OrjsonHandler (uses orjson), or
+                UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
+                extra needs to be included. Default: BuiltinHandler.
         """
-        super().__init__(api_key, custom_headers)
+        super().__init__(api_key, custom_headers, json_handler)
 
         self.http_client = HttpxAsyncClient(
             base_url=url, timeout=timeout, headers=self._headers, verify=verify
         )
-        self._http_requests = AsyncHttpRequests(self.http_client)
+        self._http_requests = AsyncHttpRequests(self.http_client, json_handler=self.json_handler)
 
     async def __aenter__(self) -> Self:
         return self
@@ -257,6 +262,7 @@ class AsyncClient(BaseClient):
             wait=wait,
             timeout_in_ms=timeout_in_ms,
             plugins=plugins,
+            json_handler=self.json_handler,
         )
 
     async def create_snapshot(self) -> TaskInfo:
@@ -348,6 +354,7 @@ class AsyncClient(BaseClient):
                 primary_key=x["primaryKey"],
                 created_at=x["createdAt"],
                 updated_at=x["updatedAt"],
+                json_handler=self.json_handler,
             )
             for x in response.json()["results"]
         ]
@@ -374,7 +381,7 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.get_index()
         """
-        return await AsyncIndex(self.http_client, uid).fetch_info()
+        return await AsyncIndex(self.http_client, uid, json_handler=self.json_handler).fetch_info()
 
     def index(self, uid: str, *, plugins: AsyncIndexPlugins | None = None) -> AsyncIndex:
         """Create a local reference to an index identified by UID, without making an HTTP call.
@@ -401,7 +408,9 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
         """
-        return AsyncIndex(self.http_client, uid=uid, plugins=plugins)
+        return AsyncIndex(
+            self.http_client, uid=uid, plugins=plugins, json_handler=self.json_handler
+        )
 
     async def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.
@@ -490,17 +499,9 @@ class AsyncClient(BaseClient):
             >>>     )
             >>>     keys = await client.create_key(key_info)
         """
-        if is_pydantic_2():
-            response = await self._http_requests.post(
-                "keys", json.loads(key.model_dump_json(by_alias=True))
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
+        response = await self._http_requests.post(
+            "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
+        )  # type: ignore[attr-defined]
 
         return Key(**response.json())
 
@@ -612,7 +613,7 @@ class AsyncClient(BaseClient):
             >>>     )
             >>>     keys = await client.update_key(key_info)
         """
-        payload = _build_update_key_payload(key)
+        payload = _build_update_key_payload(key, self.json_handler)
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
@@ -645,21 +646,10 @@ class AsyncClient(BaseClient):
             >>>     search_results = await client.search(queries)
         """
         url = "multi-search"
-        if is_pydantic_2():
-            response = await self._http_requests.post(
-                url,
-                body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
-            )
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = await self._http_requests.post(
-                url,
-                body={"queries": [x.dict(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
-            )
+        response = await self._http_requests.post(
+            url,
+            body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
+        )
 
         return [SearchResultsWithUID(**x) for x in response.json()["results"]]
 
@@ -1035,6 +1025,7 @@ class Client(BaseClient):
         timeout: int | None = None,
         verify: str | bool | SSLContext = True,
         custom_headers: dict[str, str] | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
     ) -> None:
         """Class initializer.
 
@@ -1049,13 +1040,17 @@ class Client(BaseClient):
                 a path to an SSL certificate file, or `False` (disable verification)
             custom_headers: Custom headers to add when sending data to Meilisearch. Defaults to
                 None.
+            json_handler: The module to use for json operations. The options are BuiltinHandler
+                (uses the json module from the standard library), OrjsonHandler (uses orjson), or
+                UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
+                extra needs to be included. Default: BuiltinHandler.
         """
-        super().__init__(api_key, custom_headers)
+        super().__init__(api_key, custom_headers, json_handler)
 
         self.http_client = HttpxClient(
             base_url=url, timeout=timeout, headers=self._headers, verify=verify
         )
-        self._http_requests = HttpRequests(self.http_client)
+        self._http_requests = HttpRequests(self.http_client, json_handler=self.json_handler)
 
     def create_dump(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch dump.
@@ -1131,6 +1126,7 @@ class Client(BaseClient):
             wait=wait,
             timeout_in_ms=timeout_in_ms,
             plugins=plugins,
+            json_handler=self.json_handler,
         )
 
     def create_snapshot(self) -> TaskInfo:
@@ -1222,6 +1218,7 @@ class Client(BaseClient):
                 primary_key=x["primaryKey"],
                 created_at=x["createdAt"],
                 updated_at=x["updatedAt"],
+                json_handler=self.json_handler,
             )
             for x in response.json()["results"]
         ]
@@ -1248,7 +1245,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.get_index()
         """
-        return Index(self.http_client, uid).fetch_info()
+        return Index(self.http_client, uid, json_handler=self.json_handler).fetch_info()
 
     def index(self, uid: str, *, plugins: IndexPlugins | None = None) -> Index:
         """Create a local reference to an index identified by UID, without making an HTTP call.
@@ -1273,7 +1270,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
         """
-        return Index(self.http_client, uid=uid, plugins=plugins)
+        return Index(self.http_client, uid=uid, plugins=plugins, json_handler=self.json_handler)
 
     def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.
@@ -1362,17 +1359,9 @@ class Client(BaseClient):
             >>> )
             >>> keys = client.create_key(key_info)
         """
-        if is_pydantic_2():
-            response = self._http_requests.post(
-                "keys", json.loads(key.model_dump_json(by_alias=True))
-            )  # type: ignore[attr-defined]
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
+        response = self._http_requests.post(
+            "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
+        )  # type: ignore[attr-defined]
 
         return Key(**response.json())
 
@@ -1484,7 +1473,7 @@ class Client(BaseClient):
             >>> )
             >>> keys = client.update_key(key_info)
         """
-        payload = _build_update_key_payload(key)
+        payload = _build_update_key_payload(key, self.json_handler)
         response = self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
@@ -1517,21 +1506,10 @@ class Client(BaseClient):
             >>> search_results = client.search(queries)
         """
         url = "multi-search"
-        if is_pydantic_2():
-            response = self._http_requests.post(
-                url,
-                body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
-            )
-        else:  # pragma: no cover
-            warn(
-                "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            response = self._http_requests.post(
-                url,
-                body={"queries": [x.dict(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
-            )
+        response = self._http_requests.post(
+            url,
+            body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
+        )
 
         return [SearchResultsWithUID(**x) for x in response.json()["results"]]
 
@@ -1907,23 +1885,13 @@ def _build_offset_limit_url(base: str, offset: int | None, limit: int | None) ->
     return base
 
 
-def _build_update_key_payload(key: KeyUpdate) -> JsonDict:
-    # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
+def _build_update_key_payload(
+    key: KeyUpdate, json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler
+) -> JsonDict:
+    # The json_handler.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
     # but can when converting to a json string.
-    if is_pydantic_2():
-        return {  # type: ignore[attr-defined]
-            k: v
-            for k, v in json.loads(key.model_dump_json(by_alias=True)).items()
-            if v is not None and k != "key"
-        }
-    else:  # pragma: no cover
-        warn(
-            "The use of Pydantic less than version 2 is depreciated and will be removed in a future release",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return {  # type: ignore[attr-defined]
-            k: v
-            for k, v in json.loads(key.json(by_alias=True)).items()
-            if v is not None and k != "key"
-        }
+    return {  # type: ignore[attr-defined]
+        k: v
+        for k, v in json_handler.loads(key.model_dump_json(by_alias=True)).items()
+        if v is not None and k != "key"
+    }

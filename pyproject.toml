@@ -28,8 +28,15 @@ python = "^3.8"
 aiofiles = ">=0.7"
 camel-converter = ">=1.0.0"
 httpx = ">=0.17"
+orjson = { version = ">=3.10.6", optional = true }
 pydantic = ">=1.8"
 PyJWT = ">=2.3.0"
+ujson = { version = ">=5.10.0", optional = true }
+
+[tool.poetry.extras]
+orjson = ["orjson"]
+ujson = ["ujson"]
+all = ["orjson", "ujson"]
 
 [tool.poetry.group.dev.dependencies]
 mkdocs = "1.6.0"
@@ -45,6 +52,7 @@ ruff = "0.5.5"
 tomli = {version = "2.0.1", python = "<3.11"}
 types-aiofiles = "24.1.0.20240626"
 typing-extensions = "4.12.2"
+types-ujson = "5.10.0.20240515"
 
 [tool.poetry.group.benchmark.dependencies]
 meilisearch = ">=0.26.0"
