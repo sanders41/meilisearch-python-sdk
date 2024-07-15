@@ -70,13 +70,3 @@ async def search(
     params = search_params.model_dump()
     del params["index_uid"]
     return await index.search(**params)
-
-
-def main() -> int:
-    app()
-
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
