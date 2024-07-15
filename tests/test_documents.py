@@ -327,6 +327,28 @@ def test_add_documents_from_file(
     assert update.status == "succeeded"
 
 
+def test_add_documents_from_file_orjson_handler(
+    client_orjson_handler,
+    small_movies_path,
+):
+    index = client_orjson_handler.index(str(uuid4()))
+    response = index.add_documents_from_file(small_movies_path)
+
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+
+
+def test_add_documents_from_file_ujson_handler(
+    client_ujson_handler,
+    small_movies_path,
+):
+    index = client_ujson_handler.index(str(uuid4()))
+    response = index.add_documents_from_file(small_movies_path)
+
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+
+
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -1298,7 +1320,7 @@ def test_load_documents_from_file_invalid_document(tmp_path):
         json.dump(doc, f)
 
     with pytest.raises(InvalidDocumentError):
-        _load_documents_from_file(file_path)
+        _load_documents_from_file(file_path, json_handler=BuiltinHandler())
 
 
 def test_combine_documents():

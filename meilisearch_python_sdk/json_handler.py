@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:  # pragma: no cover
-    from meilisearch_python_sdk.types import JsonDict, JsonMapping
+    pass
 
 try:
     import orjson
@@ -21,11 +21,11 @@ except ImportError:  # pragma: nocover
 class _JsonHandler(ABC):
     @staticmethod
     @abstractmethod
-    def dumps(obj: JsonDict | JsonMapping) -> str: ...
+    def dumps(obj: Any) -> str: ...
 
     @staticmethod
     @abstractmethod
-    def loads(json_string: str | bytes | bytearray) -> JsonDict | JsonMapping: ...
+    def loads(json_string: str | bytes | bytearray) -> Any: ...
 
 
 class BuiltinHandler(_JsonHandler):
@@ -41,11 +41,11 @@ class BuiltinHandler(_JsonHandler):
         BuiltinHandler.serializer = serializer
 
     @staticmethod
-    def dumps(obj: JsonDict | JsonMapping) -> str:
+    def dumps(obj: Any) -> str:
         return json.dumps(obj, cls=BuiltinHandler.serializer)
 
     @staticmethod
-    def loads(json_string: str | bytes | bytearray) -> JsonDict | JsonMapping:
+    def loads(json_string: str | bytes | bytearray) -> Any:
         return json.loads(json_string)
 
 
@@ -55,11 +55,11 @@ class OrjsonHandler(_JsonHandler):
             raise ValueError("orjson must be installed to use the OrjsonHandler")
 
     @staticmethod
-    def dumps(obj: JsonDict | JsonMapping) -> str:
+    def dumps(obj: Any) -> str:
         return orjson.dumps(obj).decode("utf-8")
 
     @staticmethod
-    def loads(json_string: str | bytes | bytearray) -> JsonDict | JsonMapping:
+    def loads(json_string: str | bytes | bytearray) -> Any:
         return orjson.loads(json_string)
 
 
@@ -69,9 +69,9 @@ class UjsonHandler(_JsonHandler):
             raise ValueError("ujson must be installed to use the UjsonHandler")
 
     @staticmethod
-    def dumps(obj: JsonDict | JsonMapping) -> str:
+    def dumps(obj: Any) -> str:
         return ujson.dumps(obj)
 
     @staticmethod
-    def loads(json_string: str | bytes | bytearray) -> JsonDict | JsonMapping:
+    def loads(json_string: str | bytes | bytearray) -> Any:
         return ujson.loads(json_string)

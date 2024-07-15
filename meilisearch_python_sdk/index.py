@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 from csv import DictReader
 from datetime import datetime
 from functools import cached_property, partial
@@ -1659,7 +1658,9 @@ class AsyncIndex(_BaseIndex):
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -1675,7 +1676,9 @@ class AsyncIndex(_BaseIndex):
             add_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     add_documents.append(
                         self.add_documents(documents, primary_key, compress=compress)
                     )
@@ -1699,7 +1702,9 @@ class AsyncIndex(_BaseIndex):
             all_results = []
             for i, path in enumerate(directory.iterdir()):
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     if i == 0:
                         all_results = [await self.add_documents(documents, compress=compress)]
                     else:
@@ -1770,7 +1775,7 @@ class AsyncIndex(_BaseIndex):
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
                     documents = await _async_load_documents_from_file(
-                        path, csv_delimiter=csv_delimiter
+                        path, csv_delimiter=csv_delimiter, json_handler=self._json_handler
                     )
                     all_documents.append(documents)
 
@@ -1791,7 +1796,9 @@ class AsyncIndex(_BaseIndex):
         add_documents = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = await _async_load_documents_from_file(path, csv_delimiter)
+                documents = await _async_load_documents_from_file(
+                    path, csv_delimiter, json_handler=self._json_handler
+                )
                 add_documents.append(
                     self.add_documents_in_batches(
                         documents,
@@ -1850,7 +1857,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.add_documents_from_file(file_path)
         """
-        documents = await _async_load_documents_from_file(file_path)
+        documents = await _async_load_documents_from_file(
+            file_path, json_handler=self._json_handler
+        )
 
         return await self.add_documents(documents, primary_key=primary_key, compress=compress)
 
@@ -1896,7 +1905,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.add_documents_from_file_in_batches(file_path)
         """
-        documents = await _async_load_documents_from_file(file_path, csv_delimiter)
+        documents = await _async_load_documents_from_file(
+            file_path, csv_delimiter, json_handler=self._json_handler
+        )
 
         return await self.add_documents_in_batches(
             documents,
@@ -2239,7 +2250,9 @@ class AsyncIndex(_BaseIndex):
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -2254,7 +2267,9 @@ class AsyncIndex(_BaseIndex):
             update_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     update_documents.append(
                         self.update_documents(documents, primary_key, compress=compress)
                     )
@@ -2277,7 +2292,9 @@ class AsyncIndex(_BaseIndex):
             results = []
             for i, path in enumerate(directory.iterdir()):
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     if i == 0:
                         results = [
                             await self.update_documents(documents, primary_key, compress=compress)
@@ -2348,7 +2365,9 @@ class AsyncIndex(_BaseIndex):
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -2369,7 +2388,9 @@ class AsyncIndex(_BaseIndex):
             update_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     update_documents.append(
                         self.update_documents_in_batches(
                             documents,
@@ -2397,7 +2418,9 @@ class AsyncIndex(_BaseIndex):
             tasks = []
             for i, path in enumerate(directory.iterdir()):
                 if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(path, csv_delimiter)
+                    documents = await _async_load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     if i == 0:
                         results = await self.update_documents_in_batches(
                             documents,
@@ -2458,7 +2481,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_documents_from_file(file_path)
         """
-        documents = await _async_load_documents_from_file(file_path, csv_delimiter)
+        documents = await _async_load_documents_from_file(
+            file_path, csv_delimiter, json_handler=self._json_handler
+        )
 
         return await self.update_documents(documents, primary_key=primary_key, compress=compress)
 
@@ -2499,7 +2524,9 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_documents_from_file_in_batches(file_path)
         """
-        documents = await _async_load_documents_from_file(file_path)
+        documents = await _async_load_documents_from_file(
+            file_path, json_handler=self._json_handler
+        )
 
         return await self.update_documents_in_batches(
             documents,
@@ -5671,7 +5698,9 @@ class Index(_BaseIndex):
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = _load_documents_from_file(path, csv_delimiter)
+                    documents = _load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -5685,7 +5714,9 @@ class Index(_BaseIndex):
         responses = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = _load_documents_from_file(path, csv_delimiter)
+                documents = _load_documents_from_file(
+                    path, csv_delimiter, json_handler=self._json_handler
+                )
                 responses.append(self.add_documents(documents, primary_key, compress=compress))
 
         _raise_on_no_documents(responses, document_type, directory_path)
@@ -5747,7 +5778,9 @@ class Index(_BaseIndex):
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = _load_documents_from_file(path, csv_delimiter=csv_delimiter)
+                    documents = _load_documents_from_file(
+                        path, csv_delimiter=csv_delimiter, json_handler=self._json_handler
+                    )
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -5764,7 +5797,9 @@ class Index(_BaseIndex):
         responses: list[TaskInfo] = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = _load_documents_from_file(path, csv_delimiter)
+                documents = _load_documents_from_file(
+                    path, csv_delimiter, json_handler=self._json_handler
+                )
                 responses.extend(
                     self.add_documents_in_batches(
                         documents,
@@ -5814,7 +5849,7 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.add_documents_from_file(file_path)
         """
-        documents = _load_documents_from_file(file_path)
+        documents = _load_documents_from_file(file_path, json_handler=self._json_handler)
 
         return self.add_documents(documents, primary_key=primary_key, compress=compress)
 
@@ -5860,7 +5895,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.add_documents_from_file_in_batches(file_path)
         """
-        documents = _load_documents_from_file(file_path, csv_delimiter)
+        documents = _load_documents_from_file(
+            file_path, csv_delimiter, json_handler=self._json_handler
+        )
 
         return self.add_documents_in_batches(
             documents,
@@ -6113,7 +6150,9 @@ class Index(_BaseIndex):
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = _load_documents_from_file(path, csv_delimiter)
+                    documents = _load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -6126,7 +6165,9 @@ class Index(_BaseIndex):
         responses = []
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = _load_documents_from_file(path, csv_delimiter)
+                documents = _load_documents_from_file(
+                    path, csv_delimiter, json_handler=self._json_handler
+                )
                 responses.append(self.update_documents(documents, primary_key, compress=compress))
 
         _raise_on_no_documents(responses, document_type, directory_path)
@@ -6188,7 +6229,9 @@ class Index(_BaseIndex):
             all_documents = []
             for path in directory.iterdir():
                 if path.suffix == f".{document_type}":
-                    documents = _load_documents_from_file(path, csv_delimiter)
+                    documents = _load_documents_from_file(
+                        path, csv_delimiter, json_handler=self._json_handler
+                    )
                     all_documents.append(documents)
 
             _raise_on_no_documents(all_documents, document_type, directory_path)
@@ -6206,7 +6249,9 @@ class Index(_BaseIndex):
 
         for path in directory.iterdir():
             if path.suffix == f".{document_type}":
-                documents = _load_documents_from_file(path, csv_delimiter)
+                documents = _load_documents_from_file(
+                    path, csv_delimiter, json_handler=self._json_handler
+                )
                 responses.extend(
                     self.update_documents_in_batches(
                         documents,
@@ -6257,7 +6302,9 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_documents_from_file(file_path)
         """
-        documents = _load_documents_from_file(file_path, csv_delimiter)
+        documents = _load_documents_from_file(
+            file_path, csv_delimiter, json_handler=self._json_handler
+        )
 
         return self.update_documents(documents, primary_key=primary_key, compress=compress)
 
@@ -6298,7 +6345,7 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_documents_from_file_in_batches(file_path)
         """
-        documents = _load_documents_from_file(file_path)
+        documents = _load_documents_from_file(file_path, json_handler=self._json_handler)
 
         return self.update_documents_in_batches(
             documents,
@@ -8118,6 +8165,8 @@ class Index(_BaseIndex):
 async def _async_load_documents_from_file(
     file_path: Path | str,
     csv_delimiter: str | None = None,
+    *,
+    json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler,
 ) -> list[dict[Any, Any]]:
     if isinstance(file_path, str):
         file_path = Path(file_path)
@@ -8144,11 +8193,11 @@ async def _async_load_documents_from_file(
 
     if file_path.suffix == ".ndjson":
         with open(file_path) as f:  # noqa: ASYNC101 ASYNC230
-            return [await loop.run_in_executor(None, partial(json.loads, x)) for x in f]
+            return [await loop.run_in_executor(None, partial(json_handler.loads, x)) for x in f]
 
     async with aiofiles.open(file_path, mode="r") as f:  # type: ignore
         data = await f.read()  # type: ignore
-        documents = await loop.run_in_executor(None, partial(json.loads, data))
+        documents = await loop.run_in_executor(None, partial(json_handler.loads, data))
 
         if not isinstance(documents, list):
             raise InvalidDocumentError("Meilisearch requires documents to be in a list")
@@ -8187,6 +8236,8 @@ def _plugin_has_method(
 def _load_documents_from_file(
     file_path: Path | str,
     csv_delimiter: str | None = None,
+    *,
+    json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler,
 ) -> list[dict[Any, Any]]:
     if isinstance(file_path, str):
         file_path = Path(file_path)
@@ -8210,11 +8261,11 @@ def _load_documents_from_file(
 
     if file_path.suffix == ".ndjson":
         with open(file_path) as f:
-            return [json.loads(x) for x in f]
+            return [json_handler.loads(x) for x in f]
 
     with open(file_path) as f:
         data = f.read()
-        documents = json.loads(data)
+        documents = json_handler.loads(data)
 
         if not isinstance(documents, list):
             raise InvalidDocumentError("Meilisearch requires documents to be in a list")

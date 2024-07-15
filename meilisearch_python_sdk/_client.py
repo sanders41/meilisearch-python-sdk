@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
 from ssl import SSLContext
 from typing import TYPE_CHECKING
@@ -496,7 +495,7 @@ class AsyncClient(BaseClient):
         """
         if is_pydantic_2():
             response = await self._http_requests.post(
-                "keys", json.loads(key.model_dump_json(by_alias=True))
+                "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             warn(
@@ -504,7 +503,9 @@ class AsyncClient(BaseClient):
                 DeprecationWarning,
                 stacklevel=2,
             )
-            response = await self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
+            response = await self._http_requests.post(
+                "keys", self.json_handler.loads(key.json(by_alias=True))
+            )  # type: ignore[attr-defined]
 
         return Key(**response.json())
 
@@ -616,7 +617,7 @@ class AsyncClient(BaseClient):
             >>>     )
             >>>     keys = await client.update_key(key_info)
         """
-        payload = _build_update_key_payload(key)
+        payload = _build_update_key_payload(key, self.json_handler)
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
@@ -1372,7 +1373,7 @@ class Client(BaseClient):
         """
         if is_pydantic_2():
             response = self._http_requests.post(
-                "keys", json.loads(key.model_dump_json(by_alias=True))
+                "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
             )  # type: ignore[attr-defined]
         else:  # pragma: no cover
             warn(
@@ -1380,7 +1381,9 @@ class Client(BaseClient):
                 DeprecationWarning,
                 stacklevel=2,
             )
-            response = self._http_requests.post("keys", json.loads(key.json(by_alias=True)))  # type: ignore[attr-defined]
+            response = self._http_requests.post(
+                "keys", self.json_handler.loads(key.json(by_alias=True))
+            )  # type: ignore[attr-defined]
 
         return Key(**response.json())
 
@@ -1492,7 +1495,7 @@ class Client(BaseClient):
             >>> )
             >>> keys = client.update_key(key_info)
         """
-        payload = _build_update_key_payload(key)
+        payload = _build_update_key_payload(key, self.json_handler)
         response = self._http_requests.patch(f"keys/{key.key}", payload)
 
         return Key(**response.json())
@@ -1915,13 +1918,15 @@ def _build_offset_limit_url(base: str, offset: int | None, limit: int | None) ->
     return base
 
 
-def _build_update_key_payload(key: KeyUpdate) -> JsonDict:
-    # The json.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
+def _build_update_key_payload(
+    key: KeyUpdate, json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler
+) -> JsonDict:
+    # The json_handler.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
     # but can when converting to a json string.
     if is_pydantic_2():
         return {  # type: ignore[attr-defined]
             k: v
-            for k, v in json.loads(key.model_dump_json(by_alias=True)).items()
+            for k, v in json_handler.loads(key.model_dump_json(by_alias=True)).items()
             if v is not None and k != "key"
         }
     else:  # pragma: no cover
@@ -1932,6 +1937,6 @@ def _build_update_key_payload(key: KeyUpdate) -> JsonDict:
         )
         return {  # type: ignore[attr-defined]
             k: v
-            for k, v in json.loads(key.json(by_alias=True)).items()
+            for k, v in json_handler.loads(key.json(by_alias=True)).items()
             if v is not None and k != "key"
         }
