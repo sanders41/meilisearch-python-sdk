@@ -11,6 +11,7 @@ from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
 from meilisearch_python_sdk.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 
 if TYPE_CHECKING:
@@ -151,8 +152,9 @@ async def async_wait_for_task(
     raise_for_status: bool = False,
 ) -> TaskResult:
     client_ = _get_async_client(client)
+    handler = _get_json_handler(client)
     url = f"tasks/{task_id}"
-    http_requests = AsyncHttpRequests(client_)
+    http_requests = AsyncHttpRequests(client_, handler)
     start_time = datetime.now()
     elapsed_time = 0.0
 
@@ -281,8 +283,9 @@ def wait_for_task(
     raise_for_status: bool = False,
 ) -> TaskResult:
     client_ = _get_client(client)
+    handler = _get_json_handler(client)
     url = f"tasks/{task_id}"
-    http_requests = HttpRequests(client_)
+    http_requests = HttpRequests(client_, json_handler=handler)
     start_time = datetime.now()
     elapsed_time = 0.0
 
@@ -311,7 +314,9 @@ def wait_for_task(
             time.sleep(interval_in_ms / 1000)
 
 
-def _get_async_client(client: AsyncClient | HttpxAsyncClient) -> HttpxAsyncClient:
+def _get_async_client(
+    client: AsyncClient | HttpxAsyncClient,
+) -> HttpxAsyncClient:
     if isinstance(client, HttpxAsyncClient):
         return client
 
@@ -325,6 +330,15 @@ def _get_client(
         return client
 
     return client.http_client
+
+
+def _get_json_handler(
+    client: AsyncClient | Client | HttpxAsyncClient | HttpxClient,
+) -> BuiltinHandler | OrjsonHandler | UjsonHandler:
+    if isinstance(client, (HttpxAsyncClient, HttpxClient)):
+        return BuiltinHandler()
+
+    return client.json_handler
 
 
 def _process_params(

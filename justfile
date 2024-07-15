@@ -49,7 +49,7 @@
   mkdocs serve
 
 @install:
-  poetry install
+  poetry install -E all
 
 @benchmark: start-meilisearch-detached && stop-meilisearch
   -poetry run python benchmark/run_benchmark.py
