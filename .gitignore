@@ -135,6 +135,3 @@ dmypy.json
 # editors
 .idea
 .vscode
-
-# sqlite files
-*.db

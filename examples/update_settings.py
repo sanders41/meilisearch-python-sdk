@@ -5,7 +5,7 @@ from meilisearch_python_sdk.models.settings import MeilisearchSettings
 
 
 def main() -> int:
-    with open("datasets/small_movies.json") as f:
+    with open("../datasets/small_movies.json") as f:
         documents = json.load(f)
 
     client = Client("http://127.0.0.1:7700", "masterKey")

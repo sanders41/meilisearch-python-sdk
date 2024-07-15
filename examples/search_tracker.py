@@ -11,7 +11,7 @@ class SearchTrackerPlugin:
     PRE_EVENT = True  # Specifies the plugin should be run before the search
 
     def __init__(self) -> None:
-        self.conn = sqlite3.Connection("examples/search_tracker.db")
+        self.conn = sqlite3.Connection("search_tracker.db")
         self.create_table()
 
     def create_table(self) -> None:
@@ -35,7 +35,7 @@ class SearchTrackerPlugin:
 
 
 def main() -> int:
-    with open("datasets/small_movies.json") as f:
+    with open("../datasets/small_movies.json") as f:
         documents = json.load(f)
 
     client = Client("http://127.0.0.1:7700", "masterKey")

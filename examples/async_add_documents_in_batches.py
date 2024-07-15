@@ -7,7 +7,7 @@ from meilisearch_python_sdk import AsyncClient
 
 
 async def main() -> int:
-    async with aiofiles.open("datasets/small_movies.json") as f:
+    async with aiofiles.open("../datasets/small_movies.json") as f:
         data = await f.read()
         documents = json.loads(data)
 

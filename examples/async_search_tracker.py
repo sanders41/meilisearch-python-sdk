@@ -15,7 +15,7 @@ class SearchTrackerPlugin:
     PRE_EVENT = False
 
     def __init__(self) -> None:
-        self.conn = sqlite3.Connection("examples/search_tracker.db")
+        self.conn = sqlite3.Connection("search_tracker.db")
         self.create_table()
 
     def create_table(self) -> None:
@@ -44,7 +44,7 @@ class SearchTrackerPlugin:
 
 
 async def main() -> int:
-    async with aiofiles.open("datasets/small_movies.json") as f:
+    async with aiofiles.open("../datasets/small_movies.json") as f:
         data = await f.read()
         documents = json.loads(data)
 
