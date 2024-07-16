@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Sequence
 from copy import deepcopy
 from datetime import datetime
-from typing import Any, Sequence
+from typing import Any
 from uuid import uuid4
 
 import pytest

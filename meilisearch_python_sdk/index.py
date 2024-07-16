@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Generator, MutableMapping, Sequence
 from csv import DictReader
 from datetime import datetime
 from functools import cached_property, partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generator, Literal, MutableMapping, Sequence
+from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlencode
 
 import aiofiles

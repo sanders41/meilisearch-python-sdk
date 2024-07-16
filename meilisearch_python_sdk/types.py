@@ -1,5 +1,6 @@
 import sys
-from typing import Any, Dict, List, MutableMapping, Union
+from collections.abc import MutableMapping
+from typing import Any, Dict, List, Union
 
 if sys.version_info >= (3, 10):  # pragma: no cover
     from typing import TypeAlias
