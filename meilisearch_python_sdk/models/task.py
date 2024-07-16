@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import List, Optional, Union
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
@@ -14,16 +15,16 @@ class TaskId(CamelBase):
 
 
 class TaskResult(TaskId):
-    index_uid: Optional[str] = None
+    index_uid: str | None = None
     status: str
-    task_type: Union[str, JsonDict] = Field(..., alias="type")
-    details: Optional[JsonDict] = None
-    error: Optional[JsonDict] = None
-    canceled_by: Optional[int] = None
-    duration: Optional[str] = None
+    task_type: str | JsonDict = Field(..., alias="type")
+    details: JsonDict | None = None
+    error: JsonDict | None = None
+    canceled_by: int | None = None
+    duration: str | None = None
     enqueued_at: datetime
-    started_at: Optional[datetime] = None
-    finished_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
 
     @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
@@ -37,28 +38,28 @@ class TaskResult(TaskId):
 
     @pydantic.field_validator("started_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_started_at(cls, v: str) -> Union[datetime, None]:
+    def validate_started_at(cls, v: str) -> datetime | None:
         return iso_to_date_time(v)
 
     @pydantic.field_validator("finished_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_finished_at(cls, v: str) -> Union[datetime, None]:
+    def validate_finished_at(cls, v: str) -> datetime | None:
         return iso_to_date_time(v)
 
 
 class TaskStatus(CamelBase):
-    results: List[TaskResult]
+    results: list[TaskResult]
     total: int
     limit: int
     from_: int = Field(..., alias="from")
-    next: Optional[int] = None
+    next: int | None = None
 
 
 class TaskInfo(CamelBase):
     task_uid: int
-    index_uid: Optional[str] = None
+    index_uid: str | None = None
     status: str
-    task_type: Union[str, JsonDict] = Field(..., alias="type")
+    task_type: str | JsonDict = Field(..., alias="type")
     enqueued_at: datetime
 
     @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]

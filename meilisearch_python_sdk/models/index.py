@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Dict, Optional
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
@@ -9,7 +10,7 @@ from meilisearch_python_sdk._utils import iso_to_date_time
 
 class IndexBase(CamelBase):
     uid: str
-    primary_key: Optional[str] = None
+    primary_key: str | None = None
 
 
 class IndexInfo(IndexBase):
@@ -40,4 +41,4 @@ class IndexInfo(IndexBase):
 class IndexStats(CamelBase):
     number_of_documents: int
     is_indexing: bool
-    field_distribution: Dict[str, int]
+    field_distribution: dict[str, int]
