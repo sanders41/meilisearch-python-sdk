@@ -26,6 +26,7 @@ include = ["meilisearch_python_sdk/py.typed"]
 python = "^3.9"
 aiofiles = ">=0.7"
 camel-converter = ">=1.0.0"
+eval-type-backport = {version = ">=0.2.0", python = "<3.10"}  # allows pydantic to use pipe instead of Union
 httpx = ">=0.17"
 orjson = { version = ">=3.10.6", optional = true }
 pydantic = ">=2.0.0"
