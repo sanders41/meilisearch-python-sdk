@@ -1,9 +1,9 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Dict, List
+from typing import Annotated, Any, Dict, List
 
 from fastapi import Depends, FastAPI, HTTPException
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
-from typing_extensions import Annotated
 
 from meilisearch_python_sdk import AsyncClient, AsyncIndex
 from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchCommunicationError
