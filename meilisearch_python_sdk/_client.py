@@ -46,12 +46,17 @@ class BaseClient:
     def __init__(
         self,
         api_key: str | None = None,
+        custom_headers: dict[str, str] | None = None,
     ) -> None:
-        self._headers: dict[str, str] | None
+        self._headers: dict[str, str] | None = None
         if api_key:
             self._headers = {"Authorization": f"Bearer {api_key}"}
-        else:
-            self._headers = None
+
+        if custom_headers:
+            if self._headers:
+                self._headers.update(custom_headers)
+            else:
+                self._headers = custom_headers
 
     def generate_tenant_token(
         self,
@@ -137,6 +142,7 @@ class AsyncClient(BaseClient):
         *,
         timeout: int | None = None,
         verify: str | bool | SSLContext = True,
+        custom_headers: dict[str, str] | None = None,
     ) -> None:
         """Class initializer.
 
@@ -149,8 +155,10 @@ class AsyncClient(BaseClient):
             verify: SSL certificates (a.k.a CA bundle) used to
                 verify the identity of requested hosts. Either `True` (default CA bundle),
                 a path to an SSL certificate file, or `False` (disable verification)
+            custom_headers: Custom headers to add when sending data to Meilisearch. Defaults to
+                None.
         """
-        super().__init__(api_key)
+        super().__init__(api_key, custom_headers)
 
         self.http_client = HttpxAsyncClient(
             base_url=url, timeout=timeout, headers=self._headers, verify=verify
@@ -1026,6 +1034,7 @@ class Client(BaseClient):
         *,
         timeout: int | None = None,
         verify: str | bool | SSLContext = True,
+        custom_headers: dict[str, str] | None = None,
     ) -> None:
         """Class initializer.
 
@@ -1038,8 +1047,10 @@ class Client(BaseClient):
             verify: SSL certificates (a.k.a CA bundle) used to
                 verify the identity of requested hosts. Either `True` (default CA bundle),
                 a path to an SSL certificate file, or `False` (disable verification)
+            custom_headers: Custom headers to add when sending data to Meilisearch. Defaults to
+                None.
         """
-        super().__init__(api_key)
+        super().__init__(api_key, custom_headers)
 
         self.http_client = HttpxClient(
             base_url=url, timeout=timeout, headers=self._headers, verify=verify

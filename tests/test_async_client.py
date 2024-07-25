@@ -82,6 +82,37 @@ async def wait_for_dump_creation(
     raise TimeoutError
 
 
+@pytest.mark.parametrize(
+    "api_key, custom_headers, expected",
+    (
+        ("testKey", None, {"Authorization": "Bearer testKey"}),
+        (
+            "testKey",
+            {"header_key_1": "header_value_1", "header_key_2": "header_value_2"},
+            {
+                "Authorization": "Bearer testKey",
+                "header_key_1": "header_value_1",
+                "header_key_2": "header_value_2",
+            },
+        ),
+        (
+            None,
+            {"header_key_1": "header_value_1", "header_key_2": "header_value_2"},
+            {
+                "header_key_1": "header_value_1",
+                "header_key_2": "header_value_2",
+            },
+        ),
+        (None, None, None),
+    ),
+)
+async def test_headers(api_key, custom_headers, expected):
+    async with AsyncClient(
+        "127.0.0.1:7700", api_key=api_key, custom_headers=custom_headers
+    ) as client:
+        assert client._headers == expected
+
+
 async def test_create_index_with_primary_key(async_client):
     uid = str(uuid4())
     primary_key = "pk_test"
