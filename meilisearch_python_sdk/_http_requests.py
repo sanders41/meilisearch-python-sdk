@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import gzip
-import json
 from functools import lru_cache
 from typing import Any, Callable
 
@@ -89,8 +88,6 @@ class AsyncHttpRequests:
         body: Any | None = None,
         content_type: str = "application/json",
         compress: bool = False,
-        *,
-        serializer: type[json.JSONEncoder] | None = None,
     ) -> Response:
         return await self._send_request(self.http_client.post, path, body, content_type, compress)
 
@@ -100,8 +97,6 @@ class AsyncHttpRequests:
         body: Any | None = None,
         content_type: str = "application/json",
         compress: bool = False,
-        *,
-        serializer: type[json.JSONEncoder] | None = None,
     ) -> Response:
         return await self._send_request(self.http_client.put, path, body, content_type, compress)
 
