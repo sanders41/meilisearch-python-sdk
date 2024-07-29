@@ -136,6 +136,28 @@ async def test_create_index_no_primary_key(async_client):
     assert isinstance(index.updated_at, datetime)
 
 
+async def test_create_index_orjson_handler(async_client_orjson_handler):
+    uid = str(uuid4())
+    index = await async_client_orjson_handler.create_index(uid=uid)
+
+    assert index.uid == uid
+
+    assert index.primary_key is None
+    assert isinstance(index.created_at, datetime)
+    assert isinstance(index.updated_at, datetime)
+
+
+async def test_create_index_ujson_handler(async_client_ujson_handler):
+    uid = str(uuid4())
+    index = await async_client_ujson_handler.create_index(uid=uid)
+
+    assert index.uid == uid
+
+    assert index.primary_key is None
+    assert isinstance(index.created_at, datetime)
+    assert isinstance(index.updated_at, datetime)
+
+
 async def test_create_index_with_settings(async_client, new_settings):
     uid = str(uuid4())
     index = await async_client.create_index(uid=uid, settings=new_settings)

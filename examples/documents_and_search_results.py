@@ -1,5 +1,6 @@
 import json
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk.models.search import SearchResults

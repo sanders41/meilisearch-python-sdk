@@ -1,9 +1,11 @@
+from __future__ import annotations
+
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Dict, List
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, HTTPException
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
-from typing_extensions import Annotated
 
 from meilisearch_python_sdk import AsyncClient, AsyncIndex
 from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchCommunicationError
@@ -58,8 +60,8 @@ async def get_documents(index: Annotated[AsyncIndex, Depends(get_index)]) -> Doc
 
 @app.post("/documents")
 async def add_documents(
-    documents: List[Dict[str, Any]], index: Annotated[AsyncIndex, Depends(get_index)]
-) -> List[TaskInfo]:
+    documents: list[dict[str, Any]], index: Annotated[AsyncIndex, Depends(get_index)]
+) -> list[TaskInfo]:
     return await index.add_documents_in_batches(documents)
 
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "meilisearch-python-sdk"
-version = "2.12.1"
+version = "3.0.0"
 description = "A Python client providing both async and sync support for the Meilisearch API"
 authors = ["Paul Sanders <psanders1@gmail.com>"]
 license = "MIT"
@@ -12,7 +12,6 @@ keywords = ["meilisearch", "async", "python", "client", "sdk"]
 classifiers=[
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -24,12 +23,20 @@ classifiers=[
 include = ["meilisearch_python_sdk/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 aiofiles = ">=0.7"
 camel-converter = ">=1.0.0"
+eval-type-backport = {version = ">=0.2.0", python = "<3.10"}  # allows pydantic to use pipe instead of Union
 httpx = ">=0.17"
-pydantic = ">=1.8"
+orjson = { version = ">=3.10.6", optional = true }
+pydantic = ">=2.0.0"
 PyJWT = ">=2.3.0"
+ujson = { version = ">=5.10.0", optional = true }
+
+[tool.poetry.extras]
+orjson = ["orjson"]
+ujson = ["ujson"]
+all = ["orjson", "ujson"]
 
 [tool.poetry.group.dev.dependencies]
 mkdocs = "1.6.0"
@@ -45,6 +52,7 @@ ruff = "0.5.5"
 tomli = {version = "2.0.1", python = "<3.11"}
 types-aiofiles = "24.1.0.20240626"
 typing-extensions = "4.12.2"
+types-ujson = "5.10.0.20240515"
 
 [tool.poetry.group.benchmark.dependencies]
 meilisearch = ">=0.26.0"
@@ -75,7 +83,7 @@ ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 100
-target-version = "py38"
+target-version = "py39"
 fix = true
 
 [tool.ruff.lint]

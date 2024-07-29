@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import sys
-from typing import Any, Dict, List, MutableMapping, Union
+from collections.abc import MutableMapping
+from typing import Any, Union
 
 if sys.version_info >= (3, 10):  # pragma: no cover
     from typing import TypeAlias
 else:
     from typing_extensions import TypeAlias
 
-Filter: TypeAlias = Union[str, List[Union[str, List[str]]]]
-JsonDict: TypeAlias = Dict[str, Any]
+Filter: TypeAlias = Union[str, list[Union[str, list[str]]]]
+JsonDict: TypeAlias = dict[str, Any]
 JsonMapping: TypeAlias = MutableMapping[str, Any]
