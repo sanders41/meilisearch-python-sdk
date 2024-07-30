@@ -759,7 +759,7 @@ class AsyncIndex(_BaseIndex):
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
-        matching_strategy: str = "all",
+        matching_strategy: Literal["all", "last", "frequency"] = "last",
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
@@ -785,13 +785,14 @@ class AsyncIndex(_BaseIndex):
             attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
                 Defaults to None.
             sort: Attributes by which to sort the results. Defaults to None.
-            show_matches_position: Defines whether an object that contains information about the matches should be
-                returned or not. Defaults to False.
+            show_matches_position: Defines whether an object that contains information about the
+                matches should be returned or not. Defaults to False.
             highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
             crop_marker: Marker to display when the number of words excedes the `crop_length`.
                 Defaults to ...
-            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
+            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to
+                `last`.
             hits_per_page: Sets the number of results returned per page.
             page: Sets the specific results page to fetch.
             attributes_to_search_on: List of field names. Allow search over a subset of searchable
@@ -1017,7 +1018,7 @@ class AsyncIndex(_BaseIndex):
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
-        matching_strategy: Literal["all", "last", "frequency"] = "all",
+        matching_strategy: Literal["all", "last", "frequency"] = "last",
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
@@ -1044,13 +1045,14 @@ class AsyncIndex(_BaseIndex):
             attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
                 Defaults to None.
             sort: Attributes by which to sort the results. Defaults to None.
-            show_matches_position: Defines whether an object that contains information about the matches should be
-                returned or not. Defaults to False.
+            show_matches_position: Defines whether an object that contains information about the
+                matches should be returned or not. Defaults to False.
             highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
             crop_marker: Marker to display when the number of words excedes the `crop_length`.
                 Defaults to ...
-            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
+            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to
+                `last`.
             hits_per_page: Sets the number of results returned per page.
             page: Sets the specific results page to fetch.
             attributes_to_search_on: List of field names. Allow search over a subset of searchable
@@ -5027,7 +5029,7 @@ class Index(_BaseIndex):
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
-        matching_strategy: Literal["all", "last", "frequency"] = "all",
+        matching_strategy: Literal["all", "last", "frequency"] = "last",
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
@@ -5053,13 +5055,14 @@ class Index(_BaseIndex):
             attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
                 Defaults to None.
             sort: Attributes by which to sort the results. Defaults to None.
-            show_matches_position: Defines whether an object that contains information about the matches should be
-                returned or not. Defaults to False.
+            show_matches_position: Defines whether an object that contains information about the
+                matches should be returned or not. Defaults to False.
             highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
             crop_marker: Marker to display when the number of words excedes the `crop_length`.
                 Defaults to ...
-            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
+            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to
+                `last`.
             hits_per_page: Sets the number of results returned per page.
             page: Sets the specific results page to fetch.
             attributes_to_search_on: List of field names. Allow search over a subset of searchable
@@ -5193,7 +5196,7 @@ class Index(_BaseIndex):
         highlight_pre_tag: str = "<em>",
         highlight_post_tag: str = "</em>",
         crop_marker: str = "...",
-        matching_strategy: str = "all",
+        matching_strategy: Literal["all", "last", "frequency"] = "last",
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
@@ -5220,13 +5223,14 @@ class Index(_BaseIndex):
             attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
                 Defaults to None.
             sort: Attributes by which to sort the results. Defaults to None.
-            show_matches_position: Defines whether an object that contains information about the matches should be
-                returned or not. Defaults to False.
+            show_matches_position: Defines whether an object that contains information about the
+                matches should be returned or not. Defaults to False.
             highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
             crop_marker: Marker to display when the number of words excedes the `crop_length`.
                 Defaults to ...
-            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to `all`.
+            matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to
+                `last`.
             hits_per_page: Sets the number of results returned per page.
             page: Sets the specific results page to fetch.
             attributes_to_search_on: List of field names. Allow search over a subset of searchable
@@ -8196,7 +8200,7 @@ def _process_search_parameters(
     highlight_pre_tag: str = "<em>",
     highlight_post_tag: str = "</em>",
     crop_marker: str = "...",
-    matching_strategy: str = "all",
+    matching_strategy: Literal["all", "last", "frequency"] = "last",
     hits_per_page: int | None = None,
     page: int | None = None,
     attributes_to_search_on: list[str] | None = None,
