@@ -79,6 +79,7 @@ class RestEmbedder(CamelBase):
     dimensions: int
     document_template: str | None = None
     distribution: Distribution | None = None
+    headers: JsonDict | None = None
     request: JsonDict
     response: JsonDict
 
