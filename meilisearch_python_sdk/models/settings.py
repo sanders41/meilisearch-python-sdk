@@ -48,6 +48,7 @@ class Distribution(CamelBase):
 
 class OpenAiEmbedder(CamelBase):
     source: str = "openAi"
+    url: str | None = None
     model: str | None = None  # Defaults to text-embedding-ada-002
     dimensions: int | None = None  # Uses the model default
     api_key: str | None = None  # Can be provided through a CLI option or environment variable
