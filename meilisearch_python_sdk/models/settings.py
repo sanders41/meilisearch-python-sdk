@@ -69,6 +69,7 @@ class OllamaEmbedder(CamelBase):
     url: str | None = None
     api_key: str | None = None
     model: str
+    dimensions: int | None = None
     document_template: str | None = None
     distribution: Distribution | None = None
 
