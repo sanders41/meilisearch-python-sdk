@@ -351,6 +351,24 @@ async def test_multi_search_federated(async_client, async_index_with_documents, 
     assert "_formatted" not in response.hits[0]
 
 
+async def test_multi_search_locales(async_client, async_index_with_documents, async_empty_index):
+    index1 = await async_index_with_documents()
+    index2 = await async_empty_index()
+    response = await async_client.multi_search(
+        [
+            SearchParams(
+                index_uid=index1.uid, query="How to Train Your Dragon", locales=["eng", "spa"]
+            ),
+            SearchParams(index_uid=index2.uid, query="", locales=["fra"]),
+        ]
+    )
+
+    assert response[0].index_uid == index1.uid
+    assert response[0].hits[0]["id"] == "166428"
+    assert "_formatted" not in response[0].hits[0]
+    assert response[1].index_uid == index2.uid
+
+
 async def test_attributes_to_search_on_search(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.search(
@@ -416,6 +434,20 @@ async def test_custom_facet_search(async_index_with_documents):
     await async_wait_for_task(index.http_client, update.task_uid)
     response = await index.facet_search(
         "Dragon", facet_name="genre", facet_query="cartoon", attributes_to_highlight=["title"]
+    )
+    assert response.facet_hits[0].value == "cartoon"
+    assert response.facet_hits[0].count == 1
+
+
+async def test_facet_search_locales(async_index_with_documents):
+    index = await async_index_with_documents()
+    update = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, update.task_uid)
+    response = await index.facet_search(
+        "How to Train Your Dragon",
+        facet_name="genre",
+        facet_query="cartoon",
+        locales=["eng", "spa"],
     )
     assert response.facet_hits[0].value == "cartoon"
     assert response.facet_hits[0].count == 1
@@ -498,3 +530,10 @@ async def test_similar_search(limit, offset, async_index_with_documents_and_vect
     index = await async_index_with_documents_and_vectors()
     response = await index.search_similar_documents("287947", limit=limit, offset=offset)
     assert len(response.hits) >= 1
+
+
+async def test_search_locales(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.search("How to Train Your Dragon", locales=["eng"])
+    assert response.hits[0]["id"] == "166428"
+    assert "_formatted" not in response.hits[0]

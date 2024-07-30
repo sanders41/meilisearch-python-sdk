@@ -55,6 +55,7 @@ class SearchParams(CamelBase):
     ranking_score_threshold: float | None = None
     vector: list[float] | None = None
     hybrid: Hybrid | None = None
+    locales: list[str] | None = None
 
     @pydantic.field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
     @classmethod

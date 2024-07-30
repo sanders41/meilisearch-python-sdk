@@ -104,6 +104,11 @@ class ProximityPrecision(str, Enum):
     BY_ATTRIBUTE = "byAttribute"
 
 
+class LocalizedAttributes(CamelBase):
+    locales: list[str]
+    attribute_patterns: list[str]
+
+
 class MeilisearchSettings(CamelBase):
     synonyms: JsonDict | None = None
     stop_words: list[str] | None = None
@@ -132,3 +137,4 @@ class MeilisearchSettings(CamelBase):
         ]
         | None
     ) = None  # Optional[Embedders] = None
+    localized_attributes: list[LocalizedAttributes] | None = None
