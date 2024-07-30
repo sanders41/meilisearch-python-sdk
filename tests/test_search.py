@@ -5,7 +5,7 @@ import pytest
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk._task import wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchError
-from meilisearch_python_sdk.models.search import Hybrid, SearchParams
+from meilisearch_python_sdk.models.search import Federation, Hybrid, SearchParams
 
 
 def test_basic_search(index_with_documents):
@@ -332,6 +332,21 @@ def test_multi_search_no_index(client):
         client.multi_search(
             [SearchParams(index_uid="bad", query="How to Train Your Dragon")],
         )
+
+
+def test_multi_search_federated(client, index_with_documents, empty_index):
+    index1 = index_with_documents()
+    index2 = empty_index()
+    response = client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
+            SearchParams(index_uid=index2.uid, query=""),
+        ],
+        federation=Federation(),
+    )
+
+    assert response.hits[0]["id"] == "166428"
+    assert "_formatted" not in response.hits[0]
 
 
 def test_attributes_to_search_on_search(index_with_documents):
