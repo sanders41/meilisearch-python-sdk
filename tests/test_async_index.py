@@ -165,12 +165,6 @@ async def test_update_settings(compress, async_empty_index, new_settings):
     assert response.non_separator_tokens == new_settings.non_separator_tokens
     assert response.search_cutoff_ms == new_settings.search_cutoff_ms
     assert response.dictionary == new_settings.dictionary
-    # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
-    # assert response.embedders["default"].source == "userProvided"
-    # assert response.embedders["test1"].source == "huggingFace"
-    # assert response.embedders["test2"].source == "openAi"
-    # assert response.embedders["test3"].source == "ollama"
-    # assert response.embedders["test4"].source == "rest"
 
 
 async def test_reset_settings(async_empty_index, new_settings, default_ranking_rules):
@@ -189,12 +183,6 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.typo_tolerance.enabled is False
     assert response.pagination == new_settings.pagination
     assert response.proximity_precision == new_settings.proximity_precision
-    # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
-    # assert response.embedders["default"].source == "userProvided"
-    # assert response.embedders["test1"].source == "huggingFace"
-    # assert response.embedders["test2"].source == "openAi"
-    # assert response.embedders["test3"].source == "ollama"
-    # assert response.embedders["test4"].source == "rest"
     response = await index.reset_settings()
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
@@ -694,10 +682,13 @@ async def test_update_embedders(async_empty_index):
     embedders = Embedders(
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),
-            # "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
-            # "test3": OllamaEmbedder(model="nomic-embed-text"),
-            "test4": RestEmbedder(url="https://myurl.com", dimensions=512),
+            "test4": RestEmbedder(
+                url="https://myurl.com",
+                dimensions=512,
+                request={"request": {"model": "minillm", "prompt": "{{text}}"}},
+                response={"response": {"embedding": "{{embedding}}"}},
+            ),
         }
     )
     index = await async_empty_index()
@@ -705,9 +696,7 @@ async def test_update_embedders(async_empty_index):
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
-    # assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
-    # assert response.embedders["test3"].source == "ollama"
     assert response.embedders["test4"].source == "rest"
 
 
@@ -715,10 +704,13 @@ async def test_reset_embedders(async_empty_index):
     embedders = Embedders(
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),
-            # "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
-            # "test3": OllamaEmbedder(model="nomic-embed-text"),
-            "test4": RestEmbedder(url="https://myurl.com", dimensions=512),
+            "test4": RestEmbedder(
+                url="https://myurl.com",
+                dimensions=512,
+                request={"request": {"model": "minillm", "prompt": "{{text}}"}},
+                response={"response": {"embedding": "{{embedding}}"}},
+            ),
         }
     )
     index = await async_empty_index()
@@ -727,9 +719,7 @@ async def test_reset_embedders(async_empty_index):
     assert update.status == "succeeded"
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
-    # assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
-    # assert response.embedders["test3"].source == "ollama"
     assert response.embedders["test4"].source == "rest"
     response = await index.reset_embedders()
     await async_wait_for_task(index.http_client, response.task_uid)
