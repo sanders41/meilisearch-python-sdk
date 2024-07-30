@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 
@@ -39,7 +41,7 @@ class SearchParams(CamelBase):
     highlight_pre_tag: str = "<em>"
     highlight_post_tag: str = "</em>"
     crop_marker: str = "..."
-    matching_strategy: str = "all"
+    matching_strategy: Literal["all", "last", "frequency"] = "last"
     hits_per_page: int | None = None
     page: int | None = None
     attributes_to_search_on: list[str] | None = None
