@@ -671,6 +671,7 @@ def test_update_embedders(empty_index):
             "test4": RestEmbedder(
                 url="https://myurl.com",
                 dimensions=512,
+                headers={"header1": "header value 1"},
                 request={"request": {"model": "minillm", "prompt": "{{text}}"}},
                 response={"response": {"embedding": "{{embedding}}"}},
             ),
@@ -693,6 +694,7 @@ def test_reset_embedders(empty_index):
             "test4": RestEmbedder(
                 url="https://myurl.com",
                 dimensions=512,
+                headers={"header1": "header value 1"},
                 request={"request": {"model": "minillm", "prompt": "{{text}}"}},
                 response={"response": {"embedding": "{{embedding}}"}},
             ),
