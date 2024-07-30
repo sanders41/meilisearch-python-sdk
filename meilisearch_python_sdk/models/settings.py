@@ -78,12 +78,9 @@ class RestEmbedder(CamelBase):
     api_key: str | None = None
     dimensions: int
     document_template: str | None = None
-    input_field: list[str] | None = None
-    input_type: str = "text"
-    query: JsonDict = {}
-    path_to_embeddings: list[str] | None = None
-    embedding_object: list[str] | None = None
     distribution: Distribution | None = None
+    request: JsonDict
+    response: JsonDict
 
 
 class UserProvidedEmbedder(CamelBase):

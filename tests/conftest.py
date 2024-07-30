@@ -282,13 +282,5 @@ def new_settings():
         non_separator_tokens=["#", "@"],
         search_cutoff_ms=100,
         dictionary=["S.O", "S.O.S"],
-        # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
-        # embedders={
-        #     "default": UserProvidedEmbedder(dimensions=512),
-        #     # "test1": HuggingFaceEmbedder(),
-        #     "test2": OpenAiEmbedder(),
-        #     # "test3": OllamaEmbedder(model="nomic-embed-text"),
-        #     "test4": RestEmbedder(url="https://myurl.com"),
-        # },
         proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
     )
