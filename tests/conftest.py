@@ -259,6 +259,15 @@ async def enable_vector_search():
         yield
 
 
+@pytest.fixture(scope="session", autouse=True)
+async def enable_edit_by_function():
+    async with HttpxAsyncClient(
+        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
+    ) as client:
+        await client.patch("/experimental-features", json={"editDocumentsByFunction": True})
+        yield
+
+
 @pytest.fixture
 async def create_tasks(async_empty_index, small_movies):
     """Ensures there are some tasks present for testing."""

@@ -1362,3 +1362,22 @@ def test_add_documents_ujson_handler(compress, client_ujson_handler, small_movie
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
+
+
+def test_edit_documents_by_function(index_with_documents):
+    index = index_with_documents()
+    task = index.update_filterable_attributes(["id"])
+    wait_for_task(index.http_client, task.task_uid)
+    response = index.edit_documents(
+        function="if doc.id == context.docid {doc.title = `${doc.title.to_upper()}`}",
+        context={"docid": "299537"},
+        filter='id = "299537" OR id = "287947"',
+    )
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_document("299537")
+
+    assert response["title"] == "CAPTAIN MARVEL"
+
+    response = index.get_document("287947")
+
+    assert response["title"] == "Shazam!"

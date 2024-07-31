@@ -2002,6 +2002,51 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
+    async def edit_documents(
+        self, function: str, *, context: JsonDict | None = None, filter: str | None = None
+    ) -> TaskInfo:
+        """Edit documents with a function.
+
+        Edit documents is only available in Meilisearch >= v1.10.0, and is experimental in
+        Meilisearch v1.10.0. In order to use this feature you first need to enable it by
+        sending a PATCH request to /experimental-features with { "editDocumentsByFunction": true }.
+
+        Args:
+
+            function: Rhai function to use to update the documents.
+            context: Parameters to use in the function. Defaults to None.
+            filter: Filter the documents before applying the function. Defaults to None.
+
+        Returns:
+
+            The details of the task.
+
+        Raises:
+
+            MeilisearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.edit_documents("doc.title = `${doc.title.to_upper()}`")
+        """
+        url = f"{self._documents_url}/edit"
+        payload: JsonDict = {"function": function}
+
+        if context:
+            payload["context"] = context
+
+        if filter:
+            payload["filter"] = filter
+
+        response = await self._http_requests.post(url, payload)
+
+        return TaskInfo(**response.json())
+
     async def update_documents(
         self,
         documents: Sequence[JsonMapping],
@@ -5940,6 +5985,51 @@ class Index(_BaseIndex):
         response = self._http_requests.post(
             url, body=data, content_type=content_type, compress=compress
         )
+
+        return TaskInfo(**response.json())
+
+    def edit_documents(
+        self, function: str, *, context: JsonDict | None = None, filter: str | None = None
+    ) -> TaskInfo:
+        """Edit documents with a function.
+
+        Edit documents is only available in Meilisearch >= v1.10.0, and is experimental in
+        Meilisearch v1.10.0. In order to use this feature you first need to enable it by
+        sending a PATCH request to /experimental-features with { "editDocumentsByFunction": true }.
+
+        Args:
+
+            function: Rhai function to use to update the documents.
+            context: Parameters to use in the function. Defaults to None.
+            filter: Filter the documents before applying the function. Defaults to None.
+
+        Returns:
+
+            The details of the task.
+
+        Raises:
+
+            MeilisearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.edit_documents("doc.title = `${doc.title.to_upper()}`")
+        """
+        url = f"{self._documents_url}/edit"
+        payload: JsonDict = {"function": function}
+
+        if context:
+            payload["context"] = context
+
+        if filter:
+            payload["filter"] = filter
+
+        response = self._http_requests.post(url, payload)
 
         return TaskInfo(**response.json())
 
