@@ -25,6 +25,11 @@ class Hybrid(CamelBase):
     embedder: str | None = None
 
 
+class Federation(CamelBase):
+    limit: int = 20
+    offset: int = 0
+
+
 class SearchParams(CamelBase):
     index_uid: str
     query: str | None = pydantic.Field(None, alias="q")
@@ -50,6 +55,7 @@ class SearchParams(CamelBase):
     ranking_score_threshold: float | None = None
     vector: list[float] | None = None
     hybrid: Hybrid | None = None
+    locales: list[str] | None = None
 
     @pydantic.field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
     @classmethod
@@ -77,6 +83,20 @@ class SearchResults(CamelBase):
 
 class SearchResultsWithUID(SearchResults):
     index_uid: str
+
+
+class SearchResultsFederated(CamelBase):
+    hits: list[JsonDict]
+    offset: int | None = None
+    limit: int | None = None
+    estimated_total_hits: int | None = None
+    processing_time_ms: int
+    facet_distribution: JsonDict | None = None
+    total_pages: int | None = None
+    total_hits: int | None = None
+    page: int | None = None
+    hits_per_page: int | None = None
+    semantic_hit_count: int | None = None
 
 
 class SimilarSearchResults(CamelBase):
