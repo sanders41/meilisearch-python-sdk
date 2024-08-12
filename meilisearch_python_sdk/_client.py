@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from ssl import SSLContext
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import jwt
 from httpx import AsyncClient as HttpxAsyncClient
@@ -27,12 +27,13 @@ from meilisearch_python_sdk.models.settings import MeilisearchSettings
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
 from meilisearch_python_sdk.plugins import AsyncIndexPlugins, IndexPlugins
+from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:  # pragma: no cover
     import sys
     from types import TracebackType
 
-    from meilisearch_python_sdk.types import JsonDict, JsonMapping
+    from meilisearch_python_sdk.types import JsonMapping
 
     if sys.version_info >= (3, 11):
         from typing import Self
@@ -618,12 +619,16 @@ class AsyncClient(BaseClient):
 
         return Key(**response.json())
 
-    async def multi_search(self, queries: list[SearchParams]) -> list[SearchResultsWithUID]:
+    async def multi_search(
+        self, queries: list[SearchParams], *, hits_type: Any = JsonDict
+    ) -> list[SearchResultsWithUID]:
         """Multi-index search.
 
         Args:
 
             queries: List of SearchParameters
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
 
@@ -651,7 +656,7 @@ class AsyncClient(BaseClient):
             body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
         )
 
-        return [SearchResultsWithUID(**x) for x in response.json()["results"]]
+        return [SearchResultsWithUID[hits_type](**x) for x in response.json()["results"]]
 
     async def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an AsyncIndex instance.
@@ -1478,12 +1483,16 @@ class Client(BaseClient):
 
         return Key(**response.json())
 
-    def multi_search(self, queries: list[SearchParams]) -> list[SearchResultsWithUID]:
+    def multi_search(
+        self, queries: list[SearchParams], *, hits_type: Any = JsonDict
+    ) -> list[SearchResultsWithUID]:
         """Multi-index search.
 
         Args:
 
             queries: List of SearchParameters
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
 
@@ -1511,7 +1520,7 @@ class Client(BaseClient):
             body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
         )
 
-        return [SearchResultsWithUID(**x) for x in response.json()["results"]]
+        return [SearchResultsWithUID[hits_type](**x) for x in response.json()["results"]]
 
     def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an Index instance.

@@ -52,11 +52,12 @@ from meilisearch_python_sdk.plugins import (
     Plugin,
     PostSearchPlugin,
 )
+from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:  # pragma: no cover
     import sys
 
-    from meilisearch_python_sdk.types import Filter, JsonDict, JsonMapping
+    from meilisearch_python_sdk.types import Filter, JsonMapping
 
     if sys.version_info >= (3, 11):
         from typing import Self
@@ -72,11 +73,13 @@ class _BaseIndex:
         created_at: str | datetime | None = None,
         updated_at: str | datetime | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        hits_type: Any = JsonDict,
     ):
         self.uid = uid
         self.primary_key = primary_key
         self.created_at: datetime | None = iso_to_date_time(created_at)
         self.updated_at: datetime | None = iso_to_date_time(updated_at)
+        self.hits_type = hits_type
         self._base_url = "indexes/"
         self._base_url_with_uid = f"{self._base_url}{self.uid}"
         self._documents_url = f"{self._base_url_with_uid}/documents"
@@ -113,6 +116,8 @@ class AsyncIndex(_BaseIndex):
         updated_at: str | datetime | None = None,
         plugins: AsyncIndexPlugins | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        *,
+        hits_type: Any = JsonDict,
     ):
         """Class initializer.
 
@@ -129,8 +134,17 @@ class AsyncIndex(_BaseIndex):
                 (uses the json module from the standard library), OrjsonHandler (uses orjson), or
                 UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
                 extra needs to be included. Default: BuiltinHandler.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
         """
-        super().__init__(uid, primary_key, created_at, updated_at, json_handler=json_handler)
+        super().__init__(
+            uid=uid,
+            primary_key=primary_key,
+            created_at=created_at,
+            updated_at=updated_at,
+            json_handler=json_handler,
+            hits_type=hits_type,
+        )
         self.http_client = http_client
         self._http_requests = AsyncHttpRequests(http_client, json_handler=self._json_handler)
         self.plugins = plugins
@@ -934,7 +948,7 @@ class AsyncIndex(_BaseIndex):
                 concurrent_tasks.append(self._http_requests.post(search_url, body=body))
 
                 responses = await asyncio.gather(*concurrent_tasks)
-                result = SearchResults(**responses[-1].json())
+                result = SearchResults[self.hits_type](**responses[-1].json())  # type: ignore[name-defined]
                 if self._post_search_plugins:
                     post = await AsyncIndex._run_plugins(
                         self._post_search_plugins, AsyncEvent.POST, search_results=result
@@ -977,7 +991,7 @@ class AsyncIndex(_BaseIndex):
                 response_coroutine = tg.create_task(self._http_requests.post(search_url, body=body))
 
             response = await response_coroutine
-            result = SearchResults(**response.json())
+            result = SearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
             if self._post_search_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_search_plugins, AsyncEvent.POST, search_results=result
@@ -988,7 +1002,7 @@ class AsyncIndex(_BaseIndex):
             return result
 
         response = await self._http_requests.post(search_url, body=body)
-        result = SearchResults(**response.json())
+        result = SearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
 
         if self._post_search_plugins:
             post = await AsyncIndex._run_plugins(
@@ -1324,7 +1338,7 @@ class AsyncIndex(_BaseIndex):
             f"{self._base_url_with_uid}/similar", body=payload
         )
 
-        return SimilarSearchResults(**response.json())
+        return SimilarSearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
 
     async def get_document(self, document_id: str) -> JsonDict:
         """Get one document with given document identifier.
@@ -4516,6 +4530,8 @@ class Index(_BaseIndex):
         updated_at: str | datetime | None = None,
         plugins: IndexPlugins | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        *,
+        hits_type: Any = JsonDict,
     ):
         """Class initializer.
 
@@ -4532,8 +4548,17 @@ class Index(_BaseIndex):
                 (uses the json module from the standard library), OrjsonHandler (uses orjson), or
                 UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
                 extra needs to be included. Default: BuiltinHandler.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
         """
-        super().__init__(uid, primary_key, created_at, updated_at, json_handler=json_handler)
+        super().__init__(
+            uid=uid,
+            primary_key=primary_key,
+            created_at=created_at,
+            updated_at=updated_at,
+            json_handler=json_handler,
+            hits_type=hits_type,
+        )
         self.http_client = http_client
         self._http_requests = HttpRequests(http_client, json_handler=self._json_handler)
         self.plugins = plugins
@@ -5169,7 +5194,7 @@ class Index(_BaseIndex):
             )
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
-        result = SearchResults(**response.json())
+        result = SearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
         if self._post_search_plugins:
             post = Index._run_plugins(self._post_search_plugins, Event.POST, search_results=result)
             if post.get("search_result"):
@@ -5408,7 +5433,7 @@ class Index(_BaseIndex):
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/similar", body=payload)
 
-        return SimilarSearchResults(**response.json())
+        return SimilarSearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
 
     def get_document(self, document_id: str) -> JsonDict:
         """Get one document with given document identifier.

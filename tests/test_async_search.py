@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from camel_converter.pydantic_base import CamelBase
 
 from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk._task import async_wait_for_task
@@ -314,9 +315,36 @@ async def test_multi_search(async_client, async_index_with_documents, async_empt
         ]
     )
 
+    assert isinstance(response[0].hits[0], dict)
     assert response[0].index_uid == index1.uid
     assert response[0].hits[0]["id"] == "166428"
     assert "_formatted" not in response[0].hits[0]
+    assert response[1].index_uid == index2.uid
+
+
+async def test_multi_search_generic(async_client, async_index_with_documents):
+    class Movie(CamelBase):
+        id: int
+        title: str
+        poster: str
+        overview: str
+        release_date: datetime
+        genre: str | None = None
+
+    index1 = await async_index_with_documents()
+    index2 = await async_index_with_documents()
+    response = await async_client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
+            SearchParams(index_uid=index2.uid, query=""),
+        ],
+        hits_type=Movie,
+    )
+
+    assert isinstance(response[0].hits[0], Movie)
+    assert isinstance(response[1].hits[0], Movie)
+    assert response[0].index_uid == index1.uid
+    assert response[0].hits[0].id == 166428
     assert response[1].index_uid == index2.uid
 
 
@@ -483,3 +511,26 @@ async def test_similar_search(limit, offset, async_index_with_documents_and_vect
     index = await async_index_with_documents_and_vectors()
     response = await index.search_similar_documents("287947", limit=limit, offset=offset)
     assert len(response.hits) >= 1
+
+
+async def test_search_result_hits_generic_default(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.search("How to Train Your Dragon")
+    assert isinstance(response.hits[0], dict)
+    assert response.hits[0]["id"] == "166428"
+
+
+async def test_search_result_hits_generic(async_index_with_documents):
+    class Movie(CamelBase):
+        id: int
+        title: str
+        poster: str
+        overview: str
+        release_date: datetime
+        genre: str | None = None
+
+    index = await async_index_with_documents()
+    index.hits_type = Movie
+    response = await index.search("How to Train Your Dragon")
+    assert isinstance(response.hits[0], Movie)
+    assert response.hits[0].id == 166428
