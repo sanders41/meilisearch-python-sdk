@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Generic, Literal, TypeVar
 
-import pydantic
 from camel_converter.pydantic_base import CamelBase
+from pydantic import Field, field_validator
 
 from meilisearch_python_sdk.errors import MeilisearchError
 from meilisearch_python_sdk.types import Filter, JsonDict
+
+T = TypeVar("T")
 
 
 class FacetHits(CamelBase):
@@ -27,7 +29,7 @@ class Hybrid(CamelBase):
 
 class SearchParams(CamelBase):
     index_uid: str
-    query: str | None = pydantic.Field(None, alias="q")
+    query: str | None = Field(None, alias="q")
     offset: int = 0
     limit: int = 20
     filter: Filter | None = None
@@ -51,7 +53,7 @@ class SearchParams(CamelBase):
     vector: list[float] | None = None
     hybrid: Hybrid | None = None
 
-    @pydantic.field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
+    @field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
     @classmethod
     def validate_ranking_score_threshold(cls, v: float | None) -> float | None:
         if v and not 0.0 <= v <= 1.0:
@@ -60,8 +62,8 @@ class SearchParams(CamelBase):
         return v
 
 
-class SearchResults(CamelBase):
-    hits: list[JsonDict]
+class SearchResults(CamelBase, Generic[T]):
+    hits: list[T]
     offset: int | None = None
     limit: int | None = None
     estimated_total_hits: int | None = None
@@ -75,12 +77,12 @@ class SearchResults(CamelBase):
     semantic_hit_count: int | None = None
 
 
-class SearchResultsWithUID(SearchResults):
+class SearchResultsWithUID(SearchResults, Generic[T]):
     index_uid: str
 
 
-class SimilarSearchResults(CamelBase):
-    hits: list[JsonDict]
+class SimilarSearchResults(CamelBase, Generic[T]):
+    hits: list[T]
     id: str
     processing_time_ms: int
     limit: int | None = None
