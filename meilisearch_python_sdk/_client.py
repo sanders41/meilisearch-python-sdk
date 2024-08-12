@@ -643,7 +643,7 @@ class AsyncClient(BaseClient):
         *,
         federation: Federation | None = None,
         hits_type: Any = JsonDict,
-    ) -> list[SearchResultsWithUID]:
+    ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
 
         Args:
@@ -695,7 +695,7 @@ class AsyncClient(BaseClient):
 
         if federation:
             results = response.json()
-            return SearchResultsFederated(**results)
+            return SearchResultsFederated[hits_type](**results)
 
         return [SearchResultsWithUID[hits_type](**x) for x in response.json()["results"]]
 
@@ -1543,7 +1543,7 @@ class Client(BaseClient):
         *,
         federation: Federation | None = None,
         hits_type: Any = JsonDict,
-    ) -> list[SearchResultsWithUID]:
+    ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
 
         Args:
@@ -1595,7 +1595,7 @@ class Client(BaseClient):
 
         if federation:
             results = response.json()
-            return SearchResultsFederated(**results)
+            return SearchResultsFederated[hits_type](**results)
 
         return [SearchResultsWithUID[hits_type](**x) for x in response.json()["results"]]
 
