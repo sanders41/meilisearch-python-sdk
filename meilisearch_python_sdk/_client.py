@@ -220,6 +220,7 @@ class AsyncClient(BaseClient):
         wait: bool = True,
         timeout_in_ms: int | None = None,
         plugins: AsyncIndexPlugins | None = None,
+        hits_type: Any = JsonDict,
     ) -> AsyncIndex:
         """Creates a new index.
 
@@ -239,6 +240,8 @@ class AsyncClient(BaseClient):
                 MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
                 if the `None` option is used the wait time could be very long. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
 
@@ -264,6 +267,7 @@ class AsyncClient(BaseClient):
             timeout_in_ms=timeout_in_ms,
             plugins=plugins,
             json_handler=self.json_handler,
+            hits_type=hits_type,
         )
 
     async def create_snapshot(self) -> TaskInfo:
@@ -437,7 +441,12 @@ class AsyncClient(BaseClient):
         return ClientStats(**response.json())
 
     async def get_or_create_index(
-        self, uid: str, primary_key: str | None = None, *, plugins: AsyncIndexPlugins | None = None
+        self,
+        uid: str,
+        primary_key: str | None = None,
+        *,
+        plugins: AsyncIndexPlugins | None = None,
+        hits_type: Any = JsonDict,
     ) -> AsyncIndex:
         """Get an index, or create it if it doesn't exist.
 
@@ -446,6 +455,8 @@ class AsyncClient(BaseClient):
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
 
@@ -468,7 +479,9 @@ class AsyncClient(BaseClient):
         except MeilisearchApiError as err:
             if "index_not_found" not in err.code:
                 raise
-            index_instance = await self.create_index(uid, primary_key, plugins=plugins)
+            index_instance = await self.create_index(
+                uid, primary_key, plugins=plugins, hits_type=hits_type
+            )
         return index_instance
 
     async def create_key(self, key: KeyCreate) -> Key:
@@ -1088,6 +1101,7 @@ class Client(BaseClient):
         wait: bool = True,
         timeout_in_ms: int | None = None,
         plugins: IndexPlugins | None = None,
+        hits_type: Any = JsonDict,
     ) -> Index:
         """Creates a new index.
 
@@ -1107,6 +1121,8 @@ class Client(BaseClient):
                 MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
                 if the `None` option is used the wait time could be very long. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
 
@@ -1132,6 +1148,7 @@ class Client(BaseClient):
             timeout_in_ms=timeout_in_ms,
             plugins=plugins,
             json_handler=self.json_handler,
+            hits_type=hits_type,
         )
 
     def create_snapshot(self) -> TaskInfo:
@@ -1301,7 +1318,12 @@ class Client(BaseClient):
         return ClientStats(**response.json())
 
     def get_or_create_index(
-        self, uid: str, primary_key: str | None = None, *, plugins: IndexPlugins | None = None
+        self,
+        uid: str,
+        primary_key: str | None = None,
+        *,
+        plugins: IndexPlugins | None = None,
+        hits_type: Any = JsonDict,
     ) -> Index:
         """Get an index, or create it if it doesn't exist.
 
@@ -1310,6 +1332,8 @@ class Client(BaseClient):
             uid: The index's unique identifier.
             primary_key: The primary key of the documents. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
 
@@ -1332,7 +1356,9 @@ class Client(BaseClient):
         except MeilisearchApiError as err:
             if "index_not_found" not in err.code:
                 raise
-            index_instance = self.create_index(uid, primary_key, plugins=plugins)
+            index_instance = self.create_index(
+                uid, primary_key, plugins=plugins, hits_type=hits_type
+            )
         return index_instance
 
     def create_key(self, key: KeyCreate) -> Key:

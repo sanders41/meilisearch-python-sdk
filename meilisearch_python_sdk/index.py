@@ -653,6 +653,7 @@ class AsyncIndex(_BaseIndex):
         timeout_in_ms: int | None = None,
         plugins: AsyncIndexPlugins | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        hits_type: Any = JsonDict,
     ) -> Self:
         """Creates a new index.
 
@@ -681,6 +682,8 @@ class AsyncIndex(_BaseIndex):
                 (uses the json module from the standard library), OrjsonHandler (uses orjson), or
                 UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
                 extra needs to be included. Default: BuiltinHandler.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
 
@@ -722,6 +725,7 @@ class AsyncIndex(_BaseIndex):
             updated_at=index_dict["updatedAt"],
             plugins=plugins,
             json_handler=json_handler,
+            hits_type=hits_type,
         )
 
         if settings:
@@ -4941,6 +4945,7 @@ class Index(_BaseIndex):
         timeout_in_ms: int | None = None,
         plugins: IndexPlugins | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        hits_type: Any = JsonDict,
     ) -> Self:
         """Creates a new index.
 
@@ -4969,6 +4974,8 @@ class Index(_BaseIndex):
                 (uses the json module from the standard library), OrjsonHandler (uses orjson), or
                 UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
                 extra needs to be included. Default: BuiltinHandler.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
 
@@ -5005,6 +5012,7 @@ class Index(_BaseIndex):
             updated_at=index_dict["updatedAt"],
             plugins=plugins,
             json_handler=json_handler,
+            hits_type=hits_type,
         )
 
         if settings:
