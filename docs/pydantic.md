@@ -58,3 +58,33 @@ you will be inheriting Pydantic models and therefore have access to the funciton
 such as [validators](https://pydantic-docs.helpmanual.io/usage/validators/) and [Fields](https://pydantic-docs.helpmanual.io/usage/model_config/#alias-precedence).
 Pydantic will also automatically deserialized the data into the correct data type based on the type
 hint provided.
+
+For `SearchResults`, the `hits` field is generic so you can specify a model that matches your data.
+If no type is specified it will default to `JsonDict` (`dict[str, Any]`).
+
+```py
+from datetime import datetime
+from typing import Optional
+
+from camel_converter.pydantic_base import CamelBase
+from meilisearch_python_sdk import Client
+
+
+# Inheriting from CamelBase will allow your class to automatically convert
+# variables returned from the server in camelCase into snake_case. It will
+# also make it a Pydantic Model.
+class Movie(CamelBase):
+    id: int
+    title: str
+    poster: str
+    overview: str
+    release_date: datetime
+    genre: Optional[str] = None
+
+
+async with Client("http://127.0.0.1:7700", "masterKey") as client:
+    index = client.index("movies", hits_type=Movie)
+    movies = await index.search("Spiderman")
+```
+
+`movies.hits` will now have items of type `Movie` instead of `JsonDict`.

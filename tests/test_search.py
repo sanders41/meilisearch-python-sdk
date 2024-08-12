@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from camel_converter.pydantic_base import CamelBase
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk._task import wait_for_task
@@ -312,9 +315,36 @@ def test_multi_search(client, index_with_documents, empty_index):
         ]
     )
 
+    assert isinstance(response[0].hits[0], dict)
     assert response[0].index_uid == index1.uid
     assert response[0].hits[0]["id"] == "166428"
     assert "_formatted" not in response[0].hits[0]
+    assert response[1].index_uid == index2.uid
+
+
+def test_multi_search_generic(client, index_with_documents):
+    class Movie(CamelBase):
+        id: int
+        title: str
+        poster: str
+        overview: str
+        release_date: datetime
+        genre: str | None = None
+
+    index1 = index_with_documents()
+    index2 = index_with_documents()
+    response = client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
+            SearchParams(index_uid=index2.uid, query=""),
+        ],
+        hits_type=Movie,
+    )
+
+    assert isinstance(response[0].hits[0], Movie)
+    assert isinstance(response[1].hits[0], Movie)
+    assert response[0].index_uid == index1.uid
+    assert response[0].hits[0].id == 166428
     assert response[1].index_uid == index2.uid
 
 
@@ -538,3 +568,26 @@ def test_search_locales(index_with_documents):
     response = index.search("How to Train Your Dragon", locales=["eng"])
     assert response.hits[0]["id"] == "166428"
     assert "_formatted" not in response.hits[0]
+
+
+def test_search_result_hits_generic_default(index_with_documents):
+    index = index_with_documents()
+    response = index.search("How to Train Your Dragon")
+    assert isinstance(response.hits[0], dict)
+    assert response.hits[0]["id"] == "166428"
+
+
+def test_search_result_hits_generic(index_with_documents):
+    class Movie(CamelBase):
+        id: int
+        title: str
+        poster: str
+        overview: str
+        release_date: datetime
+        genre: str | None = None
+
+    index = index_with_documents()
+    index.hits_type = Movie
+    response = index.search("How to Train Your Dragon")
+    assert isinstance(response.hits[0], Movie)
+    assert response.hits[0].id == 166428
