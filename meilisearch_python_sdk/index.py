@@ -781,6 +781,7 @@ class AsyncIndex(_BaseIndex):
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
+        distinct: str | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
         ranking_score_threshold: float | None = None,
@@ -815,6 +816,9 @@ class AsyncIndex(_BaseIndex):
             page: Sets the specific results page to fetch.
             attributes_to_search_on: List of field names. Allow search over a subset of searchable
                 attributes without modifying the index settings. Defaults to None.
+            distinct: If set the distinct value will return at most one result for the
+                filterable attribute. Note that a filterable attributes must be set for this work.
+                Defaults to None.
             show_ranking_score: If set to True the ranking score will be returned with each document
                 in the search. Defaults to False.
             show_ranking_score_details: If set to True the ranking details will be returned with
@@ -881,6 +885,7 @@ class AsyncIndex(_BaseIndex):
             hits_per_page=hits_per_page,
             page=page,
             attributes_to_search_on=attributes_to_search_on,
+            distinct=distinct,
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
@@ -911,6 +916,7 @@ class AsyncIndex(_BaseIndex):
                 hits_per_page=hits_per_page,
                 page=page,
                 attributes_to_search_on=attributes_to_search_on,
+                distinct=distinct,
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
                 vector=vector,
@@ -943,6 +949,7 @@ class AsyncIndex(_BaseIndex):
                                 hits_per_page=hits_per_page,
                                 page=page,
                                 attributes_to_search_on=attributes_to_search_on,
+                                distinct=distinct,
                                 show_ranking_score=show_ranking_score,
                                 show_ranking_score_details=show_ranking_score_details,
                                 vector=vector,
@@ -986,6 +993,7 @@ class AsyncIndex(_BaseIndex):
                                 hits_per_page=hits_per_page,
                                 page=page,
                                 attributes_to_search_on=attributes_to_search_on,
+                                distinct=distinct,
                                 show_ranking_score=show_ranking_score,
                                 show_ranking_score_details=show_ranking_score_details,
                                 vector=vector,
@@ -5066,6 +5074,7 @@ class Index(_BaseIndex):
         hits_per_page: int | None = None,
         page: int | None = None,
         attributes_to_search_on: list[str] | None = None,
+        distinct: str | None = None,
         show_ranking_score: bool = False,
         show_ranking_score_details: bool = False,
         ranking_score_threshold: float | None = None,
@@ -5100,6 +5109,9 @@ class Index(_BaseIndex):
             page: Sets the specific results page to fetch.
             attributes_to_search_on: List of field names. Allow search over a subset of searchable
                 attributes without modifying the index settings. Defaults to None.
+            distinct: If set the distinct value will return at most one result for the
+                filterable attribute. Note that a filterable attributes must be set for this work.
+                Defaults to None.
             show_ranking_score: If set to True the ranking score will be returned with each document
                 in the search. Defaults to False.
             show_ranking_score_details: If set to True the ranking details will be returned with
@@ -5166,6 +5178,7 @@ class Index(_BaseIndex):
             hits_per_page=hits_per_page,
             page=page,
             attributes_to_search_on=attributes_to_search_on,
+            distinct=distinct,
             show_ranking_score=show_ranking_score,
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
@@ -5195,6 +5208,7 @@ class Index(_BaseIndex):
                 hits_per_page=hits_per_page,
                 page=page,
                 attributes_to_search_on=attributes_to_search_on,
+                distinct=distinct,
                 show_ranking_score=show_ranking_score,
                 show_ranking_score_details=show_ranking_score_details,
                 vector=vector,
@@ -8237,6 +8251,7 @@ def _process_search_parameters(
     hits_per_page: int | None = None,
     page: int | None = None,
     attributes_to_search_on: list[str] | None = None,
+    distinct: str | None = None,
     show_ranking_score: bool = False,
     show_ranking_score_details: bool = False,
     ranking_score_threshold: float | None = None,
@@ -8274,6 +8289,9 @@ def _process_search_parameters(
 
     if facet_query:
         body["facetQuery"] = facet_query
+
+    if distinct:
+        body["distinct"] = distinct
 
     if show_ranking_score_details:
         body["showRankingScoreDetails"] = show_ranking_score_details
