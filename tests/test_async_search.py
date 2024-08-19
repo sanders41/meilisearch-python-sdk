@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -30,6 +31,16 @@ async def test_search_with_empty_query(async_index_with_documents):
     response = await index.search("")
     assert len(response.hits) == 20
     assert response.query == ""
+
+
+async def test_distinct_search(async_index_with_documents):
+    index = await async_index_with_documents()
+    task = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, task.task_uid)
+    response = await index.search("with", distinct="genre")
+    genres = dict(Counter([x.get("genre") for x in response.hits]))
+    assert genres == {None: 9, "action": 1}
+    assert response.hits[0]["id"] == "399579"
 
 
 async def test_custom_search(async_index_with_documents):
