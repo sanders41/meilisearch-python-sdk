@@ -2,17 +2,19 @@
 
 ## Where to start
 
-All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome.
+All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are
+welcome.
 
-The best place to start is to check the [issues](https://github.com/sanders41/meilisearch-python-sdk/issues)
-for something that interests you.
+The best place to start is to check the
+[issues](https://github.com/sanders41/meilisearch-python-sdk/issues) for something that interests you.
 
 ## Bug Reports
 
 Please include:
 
 1. A short, self-contained Python snippet reproducing the problem. You can format the code by using
-   [GitHub markdown](https://docs.github.com/en/free-pro-team@latest/github/writing-on-github). For example:
+   [GitHub markdown](https://docs.github.com/en/free-pro-team@latest/github/writing-on-github).
+   For example:
 
 ```py
 from meilisearch_python_sdk import Client
@@ -39,16 +41,18 @@ cd meilisearch-python-sdk
 git remote add upstream https://github.com/sanders41/meilisearch-python-sdk.git
 ```
 
-This creates the directory meilisearch-python-sdk and connects your repository to the upstream (main project) repository.
+This creates the directory meilisearch-python-sdk and connects your repository to the upstream
+(main project) repository.
 
 ### Working with the code
 
-Note: This project uses Poetry to manage dependencies. If you do not already have Poetry installed you will need to install it with the instructions [here](https://python-poetry.org/docs/#installation)
+Note: This project uses uv to manage dependencies. If you do not already have uv installed you will
+need to install it with the instructions [here](https://docs.astral.sh/uv/getting-started/installation/)
 
 First the requirements need to be installed.
 
 ```sh
-poetry install
+uv sync --locked --all-extras
 ```
 
 ### Creating a branch
@@ -81,13 +85,13 @@ You can run linting on your code at any time with:
 
 ```sh
 # Run ruff formatting
-poetry run ruff format meilisearch_python_sdk tests
+uv run ruff format meilisearch_python_sdk tests
 
 # Run ruff linting
-poetry run ruff check .
+uv run ruff check .
 
 # Run mypy
-poetry run mypy meilisearch_python_sdk
+uv run mypy meilisearch_python_sdk
 ```
 
 It is also suggested that you setup [pre-commit](https://pre-commit.com/) in order to run linting
@@ -157,7 +161,7 @@ docker run -p 7700:7700 getmeili/meilisearch:latest meilisearch --master-key=mas
 Now with the container running, run the test suite
 
 ```sh
-poetry run pytest
+uv run pytest
 ```
 
 In additon to mainting the coverage percentage please ensure that all
@@ -220,17 +224,20 @@ Now you can commit your changes in your local repository:
 git commit -am 'Some short helpful message to describe your changes'
 ```
 
-If you setup pre-commit and any of the tests fail the commit will be cancelled and you will need to fix any errors. Once the errors are fixed you can run the same git commit command again.
+If you setup pre-commit and any of the tests fail the commit will be cancelled and you will need to
+fix any errors. Once the errors are fixed you can run the same git commit command again.
 
 ## Push your changes
 
-Once your changes are ready and all linting/tests are passing you can push your changes to your forked repository:
+Once your changes are ready and all linting/tests are passing you can push your changes to your
+forked repository:
 
 ```sh
 git push origin my-new-feature
 ```
 
-origin is the default name of your remote repository on GitHub. You can see all of your remote repositories by running:
+origin is the default name of your remote repository on GitHub. You can see all of your remote
+repositories by running:
 
 ```sh
 git remote -v
@@ -238,11 +245,16 @@ git remote -v
 
 ## Making a Pull Request
 
-After pushing your code to origin it is now on GitHub but not yet part of the meilisearch-python-sdk project. When you’re ready to ask for a code review, file a pull request. Before you do, once again make sure that you have followed all the guidelines outlined in this document regarding code style, tests, and documentation.
+After pushing your code to origin it is now on GitHub but not yet part of the
+meilisearch-python-sdk project. When you’re ready to ask for a code review, file a pull request.
+Before you do, once again make sure that you have followed all the guidelines outlined in this
+document regarding code style, tests, and documentation.
 
 ### Make the pull request
 
-If everything looks good, you are ready to make a pull request. This is how you let the maintainers of the meilisearch-python-sdk project know you have code ready to be reviewed. To submit the pull request:
+If everything looks good, you are ready to make a pull request. This is how you let the maintainers
+of the meilisearch-python-sdk project know you have code ready to be reviewed. To submit the pull
+request:
 
 1. Navigate to your repository on GitHub
 2. Click on the Pull Request button for your feature branch
@@ -254,15 +266,19 @@ This request then goes to the repository maintainers, and they will review the c
 
 ### Updating your pull request
 
-Changes to your code may be needed based on the review of your pull request. If this is the case you can make them in your branch, add a new commit to that branch, push it to GitHub, and the pull request will be automatically updated. Pushing them to GitHub again is done by:
+Changes to your code may be needed based on the review of your pull request. If this is the case you
+can make them in your branch, add a new commit to that branch, push it to GitHub, and the pull
+request will be automatically updated. Pushing them to GitHub again is done by:
 
 ```sh
 git push origin my-new-feature
 ```
 
-This will automatically update your pull request with the latest code and restart the Continuous Integration tests.
+This will automatically update your pull request with the latest code and restart the Continuous
+Integration tests.
 
-Another reason you might need to update your pull request is to solve conflicts with changes that have been merged into the main branch since you opened your pull request.
+Another reason you might need to update your pull request is to solve conflicts with changes that
+have been merged into the main branch since you opened your pull request.
 
 To do this, you need to rebase your branch:
 
@@ -287,7 +303,8 @@ git push origin my-new-feature --force
 
 ## Delete your merged branch (optional)
 
-Once your feature branch is accepted into upstream, you’ll probably want to get rid of the branch. First, merge upstream main into your main branch so git knows it is safe to delete your branch:
+Once your feature branch is accepted into upstream, you’ll probably want to get rid of the branch.
+First, merge upstream main into your main branch so git knows it is safe to delete your branch:
 
 ```sh
 git fetch upstream
@@ -301,7 +318,8 @@ Then you can do:
 git branch -d my-new-feature
 ```
 
-Make sure you use a lower-case -d, or else git won’t warn you if your feature branch has not actually been merged.
+Make sure you use a lower-case -d, or else git won’t warn you if your feature branch has not
+actually been merged.
 
 The branch will still exist on GitHub, so to delete it there do:
 
