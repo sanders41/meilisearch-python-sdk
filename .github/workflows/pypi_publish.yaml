@@ -2,24 +2,26 @@ name: PyPi Publish
 on:
   release:
     types:
-    - published
+      - published
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Install Poetry
-      run: pipx install poetry
-    - name: Add pypi token to Poetry
-      run: poetry config pypi-token.pypi ${{ secrets.PYPI_API_KEY }}
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.11
-        cache: "poetry"
-    - name: Install Dependencies
-      run: poetry install
-    - name: Publish package
-      run: poetry publish --build
-    - name: Deploy Docs
-      run: poetry run mkdocs gh-deploy --force
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - name: Install uv
+        run: pipx install uv
+      - name: Install Dependencies
+        run: uv sync --frozen --all-extras
+      - name: Build and publish package
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: "pypi-${{ secrets.PYPI_API_KEY }}"
+        run: |
+          uvx --from build pyproject-build --installer uv
+          uvx twine upload dist/*
+      - name: Deploy Docs
+        run: uv run mkdocs gh-deploy --force

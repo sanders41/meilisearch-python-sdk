@@ -7,31 +7,31 @@
   just --justfile {{justfile()}} ruff-format
 
 @mypy:
-  poetry run mypy meilisearch_python_sdk tests
+  uv run mypy meilisearch_python_sdk tests
 
 @ruff:
-  poetry run ruff check .
+  uv run ruff check .
 
 @ruff-format:
-  poetry run ruff format meilisearch_python_sdk tests
+  uv run ruff format meilisearch_python_sdk tests
 
 @test:
-  -poetry run pytest -x
+  -uv run pytest -x
 
 @test-parallel:
-  -poetry run pytest -n auto -x -m "not no_parallel"
+  -uv run pytest -n auto -x -m "not no_parallel"
 
 @test-no-parallel:
-  -poetry run pytest -x -m "no_parallel"
+  -uv run pytest -x -m "no_parallel"
 
 @test-ci: start-meilisearch-detached && stop-meilisearch
-  poetry run pytest --cov=meilisearch_python_sdk --cov-report=xml
+  uv run pytest --cov=meilisearch_python_sdk --cov-report=xml
 
 @test-parallel-ci: start-meilisearch-detached && stop-meilisearch
-  poetry run pytest --cov=meilisearch_python_sdk --cov-report=xml -n auto -m "not no_parallel"
+  uv run pytest --cov=meilisearch_python_sdk --cov-report=xml -n auto -m "not no_parallel"
 
 @test-no-parallel-ci: start-meilisearch-detached && stop-meilisearch
-  poetry run pytest --cov=meilisearch_python_sdk --cov-report=xml -m "no_parallel"
+  uv run pytest --cov=meilisearch_python_sdk --cov-report=xml -m "no_parallel"
 
 @start-meilisearch:
   docker compose up
@@ -43,13 +43,13 @@
   docker compose down
 
 @build-docs:
-  poetry run mkdocs build --strict
+  uv run mkdocs build --strict
 
 @serve-docs:
   mkdocs serve
 
 @install:
-  poetry install -E all
+  uv sync --frozen --all-extras
 
 @benchmark: start-meilisearch-detached && stop-meilisearch
-  -poetry run python benchmark/run_benchmark.py
+  -uv run benchmark/run_benchmark.py
