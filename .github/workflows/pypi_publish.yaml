@@ -3,6 +3,8 @@ on:
   release:
     types:
       - published
+env:
+  PYTHON_VERSION: "3.12"
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -13,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Dependencies
         run: uv sync --frozen --all-extras
       - name: Build and publish package

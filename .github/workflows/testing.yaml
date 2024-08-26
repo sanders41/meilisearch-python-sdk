@@ -7,6 +7,7 @@ on:
   pull_request:
 env:
   UV_CACHE_DIR: /tmp/.uv-cache
+  PYTHON_VERSION: "3.9"
 jobs:
   linting:
     runs-on: ubuntu-latest
@@ -19,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Restore uv cache
         uses: actions/cache@v4
         with:
