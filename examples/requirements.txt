@@ -1,2 +1,2 @@
 ../.[all]
-fastapi==0.112.1
+fastapi==0.112.2
