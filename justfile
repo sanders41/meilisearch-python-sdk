@@ -49,7 +49,7 @@
   mkdocs serve
 
 @install:
-  uv sync --locked --all-extras
+  uv sync --frozen --all-extras
 
 @benchmark: start-meilisearch-detached && stop-meilisearch
   -uv run benchmark/run_benchmark.py

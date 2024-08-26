@@ -52,7 +52,7 @@ need to install it with the instructions [here](https://docs.astral.sh/uv/gettin
 First the requirements need to be installed.
 
 ```sh
-uv sync --locked --all-extras
+uv sync --frozen --all-extras
 ```
 
 ### Creating a branch
