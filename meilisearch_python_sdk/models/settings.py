@@ -48,6 +48,7 @@ class Distribution(CamelBase):
 
 class OpenAiEmbedder(CamelBase):
     source: str = "openAi"
+    url: str | None = None
     model: str | None = None  # Defaults to text-embedding-ada-002
     dimensions: int | None = None  # Uses the model default
     api_key: str | None = None  # Can be provided through a CLI option or environment variable
@@ -68,6 +69,7 @@ class OllamaEmbedder(CamelBase):
     url: str | None = None
     api_key: str | None = None
     model: str
+    dimensions: int | None = None
     document_template: str | None = None
     distribution: Distribution | None = None
 
@@ -78,12 +80,10 @@ class RestEmbedder(CamelBase):
     api_key: str | None = None
     dimensions: int
     document_template: str | None = None
-    input_field: list[str] | None = None
-    input_type: str = "text"
-    query: JsonDict = {}
-    path_to_embeddings: list[str] | None = None
-    embedding_object: list[str] | None = None
     distribution: Distribution | None = None
+    headers: JsonDict | None = None
+    request: JsonDict
+    response: JsonDict
 
 
 class UserProvidedEmbedder(CamelBase):
@@ -102,6 +102,11 @@ class Embedders(CamelBase):
 class ProximityPrecision(str, Enum):
     BY_WORD = "byWord"
     BY_ATTRIBUTE = "byAttribute"
+
+
+class LocalizedAttributes(CamelBase):
+    locales: list[str]
+    attribute_patterns: list[str]
 
 
 class MeilisearchSettings(CamelBase):
@@ -132,3 +137,4 @@ class MeilisearchSettings(CamelBase):
         ]
         | None
     ) = None  # Optional[Embedders] = None
+    localized_attributes: list[LocalizedAttributes] | None = None

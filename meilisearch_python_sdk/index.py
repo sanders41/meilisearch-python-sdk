@@ -30,6 +30,7 @@ from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
     HuggingFaceEmbedder,
+    LocalizedAttributes,
     MeilisearchSettings,
     OllamaEmbedder,
     OpenAiEmbedder,
@@ -787,6 +788,7 @@ class AsyncIndex(_BaseIndex):
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
+        locales: list[str] | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -846,6 +848,8 @@ class AsyncIndex(_BaseIndex):
                 { "vectorStore": true }. Because this feature is experimental it may be removed or
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
+            locales: Specifies the languages for the search. This parameter can only be used with
+                Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
 
         Returns:
 
@@ -891,6 +895,7 @@ class AsyncIndex(_BaseIndex):
             vector=vector,
             hybrid=hybrid,
             ranking_score_threshold=ranking_score_threshold,
+            locales=locales,
         )
         search_url = f"{self._base_url_with_uid}/search"
 
@@ -1052,6 +1057,7 @@ class AsyncIndex(_BaseIndex):
         show_ranking_score_details: bool = False,
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
+        locales: list[str] | None = None,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -1103,6 +1109,8 @@ class AsyncIndex(_BaseIndex):
                 { "vectorStore": true }. Because this feature is experimental it may be removed or
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
+            locales: Specifies the languages for the search. This parameter can only be used with
+                Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
 
         Returns:
 
@@ -1152,6 +1160,7 @@ class AsyncIndex(_BaseIndex):
             show_ranking_score_details=show_ranking_score_details,
             ranking_score_threshold=ranking_score_threshold,
             vector=vector,
+            locales=locales,
         )
         search_url = f"{self._base_url_with_uid}/facet-search"
 
@@ -2025,6 +2034,51 @@ class AsyncIndex(_BaseIndex):
         response = await self._http_requests.post(
             url, body=data, content_type=content_type, compress=compress
         )
+
+        return TaskInfo(**response.json())
+
+    async def edit_documents(
+        self, function: str, *, context: JsonDict | None = None, filter: str | None = None
+    ) -> TaskInfo:
+        """Edit documents with a function.
+
+        Edit documents is only available in Meilisearch >= v1.10.0, and is experimental in
+        Meilisearch v1.10.0. In order to use this feature you first need to enable it by
+        sending a PATCH request to /experimental-features with { "editDocumentsByFunction": true }.
+
+        Args:
+
+            function: Rhai function to use to update the documents.
+            context: Parameters to use in the function. Defaults to None.
+            filter: Filter the documents before applying the function. Defaults to None.
+
+        Returns:
+
+            The details of the task.
+
+        Raises:
+
+            MeilisearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.edit_documents("doc.title = `${doc.title.to_upper()}`")
+        """
+        url = f"{self._documents_url}/edit"
+        payload: JsonDict = {"function": function}
+
+        if context:
+            payload["context"] = context
+
+        if filter:
+            payload["filter"] = filter
+
+        response = await self._http_requests.post(url, payload)
 
         return TaskInfo(**response.json())
 
@@ -4434,8 +4488,7 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
-    async def reset_embedders(self) -> TaskInfo:  # pragma: no cover
+    async def reset_embedders(self) -> TaskInfo:
         """Reset an index's embedders settings to the default value.
 
         Returns:
@@ -4455,6 +4508,94 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.reset_embedders()
         """
         response = await self._http_requests.delete(f"{self._settings_url}/embedders")
+
+        return TaskInfo(**response.json())
+
+    async def get_localized_attributes(self) -> list[LocalizedAttributes] | None:
+        """Get localized attributes settings for the index.
+
+        Returns:
+
+            Localized attributes for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     localized_attributes = await index.get_localized_attributes()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/localized-attributes")
+
+        if not response.json():
+            return None
+
+        return [LocalizedAttributes(**x) for x in response.json()]
+
+    async def update_localized_attributes(
+        self, localized_attributes: list[LocalizedAttributes], *, compress: bool = False
+    ) -> TaskInfo:
+        """Update the localized attributes settings for an index.
+
+        Args:
+
+            localized_attributes: The localized attributes value.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.settings import LocalizedAttributes
+            >>>
+            >>>
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_localized_attributes([
+            >>>         LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
+            >>>         LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
+            >>>     ])
+        """
+        payload = [x.model_dump(by_alias=True) for x in localized_attributes]
+        response = await self._http_requests.put(
+            f"{self._settings_url}/localized-attributes", payload, compress=compress
+        )
+
+        return TaskInfo(**response.json())
+
+    async def reset_localized_attributes(self) -> TaskInfo:
+        """Reset an index's localized attributes settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_localized_attributes()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/localized-attributes")
 
         return TaskInfo(**response.json())
 
@@ -5080,6 +5221,7 @@ class Index(_BaseIndex):
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
+        locales: list[str] | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -5139,6 +5281,8 @@ class Index(_BaseIndex):
                 { "vectorStore": true }. Because this feature is experimental it may be removed or
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
+            locales: Specifies the languages for the search. This parameter can only be used with
+                Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
 
         Returns:
 
@@ -5184,6 +5328,7 @@ class Index(_BaseIndex):
             vector=vector,
             hybrid=hybrid,
             ranking_score_threshold=ranking_score_threshold,
+            locales=locales,
         )
 
         if self._pre_search_plugins:
@@ -5251,6 +5396,7 @@ class Index(_BaseIndex):
         show_ranking_score_details: bool = False,
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
+        locales: list[str] | None = None,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -5302,6 +5448,8 @@ class Index(_BaseIndex):
                 { "vectorStore": true }. Because this feature is experimental it may be removed or
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
+            locales: Specifies the languages for the search. This parameter can only be used with
+                Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
 
         Returns:
 
@@ -5351,6 +5499,7 @@ class Index(_BaseIndex):
             show_ranking_score_details=show_ranking_score_details,
             ranking_score_threshold=ranking_score_threshold,
             vector=vector,
+            locales=locales,
         )
 
         if self._pre_facet_search_plugins:
@@ -5987,6 +6136,51 @@ class Index(_BaseIndex):
         response = self._http_requests.post(
             url, body=data, content_type=content_type, compress=compress
         )
+
+        return TaskInfo(**response.json())
+
+    def edit_documents(
+        self, function: str, *, context: JsonDict | None = None, filter: str | None = None
+    ) -> TaskInfo:
+        """Edit documents with a function.
+
+        Edit documents is only available in Meilisearch >= v1.10.0, and is experimental in
+        Meilisearch v1.10.0. In order to use this feature you first need to enable it by
+        sending a PATCH request to /experimental-features with { "editDocumentsByFunction": true }.
+
+        Args:
+
+            function: Rhai function to use to update the documents.
+            context: Parameters to use in the function. Defaults to None.
+            filter: Filter the documents before applying the function. Defaults to None.
+
+        Returns:
+
+            The details of the task.
+
+        Raises:
+
+            MeilisearchError: If the file path is not valid
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.edit_documents("doc.title = `${doc.title.to_upper()}`")
+        """
+        url = f"{self._documents_url}/edit"
+        payload: JsonDict = {"function": function}
+
+        if context:
+            payload["context"] = context
+
+        if filter:
+            payload["filter"] = filter
+
+        response = self._http_requests.post(url, payload)
 
         return TaskInfo(**response.json())
 
@@ -8070,6 +8264,94 @@ class Index(_BaseIndex):
 
         return TaskInfo(**response.json())
 
+    def get_localized_attributes(self) -> list[LocalizedAttributes] | None:
+        """Get localized attributes settings for the index.
+
+        Returns:
+
+            Localized attributes for the index.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> localized_attributes = await index.get_localized_attributes()
+        """
+        response = self._http_requests.get(f"{self._settings_url}/localized-attributes")
+
+        if not response.json():
+            return None
+
+        return [LocalizedAttributes(**x) for x in response.json()]
+
+    def update_localized_attributes(
+        self, localized_attributes: list[LocalizedAttributes], *, compress: bool = False
+    ) -> TaskInfo:
+        """Update the localized attributes settings for an index.
+
+        Args:
+
+            localized_attributes: The localized attributes value.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+
+            Task to track the action.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.settings import LocalizedAttributes
+            >>>
+            >>>
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.update_localized_attributes([
+            >>>     LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
+            >>>     LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
+            >>> ])
+        """
+        payload = [x.model_dump(by_alias=True) for x in localized_attributes]
+        response = self._http_requests.put(
+            f"{self._settings_url}/localized-attributes", payload, compress=compress
+        )
+
+        return TaskInfo(**response.json())
+
+    def reset_localized_attributes(self) -> TaskInfo:
+        """Reset an index's localized attributes settings to the default value.
+
+        Returns:
+
+            The details of the task status.
+
+        Raises:
+
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+
+            >>> from meilisearch_async_client import AsyncClient
+            >>> Client("http://localhost.com", "masterKey") as client:
+            >>> index = client.index("movies")
+            >>> index.reset_localized_attributes()
+        """
+        response = self._http_requests.delete(f"{self._settings_url}/localized-attributes")
+
+        return TaskInfo(**response.json())
+
     @staticmethod
     def _run_plugins(
         plugins: Sequence[Plugin | DocumentPlugin | PostSearchPlugin],
@@ -8257,6 +8539,7 @@ def _process_search_parameters(
     ranking_score_threshold: float | None = None,
     vector: list[float] | None = None,
     hybrid: Hybrid | None = None,
+    locales: list[str] | None = None,
 ) -> JsonDict:
     if attributes_to_retrieve is None:
         attributes_to_retrieve = ["*"]
@@ -8301,6 +8584,9 @@ def _process_search_parameters(
 
     if hybrid:
         body["hybrid"] = hybrid.model_dump(by_alias=True)
+
+    if locales:
+        body["locales"] = locales
 
     return body
 

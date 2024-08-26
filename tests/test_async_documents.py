@@ -1408,3 +1408,22 @@ async def test_add_documents_ujson_handler(compress, async_client_ujson_handler,
     response = await index.add_documents(small_movies, compress=compress)
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
+
+
+async def test_edit_documents_by_function(async_index_with_documents):
+    index = await async_index_with_documents()
+    task = await index.update_filterable_attributes(["id"])
+    await async_wait_for_task(index.http_client, task.task_uid)
+    response = await index.edit_documents(
+        function="if doc.id == context.docid {doc.title = `${doc.title.to_upper()}`}",
+        context={"docid": "299537"},
+        filter='id = "299537" OR id = "287947"',
+    )
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_document("299537")
+
+    assert response["title"] == "CAPTAIN MARVEL"
+
+    response = await index.get_document("287947")
+
+    assert response["title"] == "Shazam!"

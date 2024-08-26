@@ -7,6 +7,7 @@ from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
+    LocalizedAttributes,
     MinWordSizeForTypos,
     OpenAiEmbedder,
     Pagination,
@@ -165,12 +166,36 @@ async def test_update_settings(compress, async_empty_index, new_settings):
     assert response.non_separator_tokens == new_settings.non_separator_tokens
     assert response.search_cutoff_ms == new_settings.search_cutoff_ms
     assert response.dictionary == new_settings.dictionary
-    # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
-    # assert response.embedders["default"].source == "userProvided"
-    # assert response.embedders["test1"].source == "huggingFace"
-    # assert response.embedders["test2"].source == "openAi"
-    # assert response.embedders["test3"].source == "ollama"
-    # assert response.embedders["test4"].source == "rest"
+    assert response.localized_attributes is None
+
+
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_settings_localized(compress, async_empty_index, new_settings_localized):
+    index = await async_empty_index()
+    response = await index.update_settings(new_settings_localized, compress=compress)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    response = await index.get_settings()
+    assert response.ranking_rules == new_settings_localized.ranking_rules
+    assert response.distinct_attribute is None
+    assert response.searchable_attributes == new_settings_localized.searchable_attributes
+    assert response.displayed_attributes == ["*"]
+    assert response.stop_words == []
+    assert response.synonyms == {}
+    assert response.sortable_attributes == new_settings_localized.sortable_attributes
+    assert response.typo_tolerance.enabled is False
+    assert (
+        response.faceting.max_values_per_facet
+        == new_settings_localized.faceting.max_values_per_facet
+        == 123
+    )
+    assert response.pagination == new_settings_localized.pagination
+    assert response.proximity_precision == new_settings_localized.proximity_precision
+    assert response.separator_tokens == new_settings_localized.separator_tokens
+    assert response.non_separator_tokens == new_settings_localized.non_separator_tokens
+    assert response.search_cutoff_ms == new_settings_localized.search_cutoff_ms
+    assert response.dictionary == new_settings_localized.dictionary
+    assert response.localized_attributes == new_settings_localized.localized_attributes
 
 
 async def test_reset_settings(async_empty_index, new_settings, default_ranking_rules):
@@ -189,12 +214,6 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.typo_tolerance.enabled is False
     assert response.pagination == new_settings.pagination
     assert response.proximity_precision == new_settings.proximity_precision
-    # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
-    # assert response.embedders["default"].source == "userProvided"
-    # assert response.embedders["test1"].source == "huggingFace"
-    # assert response.embedders["test2"].source == "openAi"
-    # assert response.embedders["test3"].source == "ollama"
-    # assert response.embedders["test4"].source == "rest"
     response = await index.reset_settings()
     update = await async_wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"
@@ -688,26 +707,27 @@ async def test_get_embedders(async_empty_index):
     assert response is None
 
 
-# NOTE: Compressing embedder settings is broken in Meilisearch 1.8.0-rc.1+ so skip testing compressing
-# @pytest.mark.parametrize("compress", (True, False))
-async def test_update_embedders(async_empty_index):
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_embedders(compress, async_empty_index):
     embedders = Embedders(
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),
-            # "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
-            # "test3": OllamaEmbedder(model="nomic-embed-text"),
-            "test4": RestEmbedder(url="https://myurl.com", dimensions=512),
+            "test4": RestEmbedder(
+                url="https://myurl.com",
+                dimensions=512,
+                headers={"header1": "header value 1"},
+                request={"request": {"model": "minillm", "prompt": "{{text}}"}},
+                response={"response": {"embedding": "{{embedding}}"}},
+            ),
         }
     )
     index = await async_empty_index()
-    response = await index.update_embedders(embedders)
+    response = await index.update_embedders(embedders, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
-    # assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
-    # assert response.embedders["test3"].source == "ollama"
     assert response.embedders["test4"].source == "rest"
 
 
@@ -715,10 +735,14 @@ async def test_reset_embedders(async_empty_index):
     embedders = Embedders(
         embedders={
             "default": UserProvidedEmbedder(dimensions=512),
-            # "test1": HuggingFaceEmbedder(),
             "test2": OpenAiEmbedder(),
-            # "test3": OllamaEmbedder(model="nomic-embed-text"),
-            "test4": RestEmbedder(url="https://myurl.com", dimensions=512),
+            "test4": RestEmbedder(
+                url="https://myurl.com",
+                dimensions=512,
+                headers={"header1": "header value 1"},
+                request={"request": {"model": "minillm", "prompt": "{{text}}"}},
+                response={"response": {"embedding": "{{embedding}}"}},
+            ),
         }
     )
     index = await async_empty_index()
@@ -727,9 +751,7 @@ async def test_reset_embedders(async_empty_index):
     assert update.status == "succeeded"
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
-    # assert response.embedders["test1"].source == "huggingFace"
     assert response.embedders["test2"].source == "openAi"
-    # assert response.embedders["test3"].source == "ollama"
     assert response.embedders["test4"].source == "rest"
     response = await index.reset_embedders()
     await async_wait_for_task(index.http_client, response.task_uid)
@@ -861,3 +883,50 @@ async def test_delete_index_if_exists_error(async_client, async_indexes_sample, 
     monkeypatch.setattr(AsyncHttpRequests, "_send_request", mock_response)
     with pytest.raises(MeilisearchApiError):
         await async_client.delete_index_if_exists(index_uid)
+
+
+async def test_get_localized_attributes(async_empty_index):
+    index = await async_empty_index()
+    response = await index.get_localized_attributes()
+    assert response is None
+
+
+@pytest.mark.parametrize("compress", (True, False))
+async def test_update_localized_attributes(compress, async_empty_index):
+    index = await async_empty_index()
+    response = await index.update_localized_attributes(
+        [
+            LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
+            LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
+        ],
+        compress=compress,
+    )
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_localized_attributes()
+    assert response == [
+        LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
+        LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
+    ]
+
+
+async def test_reset_localized_attributes(async_empty_index):
+    index = await async_empty_index()
+    response = await index.update_localized_attributes(
+        [
+            LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
+            LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
+        ]
+    )
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+
+    response = await index.get_localized_attributes()
+    assert response == [
+        LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
+        LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
+    ]
+
+    response = await index.reset_localized_attributes()
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_localized_attributes()
+    assert response is None

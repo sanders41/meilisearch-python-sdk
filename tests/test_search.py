@@ -9,7 +9,7 @@ from camel_converter.pydantic_base import CamelBase
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk._task import wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchError
-from meilisearch_python_sdk.models.search import Hybrid, SearchParams
+from meilisearch_python_sdk.models.search import Federation, Hybrid, SearchParams
 
 
 def test_basic_search(index_with_documents):
@@ -375,6 +375,39 @@ def test_multi_search_no_index(client):
         )
 
 
+def test_multi_search_federated(client, index_with_documents, empty_index):
+    index1 = index_with_documents()
+    index2 = empty_index()
+    response = client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
+            SearchParams(index_uid=index2.uid, query=""),
+        ],
+        federation=Federation(),
+    )
+
+    assert response.hits[0]["id"] == "166428"
+    assert "_formatted" not in response.hits[0]
+
+
+def test_multi_search_locales(client, index_with_documents, empty_index):
+    index1 = index_with_documents()
+    index2 = empty_index()
+    response = client.multi_search(
+        [
+            SearchParams(
+                index_uid=index1.uid, query="How to Train Your Dragon", locales=["eng", "spa"]
+            ),
+            SearchParams(index_uid=index2.uid, query="", locales=["fra"]),
+        ]
+    )
+
+    assert response[0].index_uid == index1.uid
+    assert response[0].hits[0]["id"] == "166428"
+    assert "_formatted" not in response[0].hits[0]
+    assert response[1].index_uid == index2.uid
+
+
 def test_attributes_to_search_on_search(index_with_documents):
     index = index_with_documents()
     response = index.search(
@@ -443,6 +476,20 @@ def test_custom_facet_search(index_with_documents):
         facet_name="genre",
         facet_query="cartoon",
         attributes_to_highlight=["title"],
+    )
+    assert response.facet_hits[0].value == "cartoon"
+    assert response.facet_hits[0].count == 1
+
+
+def test_facet_search_locales(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.facet_search(
+        "How to Train Your Dragon",
+        facet_name="genre",
+        facet_query="cartoon",
+        locales=["eng", "spa"],
     )
     assert response.facet_hits[0].value == "cartoon"
     assert response.facet_hits[0].count == 1
@@ -525,6 +572,13 @@ def test_similar_search(limit, offset, index_with_documents_and_vectors):
     index = index_with_documents_and_vectors()
     response = index.search_similar_documents("287947", limit=limit, offset=offset)
     assert len(response.hits) >= 1
+
+
+def test_search_locales(index_with_documents):
+    index = index_with_documents()
+    response = index.search("How to Train Your Dragon", locales=["eng"])
+    assert response.hits[0]["id"] == "166428"
+    assert "_formatted" not in response.hits[0]
 
 
 def test_search_result_hits_generic_default(index_with_documents):

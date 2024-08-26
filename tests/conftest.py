@@ -13,6 +13,7 @@ from meilisearch_python_sdk.json_handler import OrjsonHandler, UjsonHandler
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
+    LocalizedAttributes,
     MeilisearchSettings,
     Pagination,
     ProximityPrecision,
@@ -259,6 +260,15 @@ async def enable_vector_search():
         yield
 
 
+@pytest.fixture(scope="session", autouse=True)
+async def enable_edit_by_function():
+    async with HttpxAsyncClient(
+        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
+    ) as client:
+        await client.patch("/experimental-features", json={"editDocumentsByFunction": True})
+        yield
+
+
 @pytest.fixture
 async def create_tasks(async_empty_index, small_movies):
     """Ensures there are some tasks present for testing."""
@@ -282,13 +292,26 @@ def new_settings():
         non_separator_tokens=["#", "@"],
         search_cutoff_ms=100,
         dictionary=["S.O", "S.O.S"],
-        # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
-        # embedders={
-        #     "default": UserProvidedEmbedder(dimensions=512),
-        #     # "test1": HuggingFaceEmbedder(),
-        #     "test2": OpenAiEmbedder(),
-        #     # "test3": OllamaEmbedder(model="nomic-embed-text"),
-        #     "test4": RestEmbedder(url="https://myurl.com"),
-        # },
         proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
+    )
+
+
+@pytest.fixture
+def new_settings_localized():
+    return MeilisearchSettings(
+        ranking_rules=["typo", "words"],
+        searchable_attributes=["title", "overview"],
+        sortable_attributes=["genre", "title"],
+        typo_tolerance=TypoTolerance(enabled=False),
+        faceting=Faceting(max_values_per_facet=123),
+        pagination=Pagination(max_total_hits=17),
+        separator_tokens=["&sep", "/", "|"],
+        non_separator_tokens=["#", "@"],
+        search_cutoff_ms=100,
+        dictionary=["S.O", "S.O.S"],
+        proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
+        localized_attributes=[
+            LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
+            LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
+        ],
     )

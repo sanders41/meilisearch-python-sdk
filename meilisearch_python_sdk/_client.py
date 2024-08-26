@@ -22,7 +22,12 @@ from meilisearch_python_sdk.models.client import (
 )
 from meilisearch_python_sdk.models.health import Health
 from meilisearch_python_sdk.models.index import IndexInfo
-from meilisearch_python_sdk.models.search import SearchParams, SearchResultsWithUID
+from meilisearch_python_sdk.models.search import (
+    Federation,
+    SearchParams,
+    SearchResultsFederated,
+    SearchResultsWithUID,
+)
 from meilisearch_python_sdk.models.settings import MeilisearchSettings
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
@@ -633,13 +638,19 @@ class AsyncClient(BaseClient):
         return Key(**response.json())
 
     async def multi_search(
-        self, queries: list[SearchParams], *, hits_type: Any = JsonDict
-    ) -> list[SearchResultsWithUID]:
+        self,
+        queries: list[SearchParams],
+        *,
+        federation: Federation | None = None,
+        hits_type: Any = JsonDict,
+    ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
 
         Args:
 
             queries: List of SearchParameters
+            federation: If included a single search result with hits built from all queries. This
+                parameter can only be used with Meilisearch >= v1.10.0. Defaults to None.
             hits_type: Allows for a custom type to be passed to use for hits. Defaults to
                 JsonDict
 
@@ -664,10 +675,27 @@ class AsyncClient(BaseClient):
             >>>     search_results = await client.search(queries)
         """
         url = "multi-search"
+        if federation:
+            processed_queries = []
+            for query in queries:
+                q = query.model_dump(by_alias=True)
+                del q["limit"]
+                del q["offset"]
+                processed_queries.append(q)
+        else:
+            processed_queries = [x.model_dump(by_alias=True) for x in queries]
+
         response = await self._http_requests.post(
             url,
-            body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
+            body={
+                "federation": federation.model_dump(by_alias=True) if federation else None,
+                "queries": processed_queries,
+            },
         )
+
+        if federation:
+            results = response.json()
+            return SearchResultsFederated[hits_type](**results)
 
         return [SearchResultsWithUID[hits_type](**x) for x in response.json()["results"]]
 
@@ -1510,13 +1538,19 @@ class Client(BaseClient):
         return Key(**response.json())
 
     def multi_search(
-        self, queries: list[SearchParams], *, hits_type: Any = JsonDict
-    ) -> list[SearchResultsWithUID]:
+        self,
+        queries: list[SearchParams],
+        *,
+        federation: Federation | None = None,
+        hits_type: Any = JsonDict,
+    ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
 
         Args:
 
             queries: List of SearchParameters
+            federation: If included a single search result with hits built from all queries. This
+                parameter can only be used with Meilisearch >= v1.10.0. Defaults to None.
             hits_type: Allows for a custom type to be passed to use for hits. Defaults to
                 JsonDict
 
@@ -1541,10 +1575,27 @@ class Client(BaseClient):
             >>> search_results = client.search(queries)
         """
         url = "multi-search"
+        if federation:
+            processed_queries = []
+            for query in queries:
+                q = query.model_dump(by_alias=True)
+                del q["limit"]
+                del q["offset"]
+                processed_queries.append(q)
+        else:
+            processed_queries = [x.model_dump(by_alias=True) for x in queries]
+
         response = self._http_requests.post(
             url,
-            body={"queries": [x.model_dump(by_alias=True) for x in queries]},  # type: ignore[attr-defined]
+            body={
+                "federation": federation.model_dump(by_alias=True) if federation else None,
+                "queries": processed_queries,
+            },
         )
+
+        if federation:
+            results = response.json()
+            return SearchResultsFederated[hits_type](**results)
 
         return [SearchResultsWithUID[hits_type](**x) for x in response.json()["results"]]
 
