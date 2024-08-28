@@ -649,8 +649,9 @@ class AsyncClient(BaseClient):
         Args:
 
             queries: List of SearchParameters
-            federation: If included a single search result with hits built from all queries. This
-                parameter can only be used with Meilisearch >= v1.10.0. Defaults to None.
+            federation: If included a single search result with hits built from all queries will
+                be returned. This parameter can only be used with Meilisearch >= v1.10.0. Defaults
+                to None.
             hits_type: Allows for a custom type to be passed to use for hits. Defaults to
                 JsonDict
 
@@ -1549,8 +1550,9 @@ class Client(BaseClient):
         Args:
 
             queries: List of SearchParameters
-            federation: If included a single search result with hits built from all queries. This
-                parameter can only be used with Meilisearch >= v1.10.0. Defaults to None.
+            federation: If included a single search result with hits built from all queries will
+                be returned. This parameter can only be used with Meilisearch >= v1.10.0. Defaults
+                to None.
             hits_type: Allows for a custom type to be passed to use for hits. Defaults to
                 JsonDict
 
