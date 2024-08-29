@@ -390,6 +390,7 @@ async def test_multi_search_federated(async_client, async_index_with_documents, 
 
     assert response.hits[0]["id"] == "166428"
     assert "_formatted" not in response.hits[0]
+    assert "_federation" in response.hits[0]
 
 
 async def test_multi_search_locales(async_client, async_index_with_documents, async_empty_index):
