@@ -6,3 +6,7 @@ services:
     environment:
       - MEILI_MASTER_KEY=masterKey
       - MEILI_NO_ANALYTICS=true
+    volumes:
+      - ./meilisearch.key:/meilisearch.key
+      - ./meilisearch.crt:/meilisearch.crt
+    command: ["meilisearch", "--ssl-cert-path", "/meilisearch.crt", "--ssl-key-path", "/meilisearch.key"]

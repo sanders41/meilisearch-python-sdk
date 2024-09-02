@@ -290,12 +290,12 @@ async def test_search_sort(sort, titles, async_index_with_documents):
 
 
 async def test_search_with_tenant_token(
-    async_client, async_index_with_documents, base_url, default_search_key
+    async_client, async_index_with_documents, base_url, default_search_key, ssl_verify
 ):
     token = async_client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     index_docs = await async_index_with_documents()
 
-    async with AsyncClient(base_url, token) as client:
+    async with AsyncClient(base_url, token, verify=ssl_verify) as client:
         index = client.index(index_docs.uid)
         response = await index.search("How to Train Your Dragon")
 
@@ -303,7 +303,7 @@ async def test_search_with_tenant_token(
 
 
 async def test_search_with_tenant_token_and_expire_date(
-    async_client, async_index_with_documents, base_url, default_search_key
+    async_client, async_index_with_documents, base_url, default_search_key, ssl_verify
 ):
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     token = async_client.generate_tenant_token(
@@ -311,7 +311,7 @@ async def test_search_with_tenant_token_and_expire_date(
     )
     index_docs = await async_index_with_documents()
 
-    async with AsyncClient(base_url, token) as client:
+    async with AsyncClient(base_url, token, verify=ssl_verify) as client:
         index = client.index(index_docs.uid)
         response = await index.search("How to Train Your Dragon")
 

@@ -9,7 +9,7 @@ from meilisearch_python_sdk.decorators import ConnectionInfo, add_documents
 
 @add_documents(
     index_name="movies",
-    connection_info=ConnectionInfo(url="http://127.0.0.1:7700", api_key="masterKey"),
+    connection_info=ConnectionInfo(url="https://127.0.0.1:7700", api_key="masterKey"),
 )
 def load_documents() -> list[dict[str, Any]]:
     with open("../datasets/small_movies.json") as f:

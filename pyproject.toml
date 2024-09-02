@@ -27,7 +27,7 @@ dependencies = [
   "camel-converter>=1.0.0",
   # allows pydantic to use pipe instead of Union
   "eval-type-backport>=0.2.0; python_version < '3.10'",
-  "httpx>=0.17",
+  "httpx[http2]>=0.17",
   "pydantic>=2.0.0",
   "PyJWT>=2.3.0",
 ]

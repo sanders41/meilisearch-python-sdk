@@ -150,6 +150,7 @@ class AsyncClient(BaseClient):
         verify: str | bool | SSLContext = True,
         custom_headers: dict[str, str] | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        http2: bool = False,
     ) -> None:
         """Class initializer.
 
@@ -168,11 +169,12 @@ class AsyncClient(BaseClient):
                 (uses the json module from the standard library), OrjsonHandler (uses orjson), or
                 UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
                 extra needs to be included. Default: BuiltinHandler.
+            http2: Whether or not to use HTTP/2. Defaults to False.
         """
         super().__init__(api_key, custom_headers, json_handler)
 
         self.http_client = HttpxAsyncClient(
-            base_url=url, timeout=timeout, headers=self._headers, verify=verify
+            base_url=url, timeout=timeout, headers=self._headers, verify=verify, http2=http2
         )
         self._http_requests = AsyncHttpRequests(self.http_client, json_handler=self.json_handler)
 
@@ -1073,6 +1075,7 @@ class Client(BaseClient):
         verify: str | bool | SSLContext = True,
         custom_headers: dict[str, str] | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        http2: bool = False,
     ) -> None:
         """Class initializer.
 
@@ -1091,12 +1094,14 @@ class Client(BaseClient):
                 (uses the json module from the standard library), OrjsonHandler (uses orjson), or
                 UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
                 extra needs to be included. Default: BuiltinHandler.
+            http2: If set to True, the client will use HTTP/2. Defaults to False.
         """
         super().__init__(api_key, custom_headers, json_handler)
 
         self.http_client = HttpxClient(
-            base_url=url, timeout=timeout, headers=self._headers, verify=verify
+            base_url=url, timeout=timeout, headers=self._headers, verify=verify, http2=http2
         )
+
         self._http_requests = HttpRequests(self.http_client, json_handler=self.json_handler)
 
     def create_dump(self) -> TaskInfo:

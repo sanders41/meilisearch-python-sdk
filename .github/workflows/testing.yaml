@@ -7,7 +7,7 @@ on:
   pull_request:
 env:
   UV_CACHE_DIR: /tmp/.uv-cache
-  PYTHON_VERSION: "3.9"
+  PYTHON_VERSION: "3.10"
 jobs:
   linting:
     runs-on: ubuntu-latest
@@ -63,7 +63,15 @@ jobs:
       - name: Install Dependencies
         run: just install
       - name: Test with pytest
-        run: just test-parallel-ci
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y libnss3-tools build-essential gcc && \
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && \
+          brew install mkcert && \
+          mkcert -install && \
+          mkcert -key-file meilisearch.key -cert-file meilisearch.crt localhost 127.0.0.1 ::1 && \
+          just test-parallel-ci
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
@@ -99,7 +107,15 @@ jobs:
       - name: Install Dependencies
         run: just install
       - name: Test with pytest
-        run: just test-no-parallel-ci
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y libnss3-tools build-essential gcc && \
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && \
+          brew install mkcert && \
+          mkcert -install && \
+          mkcert -key-file meilisearch.key -cert-file meilisearch.crt localhost 127.0.0.1 ::1 && \
+          just test-no-parallel-ci
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:

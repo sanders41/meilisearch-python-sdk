@@ -101,8 +101,10 @@ def wait_for_dump_creation(client, dump_uid, timeout_in_ms=10000.0, interval_in_
         (None, None, None),
     ),
 )
-def test_headers(api_key, custom_headers, expected):
-    client = Client("127.0.0.1:7700", api_key=api_key, custom_headers=custom_headers)
+def test_headers(api_key, custom_headers, expected, ssl_verify):
+    client = Client(
+        "https://127.0.0.1:7700", api_key=api_key, custom_headers=custom_headers, verify=ssl_verify
+    )
 
     assert client._headers == expected
 
@@ -312,10 +314,10 @@ def test_get_or_create_index_no_primary_key(client):
 
 def test_get_or_create_index_communication_error(client, monkeypatch):
     def mock_get_response(*args, **kwargs):
-        raise ConnectError("test", request=Request("GET", url="http://localhost"))
+        raise ConnectError("test", request=Request("GET", url="https://localhost"))
 
     def mock_post_response(*args, **kwargs):
-        raise ConnectError("test", request=Request("POST", url="http://localhost"))
+        raise ConnectError("test", request=Request("POST", url="https://localhost"))
 
     monkeypatch.setattr(HttpxClient, "get", mock_get_response)
     monkeypatch.setattr(HttpxClient, "post", mock_post_response)
@@ -498,21 +500,21 @@ def test_create_snapshot(client, index_with_documents):
     assert snapshot_status.task_type == "snapshotCreation"
 
 
-def test_no_master_key(base_url):
+def test_no_master_key(base_url, ssl_verify):
     with pytest.raises(MeilisearchApiError):
-        client = Client(base_url)
+        client = Client(base_url, verify=ssl_verify)
         client.create_index("some_index")
 
 
-def test_bad_master_key(base_url, master_key):
+def test_bad_master_key(base_url, master_key, ssl_verify):
     with pytest.raises(MeilisearchApiError):
-        client = Client(base_url)
+        client = Client(base_url, verify=ssl_verify)
         client.create_index("some_index", f"{master_key}bad")
 
 
-def test_communication_error(master_key):
+def test_communication_error(master_key, ssl_verify):
     with pytest.raises(MeilisearchCommunicationError):
-        client = Client("http://wrongurl:1234", master_key, timeout=1)
+        client = Client("https://wrongurl:1234", master_key, timeout=1, verify=ssl_verify)
         client.create_index("some_index")
 
 
@@ -958,3 +960,9 @@ def test_wait_for_task_raise_for_status_false(
     monkeypatch.setattr(HttpxClient, "get", mock_get_response)
     with pytest.raises(MeilisearchTaskFailedError):
         client.wait_for_task(response.task_uid, raise_for_status=True)
+
+
+@pytest.mark.parametrize("http2, expected", [(True, "HTTP/2"), (False, "HTTP/1.1")])
+def test_http_version(http2, expected, master_key, ssl_verify, base_url):
+    client = Client(base_url, master_key, http2=http2, verify=ssl_verify)
+    assert client.http_client.get("health").http_version == expected

@@ -50,6 +50,7 @@
 
 @install:
   uv sync --frozen --all-extras
+  uv pip install truststore || true # truststore is not available for Python 3.9
 
 @benchmark: start-meilisearch-detached && stop-meilisearch
   -uv run benchmark/run_benchmark.py

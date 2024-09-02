@@ -289,11 +289,13 @@ def test_search_sort(sort, titles, index_with_documents):
     assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
 
 
-def test_search_with_tenant_token(client, index_with_documents, base_url, default_search_key):
+def test_search_with_tenant_token(
+    client, index_with_documents, base_url, default_search_key, ssl_verify
+):
     token = client.generate_tenant_token(search_rules=["*"], api_key=default_search_key)
     index_docs = index_with_documents()
 
-    client = Client(base_url, token)
+    client = Client(base_url, token, verify=ssl_verify)
     index = client.index(index_docs.uid)
     response = index.search("How to Train Your Dragon")
 
@@ -301,7 +303,7 @@ def test_search_with_tenant_token(client, index_with_documents, base_url, defaul
 
 
 def test_search_with_tenant_token_and_expire_date(
-    client, index_with_documents, base_url, default_search_key
+    client, index_with_documents, base_url, default_search_key, ssl_verify
 ):
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     token = client.generate_tenant_token(
@@ -309,7 +311,7 @@ def test_search_with_tenant_token_and_expire_date(
     )
     index_docs = index_with_documents()
 
-    client = Client(base_url, token)
+    client = Client(base_url, token, verify=ssl_verify)
     index = client.index(index_docs.uid)
     response = index.search("How to Train Your Dragon")
 

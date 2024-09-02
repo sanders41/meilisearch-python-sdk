@@ -1,10 +1,24 @@
 import asyncio
 import csv
 import json
+import ssl
+import sys
+from logging import warning
 from pathlib import Path
 from uuid import uuid4
 
 import pytest
+
+try:
+    import truststore
+
+    has_truststore = True
+except ImportError:
+    if sys.version_info > (3, 10):
+        warning(
+            "truststore is not installed, SSL verification will not work. run pip install truststore"
+        )
+    has_truststore = True
 from httpx import AsyncClient as HttpxAsyncClient
 
 from meilisearch_python_sdk import AsyncClient, Client
@@ -22,49 +36,62 @@ from meilisearch_python_sdk.models.settings import (
 )
 
 MASTER_KEY = "masterKey"
-BASE_URL = "http://127.0.0.1:7700"
+BASE_URL = "https://127.0.0.1:7700"
 
 ROOT_PATH = Path().absolute()
 SMALL_MOVIES_PATH = ROOT_PATH / "datasets" / "small_movies.json"
 
+_SSL_VERIFY: ssl.SSLContext | bool = (
+    truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT) if has_truststore else False
+)
+
+
+@pytest.fixture(scope="session")
+async def ssl_verify():
+    yield _SSL_VERIFY
+
 
 @pytest.fixture
 async def async_client():
-    async with AsyncClient(BASE_URL, MASTER_KEY) as client:
+    async with AsyncClient(BASE_URL, MASTER_KEY, verify=_SSL_VERIFY) as client:
         yield client
 
 
 @pytest.fixture
 async def async_client_orjson_handler():
-    async with AsyncClient(BASE_URL, MASTER_KEY, json_handler=OrjsonHandler()) as client:
+    async with AsyncClient(
+        BASE_URL, MASTER_KEY, json_handler=OrjsonHandler(), verify=_SSL_VERIFY
+    ) as client:
         yield client
 
 
 @pytest.fixture
 async def async_client_ujson_handler():
-    async with AsyncClient(BASE_URL, MASTER_KEY, json_handler=UjsonHandler()) as client:
+    async with AsyncClient(
+        BASE_URL, MASTER_KEY, json_handler=UjsonHandler(), verify=_SSL_VERIFY
+    ) as client:
         yield client
 
 
 @pytest.fixture
 async def async_client_with_plugins():
-    async with AsyncClient(BASE_URL, MASTER_KEY) as client:
+    async with AsyncClient(BASE_URL, MASTER_KEY, verify=_SSL_VERIFY) as client:
         yield client
 
 
 @pytest.fixture
 def client():
-    yield Client(BASE_URL, MASTER_KEY)
+    yield Client(BASE_URL, MASTER_KEY, verify=_SSL_VERIFY)
 
 
 @pytest.fixture
 def client_orjson_handler():
-    yield Client(BASE_URL, MASTER_KEY, json_handler=OrjsonHandler())
+    yield Client(BASE_URL, MASTER_KEY, json_handler=OrjsonHandler(), verify=_SSL_VERIFY)
 
 
 @pytest.fixture
 def client_ujson_handler():
-    yield Client(BASE_URL, MASTER_KEY, json_handler=UjsonHandler())
+    yield Client(BASE_URL, MASTER_KEY, json_handler=UjsonHandler(), verify=_SSL_VERIFY)
 
 
 @pytest.fixture(autouse=True)
@@ -254,7 +281,7 @@ async def default_search_key(async_client):
 @pytest.fixture(scope="session", autouse=True)
 async def enable_vector_search():
     async with HttpxAsyncClient(
-        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
+        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=_SSL_VERIFY
     ) as client:
         await client.patch("/experimental-features", json={"vectorStore": True})
         yield
@@ -263,7 +290,7 @@ async def enable_vector_search():
 @pytest.fixture(scope="session", autouse=True)
 async def enable_edit_by_function():
     async with HttpxAsyncClient(
-        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}
+        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=_SSL_VERIFY
     ) as client:
         await client.patch("/experimental-features", json={"editDocumentsByFunction": True})
         yield

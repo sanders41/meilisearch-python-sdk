@@ -50,7 +50,7 @@ def test_meilisearch_timeout_error():
 async def test_non_json_error_async(async_index_with_documents, monkeypatch):
     async def mock_post_response(*args, **kwargs):
         return Response(
-            status_code=504, text="test", request=Request("POST", url="http://localhost")
+            status_code=504, text="test", request=Request("POST", url="https://localhost")
         )
 
     monkeypatch.setattr(HttpxAsyncClient, "post", mock_post_response)
@@ -61,7 +61,7 @@ async def test_non_json_error_async(async_index_with_documents, monkeypatch):
 def test_non_json_error(index_with_documents, monkeypatch):
     def mock_post_response(*args, **kwargs):
         return Response(
-            status_code=504, text="test", request=Request("POST", url="http://localhost")
+            status_code=504, text="test", request=Request("POST", url="https://localhost")
         )
 
     monkeypatch.setattr(HttpxClient, "post", mock_post_response)
