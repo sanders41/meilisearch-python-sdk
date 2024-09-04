@@ -18,11 +18,20 @@
 @test:
   -uv run pytest -x
 
+@test-http2:
+  -uv run pytest -x --http2
+
 @test-parallel:
   -uv run pytest -n auto -x -m "not no_parallel"
 
 @test-no-parallel:
   -uv run pytest -x -m "no_parallel"
+
+@test-parallel-http2:
+  -uv run pytest -n auto -x -m "not no_parallel" --http2
+
+@test-no-parallel-http2:
+  -uv run pytest -x -m "no_parallel" --http2
 
 @test-ci: start-meilisearch-detached && stop-meilisearch
   uv run pytest --cov=meilisearch_python_sdk --cov-report=xml
@@ -33,6 +42,13 @@
 @test-no-parallel-ci: start-meilisearch-detached && stop-meilisearch
   uv run pytest --cov=meilisearch_python_sdk --cov-report=xml -m "no_parallel"
 
+@test-parallel-ci-http2: start-meilisearch-detached-http2 && stop-meilisearch-http2
+  uv run pytest --cov=meilisearch_python_sdk --cov-report=xml -n auto -m "not no_parallel" --http2
+
+@test-no-parallel-ci-http2: start-meilisearch-detached-http2 && stop-meilisearch-http2
+  uv run pytest --cov=meilisearch_python_sdk --cov-report=xml -m "no_parallel" --http2
+
+
 @start-meilisearch:
   docker compose up
 
@@ -42,6 +58,15 @@
 @stop-meilisearch:
   docker compose down
 
+@start-meilisearch-http2:
+  docker compose -f docker-compose.https.yml up
+
+@start-meilisearch-detached-http2:
+  docker compose -f docker-compose.https.yml up -d
+
+@stop-meilisearch-http2:
+  docker compose -f docker-compose.https.yml down
+
 @build-docs:
   uv run mkdocs build --strict
 
@@ -50,7 +75,6 @@
 
 @install:
   uv sync --frozen --all-extras
-  uv pip install truststore || true # truststore is not available for Python 3.9
 
 @benchmark: start-meilisearch-detached && stop-meilisearch
   -uv run benchmark/run_benchmark.py

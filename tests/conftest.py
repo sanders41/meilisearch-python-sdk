@@ -14,11 +14,7 @@ try:
 
     has_truststore = True
 except ImportError:
-    if sys.version_info > (3, 10):
-        warning(
-            "truststore is not installed, SSL verification will not work. run pip install truststore"
-        )
-    has_truststore = True
+    has_truststore = False
 from httpx import AsyncClient as HttpxAsyncClient
 
 from meilisearch_python_sdk import AsyncClient, Client
@@ -36,62 +32,75 @@ from meilisearch_python_sdk.models.settings import (
 )
 
 MASTER_KEY = "masterKey"
-BASE_URL = "https://127.0.0.1:7700"
 
 ROOT_PATH = Path().absolute()
 SMALL_MOVIES_PATH = ROOT_PATH / "datasets" / "small_movies.json"
 
-_SSL_VERIFY: ssl.SSLContext | bool = (
-    truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT) if has_truststore else False
-)
+
+def pytest_addoption(parser):
+    parser.addoption("--http2", action="store_true")
 
 
 @pytest.fixture(scope="session")
-async def ssl_verify():
-    yield _SSL_VERIFY
+def http2_enabled(request):
+    return request.config.getoption("--http2")
+
+
+@pytest.fixture(scope="session")
+def ssl_verify(request, http2_enabled):
+    if has_truststore:  # truststore is installed
+        if http2_enabled:
+            # http2 needs ssl so best to use truststore to make things work with mkcert
+            return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT) if http2_enabled else True
+        return True  # recommended default
+    else:  # truststore isn't installed
+        if sys.version_info >= (3, 10):  # should be available in 3.10+
+            warning("truststore not installed, your environment may be broken run uv sync")
+        # without truststore we can't verify the ssl (and when http2 is enabled, verification must be disabled)
+        return not http2_enabled
 
 
 @pytest.fixture
-async def async_client():
-    async with AsyncClient(BASE_URL, MASTER_KEY, verify=_SSL_VERIFY) as client:
+async def async_client(base_url, ssl_verify):
+    async with AsyncClient(base_url, MASTER_KEY, verify=ssl_verify) as client:
         yield client
 
 
 @pytest.fixture
-async def async_client_orjson_handler():
+async def async_client_orjson_handler(base_url, ssl_verify):
     async with AsyncClient(
-        BASE_URL, MASTER_KEY, json_handler=OrjsonHandler(), verify=_SSL_VERIFY
+        base_url, MASTER_KEY, json_handler=OrjsonHandler(), verify=ssl_verify
     ) as client:
         yield client
 
 
 @pytest.fixture
-async def async_client_ujson_handler():
+async def async_client_ujson_handler(base_url, ssl_verify):
     async with AsyncClient(
-        BASE_URL, MASTER_KEY, json_handler=UjsonHandler(), verify=_SSL_VERIFY
+        base_url, MASTER_KEY, json_handler=UjsonHandler(), verify=ssl_verify
     ) as client:
         yield client
 
 
 @pytest.fixture
-async def async_client_with_plugins():
-    async with AsyncClient(BASE_URL, MASTER_KEY, verify=_SSL_VERIFY) as client:
+async def async_client_with_plugins(base_url, ssl_verify):
+    async with AsyncClient(base_url, MASTER_KEY, verify=ssl_verify) as client:
         yield client
 
 
 @pytest.fixture
-def client():
-    yield Client(BASE_URL, MASTER_KEY, verify=_SSL_VERIFY)
+def client(base_url, ssl_verify):
+    yield Client(base_url, MASTER_KEY, verify=ssl_verify)
 
 
 @pytest.fixture
-def client_orjson_handler():
-    yield Client(BASE_URL, MASTER_KEY, json_handler=OrjsonHandler(), verify=_SSL_VERIFY)
+def client_orjson_handler(base_url, ssl_verify):
+    yield Client(base_url, MASTER_KEY, json_handler=OrjsonHandler(), verify=ssl_verify)
 
 
 @pytest.fixture
-def client_ujson_handler():
-    yield Client(BASE_URL, MASTER_KEY, json_handler=UjsonHandler(), verify=_SSL_VERIFY)
+def client_ujson_handler(base_url, ssl_verify):
+    yield Client(base_url, MASTER_KEY, json_handler=UjsonHandler(), verify=ssl_verify)
 
 
 @pytest.fixture(autouse=True)
@@ -116,8 +125,9 @@ def master_key():
 
 
 @pytest.fixture(scope="session")
-def base_url():
-    return BASE_URL
+def base_url(request, http2_enabled):
+    schema = "https" if http2_enabled else "http"
+    return f"{schema}://127.0.0.1:7700"
 
 
 @pytest.fixture
@@ -279,18 +289,18 @@ async def default_search_key(async_client):
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def enable_vector_search():
+async def enable_vector_search(base_url, ssl_verify):
     async with HttpxAsyncClient(
-        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=_SSL_VERIFY
+        base_url=base_url, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=ssl_verify
     ) as client:
         await client.patch("/experimental-features", json={"vectorStore": True})
         yield
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def enable_edit_by_function():
+async def enable_edit_by_function(base_url, ssl_verify):
     async with HttpxAsyncClient(
-        base_url=BASE_URL, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=_SSL_VERIFY
+        base_url=base_url, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=ssl_verify
     ) as client:
         await client.patch("/experimental-features", json={"editDocumentsByFunction": True})
         yield

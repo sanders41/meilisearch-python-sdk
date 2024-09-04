@@ -978,7 +978,9 @@ async def test_wait_for_task_raise_for_status_false(
 
 
 @pytest.mark.parametrize("http2, expected", [(True, "HTTP/2"), (False, "HTTP/1.1")])
-async def test_http_version(http2, expected, master_key, ssl_verify):
+async def test_http_version(http2, expected, master_key, ssl_verify, http2_enabled):
+    if not http2_enabled:
+        pytest.skip("HTTP/2 is not enabled")
     async with AsyncClient(
         "https://127.0.0.1:7700", master_key, http2=http2, verify=ssl_verify
     ) as client:

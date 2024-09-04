@@ -963,6 +963,8 @@ def test_wait_for_task_raise_for_status_false(
 
 
 @pytest.mark.parametrize("http2, expected", [(True, "HTTP/2"), (False, "HTTP/1.1")])
-def test_http_version(http2, expected, master_key, ssl_verify, base_url):
+def test_http_version(http2, expected, master_key, ssl_verify, base_url, http2_enabled):
+    if not http2_enabled:
+        pytest.skip("HTTP/2 is not enabled")
     client = Client(base_url, master_key, http2=http2, verify=ssl_verify)
     assert client.http_client.get("health").http_version == expected

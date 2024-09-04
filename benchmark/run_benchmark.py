@@ -103,7 +103,7 @@ def benchmark_meili_add_documents_in_batches(
 async def run_async_batch_add_benchmark(data: Sequence[JsonMapping]) -> list[float]:
     times = []
     for _ in track(range(10), description="Running async add in batches benchmark..."):
-        async with AsyncClient("https://127.0.0.1:7700", "masterKey", verify=False) as client:
+        async with AsyncClient("http://127.0.0.1:7700", "masterKey") as client:
             index = client.index("movies")
             _, time_taken = await benchmark_async_add_document_in_batches(client, data)
             times.append(time_taken)
@@ -118,7 +118,7 @@ async def run_async_batch_add_benchmark(data: Sequence[JsonMapping]) -> list[flo
 async def run_async_search_benchmark(movies_sampled: list[str]) -> list[float]:
     times = []
     for _ in track(range(10), description="Running async multi search benchmark..."):
-        async with AsyncClient("https://127.0.0.1:7700", "masterKey") as client:
+        async with AsyncClient("http://127.0.0.1:7700", "masterKey") as client:
             index = client.index("movies")
             searches = []
             for movie in movies_sampled:
@@ -145,7 +145,7 @@ async def setup_index(data: Sequence[JsonMapping]) -> None:
 def run_sync_batch_add_benchmark(data: Sequence[JsonMapping]) -> list[float]:
     times = []
     for _ in track(range(10), description="Running sync add in batches benchmark..."):
-        client = Client("https://127.0.0.1:7700", "masterKey", verify=False)
+        client = Client("http://127.0.0.1:7700", "masterKey")
         index = client.index("movies")
         _, time_taken = benchmark_sync_add_document_in_batches(client, data)
         times.append(time_taken)
@@ -158,7 +158,7 @@ def run_sync_batch_add_benchmark(data: Sequence[JsonMapping]) -> list[float]:
 
 
 def run_sync_search_benchmark(movies_sampled: list[str]) -> list[float]:
-    client = Client("https://127.0.0.1:7700", "masterKey")
+    client = Client("http://127.0.0.1:7700", "masterKey")
     index = client.index("movies")
     times = []
     for _ in track(range(10), description="Running sync multi search benchmark..."):
@@ -174,7 +174,7 @@ def run_sync_search_benchmark(movies_sampled: list[str]) -> list[float]:
 def run_meili_batch_add_benchmark(data: Sequence[JsonMapping]) -> list[float]:
     times = []
     for _ in track(range(10), description="Running meili add in batches benchmark..."):
-        client = MeilisearchClient("https://127.0.0.1:7700", "masterKey")
+        client = MeilisearchClient("http://127.0.0.1:7700", "masterKey")
         index = client.index("movies")
         _, time_taken = benchmark_meili_add_documents_in_batches(client, data)
         times.append(time_taken)
@@ -187,7 +187,7 @@ def run_meili_batch_add_benchmark(data: Sequence[JsonMapping]) -> list[float]:
 
 
 def run_meili_search_benchmark(movies_sampled: list[str]) -> list[float]:
-    client = MeilisearchClient("https://127.0.0.1:7700", "masterKey")
+    client = MeilisearchClient("http://127.0.0.1:7700", "masterKey")
     index = client.index("movies")
     times = []
     for _ in track(range(10), description="Running meili multi search benchmark..."):
