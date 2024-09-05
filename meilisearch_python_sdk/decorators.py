@@ -26,6 +26,7 @@ def async_add_documents(
     batch_size: int | None = None,
     primary_key: str | None = None,
     wait_for_task: bool = False,
+    verify: bool = True,
 ) -> Callable:
     """Decorator that takes the returned documents from a function and asyncronously adds them to Meilisearch.
 
@@ -42,6 +43,7 @@ def async_add_documents(
             Defaults to None.
         wait_for_task: If set to `True` the decorator will wait for the document addition to finish
             indexing before returning, otherwise it will return right away. Default = False.
+        verify: If set to `False` the decorator will not verify the SSL certificate of the server.
 
     Returns:
 
@@ -89,7 +91,9 @@ def async_add_documents(
                 )
                 return result
 
-            async with AsyncClient(connection_info.url, connection_info.api_key) as client:
+            async with AsyncClient(
+                connection_info.url, connection_info.api_key, verify=verify
+            ) as client:
                 await _async_add_documents(
                     client, index_name, result, batch_size, primary_key, wait_for_task
                 )
@@ -108,6 +112,7 @@ def add_documents(
     batch_size: int | None = None,
     primary_key: str | None = None,
     wait_for_task: bool = False,
+    verify: bool = True,
 ) -> Callable:
     """Decorator that takes the returned documents from a function and adds them to Meilisearch.
 
@@ -124,6 +129,7 @@ def add_documents(
             Defaults to None.
         wait_for_task: If set to `True` the decorator will wait for the document addition to finish
             indexing before returning, otherwise it will return right away. Default = False.
+        verify: If set to `False` the decorator will not verify the SSL certificate of the server.
 
     Returns:
 
@@ -171,7 +177,9 @@ def add_documents(
                 )
                 return result
 
-            decorator_client = Client(url=connection_info.url, api_key=connection_info.api_key)
+            decorator_client = Client(
+                url=connection_info.url, api_key=connection_info.api_key, verify=verify
+            )
             _add_documents(
                 decorator_client,
                 index_name,

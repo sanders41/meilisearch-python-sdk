@@ -1,0 +1,12 @@
+services:
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=masterKey
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - ./meilisearch.key:/meilisearch.key
+      - ./meilisearch.crt:/meilisearch.crt
+    command: ["meilisearch", "--ssl-cert-path", "/meilisearch.crt", "--ssl-key-path", "/meilisearch.key"]

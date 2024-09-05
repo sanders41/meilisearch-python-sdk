@@ -106,9 +106,9 @@ async def wait_for_dump_creation(
         (None, None, None),
     ),
 )
-async def test_headers(api_key, custom_headers, expected):
+async def test_headers(api_key, custom_headers, expected, ssl_verify):
     async with AsyncClient(
-        "127.0.0.1:7700", api_key=api_key, custom_headers=custom_headers
+        "https://127.0.0.1:7700", api_key=api_key, custom_headers=custom_headers, verify=ssl_verify
     ) as client:
         assert client._headers == expected
 
@@ -318,10 +318,10 @@ async def test_get_or_create_index_no_primary_key(async_client):
 
 async def test_get_or_create_index_communication_error(async_client, monkeypatch):
     async def mock_get_response(*args, **kwargs):
-        raise ConnectError("test", request=Request("GET", url="http://localhost"))
+        raise ConnectError("test", request=Request("GET", url="https://localhost"))
 
     async def mock_post_response(*args, **kwargs):
-        raise ConnectError("test", request=Request("POST", url="http://localhost"))
+        raise ConnectError("test", request=Request("POST", url="https://localhost"))
 
     monkeypatch.setattr(HttpxAsyncClient, "get", mock_get_response)
     monkeypatch.setattr(HttpxAsyncClient, "post", mock_post_response)
@@ -503,21 +503,21 @@ async def test_create_snapshot(async_client, async_index_with_documents):
     assert snapshot_status.task_type == "snapshotCreation"
 
 
-async def test_no_master_key(base_url):
+async def test_no_master_key(base_url, ssl_verify):
     with pytest.raises(MeilisearchApiError):
-        async with AsyncClient(base_url) as client:
+        async with AsyncClient(base_url, verify=ssl_verify) as client:
             await client.create_index("some_index")
 
 
-async def test_bad_master_key(base_url, master_key):
+async def test_bad_master_key(base_url, master_key, ssl_verify):
     with pytest.raises(MeilisearchApiError):
-        async with AsyncClient(base_url) as client:
+        async with AsyncClient(base_url, verify=ssl_verify) as client:
             await client.create_index("some_index", f"{master_key}bad")
 
 
 async def test_communication_error(master_key):
     with pytest.raises(MeilisearchCommunicationError):
-        async with AsyncClient("http://wrongurl:1234", master_key, timeout=1) as client:
+        async with AsyncClient("https://wrongurl:1234", master_key, timeout=1) as client:
             await client.create_index("some_index")
 
 
@@ -975,3 +975,14 @@ async def test_wait_for_task_raise_for_status_false(
     monkeypatch.setattr(HttpxAsyncClient, "get", mock_get_response)
     with pytest.raises(MeilisearchTaskFailedError):
         await async_client.wait_for_task(response.task_uid, raise_for_status=True)
+
+
+@pytest.mark.parametrize("http2, expected", [(True, "HTTP/2"), (False, "HTTP/1.1")])
+async def test_http_version(http2, expected, master_key, ssl_verify, http2_enabled):
+    if not http2_enabled:
+        pytest.skip("HTTP/2 is not enabled")
+    async with AsyncClient(
+        "https://127.0.0.1:7700", master_key, http2=http2, verify=ssl_verify
+    ) as client:
+        response = await client.http_client.get("health")
+        assert response.http_version == expected

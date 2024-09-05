@@ -10,7 +10,7 @@ from meilisearch_python_sdk.decorators import (
 
 
 @pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
-def test_add_documents_with_client(batch_size, primary_key, client):
+def test_add_documents_with_client(batch_size, primary_key, client, ssl_verify):
     index_name = str(uuid4())
     documents = []
 
@@ -23,6 +23,7 @@ def test_add_documents_with_client(batch_size, primary_key, client):
         batch_size=batch_size,
         primary_key=primary_key,
         wait_for_task=True,
+        verify=ssl_verify,
     )
     def tester():
         return documents
@@ -39,7 +40,9 @@ def test_add_documents_with_client(batch_size, primary_key, client):
 
 
 @pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
-def test_add_documents_with_connection_info(batch_size, primary_key, client, base_url, master_key):
+def test_add_documents_with_connection_info(
+    batch_size, primary_key, client, base_url, master_key, ssl_verify
+):
     index_name = str(uuid4())
     documents = []
 
@@ -52,6 +55,7 @@ def test_add_documents_with_connection_info(batch_size, primary_key, client, bas
         batch_size=batch_size,
         primary_key=primary_key,
         wait_for_task=True,
+        verify=ssl_verify,
     )
     def tester():
         return documents
@@ -100,7 +104,7 @@ async def test_async_add_documents_with_client(batch_size, primary_key, async_cl
 
 @pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
 async def test_async_add_documents_with_connection_info(
-    batch_size, primary_key, async_client, base_url, master_key
+    batch_size, primary_key, async_client, base_url, master_key, ssl_verify
 ):
     index_name = str(uuid4())
     documents = []
@@ -114,6 +118,7 @@ async def test_async_add_documents_with_connection_info(
         batch_size=batch_size,
         primary_key=primary_key,
         wait_for_task=True,
+        verify=ssl_verify,
     )
     async def tester():
         return documents
