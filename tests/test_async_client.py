@@ -195,6 +195,7 @@ async def test_create_keys_with_wildcarded_actions(async_client, test_key_info):
     assert key.actions == ["documents.*"]
 
 
+@pytest.mark.no_parallel
 async def test_generate_tenant_token_custom_key(async_client, test_key):
     search_rules = {"test": "value"}
     expected = {"searchRules": search_rules, "apiKeyUid": test_key.uid}
@@ -202,6 +203,7 @@ async def test_generate_tenant_token_custom_key(async_client, test_key):
     assert expected == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
 
 
+@pytest.mark.no_parallel
 async def test_generate_tenant_token_default_key(async_client, default_search_key):
     search_rules = {"test": "value"}
     expected = {"searchRules": search_rules, "apiKeyUid": default_search_key.uid}
@@ -209,6 +211,7 @@ async def test_generate_tenant_token_default_key(async_client, default_search_ke
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
+@pytest.mark.no_parallel
 async def test_generate_tenant_token_default_key_expires(async_client, default_search_key):
     search_rules: JsonDict = {"test": "value"}
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
@@ -221,6 +224,7 @@ async def test_generate_tenant_token_default_key_expires(async_client, default_s
     assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
 
 
+@pytest.mark.no_parallel
 async def test_generate_tenant_token_default_key_expires_past(async_client, default_search_key):
     search_rules: JsonDict = {"test": "value"}
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=-1)
@@ -230,6 +234,7 @@ async def test_generate_tenant_token_default_key_expires_past(async_client, defa
         )
 
 
+@pytest.mark.no_parallel
 async def test_generate_tenant_token_invalid_restriction(test_key_info, async_client):
     test_key_info.indexes = ["good"]
     key = await async_client.create_key(test_key_info)
