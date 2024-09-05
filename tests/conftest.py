@@ -47,7 +47,7 @@ def http2_enabled(request):
 
 
 @pytest.fixture(scope="session")
-def ssl_verify(request, http2_enabled):
+def ssl_verify(http2_enabled):
     if has_truststore:  # truststore is installed
         if http2_enabled:
             # http2 needs ssl so best to use truststore to make things work with mkcert
@@ -125,7 +125,7 @@ def master_key():
 
 
 @pytest.fixture(scope="session")
-def base_url(request, http2_enabled):
+def base_url(http2_enabled):
     schema = "https" if http2_enabled else "http"
     return f"{schema}://127.0.0.1:7700"
 
