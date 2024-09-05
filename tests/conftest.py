@@ -8,6 +8,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from pytest_asyncio import is_async_test
 
 try:
     import truststore
@@ -37,6 +38,13 @@ ROOT_PATH = Path().absolute()
 SMALL_MOVIES_PATH = ROOT_PATH / "datasets" / "small_movies.json"
 
 
+def pytest_collection_modifyitems(items):
+    pytest_asyncio_tests = (item for item in items if is_async_test(item))
+    session_scope_marker = pytest.mark.asyncio(loop_scope="session")
+    for async_test in pytest_asyncio_tests:
+        async_test.add_marker(session_scope_marker, append=False)
+
+
 def pytest_addoption(parser):
     parser.addoption("--http2", action="store_true")
 
@@ -60,13 +68,13 @@ def ssl_verify(http2_enabled):
         return not http2_enabled
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 async def async_client(base_url, ssl_verify):
     async with AsyncClient(base_url, MASTER_KEY, verify=ssl_verify) as client:
         yield client
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 async def async_client_orjson_handler(base_url, ssl_verify):
     async with AsyncClient(
         base_url, MASTER_KEY, json_handler=OrjsonHandler(), verify=ssl_verify
@@ -74,7 +82,7 @@ async def async_client_orjson_handler(base_url, ssl_verify):
         yield client
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 async def async_client_ujson_handler(base_url, ssl_verify):
     async with AsyncClient(
         base_url, MASTER_KEY, json_handler=UjsonHandler(), verify=ssl_verify
@@ -82,23 +90,23 @@ async def async_client_ujson_handler(base_url, ssl_verify):
         yield client
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 async def async_client_with_plugins(base_url, ssl_verify):
     async with AsyncClient(base_url, MASTER_KEY, verify=ssl_verify) as client:
         yield client
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def client(base_url, ssl_verify):
     yield Client(base_url, MASTER_KEY, verify=ssl_verify)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def client_orjson_handler(base_url, ssl_verify):
     yield Client(base_url, MASTER_KEY, json_handler=OrjsonHandler(), verify=ssl_verify)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def client_ujson_handler(base_url, ssl_verify):
     yield Client(base_url, MASTER_KEY, json_handler=UjsonHandler(), verify=ssl_verify)
 
