@@ -25,19 +25,6 @@ from meilisearch_python_sdk.types import JsonDict
 
 
 @pytest.fixture
-def remove_default_search_key(default_search_key, client):
-    client.delete_key(default_search_key.key)
-    yield
-    key = KeyCreate(
-        description=default_search_key.description,
-        actions=default_search_key.actions,
-        indexes=default_search_key.indexes,
-        expires_at=default_search_key.expires_at,
-    )
-    client.create_key(key)
-
-
-@pytest.fixture
 def test_key(client):
     key_info = KeyCreate(description="test", actions=["search"], indexes=["movies"])
     key = client.create_key(key_info)
