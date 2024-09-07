@@ -33,7 +33,7 @@ jobs:
       - name: Install Dependencies
         run: |
           just install
-          uv add --dev --frozen pytest-randomly
+          uv pip install pytest-randomly
       - name: Test with pytest in random order
         run: just test-ci
       - name: Minimize uv cache
