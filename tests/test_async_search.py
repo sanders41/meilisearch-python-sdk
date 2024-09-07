@@ -289,6 +289,7 @@ async def test_search_sort(sort, titles, async_index_with_documents):
     assert response.hits[stats.number_of_documents - 1]["title"] == titles[1]
 
 
+@pytest.mark.no_parallel
 async def test_search_with_tenant_token(
     async_client, async_index_with_documents, base_url, default_search_key, ssl_verify
 ):
@@ -302,6 +303,7 @@ async def test_search_with_tenant_token(
     assert response.hits[0]["id"] == "166428"
 
 
+@pytest.mark.no_parallel
 async def test_search_with_tenant_token_and_expire_date(
     async_client, async_index_with_documents, base_url, default_search_key, ssl_verify
 ):
