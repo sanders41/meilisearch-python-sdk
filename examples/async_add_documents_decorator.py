@@ -15,7 +15,7 @@ from meilisearch_python_sdk.decorators import ConnectionInfo, async_add_document
     connection_info=ConnectionInfo(url="http://127.0.0.1:7700", api_key="masterKey"),
 )
 async def load_documents() -> list[dict[str, Any]]:
-    async with aiofiles.open("../datasets/small_movies.json", "r") as f:
+    async with aiofiles.open("../datasets/small_movies.json") as f:
         data = await f.read()
         documents = json.loads(data)
 
