@@ -2028,7 +2028,7 @@ class AsyncIndex(_BaseIndex):
         else:
             url = self._documents_url
 
-        async with aiofiles.open(upload_path, "r") as f:
+        async with aiofiles.open(upload_path) as f:
             data = await f.read()
 
         response = await self._http_requests.post(
@@ -2692,7 +2692,7 @@ class AsyncIndex(_BaseIndex):
         else:
             url = self._documents_url
 
-        async with aiofiles.open(upload_path, "r") as f:
+        async with aiofiles.open(upload_path) as f:
             data = await f.read()
 
         response = await self._http_requests.put(
@@ -8426,7 +8426,7 @@ async def _async_load_documents_from_file(
         with open(file_path) as f:  # noqa: ASYNC101 ASYNC230
             return [await loop.run_in_executor(None, partial(json_handler.loads, x)) for x in f]
 
-    async with aiofiles.open(file_path, mode="r") as f:  # type: ignore
+    async with aiofiles.open(file_path) as f:  # type: ignore
         data = await f.read()  # type: ignore
         documents = await loop.run_in_executor(None, partial(json_handler.loads, data))
 
