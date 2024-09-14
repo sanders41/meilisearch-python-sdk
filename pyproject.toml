@@ -95,7 +95,8 @@ fix = true
 [tool.ruff.lint]
 select=[
   "E",  # pycodestyle
-  "B",  #
+  "B",  # flake8-bugbear
+  "W",  # Warning
   "F",  # pyflakes
   "UP",  # pyupgrade
   "I001",  # unsorted-imports
