@@ -70,7 +70,7 @@ minversion = "6.0"
 addopts = "--cov=meilisearch_python_sdk --cov-report term-missing --no-cov-on-fail"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
-markers = ["no_parallel"]
+markers = ["no_parallel", "no_http2"]
 
 [tool.mypy]
 check_untyped_defs = true

@@ -28,7 +28,7 @@
   -uv run pytest -x -m "no_parallel"
 
 @test-parallel-http2:
-  -uv run pytest -n auto -x -m "not no_parallel" --http2
+  -uv run pytest -n auto -x -m "not no_parallel" -m "not no_http2" --http2
 
 @test-no-parallel-http2:
   -uv run pytest -x -m "no_parallel" --http2
