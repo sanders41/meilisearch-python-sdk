@@ -81,7 +81,7 @@ module = ["tests.*"]
 disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]
-module = ["aiocache.*"]
+module = ["aiocache.*", "truststore.*"]
 ignore_missing_imports = true
 
 [tool.ruff]
