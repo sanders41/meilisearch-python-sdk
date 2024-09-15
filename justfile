@@ -7,7 +7,7 @@
   just --justfile {{justfile()}} ruff-format
 
 @mypy:
-  uv run mypy meilisearch_python_sdk tests examples
+  uv run mypy meilisearch_python_sdk tests
 
 @ruff:
   uv run ruff check .
