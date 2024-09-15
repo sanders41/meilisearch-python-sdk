@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 from meilisearch_python_sdk import Client
