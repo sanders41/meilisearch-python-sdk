@@ -1,17 +1,21 @@
 import json
 import sqlite3
+from pathlib import Path
 from typing import Any
 
-from meilisearch_python_sdk import Client
+from meilisearch_python_sdk import Client, Index
+from meilisearch_python_sdk.models.search import SearchResults
+from meilisearch_python_sdk.models.task import TaskInfo
 from meilisearch_python_sdk.plugins import Event, IndexPlugins
+from meilisearch_python_sdk.types import JsonDict
 
 
 class SearchTrackerPlugin:
     POST_EVENT = False
     PRE_EVENT = True  # Specifies the plugin should be run before the search
 
-    def __init__(self) -> None:
-        self.conn = sqlite3.Connection("search_tracker.db")
+    def __init__(self, db_path: Path | str = "search_tracker.db") -> None:
+        self.conn = sqlite3.Connection(db_path)
         self.create_table()
 
     def create_table(self) -> None:
@@ -34,16 +38,25 @@ class SearchTrackerPlugin:
             cursor.close()
 
 
-def main() -> int:
-    with open("../datasets/small_movies.json") as f:
+def add_documents(
+    index: Index, file_path: Path | str = "../datasets/small_movies.json"
+) -> TaskInfo:
+    with open(file_path) as f:
         documents = json.load(f)
+    return index.add_documents(documents)
 
+
+def search(index: Index, query: str) -> SearchResults[JsonDict]:
+    return index.search(query)
+
+
+def main() -> int:
     client = Client("http://127.0.0.1:7700", "masterKey")
     plugins = IndexPlugins(search_plugins=(SearchTrackerPlugin(),))
     index = client.create_index("movies", primary_key="id", plugins=plugins)
-    task = index.add_documents(documents)
+    task = add_documents(index)
     client.wait_for_task(task.task_uid)
-    result = index.search("Cars")
+    result = search(index, "Cars")
     print(result)  # noqa: T201
 
     return 0

@@ -7,13 +7,13 @@
   just --justfile {{justfile()}} ruff-format
 
 @mypy:
-  uv run mypy meilisearch_python_sdk tests
+  uv run mypy meilisearch_python_sdk tests examples
 
 @ruff:
   uv run ruff check .
 
 @ruff-format:
-  uv run ruff format meilisearch_python_sdk tests
+  uv run ruff format meilisearch_python_sdk tests examples
 
 @test:
   -uv run pytest -x
