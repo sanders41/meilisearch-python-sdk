@@ -1,8 +1,6 @@
 import asyncio
 from uuid import uuid4
 
-import pytest
-
 from examples.async_add_documents_decorator import load_documents
 from examples.async_add_documents_in_batches import add_documents_in_batches
 from examples.async_search_tracker import SearchTrackerPlugin, search
@@ -12,8 +10,6 @@ from examples.async_update_settings import update_settings
 from meilisearch_python_sdk.plugins import AsyncIndexPlugins
 
 
-@pytest.mark.no_parallel
-@pytest.mark.no_http2
 async def test_add_documents_decorator(small_movies_path, async_client):
     index = await async_client.create_index("movies", "id")
     await load_documents(small_movies_path)
@@ -24,8 +20,6 @@ async def test_add_documents_decorator(small_movies_path, async_client):
     assert len(documents.results) > 0
 
 
-@pytest.mark.no_parallel
-@pytest.mark.no_http2
 async def test_add_documents_in_batchees(small_movies_path, async_empty_index, async_client):
     index = await async_empty_index()
     tasks = await add_documents_in_batches(index, small_movies_path)
@@ -35,7 +29,6 @@ async def test_add_documents_in_batchees(small_movies_path, async_empty_index, a
         assert result.status == "succeeded"
 
 
-@pytest.mark.no_http2
 async def test_search_tracker(small_movies_path, async_client, tmp_path):
     db_path = tmp_path / "search_tracker.db"
     plugins = AsyncIndexPlugins(search_plugins=(SearchTrackerPlugin(db_path),))
@@ -50,7 +43,6 @@ async def test_search_tracker(small_movies_path, async_client, tmp_path):
     assert len(result.hits) > 0
 
 
-@pytest.mark.no_http2
 async def test_update_settings(small_movies_path, async_empty_index, async_client):
     index = await async_empty_index()
     task = await update_settings(index)

@@ -1,7 +1,5 @@
 from uuid import uuid4
 
-import pytest
-
 from examples.orjson_example import add_documents as orjson_add_documents
 from examples.search_tracker import SearchTrackerPlugin, search
 from examples.search_tracker import add_documents as search_tracker_add_documents
@@ -11,7 +9,6 @@ from examples.update_settings import update_settings
 from meilisearch_python_sdk.plugins import IndexPlugins
 
 
-@pytest.mark.no_http2
 def test_orjson_example(small_movies_path, client):
     task = orjson_add_documents(small_movies_path)
     client.wait_for_task(task.task_uid)
@@ -19,7 +16,6 @@ def test_orjson_example(small_movies_path, client):
     assert result.status == "succeeded"
 
 
-@pytest.mark.no_http2
 def test_search_tracker(small_movies_path, client, tmp_path):
     db_path = tmp_path / "search_tracker.db"
     plugins = IndexPlugins(search_plugins=(SearchTrackerPlugin(db_path),))
@@ -34,7 +30,6 @@ def test_search_tracker(small_movies_path, client, tmp_path):
     assert len(result.hits) > 0
 
 
-@pytest.mark.no_http2
 def test_update_settings(small_movies_path, empty_index, client):
     index = empty_index()
     task = update_settings(index)
@@ -45,7 +40,6 @@ def test_update_settings(small_movies_path, empty_index, client):
     assert result.status == "succeeded"
 
 
-@pytest.mark.no_http2
 def test_ujson_example(small_movies_path, client):
     task = ujson_add_documents(small_movies_path)
     client.wait_for_task(task.task_uid)

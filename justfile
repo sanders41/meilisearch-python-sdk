@@ -28,10 +28,10 @@
   -uv run pytest -x -m "no_parallel"
 
 @test-parallel-http2:
-  -uv run pytest -n auto -x -m "not no_parallel and not no_http2" --http2
+  -uv run pytest -n auto -x -m "not no_parallel" --http2
 
 @test-no-parallel-http2:
-  -uv run pytest -x -m "no_parallel and not no_http2" --http2
+  -uv run pytest -x -m "no_parallel" --http2
 
 @test-ci: start-meilisearch-detached && stop-meilisearch
   uv run pytest --cov=meilisearch_python_sdk --cov-report=xml
@@ -48,6 +48,10 @@
 @test-no-parallel-ci-http2: start-meilisearch-detached-http2 && stop-meilisearch-http2
   uv run pytest --cov=meilisearch_python_sdk --cov-report=xml -m "no_parallel" --http2
 
+@test-examples-ci: start-meilisearch-detached
+  cd examples && \
+  uv pip install -r requirements.txt && \
+  uv run pytest
 
 @start-meilisearch:
   docker compose up
