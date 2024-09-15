@@ -13,7 +13,7 @@
   uv run ruff check .
 
 @ruff-format:
-  uv run ruff format meilisearch_python_sdk tests
+  uv run ruff format meilisearch_python_sdk tests examples
 
 @test:
   -uv run pytest -x
@@ -48,6 +48,10 @@
 @test-no-parallel-ci-http2: start-meilisearch-detached-http2 && stop-meilisearch-http2
   uv run pytest --cov=meilisearch_python_sdk --cov-report=xml -m "no_parallel" --http2
 
+@test-examples-ci: start-meilisearch-detached
+  cd examples && \
+  pip install -r requirements.txt && \
+  pytest
 
 @start-meilisearch:
   docker compose up

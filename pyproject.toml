@@ -66,7 +66,7 @@ documentation = "https://meilisearch-python-sdk.paulsanders.dev"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--cov=meilisearch_python_sdk --cov-report term-missing --no-cov-on-fail"
+addopts = "--cov=meilisearch_python_sdk --cov-report term-missing --no-cov-on-fail --ignore examples"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 markers = ["no_parallel"]
@@ -77,7 +77,7 @@ disallow_untyped_defs = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["tests.*"]
+module = ["tests.*", "examples/tests.*"]
 disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]

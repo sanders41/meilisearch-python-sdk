@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from pathlib import Path
 from typing import Any
 
 import aiofiles
@@ -14,8 +15,10 @@ from meilisearch_python_sdk.decorators import ConnectionInfo, async_add_document
     index_name="movies",
     connection_info=ConnectionInfo(url="http://127.0.0.1:7700", api_key="masterKey"),
 )
-async def load_documents() -> list[dict[str, Any]]:
-    async with aiofiles.open("../datasets/small_movies.json") as f:
+async def load_documents(
+    file_path: Path | str = "../datasets/small_movies.json",
+) -> list[dict[str, Any]]:
+    async with aiofiles.open(file_path) as f:
         data = await f.read()
         documents = json.loads(data)
 
