@@ -1,3 +1,6 @@
+@_default:
+  just --list
+
 @lint:
   echo mypy
   just --justfile {{justfile()}} mypy
