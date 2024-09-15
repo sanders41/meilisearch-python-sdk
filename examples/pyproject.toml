@@ -1,3 +1,12 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "examples"
+version = "0.1.0"
+requires-python = ">=3.9"
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 asyncio_mode = "auto"
