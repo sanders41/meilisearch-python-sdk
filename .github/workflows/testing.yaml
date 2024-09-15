@@ -99,7 +99,7 @@ jobs:
       - name: Install Dependencies
         run: just install
       - name: Install truststore
-        if: ${{ ! startsWith(matrix.python-version, "3.9") }}
+        if: ${{ ! startsWith(matrix.python-version, '3.9') }}
         run: uv pip install truststore
       - name: Test with pytest
         run: |
@@ -182,7 +182,7 @@ jobs:
       - name: Install Dependencies
         run: just install
       - name: Install truststore
-        if: ${{ ! startsWith(matrix.python-version, "3.9") }}
+        if: ${{ ! startsWith(matrix.python-version, '3.9') }}
         run: uv pip install truststore
       - name: Test with pytest
         run: |
