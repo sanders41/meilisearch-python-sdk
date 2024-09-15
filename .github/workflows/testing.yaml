@@ -98,6 +98,9 @@ jobs:
             uv-${{ runner.os }}
       - name: Install Dependencies
         run: just install
+      - name: Install truststore
+        if: ${{ matrix.python-version }} != "3.9"
+        run: uv pip install truststore
       - name: Test with pytest
         run: |
           sudo apt-get update && \
@@ -178,6 +181,9 @@ jobs:
             uv-${{ runner.os }}
       - name: Install Dependencies
         run: just install
+      - name: Install truststore
+        if: ${{ matrix.python-version }} != "3.9"
+        run: uv pip install truststore
       - name: Test with pytest
         run: |
           sudo apt-get update && \
