@@ -179,7 +179,7 @@ async def test_add_documents_from_directory_with_concurrency_limit(
         add_json_file(tmp_path / f"test{i}.json", 10, i * 10)
 
     index = async_client.index(str(uuid4()))
-    responses = await index.add_documents_from_directory(tmp_path, concurrency_limit=1)
+    responses = await index.add_documents_from_directory(tmp_path, concurrency_limit=2)
     await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == 1000
