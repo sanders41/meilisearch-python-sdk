@@ -128,12 +128,27 @@ async def test_add_documents_in_batches(
     assert await index.get_primary_key() == expected_primary_key
 
 
+async def test_add_documents_in_batches_with_concurrency_limit(async_empty_index, small_movies):
+    index = await async_empty_index()
+    batch_size = 10
+    response = await index.add_documents_in_batches(
+        small_movies, batch_size=batch_size, primary_key="id", concurrency_limit=1
+    )
+    assert ceil(len(small_movies) / batch_size) == len(response)
+
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in response]
+    )
+    assert {"succeeded"} == {x.status for x in tasks}
+
+
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
 @pytest.mark.parametrize(
     "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 @pytest.mark.parametrize("compress", (True, False))
+@pytest.mark.parametrize("concurrency_limit", (None, 1))
 async def test_add_documents_from_directory(
     path_type,
     combine_documents,
@@ -141,6 +156,7 @@ async def test_add_documents_from_directory(
     documents_per_file,
     total_documents,
     compress,
+    concurrency_limit,
     async_client,
     tmp_path,
 ):
@@ -150,7 +166,10 @@ async def test_add_documents_from_directory(
     index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
-        path, combine_documents=combine_documents, compress=compress
+        path,
+        combine_documents=combine_documents,
+        compress=compress,
+        concurrency_limit=concurrency_limit,
     )
     await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
@@ -272,6 +291,22 @@ async def test_add_documents_from_directory_in_batchs(
     await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
+
+
+async def test_add_documents_from_directory_in_batches_with_concurrency_limit(
+    async_client, tmp_path
+):
+    for i in range(2):
+        add_json_file(tmp_path / f"test{i}.json", 100, i * 100)
+
+    index = async_client.index(str(uuid4()))
+    responses = await index.add_documents_from_directory_in_batches(
+        tmp_path, batch_size=10, concurrency_limit=1
+    )
+
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
+    stats = await index.get_stats()
+    assert stats.number_of_documents == 200
 
 
 @pytest.mark.parametrize("batch_size", [10, 25])
@@ -525,6 +560,25 @@ async def test_add_documents_from_file_in_batches(
     assert await index.get_primary_key() == expected_primary_key
 
 
+async def test_add_documents_from_file_in_batches_concurrency_limit(
+    async_client,
+    small_movies_path,
+    small_movies,
+):
+    index = async_client.index(str(uuid4()))
+    batch_size = 10
+    response = await index.add_documents_from_file_in_batches(
+        small_movies_path, batch_size=batch_size, primary_key="id", concurrency_limit=1
+    )
+
+    assert ceil(len(small_movies) / batch_size) == len(response)
+
+    tasks = await asyncio.gather(
+        *[async_wait_for_task(index.http_client, x.task_uid) for x in response]
+    )
+    assert {"succeeded"} == {x.status for x in tasks}
+
+
 @pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
@@ -729,6 +783,30 @@ async def test_update_documents_in_batches(
     response = await index.get_document(doc_id)
     assert response["title"] == "Some title"
     updates = await index.update_documents_in_batches(small_movies, batch_size=batch_size)
+    assert ceil(len(small_movies) / batch_size) == len(updates)
+
+    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in updates])
+
+    response = await index.get_document(doc_id)
+    assert response["title"] != "Some title"
+
+
+async def test_update_documents_in_batches_with_concurrency_limit(
+    async_index_with_documents, small_movies
+):
+    batch_size = 10
+    index = await async_index_with_documents()
+    response = await index.get_documents()
+    doc_id = response.results[0]["id"]
+    response.results[0]["title"] = "Some title"
+    update = await index.update_documents([response.results[0]])
+    await async_wait_for_task(index.http_client, update.task_uid)
+
+    response = await index.get_document(doc_id)
+    assert response["title"] == "Some title"
+    updates = await index.update_documents_in_batches(
+        small_movies, batch_size=batch_size, concurrency_limit=1
+    )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
     await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in updates])
@@ -1339,6 +1417,29 @@ async def test_delete_documents_in_batches_by_filter(async_index_with_documents)
     assert 1520035200 in [x.get("release_date") for x in response.results]
     response = await index.delete_documents_in_batches_by_filter(
         ["genre=action", "release_date=1520035200"]
+    )
+    for task in response:
+        await async_wait_for_task(index.http_client, task.task_uid)
+    response = await index.get_documents()
+    genres = [x.get("genre") for x in response.results]
+    release_dates = [x.get("release_date") for x in response.results]
+    assert "action" not in genres
+    assert "cartoon" in genres
+    assert len(release_dates) > 0
+    assert 1520035200 not in release_dates
+
+
+async def test_delete_documents_in_batches_by_filter_with_concurrency_limit(
+    async_index_with_documents,
+):
+    index = await async_index_with_documents()
+    response = await index.update_filterable_attributes(["genre", "release_date"])
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents()
+    assert "action" in [x.get("genre") for x in response.results]
+    assert 1520035200 in [x.get("release_date") for x in response.results]
+    response = await index.delete_documents_in_batches_by_filter(
+        ["genre=action", "release_date=1520035200"], concurrency_limit=1
     )
     for task in response:
         await async_wait_for_task(index.http_client, task.task_uid)
