@@ -148,6 +148,7 @@ async def test_add_documents_in_batches_with_concurrency_limit(async_empty_index
     "number_of_files, documents_per_file, total_documents", [(1, 50, 50), (2, 50, 100)]
 )
 @pytest.mark.parametrize("compress", (True, False))
+@pytest.mark.parametrize("concurrency_limit", (None, 1))
 async def test_add_documents_from_directory(
     path_type,
     combine_documents,
@@ -155,6 +156,7 @@ async def test_add_documents_from_directory(
     documents_per_file,
     total_documents,
     compress,
+    concurrency_limit,
     async_client,
     tmp_path,
 ):
@@ -164,25 +166,14 @@ async def test_add_documents_from_directory(
     index = async_client.index(str(uuid4()))
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
-        path, combine_documents=combine_documents, compress=compress
+        path,
+        combine_documents=combine_documents,
+        compress=compress,
+        concurrency_limit=concurrency_limit,
     )
     await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
     assert stats.number_of_documents == total_documents
-
-
-async def test_add_documents_from_directory_with_concurrency_limit(
-    async_client,
-    tmp_path,
-):
-    for i in range(100):
-        add_json_file(tmp_path / f"test{i}.json", 10, i * 10)
-
-    index = async_client.index(str(uuid4()))
-    responses = await index.add_documents_from_directory(tmp_path, concurrency_limit=2)
-    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
-    stats = await index.get_stats()
-    assert stats.number_of_documents == 1000
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))
@@ -197,18 +188,6 @@ async def test_add_documents_from_directory_csv_path(
     path = str(tmp_path) if path_type == "str" else tmp_path
     responses = await index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", compress=compress
-    )
-    await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
-    stats = await index.get_stats()
-    assert stats.number_of_documents == 20
-
-
-async def test_add_documents_from_directory_csv_path_with_concurrency_limit(async_client, tmp_path):
-    add_csv_file(tmp_path / "test1.csv", 10, 0)
-    add_csv_file(tmp_path / "test2.csv", 10, 11)
-    index = async_client.index(str(uuid4()))
-    responses = await index.add_documents_from_directory(
-        tmp_path, document_type="csv", concurrency_limit=1
     )
     await asyncio.gather(*[async_wait_for_task(index.http_client, x.task_uid) for x in responses])
     stats = await index.get_stats()
