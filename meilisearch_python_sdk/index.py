@@ -1596,6 +1596,7 @@ class AsyncIndex(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
 
@@ -1607,6 +1608,9 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            concurrency_limit: If set this will limit the number of batches that will be sent
+                concurrently. This can be helpful if you find you are overloading the Meilisearch
+                server with requests. Defaults to None.
 
         Returns:
 
@@ -1628,6 +1632,23 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.add_documents_in_batches(documents)
         """
+        if concurrency_limit:
+            async with asyncio.Semaphore(concurrency_limit):
+                if not use_task_groups():
+                    batches = [
+                        self.add_documents(x, primary_key, compress=compress)
+                        for x in _batch(documents, batch_size)
+                    ]
+                    return await asyncio.gather(*batches)
+
+                async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+                    tasks = [
+                        tg.create_task(self.add_documents(x, primary_key, compress=compress))
+                        for x in _batch(documents, batch_size)
+                    ]
+
+                return [x.result() for x in tasks]
+
         if not use_task_groups():
             batches = [
                 self.add_documents(x, primary_key, compress=compress)
@@ -1652,6 +1673,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index.
 
@@ -1668,6 +1690,9 @@ class AsyncIndex(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            concurrency_limit: If set this will limit the number of batches that will be sent
+                concurrently. This can be helpful if you find you are overloading the Meilisearch
+                server with requests. Defaults to None.
 
         Returns:
 
@@ -1708,6 +1733,54 @@ class AsyncIndex(_BaseIndex):
             response = await self.add_documents(combined, primary_key, compress=compress)
 
             return [response]
+
+        if concurrency_limit:
+            async with asyncio.Semaphore(concurrency_limit):
+                if not use_task_groups():
+                    add_documents = []
+                    for path in directory.iterdir():
+                        if path.suffix == f".{document_type}":
+                            documents = await _async_load_documents_from_file(
+                                path, csv_delimiter, json_handler=self._json_handler
+                            )
+                            add_documents.append(
+                                self.add_documents(documents, primary_key, compress=compress)
+                            )
+
+                    _raise_on_no_documents(add_documents, document_type, directory_path)
+
+                    if len(add_documents) > 1:
+                        # Send the first document on its own before starting the gather. Otherwise Meilisearch
+                        # returns an error because it thinks all entries are trying to create the same index.
+                        first_response = [await add_documents.pop()]
+
+                        responses = await asyncio.gather(*add_documents)
+                        responses = [*first_response, *responses]
+                    else:
+                        responses = [await add_documents[0]]
+
+                    return responses
+
+                async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+                    tasks = []
+                    all_results = []
+                    for i, path in enumerate(directory.iterdir()):
+                        if path.suffix == f".{document_type}":
+                            documents = await _async_load_documents_from_file(
+                                path, csv_delimiter, json_handler=self._json_handler
+                            )
+                            if i == 0:
+                                all_results = [
+                                    await self.add_documents(documents, compress=compress)
+                                ]
+                            else:
+                                tasks.append(
+                                    tg.create_task(
+                                        self.add_documents(
+                                            documents, primary_key, compress=compress
+                                        )
+                                    )
+                                )
 
         if not use_task_groups():
             add_documents = []
@@ -1766,6 +1839,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and add the documents to the index in batches.
 
@@ -1784,6 +1858,9 @@ class AsyncIndex(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            concurrency_limit: If set this will limit the number of batches that will be sent
+                concurrently. This can be helpful if you find you are overloading the Meilisearch
+                server with requests. Defaults to None.
 
         Returns:
 
@@ -1826,6 +1903,7 @@ class AsyncIndex(_BaseIndex):
                 batch_size=batch_size,
                 primary_key=primary_key,
                 compress=compress,
+                concurrency_limit=concurrency_limit,
             )
 
         responses: list[TaskInfo] = []
@@ -1842,6 +1920,7 @@ class AsyncIndex(_BaseIndex):
                         batch_size=batch_size,
                         primary_key=primary_key,
                         compress=compress,
+                        concurrency_limit=concurrency_limit,
                     )
                 )
 
@@ -1908,6 +1987,7 @@ class AsyncIndex(_BaseIndex):
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
         compress: bool = False,
+        concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -1921,6 +2001,9 @@ class AsyncIndex(_BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            concurrency_limit: If set this will limit the number of batches that will be sent
+                concurrently. This can be helpful if you find you are overloading the Meilisearch
+                server with requests. Defaults to None.
 
         Returns:
 
@@ -1951,6 +2034,7 @@ class AsyncIndex(_BaseIndex):
             batch_size=batch_size,
             primary_key=primary_key,
             compress=compress,
+            concurrency_limit=concurrency_limit,
         )
 
     async def add_documents_from_raw_file(
@@ -2232,6 +2316,7 @@ class AsyncIndex(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
 
@@ -2245,6 +2330,9 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            concurrency_limit: If set this will limit the number of batches that will be sent
+                concurrently. This can be helpful if you find you are overloading the Meilisearch
+                server with requests. Defaults to None.
 
         Returns:
 
@@ -2266,6 +2354,22 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_documents_in_batches(documents)
         """
+        if concurrency_limit:
+            async with asyncio.Semaphore(concurrency_limit):
+                if not use_task_groups():
+                    batches = [
+                        self.update_documents(x, primary_key, compress=compress)
+                        for x in _batch(documents, batch_size)
+                    ]
+                    return await asyncio.gather(*batches)
+
+                async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+                    tasks = [
+                        tg.create_task(self.update_documents(x, primary_key, compress=compress))
+                        for x in _batch(documents, batch_size)
+                    ]
+                return [x.result() for x in tasks]
+
         if not use_task_groups():
             batches = [
                 self.update_documents(x, primary_key, compress=compress)
@@ -2402,6 +2506,7 @@ class AsyncIndex(_BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
 
@@ -2420,6 +2525,9 @@ class AsyncIndex(_BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            concurrency_limit: If set this will limit the number of batches that will be sent
+                concurrently. This can be helpful if you find you are overloading the Meilisearch
+                server with requests. Defaults to None.
 
         Returns:
 
@@ -2462,6 +2570,7 @@ class AsyncIndex(_BaseIndex):
                 batch_size=batch_size,
                 primary_key=primary_key,
                 compress=compress,
+                concurrency_limit=concurrency_limit,
             )
 
         if not use_task_groups():
@@ -2479,6 +2588,7 @@ class AsyncIndex(_BaseIndex):
                             batch_size=batch_size,
                             primary_key=primary_key,
                             compress=compress,
+                            concurrency_limit=concurrency_limit,
                         )
                     )
 
@@ -2509,6 +2619,7 @@ class AsyncIndex(_BaseIndex):
                             batch_size=batch_size,
                             primary_key=primary_key,
                             compress=compress,
+                            concurrency_limit=concurrency_limit,
                         )
                     else:
                         tasks.append(
@@ -2518,6 +2629,7 @@ class AsyncIndex(_BaseIndex):
                                     batch_size=batch_size,
                                     primary_key=primary_key,
                                     compress=compress,
+                                    concurrency_limit=concurrency_limit,
                                 )
                             )
                         )
@@ -2576,6 +2688,7 @@ class AsyncIndex(_BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         compress: bool = False,
+        concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
@@ -2587,6 +2700,9 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            concurrency_limit: If set this will limit the number of batches that will be sent
+                concurrently. This can be helpful if you find you are overloading the Meilisearch
+                server with requests. Defaults to None.
 
         Returns:
 
@@ -2615,6 +2731,7 @@ class AsyncIndex(_BaseIndex):
             batch_size=batch_size,
             primary_key=primary_key,
             compress=compress,
+            concurrency_limit=concurrency_limit,
         )
 
     async def update_documents_from_raw_file(
@@ -2935,13 +3052,16 @@ class AsyncIndex(_BaseIndex):
         return result
 
     async def delete_documents_in_batches_by_filter(
-        self, filters: list[str | list[str | list[str]]]
+        self, filters: list[str | list[str | list[str]]], concurrency_limit: int | None = None
     ) -> list[TaskInfo]:
         """Delete batches of documents from the index by filter.
 
         Args:
 
             filters: A list of filter value information.
+            concurrency_limit: If set this will limit the number of batches that will be sent
+                concurrently. This can be helpful if you find you are overloading the Meilisearch
+                server with requests. Defaults to None.
 
         Returns:
 
@@ -2964,6 +3084,20 @@ class AsyncIndex(_BaseIndex):
             >>>         ]
             >>>     )
         """
+        if concurrency_limit:
+            async with asyncio.Semaphore(concurrency_limit):
+                if not use_task_groups():
+                    tasks = [self.delete_documents_by_filter(filter) for filter in filters]
+                    return await asyncio.gather(*tasks)
+
+                async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+                    tg_tasks = [
+                        tg.create_task(self.delete_documents_by_filter(filter))
+                        for filter in filters
+                    ]
+
+                return [x.result() for x in tg_tasks]
+
         if not use_task_groups():
             tasks = [self.delete_documents_by_filter(filter) for filter in filters]
             return await asyncio.gather(*tasks)
