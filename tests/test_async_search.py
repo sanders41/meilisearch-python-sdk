@@ -9,7 +9,13 @@ from camel_converter.pydantic_base import CamelBase
 from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk._task import async_wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchError
-from meilisearch_python_sdk.models.search import Federation, Hybrid, SearchParams
+from meilisearch_python_sdk.models.search import (
+    Federation,
+    FederationMerged,
+    Hybrid,
+    MergeFacets,
+    SearchParams,
+)
 
 
 async def test_basic_search(async_index_with_documents):
@@ -416,6 +422,32 @@ async def test_multi_search_federated_facets_by_index(
     assert "_formatted" not in response.hits[0]
     assert "_federation" in response.hits[0]
     assert response.facets_by_index is not None
+
+
+async def test_multi_search_federated_merge_facets(
+    async_client,
+    async_index_with_documents,
+    async_empty_index,
+):
+    index1 = await async_index_with_documents()
+    task = await index1.update_filterable_attributes(["title"])
+    await async_client.wait_for_task(task.task_uid)
+    index2 = await async_empty_index()
+    federation = FederationMerged(merge_facets=MergeFacets(max_values_per_facet=10))
+    federation.facets_by_index = {index1.uid: ["title"]}
+    response = await async_client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
+            SearchParams(index_uid=index2.uid, query=""),
+        ],
+        federation=federation,
+    )
+
+    assert response.hits[0]["id"] == "166428"
+    assert "_formatted" not in response.hits[0]
+    assert "_federation" in response.hits[0]
+    assert response.facets_by_index is None
+    assert response.facet_distribution is not None
 
 
 async def test_multi_search_locales(async_client, async_index_with_documents, async_empty_index):
