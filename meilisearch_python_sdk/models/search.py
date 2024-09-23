@@ -30,6 +30,7 @@ class Hybrid(CamelBase):
 class Federation(CamelBase):
     limit: int = 20
     offset: int = 0
+    facets_by_index: dict[str, list[str]] | None = None
 
 
 class SearchParams(CamelBase):
@@ -99,6 +100,7 @@ class SearchResultsFederated(CamelBase, Generic[T]):
     page: int | None = None
     hits_per_page: int | None = None
     semantic_hit_count: int | None = None
+    facets_by_index: JsonDict | None = None
 
 
 class SimilarSearchResults(CamelBase, Generic[T]):
