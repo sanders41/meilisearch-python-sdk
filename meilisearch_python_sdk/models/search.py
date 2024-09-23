@@ -24,7 +24,7 @@ class FacetSearchResults(CamelBase):
 
 class Hybrid(CamelBase):
     semantic_ratio: float
-    embedder: str | None = None
+    embedder: str
 
 
 class Federation(CamelBase):
