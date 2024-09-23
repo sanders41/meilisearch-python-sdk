@@ -24,6 +24,7 @@ from meilisearch_python_sdk.models.health import Health
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.search import (
     Federation,
+    FederationMerged,
     SearchParams,
     SearchResultsFederated,
     SearchResultsWithUID,
@@ -643,7 +644,7 @@ class AsyncClient(BaseClient):
         self,
         queries: list[SearchParams],
         *,
-        federation: Federation | None = None,
+        federation: Federation | FederationMerged | None = None,
         hits_type: Any = JsonDict,
     ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
@@ -1555,7 +1556,7 @@ class Client(BaseClient):
         self,
         queries: list[SearchParams],
         *,
-        federation: Federation | None = None,
+        federation: Federation | FederationMerged | None = None,
         hits_type: Any = JsonDict,
     ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
