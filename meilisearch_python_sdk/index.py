@@ -123,7 +123,6 @@ class AsyncIndex(_BaseIndex):
         """Class initializer.
 
         Args:
-
             http_client: An instance of the AsyncClient. This automatically gets passed by the
                 AsyncClient when creating and AsyncIndex instance.
             uid: The index's unique identifier.
@@ -516,16 +515,13 @@ class AsyncIndex(_BaseIndex):
         """Deletes the index.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -538,16 +534,13 @@ class AsyncIndex(_BaseIndex):
         """Delete the index if it already exists.
 
         Returns:
-
             True if the index was deleted or False if not.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -566,20 +559,16 @@ class AsyncIndex(_BaseIndex):
         """Update the index primary key.
 
         Args:
-
             primary_key: The primary key of the documents.
 
         Returns:
-
             An instance of the AsyncIndex with the updated information.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -598,16 +587,13 @@ class AsyncIndex(_BaseIndex):
         """Gets the infromation about the index.
 
         Returns:
-
             An instance of the AsyncIndex containing the retrieved information.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -624,16 +610,13 @@ class AsyncIndex(_BaseIndex):
         """Get the primary key.
 
         Returns:
-
             The primary key for the documents in the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -662,7 +645,6 @@ class AsyncIndex(_BaseIndex):
         through the `Client`.
 
         Args:
-
             http_client: An instance of the AsyncClient. This automatically gets passed by the
                 Client when creating an AsyncIndex instance.
             uid: The index's unique identifier.
@@ -687,16 +669,13 @@ class AsyncIndex(_BaseIndex):
                 JsonDict
 
         Returns:
-
             An instance of AsyncIndex containing the information of the newly created index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await index.create(client, "movies")
@@ -742,16 +721,13 @@ class AsyncIndex(_BaseIndex):
         """Get stats of the index.
 
         Returns:
-
             Stats of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -793,7 +769,6 @@ class AsyncIndex(_BaseIndex):
         """Search the index.
 
         Args:
-
             query: String containing the word(s) to search
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returned. Defaults to 20.
@@ -852,16 +827,13 @@ class AsyncIndex(_BaseIndex):
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
 
         Returns:
-
             Results of the search
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1062,7 +1034,6 @@ class AsyncIndex(_BaseIndex):
         """Search the index.
 
         Args:
-
             query: String containing the word(s) to search
             facet_name: The name of the facet to search
             facet_query: The facet search value
@@ -1113,16 +1084,13 @@ class AsyncIndex(_BaseIndex):
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
 
         Returns:
-
             Results of the search
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1324,16 +1292,13 @@ class AsyncIndex(_BaseIndex):
                 to None.
 
         Returns:
-
             Results of the search
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1365,20 +1330,16 @@ class AsyncIndex(_BaseIndex):
         """Get one document with given document identifier.
 
         Args:
-
             document_id: Unique identifier of the document.
 
         Returns:
-
             The document information
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1399,7 +1360,6 @@ class AsyncIndex(_BaseIndex):
         """Get a batch documents from the index.
 
         Args:
-
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
@@ -1408,17 +1368,14 @@ class AsyncIndex(_BaseIndex):
                 used with Meilisearch >= v1.2.0
 
         Returns:
-
             Documents info.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1457,23 +1414,19 @@ class AsyncIndex(_BaseIndex):
         """Add documents to the index.
 
         Args:
-
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -1601,7 +1554,6 @@ class AsyncIndex(_BaseIndex):
         """Adds documents in batches to reduce RAM usage with indexing.
 
         Args:
-
             documents: List of documents.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -1613,16 +1565,13 @@ class AsyncIndex(_BaseIndex):
                 server with requests. Defaults to None.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -1678,7 +1627,6 @@ class AsyncIndex(_BaseIndex):
         """Load all json files from a directory and add the documents to the index.
 
         Args:
-
             directory_path: Path to the directory that contains the json files.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
@@ -1695,18 +1643,15 @@ class AsyncIndex(_BaseIndex):
                 server with requests. Defaults to None.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -1844,7 +1789,6 @@ class AsyncIndex(_BaseIndex):
         """Load all json files from a directory and add the documents to the index in batches.
 
         Args:
-
             directory_path: Path to the directory that contains the json files.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -1863,18 +1807,15 @@ class AsyncIndex(_BaseIndex):
                 server with requests. Defaults to None.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -1947,25 +1888,21 @@ class AsyncIndex(_BaseIndex):
         """Add documents to the index from a json file.
 
         Args:
-
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
@@ -1992,7 +1929,6 @@ class AsyncIndex(_BaseIndex):
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
         Args:
-
             file_path: Path to the json file.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -2006,18 +1942,15 @@ class AsyncIndex(_BaseIndex):
                 server with requests. Defaults to None.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
@@ -2051,7 +1984,6 @@ class AsyncIndex(_BaseIndex):
         for batching.
 
         Args:
-
             file_path: The path to the file to send to Meilisearch. Only csv and ndjson files are
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
@@ -2061,19 +1993,16 @@ class AsyncIndex(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             ValueError: If the file is not a csv or ndjson file, or if a csv_delimiter is sent for
                 a non-csv file.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.csv")
@@ -2131,23 +2060,19 @@ class AsyncIndex(_BaseIndex):
         sending a PATCH request to /experimental-features with { "editDocumentsByFunction": true }.
 
         Args:
-
             function: Rhai function to use to update the documents.
             context: Parameters to use in the function. Defaults to None.
             filter: Filter the documents before applying the function. Defaults to None.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -2176,23 +2101,19 @@ class AsyncIndex(_BaseIndex):
         """Update documents in the index.
 
         Args:
-
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -2323,7 +2244,6 @@ class AsyncIndex(_BaseIndex):
         Each batch tries to fill the max_payload_size
 
         Args:
-
             documents: List of documents.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -2335,16 +2255,13 @@ class AsyncIndex(_BaseIndex):
                 server with requests. Defaults to None.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -2397,7 +2314,6 @@ class AsyncIndex(_BaseIndex):
         """Load all json files from a directory and update the documents.
 
         Args:
-
             directory_path: Path to the directory that contains the json files.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
@@ -2411,18 +2327,15 @@ class AsyncIndex(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -2511,7 +2424,6 @@ class AsyncIndex(_BaseIndex):
         """Load all json files from a directory and update the documents.
 
         Args:
-
             directory_path: Path to the directory that contains the json files.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -2530,18 +2442,15 @@ class AsyncIndex(_BaseIndex):
                 server with requests. Defaults to None.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -2649,7 +2558,6 @@ class AsyncIndex(_BaseIndex):
         """Add documents in the index from a json file.
 
         Args:
-
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
@@ -2658,16 +2566,13 @@ class AsyncIndex(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
@@ -2693,7 +2598,6 @@ class AsyncIndex(_BaseIndex):
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
         Args:
-
             file_path: Path to the json file.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -2705,16 +2609,13 @@ class AsyncIndex(_BaseIndex):
                 server with requests. Defaults to None.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
@@ -2748,7 +2649,6 @@ class AsyncIndex(_BaseIndex):
         for batching.
 
         Args:
-
             file_path: The path to the file to send to Meilisearch. Only csv and ndjson files are
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
@@ -2758,19 +2658,16 @@ class AsyncIndex(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             ValueError: If the file is not a csv or ndjson file, or if a csv_delimiter is sent for
                 a non-csv file.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.csv")
@@ -2822,20 +2719,16 @@ class AsyncIndex(_BaseIndex):
         """Delete one document from the index.
 
         Args:
-
             document_id: Unique identifier of the document.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -2901,20 +2794,16 @@ class AsyncIndex(_BaseIndex):
         """Delete multiple documents from the index.
 
         Args:
-
             ids: List of unique identifiers of documents.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -2976,20 +2865,16 @@ class AsyncIndex(_BaseIndex):
         """Delete documents from the index by filter.
 
         Args:
-
             filter: The filter value information.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_pyrhon_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3057,23 +2942,19 @@ class AsyncIndex(_BaseIndex):
         """Delete batches of documents from the index by filter.
 
         Args:
-
             filters: A list of filter value information.
             concurrency_limit: If set this will limit the number of batches that will be sent
                 concurrently. This can be helpful if you find you are overloading the Meilisearch
                 server with requests. Defaults to None.
 
         Returns:
-
             The a list of details of the task statuses.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3113,16 +2994,13 @@ class AsyncIndex(_BaseIndex):
         """Delete all documents from the index.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3179,16 +3057,13 @@ class AsyncIndex(_BaseIndex):
         """Get settings of the index.
 
         Returns:
-
             Settings of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3212,21 +3087,17 @@ class AsyncIndex(_BaseIndex):
         """Update settings of the index.
 
         Args:
-
             body: Settings of the index.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk import MeilisearchSettings
             >>> new_settings = MeilisearchSettings(
@@ -3261,16 +3132,13 @@ class AsyncIndex(_BaseIndex):
         """Reset settings of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3284,16 +3152,13 @@ class AsyncIndex(_BaseIndex):
         """Get ranking rules of the index.
 
         Returns:
-
             List containing the ranking rules of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3309,21 +3174,17 @@ class AsyncIndex(_BaseIndex):
         """Update ranking rules of the index.
 
         Args:
-
             ranking_rules: List containing the ranking rules.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> ranking_rules=[
             >>>      "words",
@@ -3349,16 +3210,13 @@ class AsyncIndex(_BaseIndex):
         """Reset ranking rules of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3372,17 +3230,14 @@ class AsyncIndex(_BaseIndex):
         """Get distinct attribute of the index.
 
         Returns:
-
             String containing the distinct attribute of the index. If no distinct attribute
                 `None` is returned.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3399,21 +3254,17 @@ class AsyncIndex(_BaseIndex):
         """Update distinct attribute of the index.
 
         Args:
-
             body: Distinct attribute.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3429,16 +3280,13 @@ class AsyncIndex(_BaseIndex):
         """Reset distinct attribute of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3452,16 +3300,13 @@ class AsyncIndex(_BaseIndex):
         """Get searchable attributes of the index.
 
         Returns:
-
             List containing the searchable attributes of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3477,21 +3322,17 @@ class AsyncIndex(_BaseIndex):
         """Update searchable attributes of the index.
 
         Args:
-
             body: List containing the searchable attributes.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3507,16 +3348,13 @@ class AsyncIndex(_BaseIndex):
         """Reset searchable attributes of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3530,16 +3368,13 @@ class AsyncIndex(_BaseIndex):
         """Get displayed attributes of the index.
 
         Returns:
-
             List containing the displayed attributes of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3555,21 +3390,17 @@ class AsyncIndex(_BaseIndex):
         """Update displayed attributes of the index.
 
         Args:
-
             body: List containing the displayed attributes.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3587,16 +3418,13 @@ class AsyncIndex(_BaseIndex):
         """Reset displayed attributes of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3610,16 +3438,13 @@ class AsyncIndex(_BaseIndex):
         """Get stop words of the index.
 
         Returns:
-
             List containing the stop words of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3636,21 +3461,17 @@ class AsyncIndex(_BaseIndex):
         """Update stop words of the index.
 
         Args:
-
             body: List containing the stop words of the index.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3666,16 +3487,13 @@ class AsyncIndex(_BaseIndex):
         """Reset stop words of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3689,16 +3507,13 @@ class AsyncIndex(_BaseIndex):
         """Get synonyms of the index.
 
         Returns:
-
             The synonyms of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3717,21 +3532,17 @@ class AsyncIndex(_BaseIndex):
         """Update synonyms of the index.
 
         Args:
-
             body: The synonyms of the index.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3749,16 +3560,13 @@ class AsyncIndex(_BaseIndex):
         """Reset synonyms of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3772,16 +3580,13 @@ class AsyncIndex(_BaseIndex):
         """Get filterable attributes of the index.
 
         Returns:
-
             List containing the filterable attributes of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3800,21 +3605,17 @@ class AsyncIndex(_BaseIndex):
         """Update filterable attributes of the index.
 
         Args:
-
             body: List containing the filterable attributes of the index.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3830,16 +3631,13 @@ class AsyncIndex(_BaseIndex):
         """Reset filterable attributes of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3853,16 +3651,13 @@ class AsyncIndex(_BaseIndex):
         """Get sortable attributes of the AsyncIndex.
 
         Returns:
-
             List containing the sortable attributes of the AsyncIndex.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3878,21 +3673,17 @@ class AsyncIndex(_BaseIndex):
         """Get sortable attributes of the AsyncIndex.
 
         Args:
-
             sortable_attributes: List of attributes for searching.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3908,16 +3699,13 @@ class AsyncIndex(_BaseIndex):
         """Reset sortable attributes of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3931,16 +3719,13 @@ class AsyncIndex(_BaseIndex):
         """Get typo tolerance for the index.
 
         Returns:
-
             TypoTolerance for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3956,21 +3741,17 @@ class AsyncIndex(_BaseIndex):
         """Update typo tolerance.
 
         Args:
-
             typo_tolerance: Typo tolerance settings.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3989,16 +3770,13 @@ class AsyncIndex(_BaseIndex):
         """Reset typo tolerance to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4012,16 +3790,13 @@ class AsyncIndex(_BaseIndex):
         """Get faceting for the index.
 
         Returns:
-
             Faceting for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4035,21 +3810,17 @@ class AsyncIndex(_BaseIndex):
         """Partially update the faceting settings for an index.
 
         Args:
-
             faceting: Faceting values.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4067,16 +3838,13 @@ class AsyncIndex(_BaseIndex):
         """Reset an index's faceting settings to their default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4090,16 +3858,13 @@ class AsyncIndex(_BaseIndex):
         """Get pagination settings for the index.
 
         Returns:
-
             Pagination for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4113,21 +3878,17 @@ class AsyncIndex(_BaseIndex):
         """Partially update the pagination settings for an index.
 
         Args:
-
             settings: settings for pagination.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import Pagination
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
@@ -4146,16 +3907,13 @@ class AsyncIndex(_BaseIndex):
         """Reset an index's pagination settings to their default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4169,16 +3927,13 @@ class AsyncIndex(_BaseIndex):
         """Get separator token settings for the index.
 
         Returns:
-
             Separator tokens for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4194,21 +3949,17 @@ class AsyncIndex(_BaseIndex):
         """Update the separator tokens settings for an index.
 
         Args:
-
             separator_tokens: List of separator tokens.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4224,16 +3975,13 @@ class AsyncIndex(_BaseIndex):
         """Reset an index's separator tokens settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4247,16 +3995,13 @@ class AsyncIndex(_BaseIndex):
         """Get non-separator token settings for the index.
 
         Returns:
-
             Non-separator tokens for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4272,21 +4017,17 @@ class AsyncIndex(_BaseIndex):
         """Update the non-separator tokens settings for an index.
 
         Args:
-
             non_separator_tokens: List of non-separator tokens.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4302,16 +4043,13 @@ class AsyncIndex(_BaseIndex):
         """Reset an index's non-separator tokens settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4325,16 +4063,13 @@ class AsyncIndex(_BaseIndex):
         """Get search cutoff time in ms.
 
         Returns:
-
             Integer representing the search cutoff time in ms, or None.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4350,21 +4085,17 @@ class AsyncIndex(_BaseIndex):
         """Update the search cutoff for an index.
 
         Args:
-
             search_cutoff_ms: Integer value of the search cutoff time in ms.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4380,16 +4111,13 @@ class AsyncIndex(_BaseIndex):
         """Reset the search cutoff time to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4403,16 +4131,13 @@ class AsyncIndex(_BaseIndex):
         """Get word dictionary settings for the index.
 
         Returns:
-
             Word dictionary for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4428,21 +4153,17 @@ class AsyncIndex(_BaseIndex):
         """Update the word dictionary settings for an index.
 
         Args:
-
             dictionary: List of dictionary values.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4458,16 +4179,13 @@ class AsyncIndex(_BaseIndex):
         """Reset an index's word dictionary settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4481,16 +4199,13 @@ class AsyncIndex(_BaseIndex):
         """Get proximity precision settings for the index.
 
         Returns:
-
             Proximity precision for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4506,21 +4221,17 @@ class AsyncIndex(_BaseIndex):
         """Update the proximity precision settings for an index.
 
         Args:
-
             proximity_precision: The proximity precision value.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import ProximityPrecision
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
@@ -4539,16 +4250,13 @@ class AsyncIndex(_BaseIndex):
         """Reset an index's proximity precision settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4562,16 +4270,13 @@ class AsyncIndex(_BaseIndex):
         """Get embedder settings for the index.
 
         Returns:
-
             Embedders for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4585,21 +4290,17 @@ class AsyncIndex(_BaseIndex):
         """Update the embedders settings for an index.
 
         Args:
-
             embedders: The embedders value.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import Embedders, UserProvidedEmbedder
             >>>
@@ -4626,16 +4327,13 @@ class AsyncIndex(_BaseIndex):
         """Reset an index's embedders settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4649,16 +4347,13 @@ class AsyncIndex(_BaseIndex):
         """Get localized attributes settings for the index.
 
         Returns:
-
             Localized attributes for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4677,21 +4372,17 @@ class AsyncIndex(_BaseIndex):
         """Update the localized attributes settings for an index.
 
         Args:
-
             localized_attributes: The localized attributes value.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import LocalizedAttributes
             >>>
@@ -4714,16 +4405,13 @@ class AsyncIndex(_BaseIndex):
         """Reset an index's localized attributes settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4823,7 +4511,6 @@ class Index(_BaseIndex):
         """Class initializer.
 
         Args:
-
             http_client: An instance of the Client. This automatically gets passed by the
                 Client when creating and Index instance.
             uid: The index's unique identifier.
@@ -5094,16 +4781,13 @@ class Index(_BaseIndex):
         """Deletes the index.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5116,16 +4800,13 @@ class Index(_BaseIndex):
         """Delete the index if it already exists.
 
         Returns:
-
             True if the index was deleted or False if not.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5142,20 +4823,16 @@ class Index(_BaseIndex):
         """Update the index primary key.
 
         Args:
-
             primary_key: The primary key of the documents.
 
         Returns:
-
             An instance of the AsyncIndex with the updated information.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5172,16 +4849,13 @@ class Index(_BaseIndex):
         """Gets the infromation about the index.
 
         Returns:
-
             An instance of the AsyncIndex containing the retrieved information.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5198,16 +4872,13 @@ class Index(_BaseIndex):
         """Get the primary key.
 
         Returns:
-
             The primary key for the documents in the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5236,7 +4907,6 @@ class Index(_BaseIndex):
         through the `Client`.
 
         Args:
-
             http_client: An instance of the Client. This automatically gets passed by the Client
                 when creating an Index instance.
             uid: The index's unique identifier.
@@ -5261,16 +4931,13 @@ class Index(_BaseIndex):
                 JsonDict
 
         Returns:
-
             An instance of Index containing the information of the newly created index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = index.create(client, "movies")
@@ -5309,16 +4976,13 @@ class Index(_BaseIndex):
         """Get stats of the index.
 
         Returns:
-
             Stats of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5360,7 +5024,6 @@ class Index(_BaseIndex):
         """Search the index.
 
         Args:
-
             query: String containing the word(s) to search
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returned. Defaults to 20.
@@ -5419,16 +5082,13 @@ class Index(_BaseIndex):
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
 
         Returns:
-
             Results of the search
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5535,7 +5195,6 @@ class Index(_BaseIndex):
         """Search the index.
 
         Args:
-
             query: String containing the word(s) to search
             facet_name: The name of the facet to search
             facet_query: The facet search value
@@ -5586,16 +5245,13 @@ class Index(_BaseIndex):
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
 
         Returns:
-
             Results of the search
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5705,16 +5361,13 @@ class Index(_BaseIndex):
                 to None.
 
         Returns:
-
             Results of the search
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5744,20 +5397,16 @@ class Index(_BaseIndex):
         """Get one document with given document identifier.
 
         Args:
-
             document_id: Unique identifier of the document.
 
         Returns:
-
             The document information
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5778,7 +5427,6 @@ class Index(_BaseIndex):
         """Get a batch documents from the index.
 
         Args:
-
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
@@ -5787,17 +5435,14 @@ class Index(_BaseIndex):
                 used with Meilisearch >= v1.2.0
 
         Returns:
-
             Documents info.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -5835,23 +5480,19 @@ class Index(_BaseIndex):
         """Add documents to the index.
 
         Args:
-
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -5896,7 +5537,6 @@ class Index(_BaseIndex):
         """Adds documents in batches to reduce RAM usage with indexing.
 
         Args:
-
             documents: List of documents.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -5905,16 +5545,13 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -5942,7 +5579,6 @@ class Index(_BaseIndex):
         """Load all json files from a directory and add the documents to the index.
 
         Args:
-
             directory_path: Path to the directory that contains the json files.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
@@ -5956,18 +5592,15 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -6020,7 +5653,6 @@ class Index(_BaseIndex):
         """Load all json files from a directory and add the documents to the index in batches.
 
         Args:
-
             directory_path: Path to the directory that contains the json files.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -6036,18 +5668,15 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -6106,25 +5735,21 @@ class Index(_BaseIndex):
         """Add documents to the index from a json file.
 
         Args:
-
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
@@ -6148,7 +5773,6 @@ class Index(_BaseIndex):
         """Adds documents form a json file in batches to reduce RAM usage with indexing.
 
         Args:
-
             file_path: Path to the json file.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -6159,18 +5783,15 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
@@ -6203,7 +5824,6 @@ class Index(_BaseIndex):
         for batching.
 
         Args:
-
             file_path: The path to the file to send to Meilisearch. Only csv and ndjson files are
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
@@ -6213,19 +5833,16 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             ValueError: If the file is not a csv or ndjson file, or if a csv_delimiter is sent for
                 a non-csv file.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.csv")
@@ -6283,23 +5900,19 @@ class Index(_BaseIndex):
         sending a PATCH request to /experimental-features with { "editDocumentsByFunction": true }.
 
         Args:
-
             function: Rhai function to use to update the documents.
             context: Parameters to use in the function. Defaults to None.
             filter: Filter the documents before applying the function. Defaults to None.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -6328,23 +5941,19 @@ class Index(_BaseIndex):
         """Update documents in the index.
 
         Args:
-
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -6393,7 +6002,6 @@ class Index(_BaseIndex):
         Each batch tries to fill the max_payload_size
 
         Args:
-
             documents: List of documents.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -6402,16 +6010,13 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -6439,7 +6044,6 @@ class Index(_BaseIndex):
         """Load all json files from a directory and update the documents.
 
         Args:
-
             directory_path: Path to the directory that contains the json files.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
@@ -6453,18 +6057,15 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -6516,7 +6117,6 @@ class Index(_BaseIndex):
         """Load all json files from a directory and update the documents.
 
         Args:
-
             directory_path: Path to the directory that contains the json files.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -6532,18 +6132,15 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -6604,7 +6201,6 @@ class Index(_BaseIndex):
         """Add documents in the index from a json file.
 
         Args:
-
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
@@ -6613,16 +6209,13 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
@@ -6647,7 +6240,6 @@ class Index(_BaseIndex):
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
 
         Args:
-
             file_path: Path to the json file.
             batch_size: The number of documents that should be included in each batch.
                 Defaults to 1000.
@@ -6656,16 +6248,13 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
@@ -6696,7 +6285,6 @@ class Index(_BaseIndex):
         for batching.
 
         Args:
-
             file_path: The path to the file to send to Meilisearch. Only csv and ndjson files are
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
@@ -6706,19 +6294,16 @@ class Index(_BaseIndex):
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             ValueError: If the file is not a csv or ndjson file, or if a csv_delimiter is sent for
                 a non-csv file.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.csv")
@@ -6770,20 +6355,16 @@ class Index(_BaseIndex):
         """Delete one document from the index.
 
         Args:
-
             document_id: Unique identifier of the document.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -6807,20 +6388,16 @@ class Index(_BaseIndex):
         """Delete multiple documents from the index.
 
         Args:
-
             ids: List of unique identifiers of documents.
 
         Returns:
-
             List of update ids to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -6844,20 +6421,16 @@ class Index(_BaseIndex):
         """Delete documents from the index by filter.
 
         Args:
-
             filter: The filter value information.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -6887,20 +6460,16 @@ class Index(_BaseIndex):
         """Delete batches of documents from the index by filter.
 
         Args:
-
             filters: A list of filter value information.
 
         Returns:
-
             The a list of details of the task statuses.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -6917,16 +6486,13 @@ class Index(_BaseIndex):
         """Delete all documents from the index.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -6950,16 +6516,13 @@ class Index(_BaseIndex):
         """Get settings of the index.
 
         Returns:
-
             Settings of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -6981,21 +6544,17 @@ class Index(_BaseIndex):
         """Update settings of the index.
 
         Args:
-
             body: Settings of the index.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk import MeilisearchSettings
             >>> new_settings = MeilisearchSettings(
@@ -7030,16 +6589,13 @@ class Index(_BaseIndex):
         """Reset settings of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7053,16 +6609,13 @@ class Index(_BaseIndex):
         """Get ranking rules of the index.
 
         Returns:
-
             List containing the ranking rules of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7076,21 +6629,17 @@ class Index(_BaseIndex):
         """Update ranking rules of the index.
 
         Args:
-
             ranking_rules: List containing the ranking rules.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> ranking_rules=[
             >>>      "words",
@@ -7116,16 +6665,13 @@ class Index(_BaseIndex):
         """Reset ranking rules of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7139,17 +6685,14 @@ class Index(_BaseIndex):
         """Get distinct attribute of the index.
 
         Returns:
-
             String containing the distinct attribute of the index. If no distinct attribute
                 `None` is returned.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7166,21 +6709,17 @@ class Index(_BaseIndex):
         """Update distinct attribute of the index.
 
         Args:
-
             body: Distinct attribute.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7196,16 +6735,13 @@ class Index(_BaseIndex):
         """Reset distinct attribute of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7219,16 +6755,13 @@ class Index(_BaseIndex):
         """Get searchable attributes of the index.
 
         Returns:
-
             List containing the searchable attributes of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7242,21 +6775,17 @@ class Index(_BaseIndex):
         """Update searchable attributes of the index.
 
         Args:
-
             body: List containing the searchable attributes.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7272,16 +6801,13 @@ class Index(_BaseIndex):
         """Reset searchable attributes of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7295,16 +6821,13 @@ class Index(_BaseIndex):
         """Get displayed attributes of the index.
 
         Returns:
-
             List containing the displayed attributes of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7318,21 +6841,17 @@ class Index(_BaseIndex):
         """Update displayed attributes of the index.
 
         Args:
-
             body: List containing the displayed attributes.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7350,16 +6869,13 @@ class Index(_BaseIndex):
         """Reset displayed attributes of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7373,16 +6889,13 @@ class Index(_BaseIndex):
         """Get stop words of the index.
 
         Returns:
-
             List containing the stop words of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7399,21 +6912,17 @@ class Index(_BaseIndex):
         """Update stop words of the index.
 
         Args:
-
             body: List containing the stop words of the index.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7429,16 +6938,13 @@ class Index(_BaseIndex):
         """Reset stop words of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7452,16 +6958,13 @@ class Index(_BaseIndex):
         """Get synonyms of the index.
 
         Returns:
-
             The synonyms of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7478,20 +6981,16 @@ class Index(_BaseIndex):
         """Update synonyms of the index.
 
         Args:
-
             body: The synonyms of the index.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey") as client:
             >>> index = client.index("movies")
@@ -7509,16 +7008,13 @@ class Index(_BaseIndex):
         """Reset synonyms of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7532,16 +7028,13 @@ class Index(_BaseIndex):
         """Get filterable attributes of the index.
 
         Returns:
-
             List containing the filterable attributes of the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7558,21 +7051,17 @@ class Index(_BaseIndex):
         """Update filterable attributes of the index.
 
         Args:
-
             body: List containing the filterable attributes of the index.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7588,16 +7077,13 @@ class Index(_BaseIndex):
         """Reset filterable attributes of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7611,16 +7097,13 @@ class Index(_BaseIndex):
         """Get sortable attributes of the AsyncIndex.
 
         Returns:
-
             List containing the sortable attributes of the AsyncIndex.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7636,21 +7119,17 @@ class Index(_BaseIndex):
         """Get sortable attributes of the AsyncIndex.
 
         Args:
-
             sortable_attributes: List of attributes for searching.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7666,16 +7145,13 @@ class Index(_BaseIndex):
         """Reset sortable attributes of the index to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7689,16 +7165,13 @@ class Index(_BaseIndex):
         """Get typo tolerance for the index.
 
         Returns:
-
             TypoTolerance for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7714,21 +7187,17 @@ class Index(_BaseIndex):
         """Update typo tolerance.
 
         Args:
-
             typo_tolerance: Typo tolerance settings.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7747,16 +7216,13 @@ class Index(_BaseIndex):
         """Reset typo tolerance to default values.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7770,16 +7236,13 @@ class Index(_BaseIndex):
         """Get faceting for the index.
 
         Returns:
-
             Faceting for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7793,21 +7256,17 @@ class Index(_BaseIndex):
         """Partially update the faceting settings for an index.
 
         Args:
-
             faceting: Faceting values.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7825,16 +7284,13 @@ class Index(_BaseIndex):
         """Reset an index's faceting settings to their default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7848,16 +7304,13 @@ class Index(_BaseIndex):
         """Get pagination settings for the index.
 
         Returns:
-
             Pagination for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7871,21 +7324,17 @@ class Index(_BaseIndex):
         """Partially update the pagination settings for an index.
 
         Args:
-
             settings: settings for pagination.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.settings import Pagination
             >>> client = Client("http://localhost.com", "masterKey")
@@ -7904,16 +7353,13 @@ class Index(_BaseIndex):
         """Reset an index's pagination settings to their default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7927,16 +7373,13 @@ class Index(_BaseIndex):
         """Get separator token settings for the index.
 
         Returns:
-
             Separator tokens for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7952,21 +7395,17 @@ class Index(_BaseIndex):
         """Update the separator tokens settings for an index.
 
         Args:
-
             separator_tokens: List of separator tokens.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -7982,16 +7421,13 @@ class Index(_BaseIndex):
         """Reset an index's separator tokens settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8005,16 +7441,13 @@ class Index(_BaseIndex):
         """Get non-separator token settings for the index.
 
         Returns:
-
             Non-separator tokens for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8030,21 +7463,17 @@ class Index(_BaseIndex):
         """Update the non-separator tokens settings for an index.
 
         Args:
-
             non_separator_tokens: List of non-separator tokens.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8060,16 +7489,13 @@ class Index(_BaseIndex):
         """Reset an index's non-separator tokens settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8083,16 +7509,13 @@ class Index(_BaseIndex):
         """Get search cutoff time in ms.
 
         Returns:
-
             Integer representing the search cutoff time in ms, or None.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8106,21 +7529,17 @@ class Index(_BaseIndex):
         """Update the search cutoff for an index.
 
         Args:
-
             search_cutoff_ms: Integer value of the search cutoff time in ms.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8136,16 +7555,13 @@ class Index(_BaseIndex):
         """Reset the search cutoff time to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8159,16 +7575,13 @@ class Index(_BaseIndex):
         """Get word dictionary settings for the index.
 
         Returns:
-
             Word dictionary for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8182,21 +7595,17 @@ class Index(_BaseIndex):
         """Update the word dictionary settings for an index.
 
         Args:
-
             dictionary: List of dictionary values.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8212,16 +7621,13 @@ class Index(_BaseIndex):
         """Reset an index's word dictionary settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8235,16 +7641,13 @@ class Index(_BaseIndex):
         """Get proximity precision settings for the index.
 
         Returns:
-
             Proximity precision for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8260,21 +7663,17 @@ class Index(_BaseIndex):
         """Update the proximity precision settings for an index.
 
         Args:
-
             proximity_precision: The proximity precision value.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.settings import ProximityPrecision
             >>> client = Client("http://localhost.com", "masterKey")
@@ -8293,16 +7692,13 @@ class Index(_BaseIndex):
         """Reset an index's proximity precision settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8316,16 +7712,13 @@ class Index(_BaseIndex):
         """Get embedder settings for the index.
 
         Returns:
-
             Embedders for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8339,21 +7732,17 @@ class Index(_BaseIndex):
         """Update the embedders settings for an index.
 
         Args:
-
             embedders: The embedders value.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.settings import Embedders, UserProvidedEmbedder
             >>> client = Client("http://localhost.com", "masterKey")
@@ -8379,16 +7768,13 @@ class Index(_BaseIndex):
         """Reset an index's embedders settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import Client
             >>> client = AsyncClient("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8402,16 +7788,13 @@ class Index(_BaseIndex):
         """Get localized attributes settings for the index.
 
         Returns:
-
             Localized attributes for the index.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.index("movies")
@@ -8430,21 +7813,17 @@ class Index(_BaseIndex):
         """Update the localized attributes settings for an index.
 
         Args:
-
             localized_attributes: The localized attributes value.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
-
             Task to track the action.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import LocalizedAttributes
             >>>
@@ -8467,16 +7846,13 @@ class Index(_BaseIndex):
         """Reset an index's localized attributes settings to the default value.
 
         Returns:
-
             The details of the task status.
 
         Raises:
-
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples:
-
+        Examples
             >>> from meilisearch_async_client import AsyncClient
             >>> Client("http://localhost.com", "masterKey") as client:
             >>> index = client.index("movies")
