@@ -1736,7 +1736,6 @@ class Client(BaseClient):
         """Wait until Meilisearch processes a task, and get its status.
 
         Args:
-            client: An httpx HttpxClient or meilisearch_python_sdk Client instance.
             task_id: Identifier of the task to retrieve.
             timeout_in_ms: Amount of time in milliseconds to wait before raising a
                 MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
