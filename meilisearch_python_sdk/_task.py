@@ -35,7 +35,6 @@ async def async_cancel_tasks(
     Defaults to cancelling all tasks.
 
     Args:
-
         client: An httpx HttpxAsyncClient or meilisearch_python_sdk AsyncClient instance.
         uids: A list of task UIDs to cancel.
         index_uids: A list of index UIDs for which to cancel tasks.
@@ -47,17 +46,14 @@ async def async_cancel_tasks(
         after_finished_at: Cancel tasks that were finished after the specified date time.
 
     Returns:
-
         The details of the task
 
     Raises:
-
         MeilisearchCommunicationError: If there was an error communicating with the server.
         MeilisearchApiError: If the Meilisearch API returned an error.
         MeilisearchTimeoutError: If the connection times out.
 
-    Examples:
-
+    Examples
         >>> from meilisearch_python_sdk import AsyncClient
         >>> from meilisearch_python_sdk.task import cancel_tasks
         >>>
