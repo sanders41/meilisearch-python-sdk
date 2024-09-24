@@ -33,7 +33,6 @@ def async_add_documents(
     It is required that either an async_client or url is provided.
 
     Args:
-
         index_name: The name of the index to which the documents should be added.
         connection_info: Either an AsyncClient instance ConnectionInfo with informtaion on how to
             connect to Meilisearch.
@@ -46,17 +45,14 @@ def async_add_documents(
         verify: If set to `False` the decorator will not verify the SSL certificate of the server.
 
     Returns:
-
         The list of documents proviced by the decorated function.
 
     Raises:
-
         MeilisearchCommunicationError: If there was an error communicating with the server.
         MeilisearchApiError: If the Meilisearch API returned an error.
         ValueError: If neither an async_client nor an url is provided.
 
-    Examples:
-
+    Examples
         >>> from meilisearch_python_sdk import AsyncClient
         >>> from meilisearch_python_sdk.decorators import async_add_documents, ConnectionInfo
         >>>
@@ -119,7 +115,6 @@ def add_documents(
     It is required that either an client or url is provided.
 
     Args:
-
         index_name: The name of the index to which the documents should be added.
         connection_info: Either an Client instance ConnectionInfo with informtaion on how to
             connect to Meilisearch.
@@ -132,17 +127,14 @@ def add_documents(
         verify: If set to `False` the decorator will not verify the SSL certificate of the server.
 
     Returns:
-
         The list of documents proviced by the decorated function.
 
     Raises:
-
         MeilisearchCommunicationError: If there was an error communicating with the server.
         MeilisearchApiError: If the Meilisearch API returned an error.
         ValueError: If neither an async_client nor an url is provided.
 
-    Examples:
-
+    Examples
         >>> from meilisearch_python_sdk import Client
         >>> from meilisearch_python_sdk.decorators import add_documents, ConnectionInfo
         >>>
