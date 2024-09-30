@@ -49,9 +49,9 @@ class Distribution(CamelBase):
 class OpenAiEmbedder(CamelBase):
     source: str = "openAi"
     url: str | None = None
-    model: str | None = None  # Defaults to text-embedding-ada-002
-    dimensions: int | None = None  # Uses the model default
-    api_key: str | None = None  # Can be provided through a CLI option or environment variable
+    model: str | None = None
+    dimensions: int | None = None
+    api_key: str | None = None
     document_template: str | None = None
     document_template_max_bytes: int | None = None
     distribution: Distribution | None = None
@@ -59,7 +59,7 @@ class OpenAiEmbedder(CamelBase):
 
 class HuggingFaceEmbedder(CamelBase):
     source: str = "huggingFace"
-    model: str | None = None  # Defaults to BAAI/bge-base-en-v1.5
+    model: str | None = None
     revision: str | None = None
     document_template: str | None = None
     document_template_max_bytes: int | None = None
