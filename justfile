@@ -83,5 +83,8 @@
 @install:
   uv sync --frozen --all-extras
 
+@lock:
+  uv lock
+
 @benchmark: start-meilisearch-detached && stop-meilisearch
   -uv run benchmark/run_benchmark.py
