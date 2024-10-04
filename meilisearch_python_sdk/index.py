@@ -154,10 +154,9 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.add_documents_plugins:
-            if plugin.CONCURRENT_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.add_documents_plugins if plugin.CONCURRENT_EVENT
+        ]
 
         if not plugins:
             return None
@@ -169,10 +168,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.add_documents_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.add_documents_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -184,10 +180,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.add_documents_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.add_documents_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -199,10 +192,11 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_all_documents_plugins:
-            if plugin.CONCURRENT_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin
+            for plugin in self.plugins.delete_all_documents_plugins
+            if plugin.CONCURRENT_EVENT
+        ]
 
         if not plugins:
             return None
@@ -214,10 +208,9 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_all_documents_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.delete_all_documents_plugins if plugin.POST_EVENT
+        ]
 
         if not plugins:
             return None
@@ -229,10 +222,9 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_all_documents_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.delete_all_documents_plugins if plugin.PRE_EVENT
+        ]
 
         if not plugins:
             return None
@@ -244,10 +236,9 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_document_plugins:
-            if plugin.CONCURRENT_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.delete_document_plugins if plugin.CONCURRENT_EVENT
+        ]
 
         if not plugins:
             return None
@@ -259,10 +250,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_document_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.delete_document_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -274,10 +262,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_document_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.delete_document_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -289,10 +274,9 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_plugins:
-            if plugin.CONCURRENT_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.delete_documents_plugins if plugin.CONCURRENT_EVENT
+        ]
 
         if not plugins:
             return None
@@ -304,10 +288,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.delete_documents_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -319,10 +300,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.delete_documents_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -334,10 +312,11 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_by_filter_plugins:
-            if plugin.CONCURRENT_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin
+            for plugin in self.plugins.delete_documents_by_filter_plugins
+            if plugin.CONCURRENT_EVENT
+        ]
 
         if not plugins:
             return None
@@ -349,10 +328,11 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_by_filter_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin
+            for plugin in self.plugins.delete_documents_by_filter_plugins
+            if plugin.POST_EVENT
+        ]
 
         if not plugins:
             return None
@@ -364,10 +344,9 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_by_filter_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.delete_documents_by_filter_plugins if plugin.PRE_EVENT
+        ]
 
         if not plugins:
             return None
@@ -379,10 +358,9 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.facet_search_plugins:
-            if plugin.CONCURRENT_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.facet_search_plugins if plugin.CONCURRENT_EVENT
+        ]
 
         if not plugins:
             return None
@@ -394,10 +372,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.facet_search_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.facet_search_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -409,10 +384,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.facet_search_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.facet_search_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -424,10 +396,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.search_plugins:
-            if plugin.CONCURRENT_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.CONCURRENT_EVENT]
 
         if not plugins:
             return None
@@ -439,10 +408,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.search_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -454,10 +420,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.search_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -471,10 +434,9 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.update_documents_plugins:
-            if plugin.CONCURRENT_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.update_documents_plugins if plugin.CONCURRENT_EVENT
+        ]
 
         if not plugins:
             return None
@@ -486,10 +448,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.update_documents_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.update_documents_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -501,10 +460,7 @@ class AsyncIndex(_BaseIndex):
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.update_documents_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.update_documents_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -4542,10 +4498,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.add_documents_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.add_documents_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -4557,10 +4510,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.add_documents_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.add_documents_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -4572,10 +4522,9 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_all_documents_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.delete_all_documents_plugins if plugin.POST_EVENT
+        ]
 
         if not plugins:
             return None
@@ -4587,10 +4536,9 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_all_documents_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.delete_all_documents_plugins if plugin.PRE_EVENT
+        ]
 
         if not plugins:
             return None
@@ -4602,10 +4550,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_document_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.delete_document_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -4617,10 +4562,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_document_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.delete_document_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -4632,10 +4574,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.delete_documents_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -4647,10 +4586,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.delete_documents_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -4662,10 +4598,11 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_by_filter_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin
+            for plugin in self.plugins.delete_documents_by_filter_plugins
+            if plugin.POST_EVENT
+        ]
 
         if not plugins:
             return None
@@ -4677,10 +4614,9 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.delete_documents_by_filter_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [
+            plugin for plugin in self.plugins.delete_documents_by_filter_plugins if plugin.PRE_EVENT
+        ]
 
         if not plugins:
             return None
@@ -4692,10 +4628,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.facet_search_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.facet_search_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -4707,10 +4640,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.facet_search_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.facet_search_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -4722,10 +4652,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.search_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -4737,10 +4664,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.search_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
@@ -4752,10 +4676,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.update_documents_plugins:
-            if plugin.POST_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.update_documents_plugins if plugin.POST_EVENT]
 
         if not plugins:
             return None
@@ -4767,10 +4688,7 @@ class Index(_BaseIndex):
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = []
-        for plugin in self.plugins.update_documents_plugins:
-            if plugin.PRE_EVENT:
-                plugins.append(plugin)
+        plugins = [plugin for plugin in self.plugins.update_documents_plugins if plugin.PRE_EVENT]
 
         if not plugins:
             return None
