@@ -11,11 +11,10 @@ import pytest
 from pytest_asyncio import is_async_test
 
 try:
-    import truststore
-
-    has_truststore = True
+    import truststore as truststore
 except ImportError:
-    has_truststore = False
+    truststore = None
+
 from httpx import AsyncClient as HttpxAsyncClient
 
 from meilisearch_python_sdk import AsyncClient, Client
@@ -56,7 +55,7 @@ def http2_enabled(request):
 
 @pytest.fixture(scope="session")
 def ssl_verify(http2_enabled):
-    if has_truststore:  # truststore is installed
+    if truststore:  # truststore is installed
         if http2_enabled:
             # http2 needs ssl so best to use truststore to make things work with mkcert
             return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT) if http2_enabled else True
