@@ -43,7 +43,7 @@ dev-dependencies = [
   "mkdocs-material==9.5.32",
   "mkdocstrings[python]==0.25.2",
   "mypy==1.11.1",
-  "pre-commit==3.8.0",
+  "pre-commit==4.0.0",
   "pytest==8.3.2",
   "pytest-cov==5.0.0",
   "pytest-asyncio==0.24.0",
