@@ -24,12 +24,24 @@ class FacetSearchResults(CamelBase):
 
 class Hybrid(CamelBase):
     semantic_ratio: float
-    embedder: str | None = None
+    embedder: str
+
+
+class MergeFacets(CamelBase):
+    max_values_per_facet: int
 
 
 class Federation(CamelBase):
     limit: int = 20
     offset: int = 0
+    facets_by_index: dict[str, list[str]] | None = None
+
+
+class FederationMerged(CamelBase):
+    limit: int = 20
+    offset: int = 0
+    facets_by_index: dict[str, list[str]] | None = None
+    merge_facets: MergeFacets | None
 
 
 class SearchParams(CamelBase):
@@ -99,6 +111,7 @@ class SearchResultsFederated(CamelBase, Generic[T]):
     page: int | None = None
     hits_per_page: int | None = None
     semantic_hit_count: int | None = None
+    facets_by_index: JsonDict | None = None
 
 
 class SimilarSearchResults(CamelBase, Generic[T]):
