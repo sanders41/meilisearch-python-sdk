@@ -18,23 +18,23 @@
 @ruff-format:
   uv run ruff format meilisearch_python_sdk tests examples
 
-@test:
-  -uv run pytest -x
+@test *args="":
+  -uv run pytest {{args}}
 
-@test-http2:
-  -uv run pytest -x --http2
+@test-http2 *args="":
+  -uv run pytest --http2 {{args}}
 
-@test-parallel:
-  -uv run pytest -n auto -x -m "not no_parallel"
+@test-parallel *args="":
+  -uv run pytest -n auto -m "not no_parallel" {{args}}
 
-@test-no-parallel:
-  -uv run pytest -x -m "no_parallel"
+@test-no-parallel *args="":
+  -uv run pytest -m "no_parallel" {{args}}
 
-@test-parallel-http2:
-  -uv run pytest -n auto -x -m "not no_parallel" --http2
+@test-parallel-http2 *args="":
+  -uv run pytest -n auto -m "not no_parallel" --http2 {{args}}
 
-@test-no-parallel-http2:
-  -uv run pytest -x -m "no_parallel" --http2
+@test-no-parallel-http2 *args="":
+  -uv run pytest -m "no_parallel" --http2 {{args}}
 
 @test-ci: start-meilisearch-detached && stop-meilisearch
   uv run pytest --cov=meilisearch_python_sdk --cov-report=xml
