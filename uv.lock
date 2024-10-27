@@ -537,7 +537,7 @@ version = "3.5.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
-    { name = "camel-converter" },
+    { name = "camel-converter", extra = ["pydantic"] },
     { name = "eval-type-backport", marker = "python_full_version < '3.10'" },
     { name = "httpx", extra = ["http2"] },
     { name = "pydantic" },
@@ -556,7 +556,7 @@ ujson = [
     { name = "ujson" },
 ]
 
-[package.dev-dependencies]
+[package.dependency-groups]
 dev = [
     { name = "meilisearch" },
     { name = "mkdocs" },
@@ -578,7 +578,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiofiles", specifier = ">=0.7" },
-    { name = "camel-converter", specifier = ">=1.0.0" },
+    { name = "camel-converter", extras = ["pydantic"], specifier = ">=1.0.0" },
     { name = "eval-type-backport", marker = "python_full_version < '3.10'", specifier = ">=0.2.0" },
     { name = "httpx", extras = ["http2"], specifier = ">=0.17" },
     { name = "orjson", marker = "extra == 'all'" },
@@ -589,7 +589,7 @@ requires-dist = [
     { name = "ujson", marker = "extra == 'ujson'", specifier = ">=5.10.0" },
 ]
 
-[package.metadata.requires-dev]
+[package.metadata.dependency-groups]
 dev = [
     { name = "meilisearch", specifier = "==0.31.5" },
     { name = "mkdocs", specifier = "==1.6.0" },
