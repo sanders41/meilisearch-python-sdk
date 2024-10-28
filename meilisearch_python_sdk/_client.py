@@ -24,6 +24,7 @@ from meilisearch_python_sdk.models.health import Health
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.search import (
     Federation,
+    FederationMerged,
     SearchParams,
     SearchResultsFederated,
     SearchResultsWithUID,
@@ -587,7 +588,7 @@ class AsyncClient(BaseClient):
         self,
         queries: list[SearchParams],
         *,
-        federation: Federation | None = None,
+        federation: Federation | FederationMerged | None = None,
         hits_type: Any = JsonDict,
     ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
@@ -628,10 +629,18 @@ class AsyncClient(BaseClient):
         else:
             processed_queries = [x.model_dump(by_alias=True) for x in queries]
 
+        if federation:
+            federation_payload = federation.model_dump(by_alias=True)
+            if federation.facets_by_index is None:
+                del federation_payload["facetsByIndex"]
+
+        else:
+            federation_payload = None
+
         response = await self._http_requests.post(
             url,
             body={
-                "federation": federation.model_dump(by_alias=True) if federation else None,
+                "federation": federation_payload,
                 "queries": processed_queries,
             },
         )
@@ -1396,7 +1405,7 @@ class Client(BaseClient):
         self,
         queries: list[SearchParams],
         *,
-        federation: Federation | None = None,
+        federation: Federation | FederationMerged | None = None,
         hits_type: Any = JsonDict,
     ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
@@ -1437,10 +1446,18 @@ class Client(BaseClient):
         else:
             processed_queries = [x.model_dump(by_alias=True) for x in queries]
 
+        if federation:
+            federation_payload = federation.model_dump(by_alias=True)
+            if federation.facets_by_index is None:
+                del federation_payload["facetsByIndex"]
+
+        else:
+            federation_payload = None
+
         response = self._http_requests.post(
             url,
             body={
-                "federation": federation.model_dump(by_alias=True) if federation else None,
+                "federation": federation_payload,
                 "queries": processed_queries,
             },
         )

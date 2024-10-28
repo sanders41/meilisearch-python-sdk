@@ -3079,7 +3079,11 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_settings(new_settings)
         """
-        body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}
+        body_dict = {
+            k: v
+            for k, v in body.model_dump(by_alias=True, exclude_none=True).items()
+            if v is not None
+        }
         response = await self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
         return TaskInfo(**response.json())
@@ -4270,7 +4274,9 @@ class AsyncIndex(_BaseIndex):
         payload = {}
         for key, embedder in embedders.embedders.items():
             payload[key] = {
-                k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
+                k: v
+                for k, v in embedder.model_dump(by_alias=True, exclude_none=True).items()
+                if v is not None
             }
 
         response = await self._http_requests.patch(
@@ -6498,7 +6504,11 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_settings(new_settings)
         """
-        body_dict = {k: v for k, v in body.model_dump(by_alias=True).items() if v is not None}
+        body_dict = {
+            k: v
+            for k, v in body.model_dump(by_alias=True, exclude_none=True).items()
+            if v is not None
+        }
         response = self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
         return TaskInfo(**response.json())
@@ -7672,7 +7682,9 @@ class Index(_BaseIndex):
         payload = {}
         for key, embedder in embedders.embedders.items():
             payload[key] = {
-                k: v for k, v in embedder.model_dump(by_alias=True).items() if v is not None
+                k: v
+                for k, v in embedder.model_dump(by_alias=True, exclude_none=True).items()
+                if v is not None
             }
 
         response = self._http_requests.patch(
