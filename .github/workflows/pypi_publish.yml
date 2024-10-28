@@ -20,7 +20,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Dependencies
         run: uv sync --frozen --all-extras
-      - name: Build and publish package
+      - name: Build package
+        run: uv build
+      - name: Publish package
         run: uv publish
       - name: Deploy Docs
         run: uv run mkdocs gh-deploy --force
