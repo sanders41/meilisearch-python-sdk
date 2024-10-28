@@ -1,4 +1,4 @@
-name: PyPi Publish
+name: Docs Publish
 on:
   release:
     types:
@@ -8,9 +8,6 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      # For PyPI's trusted publishing.
-      id-token: write
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
@@ -23,7 +20,5 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Dependencies
         run: uv sync --frozen --all-extras
-      - name: Build package
-        run: uv build
-      - name: Publish package
-        run: uv publish
+      - name: Deploy Docs
+        run: uv run mkdocs gh-deploy --force
