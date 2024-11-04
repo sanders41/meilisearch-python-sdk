@@ -112,7 +112,13 @@ class TaskInfoPlugin:
     PRE_EVENT = False
 
     async def run_plugin(self, event: AsyncEvent, **kwargs: Any) -> TaskInfo:
-        return TaskInfo(task_uid=1, status="succeeded", type="test", enqueued_at=datetime.now())
+        return TaskInfo(
+            task_uid=1,
+            status="succeeded",
+            type="test",
+            task_type="test",
+            enqueued_at=datetime.now(),
+        )
 
 
 class PrePlugin:
