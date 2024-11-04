@@ -102,7 +102,13 @@ class TaskInfoPlugin:
     PRE_EVENT = False
 
     def run_plugin(self, event: Event, **kwargs: Any) -> TaskInfo:
-        return TaskInfo(task_uid=1, status="succeeded", type="test", enqueued_at=datetime.now())
+        return TaskInfo(
+            task_uid=1,
+            status="succeeded",
+            type="test",
+            task_type="test",
+            enqueued_at=datetime.now(),
+        )
 
 
 @pytest.mark.parametrize(
