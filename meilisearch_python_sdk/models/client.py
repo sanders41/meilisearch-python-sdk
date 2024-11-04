@@ -23,7 +23,7 @@ class ClientStats(CamelBase):
 class _KeyBase(CamelBase):
     uid: str
     name: str | None = None
-    description: str
+    description: str | None = None
     actions: list[str]
     indexes: list[str]
     expires_at: datetime | None = None
@@ -59,7 +59,7 @@ class Key(_KeyBase):
 
 class KeyCreate(CamelBase):
     name: str | None = None
-    description: str
+    description: str | None = None
     actions: list[str]
     indexes: list[str]
     expires_at: datetime | None = None
