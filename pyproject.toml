@@ -49,7 +49,7 @@ dev = [
   "pytest-cov==6.0.0",
   "pytest-asyncio==0.24.0",
   "pytest-xdist==3.6.1",
-  "ruff==0.7.4",
+  "ruff==0.8.0",
   "types-aiofiles==24.1.0.20240626",
   "typing-extensions==4.12.2",
   "types-ujson==5.10.0.20240515",
@@ -98,9 +98,11 @@ select=[
   "F",  # pyflakes
   "UP",  # pyupgrade
   "I001",  # unsorted-imports
-  "T201",
-  "T203",
-  "ASYNC"  # flake8-async
+  "T201",  # Don't allow print
+  "T203",  # Don't allow pprint
+  "ASYNC",  # flake8-async
+  "RUF022",  # Unsorted __all__
+  "RUF023",  # Unforted __slots__
 ]
 ignore=[
   # Recommened ignores by ruff when using formatter
