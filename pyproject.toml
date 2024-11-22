@@ -101,8 +101,8 @@ select=[
   "T201",  # Don't allow print
   "T203",  # Don't allow pprint
   "ASYNC",  # flake8-async
-  "RUFF022",  # Unsorted __all__
-  "RUFF023",  # Unforted __slots__
+  "RUF022",  # Unsorted __all__
+  "RUF023",  # Unforted __slots__
 ]
 ignore=[
   # Recommened ignores by ruff when using formatter
