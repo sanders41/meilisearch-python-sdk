@@ -101,7 +101,7 @@ select=[
   "T201",  # Don't allow print
   "T203",  # Don't allow pprint
   "ASYNC",  # flake8-async
-  "RUFf022",  # Unsorted __all__
+  "RUFF022",  # Unsorted __all__
   "RUFF023",  # Unforted __slots__
 ]
 ignore=[
