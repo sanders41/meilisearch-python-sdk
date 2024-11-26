@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from meilisearch_python_sdk._utils import get_async_client
+from meilisearch_python_sdk._utils import get_async_client, get_client
 from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ async def async_get_batches(client: HttpxAsyncClient | AsyncClient) -> BatchStat
 
 
 def get_batch(client: HttpxClient | Client, batch_uid: str) -> BatchResult | None:
-    client_ = get_async_client(client)
+    client_ = get_client(client)
     response = client_.get(f"batches/{batch_uid}")
     if not response.json():
         return None
@@ -43,7 +43,7 @@ def get_batch(client: HttpxClient | Client, batch_uid: str) -> BatchResult | Non
 
 
 def get_batches(client: HttpxClient | Client) -> BatchStatus:
-    client_ = get_async_client(client)
+    client_ = get_client(client)
     response = client_.get("batches")
 
     return BatchStatus(**response.json())
