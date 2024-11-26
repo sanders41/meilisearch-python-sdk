@@ -12,6 +12,7 @@ from httpx import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Re
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk.errors import (
+    BatchNotFoundError,
     InvalidRestriction,
     MeilisearchApiError,
     MeilisearchCommunicationError,
@@ -1012,3 +1013,8 @@ def test_get_batch(client, empty_index, small_movies):
     result = client.get_batch(task.batch_uid)
 
     assert result.uid == task.batch_uid
+
+
+def test_get_batch_not_found(client):
+    with pytest.raises(BatchNotFoundError):
+        client.get_batch(999999999)

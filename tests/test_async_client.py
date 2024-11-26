@@ -15,6 +15,7 @@ from meilisearch_python_sdk._task import (
     async_get_task,
 )
 from meilisearch_python_sdk.errors import (
+    BatchNotFoundError,
     InvalidRestriction,
     MeilisearchApiError,
     MeilisearchCommunicationError,
@@ -1031,3 +1032,8 @@ async def test_get_batch(async_client, async_empty_index, small_movies):
     result = await async_client.get_batch(task.batch_uid)
 
     assert result.uid == task.batch_uid
+
+
+async def test_get_batch_not_found(async_client):
+    with pytest.raises(BatchNotFoundError):
+        await async_client.get_batch(999999999)

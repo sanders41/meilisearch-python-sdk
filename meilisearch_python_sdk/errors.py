@@ -1,6 +1,10 @@
 from httpx import Response
 
 
+class BatchNotFoundError(Exception):
+    pass
+
+
 class InvalidDocumentError(Exception):
     """Error for documents that are not in a valid format for Meilisearch."""
 
