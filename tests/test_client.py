@@ -960,3 +960,27 @@ def test_http_version(http2, expected, master_key, ssl_verify, base_url, http2_e
         pytest.skip("HTTP/2 is not enabled")
     client = Client(base_url, master_key, http2=http2, verify=ssl_verify)
     assert client.http_client.get("health").http_version == expected
+
+
+def test_get_batches(client, empty_index, small_movies):
+    # Add documents to create batches
+    index = empty_index()
+    tasks = index.add_documents_in_batches(small_movies, batch_size=5)
+    for task in tasks:
+        client.wait_for_task(task.task_uid)
+
+    result = client.get_batches()
+    assert len(result.results) > 0
+
+
+def test_get_batch(client, empty_index, small_movies):
+    # Add documents to create batches
+    index = empty_index()
+    tasks = index.add_documents_in_batches(small_movies, batch_size=5)
+    for task in tasks:
+        client.wait_for_task(task.task_uid)
+
+    task = client.get_task(tasks[0].task_uid)
+    result = client.get_batch(task.batch_uid)
+
+    assert result.uid == task.batch_uid

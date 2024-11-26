@@ -9,6 +9,7 @@ from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk import _task
+from meilisearch_python_sdk._batch import async_get_batch, async_get_batches, get_batch, get_batches
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
 from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_sdk.index import AsyncIndex, Index
@@ -39,6 +40,7 @@ if TYPE_CHECKING:  # pragma: no cover
     import sys
     from types import TracebackType
 
+    from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
     from meilisearch_python_sdk.types import JsonMapping
 
     if sys.version_info >= (3, 11):
@@ -769,6 +771,12 @@ class AsyncClient(BaseClient):
         response = await self._http_requests.post("swap-indexes", processed_indexes)
 
         return TaskInfo(**response.json())
+
+    async def get_batch(self, batch_uid: str) -> BatchResult | None:
+        return await async_get_batch(self, batch_uid)
+
+    async def get_batches(self) -> BatchStatus:
+        return await async_get_batches(self)
 
     async def cancel_tasks(
         self,
@@ -1585,6 +1593,12 @@ class Client(BaseClient):
         response = self._http_requests.post("swap-indexes", processed_indexes)
 
         return TaskInfo(**response.json())
+
+    def get_batch(self, batch_uid: str) -> BatchResult | None:
+        return get_batch(self, batch_uid)
+
+    def get_batches(self) -> BatchStatus:
+        return get_batches(self)
 
     def cancel_tasks(
         self,
