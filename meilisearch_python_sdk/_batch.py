@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from meilisearch_python_sdk._utils import get_async_client, get_client
+from meilisearch_python_sdk.errors import BatchNotFoundError
 from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
 
 if TYPE_CHECKING:
@@ -16,12 +17,13 @@ if TYPE_CHECKING:
 
 
 async def async_get_batch(
-    client: HttpxAsyncClient | AsyncClient, batch_uid: str
+    client: HttpxAsyncClient | AsyncClient, batch_uid: int
 ) -> BatchResult | None:
     client_ = get_async_client(client)
     response = await client_.get(f"batches/{batch_uid}")
-    if not response.json():  # pragma: no cover
-        return None
+
+    if response.status_code == 404:
+        raise BatchNotFoundError(f"Batch {batch_uid} not found")
 
     return BatchResult(**response.json())
 
@@ -33,11 +35,12 @@ async def async_get_batches(client: HttpxAsyncClient | AsyncClient) -> BatchStat
     return BatchStatus(**response.json())
 
 
-def get_batch(client: HttpxClient | Client, batch_uid: str) -> BatchResult | None:
+def get_batch(client: HttpxClient | Client, batch_uid: int) -> BatchResult | None:
     client_ = get_client(client)
     response = client_.get(f"batches/{batch_uid}")
-    if not response.json():  # pragma: no cover
-        return None
+
+    if response.status_code == 404:
+        raise BatchNotFoundError(f"Batch {batch_uid} not found")
 
     return BatchResult(**response.json())
 

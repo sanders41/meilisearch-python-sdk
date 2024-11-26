@@ -772,7 +772,7 @@ class AsyncClient(BaseClient):
 
         return TaskInfo(**response.json())
 
-    async def get_batch(self, batch_uid: str) -> BatchResult | None:
+    async def get_batch(self, batch_uid: int) -> BatchResult | None:
         return await async_get_batch(self, batch_uid)
 
     async def get_batches(self) -> BatchStatus:
@@ -1598,7 +1598,7 @@ class Client(BaseClient):
 
         return TaskInfo(**response.json())
 
-    def get_batch(self, batch_uid: str) -> BatchResult | None:
+    def get_batch(self, batch_uid: int) -> BatchResult | None:
         return get_batch(self, batch_uid)
 
     def get_batches(self) -> BatchStatus:
