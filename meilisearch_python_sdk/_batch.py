@@ -20,7 +20,7 @@ async def async_get_batch(
 ) -> BatchResult | None:
     client_ = get_async_client(client)
     response = await client_.get(f"batches/{batch_uid}")
-    if not response.json():
+    if not response.json():  # pragma: no cover
         return None
 
     return BatchResult(**response.json())
@@ -36,7 +36,7 @@ async def async_get_batches(client: HttpxAsyncClient | AsyncClient) -> BatchStat
 def get_batch(client: HttpxClient | Client, batch_uid: str) -> BatchResult | None:
     client_ = get_client(client)
     response = client_.get(f"batches/{batch_uid}")
-    if not response.json():
+    if not response.json():  # pragma: no cover
         return None
 
     return BatchResult(**response.json())
