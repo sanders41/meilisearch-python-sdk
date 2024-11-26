@@ -861,6 +861,34 @@ def test_get_tasks_for_index(client, empty_index, small_movies):
     assert next(iter(uid)) == index.uid
 
 
+@pytest.mark.no_parallel
+def test_get_tasks_reverse(client, empty_index, small_movies):
+    index = empty_index()
+    tasks = client.get_tasks()
+    current_tasks = len(tasks.results)
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    response = client.get_tasks(reverse=True)
+    assert len(response.results) >= current_tasks
+
+
+def test_get_tasks_for_index_reverse(client, empty_index, small_movies):
+    index = empty_index()
+    tasks = client.get_tasks(index_ids=[index.uid])
+    current_tasks = len(tasks.results)
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    response = client.get_tasks(index_ids=[index.uid], reverse=True)
+    assert len(response.results) >= current_tasks
+    uid = set([x.index_uid for x in response.results])
+    assert len(uid) == 1
+    assert next(iter(uid)) == index.uid
+
+
 def test_get_task(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)

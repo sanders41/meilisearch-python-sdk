@@ -868,6 +868,35 @@ async def test_get_tasks_for_index(async_client, async_empty_index, small_movies
 
 
 @pytest.mark.no_parallel
+async def test_get_tasks_reverse(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    tasks = await async_client.get_tasks()
+    current_tasks = len(tasks.results)
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    response = await async_client.get_tasks(reverse=True)
+    assert len(response.results) >= current_tasks
+
+
+@pytest.mark.no_parallel
+async def test_get_tasks_for_index_reverse(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    tasks = await async_client.get_tasks(index_ids=[index.uid])
+    current_tasks = len(tasks.results)
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    response = await async_client.get_tasks(index_ids=[index.uid], reverse=True)
+    assert len(response.results) >= current_tasks
+    uid = set([x.index_uid for x in response.results])
+    assert len(uid) == 1
+    assert next(iter(uid)) == index.uid
+
+
+@pytest.mark.no_parallel
 async def test_get_task(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     response = await index.add_documents(small_movies)

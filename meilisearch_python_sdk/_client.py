@@ -911,6 +911,7 @@ class AsyncClient(BaseClient):
         *,
         index_ids: list[str] | None = None,
         types: str | list[str] | None = None,
+        reverse: bool | None = None,
     ) -> TaskStatus:
         """Get multiple tasks.
 
@@ -918,6 +919,7 @@ class AsyncClient(BaseClient):
             index_ids: A list of index UIDs for which to get the tasks. If provided this will get the
                 tasks only for the specified indexes, if not all tasks will be returned. Default = None
             types: Specify specific task types to retrieve. Default = None
+            reverse: If True the tasks will be returned in reverse order. Default = None
 
         Returns:
             Task statuses.
@@ -933,7 +935,9 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.get_tasks()
         """
-        return await _task.async_get_tasks(self.http_client, index_ids=index_ids, types=types)
+        return await _task.async_get_tasks(
+            self.http_client, index_ids=index_ids, types=types, reverse=reverse
+        )
 
     async def wait_for_task(
         self,
@@ -1732,6 +1736,7 @@ class Client(BaseClient):
         *,
         index_ids: list[str] | None = None,
         types: str | list[str] | None = None,
+        reverse: bool | None = None,
     ) -> TaskStatus:
         """Get multiple tasks.
 
@@ -1739,6 +1744,7 @@ class Client(BaseClient):
             index_ids: A list of index UIDs for which to get the tasks. If provided this will get the
                 tasks only for the specified indexes, if not all tasks will be returned. Default = None
             types: Specify specific task types to retrieve. Default = None
+            reverse: If True the tasks will be returned in reverse order. Default = None
 
         Returns:
             Task statuses.
@@ -1754,7 +1760,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.get_tasks(client)
         """
-        return _task.get_tasks(self.http_client, index_ids=index_ids, types=types)
+        return _task.get_tasks(self.http_client, index_ids=index_ids, types=types, reverse=reverse)
 
     def wait_for_task(
         self,

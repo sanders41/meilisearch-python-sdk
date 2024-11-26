@@ -117,7 +117,10 @@ async def async_delete_tasks(
     return TaskInfo(**response.json())
 
 
-async def async_get_task(client: HttpxAsyncClient | AsyncClient, task_id: int) -> TaskResult:
+async def async_get_task(
+    client: HttpxAsyncClient | AsyncClient,
+    task_id: int,
+) -> TaskResult:
     client_ = get_async_client(client)
     response = await client_.get(f"tasks/{task_id}")
 
@@ -129,11 +132,18 @@ async def async_get_tasks(
     *,
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
+    reverse: bool | None = None,
 ) -> TaskStatus:
     url = f"tasks?indexUids={','.join(index_ids)}" if index_ids else "tasks"
     if types:
         formatted_types = ",".join(types) if isinstance(types, list) else types
         url = f"{url}&types={formatted_types}" if "?" in url else f"{url}?types={formatted_types}"
+    if reverse:
+        url = (
+            f"{url}&reverse={str(reverse).lower()}"
+            if "?" in url
+            else f"{url}?reverse={str(reverse).lower()}"
+        )
     client_ = get_async_client(client)
     response = await client_.get(url)
 
@@ -260,11 +270,18 @@ def get_tasks(
     *,
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
+    reverse: bool | None = None,
 ) -> TaskStatus:
     url = f"tasks?indexUids={','.join(index_ids)}" if index_ids else "tasks"
     if types:
         formatted_types = ",".join(types) if isinstance(types, list) else types
         url = f"{url}&types={formatted_types}" if "?" in url else f"{url}?types={formatted_types}"
+    if reverse:
+        url = (
+            f"{url}&reverse={str(reverse).lower()}"
+            if "?" in url
+            else f"{url}?reverse={str(reverse).lower()}"
+        )
     client_ = get_client(client)
     response = client_.get(url)
 
