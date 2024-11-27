@@ -337,6 +337,8 @@ def new_settings():
         search_cutoff_ms=100,
         dictionary=["S.O", "S.O.S"],
         proximity_precision=ProximityPrecision.BY_ATTRIBUTE,
+        facet_search=False,
+        prefix_search="disabled",
     )
 
 

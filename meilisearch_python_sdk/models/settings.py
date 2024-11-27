@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Literal
 
 import pydantic
 from camel_converter.pydantic_base import CamelBase
@@ -142,3 +143,5 @@ class MeilisearchSettings(CamelBase):
         | None
     ) = None  # Optional[Embedders] = None
     localized_attributes: list[LocalizedAttributes] | None = None
+    facet_search: bool | None = None
+    prefix_search: Literal["disabled", "indexingTime", "searchTime"] | None = None
