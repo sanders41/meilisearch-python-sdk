@@ -121,7 +121,7 @@ class HttpRequests:
     ) -> Response:
         headers = build_headers(content_type, compress)
         try:
-            if not body:
+            if body is None:
                 response = http_method(path)
             elif content_type == "application/json" and not compress:
                 response = http_method(path, content=self.json_handler.dumps(body), headers=headers)
