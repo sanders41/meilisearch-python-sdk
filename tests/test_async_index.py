@@ -140,6 +140,8 @@ async def test_get_settings_default(
     assert response.search_cutoff_ms is None
     assert response.dictionary == []
     assert response.embedders is None
+    assert response.facet_search is True
+    assert response.prefix_search == "indexingTime"
 
 
 @pytest.mark.parametrize("compress", (True, False))
@@ -167,6 +169,8 @@ async def test_update_settings(compress, async_empty_index, new_settings):
     assert response.search_cutoff_ms == new_settings.search_cutoff_ms
     assert response.dictionary == new_settings.dictionary
     assert response.localized_attributes is None
+    assert response.facet_search is False
+    assert response.prefix_search == "disabled"
 
 
 @pytest.mark.parametrize("compress", (True, False))
@@ -930,3 +934,63 @@ async def test_reset_localized_attributes(async_empty_index):
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_localized_attributes()
     assert response is None
+
+
+async def test_get_facet_search_opt_out(async_empty_index):
+    index = await async_empty_index()
+    response = await index.get_facet_search()
+    assert response is True
+
+
+async def test_update_facet_search_opt_out(async_empty_index):
+    index = await async_empty_index()
+    task = await index.update_facet_search(False)
+    await async_wait_for_task(index.http_client, task.task_uid)
+    result = await index.get_settings()
+
+    assert result.facet_search is False
+
+
+async def test_reset_facet_search_opt_out(async_empty_index):
+    index = await async_empty_index()
+    task = await index.update_facet_search(False)
+    await async_wait_for_task(index.http_client, task.task_uid)
+    result = await index.get_settings()
+
+    assert result.facet_search is False
+
+    task = await index.reset_facet_search()
+    await async_wait_for_task(index.http_client, task.task_uid)
+    result = await index.get_settings()
+
+    assert result.facet_search is True
+
+
+async def test_get_prefix_search_opt_out(async_empty_index):
+    index = await async_empty_index()
+    response = await index.get_prefix_search()
+    assert response == "indexingTime"
+
+
+async def test_update_prefix_search_opt_out(async_empty_index):
+    index = await async_empty_index()
+    task = await index.update_prefix_search("disabled")
+    await async_wait_for_task(index.http_client, task.task_uid)
+    result = await index.get_settings()
+
+    assert result.prefix_search == "disabled"
+
+
+async def test_reset_prefix_search_opt_out(async_empty_index):
+    index = await async_empty_index()
+    task = await index.update_prefix_search("disabled")
+    await async_wait_for_task(index.http_client, task.task_uid)
+    result = await index.get_settings()
+
+    assert result.prefix_search == "disabled"
+
+    task = await index.reset_prefix_search()
+    await async_wait_for_task(index.http_client, task.task_uid)
+    result = await index.get_settings()
+
+    assert result.prefix_search == "indexingTime"
