@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from ssl import SSLContext
 from typing import TYPE_CHECKING, Any
 
 import jwt
