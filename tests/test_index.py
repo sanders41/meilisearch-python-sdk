@@ -132,6 +132,8 @@ def test_get_settings_default(
     assert response.search_cutoff_ms is None
     assert response.dictionary == []
     assert response.embedders is None
+    assert response.facet_search is True
+    assert response.prefix_search == "indexingTime"
 
 
 @pytest.mark.parametrize("compress", (True, False))
@@ -159,6 +161,8 @@ def test_update_settings(compress, empty_index, new_settings):
     assert response.search_cutoff_ms == new_settings.search_cutoff_ms
     assert response.dictionary == new_settings.dictionary
     assert response.localized_attributes is None
+    assert response.facet_search is False
+    assert response.prefix_search == "disabled"
 
 
 @pytest.mark.parametrize("compress", (True, False))
@@ -878,7 +882,7 @@ def test_get_localized_attributes(empty_index):
 
 
 @pytest.mark.parametrize("compress", (True, False))
-async def test_update_localized_attributes(compress, empty_index):
+def test_update_localized_attributes(compress, empty_index):
     index = empty_index()
     response = index.update_localized_attributes(
         [
@@ -916,3 +920,63 @@ def test_reset_localized_attributes(empty_index):
     wait_for_task(index.http_client, response.task_uid)
     response = index.get_localized_attributes()
     assert response is None
+
+
+def test_get_facet_search_opt_out(empty_index):
+    index = empty_index()
+    response = index.get_facet_search()
+    assert response is True
+
+
+def test_update_facet_search_opt_out(empty_index):
+    index = empty_index()
+    task = index.update_facet_search(False)
+    wait_for_task(index.http_client, task.task_uid)
+    result = index.get_settings()
+
+    assert result.facet_search is False
+
+
+def test_reset_facet_search_opt_out(empty_index):
+    index = empty_index()
+    task = index.update_facet_search(False)
+    wait_for_task(index.http_client, task.task_uid)
+    result = index.get_settings()
+
+    assert result.facet_search is False
+
+    task = index.reset_facet_search()
+    wait_for_task(index.http_client, task.task_uid)
+    result = index.get_settings()
+
+    assert result.facet_search is True
+
+
+def test_get_prefix_search_opt_out(empty_index):
+    index = empty_index()
+    response = index.get_prefix_search()
+    assert response == "indexingTime"
+
+
+def test_update_prefix_search_opt_out(empty_index):
+    index = empty_index()
+    task = index.update_prefix_search("disabled")
+    wait_for_task(index.http_client, task.task_uid)
+    result = index.get_settings()
+
+    assert result.prefix_search == "disabled"
+
+
+def test_reset_prefix_search_opt_out(empty_index):
+    index = empty_index()
+    task = index.update_prefix_search("disabled")
+    wait_for_task(index.http_client, task.task_uid)
+    result = index.get_settings()
+
+    assert result.prefix_search == "disabled"
+
+    task = index.reset_prefix_search()
+    wait_for_task(index.http_client, task.task_uid)
+    result = index.get_settings()
+
+    assert result.prefix_search == "indexingTime"
