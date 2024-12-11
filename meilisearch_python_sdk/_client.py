@@ -9,6 +9,7 @@ from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk import _task
+from meilisearch_python_sdk._batch import async_get_batch, async_get_batches, get_batch, get_batches
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
 from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_sdk.index import AsyncIndex, Index
@@ -39,6 +40,7 @@ if TYPE_CHECKING:  # pragma: no cover
     import sys
     from types import TracebackType
 
+    from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
     from meilisearch_python_sdk.types import JsonMapping
 
     if sys.version_info >= (3, 11):
@@ -770,6 +772,12 @@ class AsyncClient(BaseClient):
 
         return TaskInfo(**response.json())
 
+    async def get_batch(self, batch_uid: int) -> BatchResult | None:
+        return await async_get_batch(self, batch_uid)
+
+    async def get_batches(self) -> BatchStatus:
+        return await async_get_batches(self)
+
     async def cancel_tasks(
         self,
         *,
@@ -903,6 +911,7 @@ class AsyncClient(BaseClient):
         *,
         index_ids: list[str] | None = None,
         types: str | list[str] | None = None,
+        reverse: bool | None = None,
     ) -> TaskStatus:
         """Get multiple tasks.
 
@@ -910,6 +919,7 @@ class AsyncClient(BaseClient):
             index_ids: A list of index UIDs for which to get the tasks. If provided this will get the
                 tasks only for the specified indexes, if not all tasks will be returned. Default = None
             types: Specify specific task types to retrieve. Default = None
+            reverse: If True the tasks will be returned in reverse order. Default = None
 
         Returns:
             Task statuses.
@@ -925,7 +935,9 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.get_tasks()
         """
-        return await _task.async_get_tasks(self.http_client, index_ids=index_ids, types=types)
+        return await _task.async_get_tasks(
+            self.http_client, index_ids=index_ids, types=types, reverse=reverse
+        )
 
     async def wait_for_task(
         self,
@@ -1586,6 +1598,12 @@ class Client(BaseClient):
 
         return TaskInfo(**response.json())
 
+    def get_batch(self, batch_uid: int) -> BatchResult | None:
+        return get_batch(self, batch_uid)
+
+    def get_batches(self) -> BatchStatus:
+        return get_batches(self)
+
     def cancel_tasks(
         self,
         *,
@@ -1718,6 +1736,7 @@ class Client(BaseClient):
         *,
         index_ids: list[str] | None = None,
         types: str | list[str] | None = None,
+        reverse: bool | None = None,
     ) -> TaskStatus:
         """Get multiple tasks.
 
@@ -1725,6 +1744,7 @@ class Client(BaseClient):
             index_ids: A list of index UIDs for which to get the tasks. If provided this will get the
                 tasks only for the specified indexes, if not all tasks will be returned. Default = None
             types: Specify specific task types to retrieve. Default = None
+            reverse: If True the tasks will be returned in reverse order. Default = None
 
         Returns:
             Task statuses.
@@ -1740,7 +1760,7 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> client.get_tasks(client)
         """
-        return _task.get_tasks(self.http_client, index_ids=index_ids, types=types)
+        return _task.get_tasks(self.http_client, index_ids=index_ids, types=types, reverse=reverse)
 
     def wait_for_task(
         self,

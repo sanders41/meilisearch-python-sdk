@@ -25,6 +25,7 @@ class TaskResult(TaskId):
     enqueued_at: datetime
     started_at: datetime | None = None
     finished_at: datetime | None = None
+    batch_uid: int | None = None
 
     @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
@@ -61,6 +62,7 @@ class TaskInfo(CamelBase):
     status: str
     task_type: str | JsonDict = Field(..., alias="type")
     enqueued_at: datetime
+    batch_uid: int | None = None
 
     @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
