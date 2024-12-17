@@ -34,6 +34,9 @@ async def test_check_health(test_client):
 
 @pytest.mark.asyncio
 async def test_get_documents(test_client):
+    await test_client.delete("/documents")
+    await test_client.post("/documents", json=sample_documents)
+
     response = await test_client.get("/documents")
     assert response.status_code == 200
     documents = response.json()["results"]
