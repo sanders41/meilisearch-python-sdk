@@ -1,25 +1,28 @@
 import pytest
-from fastapi import FastAPI
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from examples.fastapi_example import app
+
 
 @pytest.fixture
 async def test_client():
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url=f"http://127.0.0.1:8000"
+        transport=ASGITransport(app=app), base_url="http://127.0.0.1:8000"
     ) as client:
         yield client
+
 
 sample_documents = [
     {"id": "1", "title": "Inception", "genre": "Sci-Fi"},
     {"id": "2", "title": "The Matrix", "genre": "Sci-Fi"},
 ]
 
+
 @pytest.mark.asyncio
 async def test_get_index(test_client):
     response = await test_client.get("/documents")
     assert response.status_code == 200
+
 
 @pytest.mark.asyncio
 async def test_check_health(test_client):
@@ -27,6 +30,7 @@ async def test_check_health(test_client):
     assert response.status_code == 200
     health = response.json()
     assert health["status"] == "available"
+
 
 @pytest.mark.asyncio
 async def test_get_documents(test_client):
@@ -36,6 +40,7 @@ async def test_get_documents(test_client):
     assert len(documents) == len(sample_documents)
     assert documents[0]["id"] == sample_documents[0]["id"]
 
+
 @pytest.mark.asyncio
 async def test_add_documents(test_client):
     response = await test_client.post("/documents", json=sample_documents)
@@ -44,6 +49,7 @@ async def test_add_documents(test_client):
     assert isinstance(task_info, list)
     for task in task_info:
         assert task["status"] == "enqueued"
+
 
 @pytest.mark.asyncio
 async def test_search(test_client):
