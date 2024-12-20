@@ -54,7 +54,7 @@ dev = [
   "typing-extensions==4.12.2",
   "types-ujson==5.10.0.20240515",
   "meilisearch==0.33.0",
-  "rich==13.9.3",
+  "rich==13.9.4",
 ]
 
 [tool.hatch.version]
