@@ -550,15 +550,15 @@ wheels = [
 
 [[package]]
 name = "meilisearch"
-version = "0.31.6"
+version = "0.33.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "camel-converter", extra = ["pydantic"] },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/49/b3/c7ac76c8e664baac4eb5179b421a6ffb430a288738b5832f2ff47144c5df/meilisearch-0.31.6.tar.gz", hash = "sha256:cb0359da955c7e615534ddb48720027529fc176bf64d864e5d632779d531744e", size = 23184 }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/21/94d148ce1dea1ddbb7c1241a02c750399ddae647c4006f451950af84f9be/meilisearch-0.33.0.tar.gz", hash = "sha256:62c4890b11744f1dde14248a1bb05d7873ceaae6e2119783f391813ad4661a62", size = 23208 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9b/18/e8ccfbfb71ba05237d8db6382fd56b58a72a47c208f356c662ed162f4dfe/meilisearch-0.31.6-py3-none-any.whl", hash = "sha256:ee353949868a8454b45233c9e01c6f609d0bf6096be88e07217cfba92ca59907", size = 23800 },
+    { url = "https://files.pythonhosted.org/packages/40/83/2b4dbda89b7a66ea62b118829eb5678fb703d0307d0d5ecb32811be4db03/meilisearch-0.33.0-py3-none-any.whl", hash = "sha256:4aed5b4b0c5f5602574476de37d436701f2f31768b75df64b13cde0cad5988a3", size = 23778 },
 ]
 
 [[package]]
@@ -621,7 +621,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "meilisearch", specifier = "==0.31.6" },
+    { name = "meilisearch", specifier = "==0.33.0" },
     { name = "mkdocs", specifier = "==1.6.1" },
     { name = "mkdocs-material", specifier = "==9.5.49" },
     { name = "mkdocstrings", extras = ["python"], specifier = "==0.27.0" },
