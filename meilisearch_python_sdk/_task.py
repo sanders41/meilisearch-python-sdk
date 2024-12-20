@@ -10,6 +10,7 @@ from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
+from meilisearch_python_sdk._utils import get_async_client, get_client
 from meilisearch_python_sdk.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
@@ -76,7 +77,7 @@ async def async_cancel_tasks(
         parameters["statuses"] = "enqueued,processing"
 
     url = f"tasks/cancel?{urlencode(parameters)}"
-    client_ = _get_async_client(client)
+    client_ = get_async_client(client)
     response = await client_.post(url)
 
     return TaskInfo(**response.json())
@@ -110,14 +111,17 @@ async def async_delete_tasks(
         parameters["statuses"] = "canceled,enqueued,failed,processing,succeeded"
 
     url = f"tasks?{urlencode(parameters)}"
-    client_ = _get_async_client(client)
+    client_ = get_async_client(client)
     response = await client_.delete(url)
 
     return TaskInfo(**response.json())
 
 
-async def async_get_task(client: HttpxAsyncClient | AsyncClient, task_id: int) -> TaskResult:
-    client_ = _get_async_client(client)
+async def async_get_task(
+    client: HttpxAsyncClient | AsyncClient,
+    task_id: int,
+) -> TaskResult:
+    client_ = get_async_client(client)
     response = await client_.get(f"tasks/{task_id}")
 
     return TaskResult(**response.json())
@@ -128,12 +132,19 @@ async def async_get_tasks(
     *,
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
+    reverse: bool | None = None,
 ) -> TaskStatus:
     url = f"tasks?indexUids={','.join(index_ids)}" if index_ids else "tasks"
     if types:
         formatted_types = ",".join(types) if isinstance(types, list) else types
         url = f"{url}&types={formatted_types}" if "?" in url else f"{url}?types={formatted_types}"
-    client_ = _get_async_client(client)
+    if reverse:
+        url = (
+            f"{url}&reverse={str(reverse).lower()}"
+            if "?" in url
+            else f"{url}?reverse={str(reverse).lower()}"
+        )
+    client_ = get_async_client(client)
     response = await client_.get(url)
 
     return TaskStatus(**response.json())
@@ -147,7 +158,7 @@ async def async_wait_for_task(
     interval_in_ms: int = 50,
     raise_for_status: bool = False,
 ) -> TaskResult:
-    client_ = _get_async_client(client)
+    client_ = get_async_client(client)
     handler = _get_json_handler(client)
     url = f"tasks/{task_id}"
     http_requests = AsyncHttpRequests(client_, handler)
@@ -207,7 +218,7 @@ def cancel_tasks(
         parameters["statuses"] = "enqueued,processing"
 
     url = f"tasks/cancel?{urlencode(parameters)}"
-    client_ = _get_client(client)
+    client_ = get_client(client)
     response = client_.post(url)
 
     return TaskInfo(**response.json())
@@ -241,14 +252,14 @@ def delete_tasks(
         parameters["statuses"] = "canceled,enqueued,failed,processing,succeeded"
 
     url = f"tasks?{urlencode(parameters)}"
-    client_ = _get_client(client)
+    client_ = get_client(client)
     response = client_.delete(url)
 
     return TaskInfo(**response.json())
 
 
 def get_task(client: HttpxClient | Client, task_id: int) -> TaskResult:
-    client_ = _get_client(client)
+    client_ = get_client(client)
     response = client_.get(f"tasks/{task_id}")
 
     return TaskResult(**response.json())
@@ -259,12 +270,19 @@ def get_tasks(
     *,
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
+    reverse: bool | None = None,
 ) -> TaskStatus:
     url = f"tasks?indexUids={','.join(index_ids)}" if index_ids else "tasks"
     if types:
         formatted_types = ",".join(types) if isinstance(types, list) else types
         url = f"{url}&types={formatted_types}" if "?" in url else f"{url}?types={formatted_types}"
-    client_ = _get_client(client)
+    if reverse:
+        url = (
+            f"{url}&reverse={str(reverse).lower()}"
+            if "?" in url
+            else f"{url}?reverse={str(reverse).lower()}"
+        )
+    client_ = get_client(client)
     response = client_.get(url)
 
     return TaskStatus(**response.json())
@@ -278,7 +296,7 @@ def wait_for_task(
     interval_in_ms: int = 50,
     raise_for_status: bool = False,
 ) -> TaskResult:
-    client_ = _get_client(client)
+    client_ = get_client(client)
     handler = _get_json_handler(client)
     url = f"tasks/{task_id}"
     http_requests = HttpRequests(client_, json_handler=handler)
@@ -308,24 +326,6 @@ def wait_for_task(
                     raise MeilisearchTaskFailedError(f"Task {task_id} failed")
                 return status
             time.sleep(interval_in_ms / 1000)
-
-
-def _get_async_client(
-    client: AsyncClient | HttpxAsyncClient,
-) -> HttpxAsyncClient:
-    if isinstance(client, HttpxAsyncClient):
-        return client
-
-    return client.http_client
-
-
-def _get_client(
-    client: Client | HttpxClient,
-) -> HttpxClient:
-    if isinstance(client, HttpxClient):
-        return client
-
-    return client.http_client
 
 
 def _get_json_handler(

@@ -639,3 +639,9 @@ def test_search_result_hits_generic(index_with_documents):
     response = index.search("How to Train Your Dragon")
     assert isinstance(response.hits[0], Movie)
     assert response.hits[0].id == 166428
+
+
+def test_search_show_matches_position(index_with_documents):
+    index = index_with_documents()
+    response = index.search("with", show_matches_position=True)
+    assert "_matchesPosition" in response.hits[0]

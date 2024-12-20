@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import sleep
+import asyncio
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
 from uuid import uuid4
@@ -15,6 +15,7 @@ from meilisearch_python_sdk._task import (
     async_get_task,
 )
 from meilisearch_python_sdk.errors import (
+    BatchNotFoundError,
     InvalidRestriction,
     MeilisearchApiError,
     MeilisearchCommunicationError,
@@ -63,7 +64,7 @@ async def wait_for_dump_creation(
         dump = await async_client.get_dump_status(dump_uid)
         if dump.status != "in_progress":
             return None
-        await sleep(interval_in_ms / 1000)
+        await asyncio.sleep(interval_in_ms / 1000)
         time_delta = datetime.now() - start_time
         elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
     raise TimeoutError
@@ -868,6 +869,35 @@ async def test_get_tasks_for_index(async_client, async_empty_index, small_movies
 
 
 @pytest.mark.no_parallel
+async def test_get_tasks_reverse(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    tasks = await async_client.get_tasks()
+    current_tasks = len(tasks.results)
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    response = await async_client.get_tasks(reverse=True)
+    assert len(response.results) >= current_tasks
+
+
+@pytest.mark.no_parallel
+async def test_get_tasks_for_index_reverse(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    tasks = await async_client.get_tasks(index_ids=[index.uid])
+    current_tasks = len(tasks.results)
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    response = await async_client.get_tasks(index_ids=[index.uid], reverse=True)
+    assert len(response.results) >= current_tasks
+    uid = set([x.index_uid for x in response.results])
+    assert len(uid) == 1
+    assert next(iter(uid)) == index.uid
+
+
+@pytest.mark.no_parallel
 async def test_get_task(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     response = await index.add_documents(small_movies)
@@ -978,3 +1008,32 @@ async def test_http_version(http2, expected, master_key, ssl_verify, http2_enabl
     ) as client:
         response = await client.http_client.get("health")
         assert response.http_version == expected
+
+
+async def test_get_batches(async_client, async_empty_index, small_movies):
+    # Add documents to create batches
+    index = await async_empty_index()
+    tasks = await index.add_documents_in_batches(small_movies, batch_size=5)
+    waits = [async_client.wait_for_task(x.task_uid) for x in tasks]
+    await asyncio.gather(*waits)
+
+    result = await async_client.get_batches()
+    assert len(result.results) > 0
+
+
+async def test_get_batch(async_client, async_empty_index, small_movies):
+    # Add documents to create batches
+    index = await async_empty_index()
+    tasks = await index.add_documents_in_batches(small_movies, batch_size=5)
+    waits = [async_client.wait_for_task(x.task_uid) for x in tasks]
+    await asyncio.gather(*waits)
+    task = await async_client.get_task(tasks[0].task_uid)
+
+    result = await async_client.get_batch(task.batch_uid)
+
+    assert result.uid == task.batch_uid
+
+
+async def test_get_batch_not_found(async_client):
+    with pytest.raises(BatchNotFoundError):
+        await async_client.get_batch(999999999)

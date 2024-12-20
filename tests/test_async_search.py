@@ -659,3 +659,9 @@ async def test_search_result_hits_generic(async_index_with_documents):
     response = await index.search("How to Train Your Dragon")
     assert isinstance(response.hits[0], Movie)
     assert response.hits[0].id == 166428
+
+
+async def test_search_show_matches_position(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.search("with", show_matches_position=True)
+    assert "_matchesPosition" in response.hits[0]
