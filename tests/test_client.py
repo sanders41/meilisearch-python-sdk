@@ -12,6 +12,7 @@ from httpx import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Re
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk.errors import (
+    BatchNotFoundError,
     InvalidRestriction,
     MeilisearchApiError,
     MeilisearchCommunicationError,
@@ -861,6 +862,34 @@ def test_get_tasks_for_index(client, empty_index, small_movies):
     assert next(iter(uid)) == index.uid
 
 
+@pytest.mark.no_parallel
+def test_get_tasks_reverse(client, empty_index, small_movies):
+    index = empty_index()
+    tasks = client.get_tasks()
+    current_tasks = len(tasks.results)
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    response = client.get_tasks(reverse=True)
+    assert len(response.results) >= current_tasks
+
+
+def test_get_tasks_for_index_reverse(client, empty_index, small_movies):
+    index = empty_index()
+    tasks = client.get_tasks(index_ids=[index.uid])
+    current_tasks = len(tasks.results)
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    response = client.get_tasks(index_ids=[index.uid], reverse=True)
+    assert len(response.results) >= current_tasks
+    uid = set([x.index_uid for x in response.results])
+    assert len(uid) == 1
+    assert next(iter(uid)) == index.uid
+
+
 def test_get_task(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)
@@ -960,3 +989,32 @@ def test_http_version(http2, expected, master_key, ssl_verify, base_url, http2_e
         pytest.skip("HTTP/2 is not enabled")
     client = Client(base_url, master_key, http2=http2, verify=ssl_verify)
     assert client.http_client.get("health").http_version == expected
+
+
+def test_get_batches(client, empty_index, small_movies):
+    # Add documents to create batches
+    index = empty_index()
+    tasks = index.add_documents_in_batches(small_movies, batch_size=5)
+    for task in tasks:
+        client.wait_for_task(task.task_uid)
+
+    result = client.get_batches()
+    assert len(result.results) > 0
+
+
+def test_get_batch(client, empty_index, small_movies):
+    # Add documents to create batches
+    index = empty_index()
+    tasks = index.add_documents_in_batches(small_movies, batch_size=5)
+    for task in tasks:
+        client.wait_for_task(task.task_uid)
+
+    task = client.get_task(tasks[0].task_uid)
+    result = client.get_batch(task.batch_uid)
+
+    assert result.uid == task.batch_uid
+
+
+def test_get_batch_not_found(client):
+    with pytest.raises(BatchNotFoundError):
+        client.get_batch(999999999)

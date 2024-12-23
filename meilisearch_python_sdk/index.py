@@ -4383,6 +4383,147 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
+    async def get_facet_search(self) -> bool | None:
+        """Get setting for facet search opt-out.
+
+        Returns:
+            True if facet search is enabled or False if not.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     facet_search = await index.get_facet_search()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/facet-search")
+
+        return response.json()
+
+    async def update_facet_search(self, facet_search: bool, *, compress: bool = False) -> TaskInfo:
+        """Update setting for facet search opt-out.
+
+        Args:
+            facet_search: Boolean indicating if facet search should be disabled.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.update_facet_search(True)
+        """
+        response = await self._http_requests.put(
+            f"{self._settings_url}/facet-search",
+            facet_search,
+            compress=compress,
+        )
+
+        return TaskInfo(**response.json())
+
+    async def reset_facet_search(self) -> TaskInfo:
+        """Reset the facet search opt-out settings.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_facet_search()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/facet-search")
+
+        return TaskInfo(**response.json())
+
+    async def get_prefix_search(self) -> str:
+        """Get setting for prefix search opt-out.
+
+        Returns:
+            True if prefix search is enabled or False if not.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = await client.index("movies")
+            >>>     prefix_search = await index.get_prefix_search()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/prefix-search")
+
+        return response.json()
+
+    async def update_prefix_search(
+        self,
+        prefix_search: Literal["disabled", "indexingTime", "searchTime"],
+        *,
+        compress: bool = False,
+    ) -> TaskInfo:
+        """Update setting for prefix search opt-out.
+
+        Args:
+            prefix_search: Value indicating prefix search setting.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = await client.index("movies")
+            >>>     await index.update_prefix_search("disabled")
+        """
+        response = await self._http_requests.put(
+            f"{self._settings_url}/prefix-search",
+            prefix_search,
+            compress=compress,
+        )
+
+        return TaskInfo(**response.json())
+
+    async def reset_prefix_search(self) -> TaskInfo:
+        """Reset the prefix search opt-out settings.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = await client.index("movies")
+            >>>     await index.reset_prefix_search()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/prefix-search")
+
+        return TaskInfo(**response.json())
+
     @staticmethod
     async def _run_plugins(
         plugins: Sequence[AsyncPlugin | AsyncDocumentPlugin | AsyncPostSearchPlugin],
@@ -7789,6 +7930,147 @@ class Index(_BaseIndex):
             >>> index.reset_localized_attributes()
         """
         response = self._http_requests.delete(f"{self._settings_url}/localized-attributes")
+
+        return TaskInfo(**response.json())
+
+    def get_facet_search(self) -> bool:
+        """Get setting for facet search opt-out.
+
+        Returns:
+            True if facet search is enabled or False if not.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> facet_search = await index.get_facet_search()
+        """
+        response = self._http_requests.get(f"{self._settings_url}/facet-search")
+
+        return response.json()
+
+    def update_facet_search(self, facet_search: bool, *, compress: bool = False) -> TaskInfo:
+        """Update setting for facet search opt-out.
+
+        Args:
+            facet_search: Boolean indicating if facet search should be disabled.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.update_facet_search(True)
+        """
+        response = self._http_requests.put(
+            f"{self._settings_url}/facet-search",
+            facet_search,
+            compress=compress,
+        )
+
+        return TaskInfo(**response.json())
+
+    def reset_facet_search(self) -> TaskInfo:
+        """Reset the facet search opt-out settings.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> await index.reset_facet_search()
+        """
+        response = self._http_requests.delete(f"{self._settings_url}/facet-search")
+
+        return TaskInfo(**response.json())
+
+    def get_prefix_search(self) -> bool:
+        """Get setting for prefix search opt-out.
+
+        Returns:
+            True if prefix search is enabled or False if not.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> prefix_search = index.get_prefix_search()
+        """
+        response = self._http_requests.get(f"{self._settings_url}/prefix-search")
+
+        return response.json()
+
+    def update_prefix_search(
+        self,
+        prefix_search: Literal["disabled", "indexingTime", "searchTime"],
+        *,
+        compress: bool = False,
+    ) -> TaskInfo:
+        """Update setting for prefix search opt-out.
+
+        Args:
+            prefix_search: Value indicating prefix search setting.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.update_prefix_search("disabled")
+        """
+        response = self._http_requests.put(
+            f"{self._settings_url}/prefix-search",
+            prefix_search,
+            compress=compress,
+        )
+
+        return TaskInfo(**response.json())
+
+    def reset_prefix_search(self) -> TaskInfo:
+        """Reset the prefix search opt-out settings.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.reset_prefix_search()
+        """
+        response = self._http_requests.delete(f"{self._settings_url}/prefix-search")
 
         return TaskInfo(**response.json())
 

@@ -563,7 +563,7 @@ wheels = [
 
 [[package]]
 name = "meilisearch-python-sdk"
-version = "3.6.2"
+version = "4.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
