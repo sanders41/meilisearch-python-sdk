@@ -1,6 +1,6 @@
 # Meilisearch Python SDK
 
-[![Tests Status](https://github.com/sanders41/meilisearch-python-sdk/workflows/Testing/badge.svg?branch=main&event=push)](https://github.com/sanders41/meilisearch-python-sdk/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
+[![Tests Status](https://github.com/sanders41/meilisearch-python-sdk/actions/workflows/testing.yml/badge.svg?branch=main&event=push)](https://github.com/sanders41/meilisearch-python-sdk/actions?query=workflow%3ATesting+branch%3Amain+event%3Apush)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sanders41/meilisearch-python-sdk/main.svg)](https://results.pre-commit.ci/latest/github/sanders41/meilisearch-python-sdk/main)
 [![Coverage](https://codecov.io/github/sanders41/meilisearch-python-sdk/coverage.svg?branch=main)](https://codecov.io/gh/sanders41/meilisearch-python-sdk)
 [![PyPI version](https://badge.fury.io/py/meilisearch-python-sdk.svg)](https://badge.fury.io/py/meilisearch-python-sdk)
