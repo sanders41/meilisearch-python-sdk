@@ -85,8 +85,8 @@ variable, this will be an `UpdateId` object, and use it to check the status of t
 #### AsyncClient
 
 ```py
-task = index.add_documents([{"id": 1, "title": "test"}])
-status = client.get_task(task.task_uid)
+task = await index.add_documents([{"id": 1, "title": "test"}])
+status = await client.get_task(task.task_uid)
 ```
 
 #### Client
