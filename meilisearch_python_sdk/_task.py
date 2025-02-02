@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 async def async_cancel_tasks(
     client: HttpxAsyncClient | AsyncClient,
     *,
-    uids: list[str] | None = None,
-    index_uids: list[str] | None = None,
+    uids: list[int] | None = None,
+    index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
@@ -86,8 +86,8 @@ async def async_cancel_tasks(
 async def async_delete_tasks(
     client: HttpxAsyncClient | AsyncClient,
     *,
-    uids: list[str] | None = None,
-    index_uids: list[str] | None = None,
+    uids: list[int] | None = None,
+    index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
@@ -193,8 +193,8 @@ async def async_wait_for_task(
 def cancel_tasks(
     client: HttpxClient | Client,
     *,
-    uids: list[str] | None = None,
-    index_uids: list[str] | None = None,
+    uids: list[int] | None = None,
+    index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
@@ -227,8 +227,8 @@ def cancel_tasks(
 def delete_tasks(
     client: HttpxClient | Client,
     *,
-    uids: list[str] | None = None,
-    index_uids: list[str] | None = None,
+    uids: list[int] | None = None,
+    index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
@@ -338,8 +338,8 @@ def _get_json_handler(
 
 
 def _process_params(
-    uids: list[str] | None = None,
-    index_uids: list[str] | None = None,
+    uids: list[int] | None = None,
+    index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,

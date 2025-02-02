@@ -812,8 +812,8 @@ class AsyncClient(BaseClient):
     async def cancel_tasks(
         self,
         *,
-        uids: list[str] | None = None,
-        index_uids: list[str] | None = None,
+        uids: list[int] | None = None,
+        index_uids: list[int] | None = None,
         statuses: list[str] | None = None,
         types: list[str] | None = None,
         before_enqueued_at: datetime | None = None,
@@ -887,8 +887,8 @@ class AsyncClient(BaseClient):
     async def delete_tasks(
         self,
         *,
-        uids: list[str] | None = None,
-        index_uids: list[str] | None = None,
+        uids: list[int] | None = None,
+        index_uids: list[int] | None = None,
         statuses: list[str] | None = None,
         types: list[str] | None = None,
         before_enqueued_at: datetime | None = None,
@@ -1667,8 +1667,8 @@ class Client(BaseClient):
     def cancel_tasks(
         self,
         *,
-        uids: list[str] | None = None,
-        index_uids: list[str] | None = None,
+        uids: list[int] | None = None,
+        index_uids: list[int] | None = None,
         statuses: list[str] | None = None,
         types: list[str] | None = None,
         before_enqueued_at: datetime | None = None,
@@ -1720,8 +1720,8 @@ class Client(BaseClient):
     def delete_tasks(
         self,
         *,
-        uids: list[str] | None = None,
-        index_uids: list[str] | None = None,
+        uids: list[int] | None = None,
+        index_uids: list[int] | None = None,
         statuses: list[str] | None = None,
         types: list[str] | None = None,
         before_enqueued_at: datetime | None = None,
