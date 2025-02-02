@@ -1021,6 +1021,17 @@ async def test_get_batches(async_client, async_empty_index, small_movies):
     assert len(result.results) > 0
 
 
+async def test_get_batches_with_params(async_client, async_empty_index, small_movies):
+    # Add documents to create batches
+    index = await async_empty_index()
+    tasks = await index.add_documents_in_batches(small_movies, batch_size=5)
+    waits = [async_client.wait_for_task(x.task_uid) for x in tasks]
+    await asyncio.gather(*waits)
+
+    result = await async_client.get_batches(uids=[task.task_uid for task in tasks])
+    assert len(result.results) > 0
+
+
 async def test_get_batch(async_client, async_empty_index, small_movies):
     # Add documents to create batches
     index = await async_empty_index()
