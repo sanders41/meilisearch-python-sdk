@@ -9,7 +9,9 @@ from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk import _task
-from meilisearch_python_sdk._batch import async_get_batch, async_get_batches, get_batch, get_batches
+from meilisearch_python_sdk._batch import async_get_batch, async_get_batches
+from meilisearch_python_sdk._batch import get_batch as _get_batch
+from meilisearch_python_sdk._batch import get_batches as _get_batches
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
 from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_sdk.index import AsyncIndex, Index
@@ -775,8 +777,37 @@ class AsyncClient(BaseClient):
     async def get_batch(self, batch_uid: int) -> BatchResult | None:
         return await async_get_batch(self, batch_uid)
 
-    async def get_batches(self) -> BatchStatus:
-        return await async_get_batches(self)
+    async def get_batches(
+        self,
+        *,
+        uids: list[int] | None = None,
+        batch_uids: list[int] | None = None,
+        index_uids: list[int] | None = None,
+        statuses: list[str] | None = None,
+        types: list[str] | None = None,
+        limit: int = 20,
+        from_: str | None = None,
+        reverse: bool = False,
+        before_enqueued_at: datetime | None = None,
+        after_enqueued_at: datetime | None = None,
+        before_started_at: datetime | None = None,
+        after_finished_at: datetime | None = None,
+    ) -> BatchStatus:
+        return await async_get_batches(
+            self,
+            uids=uids,
+            batch_uids=batch_uids,
+            index_uids=index_uids,
+            statuses=statuses,
+            types=types,
+            limit=limit,
+            from_=from_,
+            reverse=reverse,
+            before_enqueued_at=before_enqueued_at,
+            after_enqueued_at=after_enqueued_at,
+            before_started_at=before_started_at,
+            after_finished_at=after_finished_at,
+        )
 
     async def cancel_tasks(
         self,
@@ -1599,10 +1630,39 @@ class Client(BaseClient):
         return TaskInfo(**response.json())
 
     def get_batch(self, batch_uid: int) -> BatchResult | None:
-        return get_batch(self, batch_uid)
+        return _get_batch(self, batch_uid)
 
-    def get_batches(self) -> BatchStatus:
-        return get_batches(self)
+    def get_batches(
+        self,
+        *,
+        uids: list[int] | None = None,
+        batch_uids: list[int] | None = None,
+        index_uids: list[int] | None = None,
+        statuses: list[str] | None = None,
+        types: list[str] | None = None,
+        limit: int = 20,
+        from_: str | None = None,
+        reverse: bool = False,
+        before_enqueued_at: datetime | None = None,
+        after_enqueued_at: datetime | None = None,
+        before_started_at: datetime | None = None,
+        after_finished_at: datetime | None = None,
+    ) -> BatchStatus:
+        return _get_batches(
+            self,
+            uids=uids,
+            batch_uids=batch_uids,
+            index_uids=index_uids,
+            statuses=statuses,
+            types=types,
+            limit=limit,
+            from_=from_,
+            reverse=reverse,
+            before_enqueued_at=before_enqueued_at,
+            after_enqueued_at=after_enqueued_at,
+            before_started_at=before_started_at,
+            after_finished_at=after_finished_at,
+        )
 
     def cancel_tasks(
         self,

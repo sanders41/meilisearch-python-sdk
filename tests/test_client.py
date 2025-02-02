@@ -1002,6 +1002,17 @@ def test_get_batches(client, empty_index, small_movies):
     assert len(result.results) > 0
 
 
+def test_get_batches_with_params(client, empty_index, small_movies):
+    # Add documents to create batches
+    index = empty_index()
+    tasks = index.add_documents_in_batches(small_movies, batch_size=5)
+    for task in tasks:
+        client.wait_for_task(task.task_uid)
+
+    result = client.get_batches(uids=[task.task_uid for task in tasks])
+    assert len(result.results) > 0
+
+
 def test_get_batch(client, empty_index, small_movies):
     # Add documents to create batches
     index = empty_index()
