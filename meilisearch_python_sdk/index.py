@@ -8300,6 +8300,7 @@ def _process_search_parameters(
         "attributesToSearchOn": attributes_to_search_on,
         "showRankingScore": show_ranking_score,
         "rankingScoreThreshold": ranking_score_threshold,
+        "retrieveVectors": retrieve_vectors,
     }
 
     if facet_name:
@@ -8322,9 +8323,6 @@ def _process_search_parameters(
 
     if locales:
         body["locales"] = locales
-
-    if retrieve_vectors:
-        body["retrieveVectors"] = retrieve_vectors
 
     return body
 
