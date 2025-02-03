@@ -721,7 +721,7 @@ class AsyncIndex(_BaseIndex):
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
         locales: list[str] | None = None,
-        retrieve_vectors: bool | None = None,
+        retrieve_vectors: bool = False,
     ) -> SearchResults:
         """Search the index.
 
@@ -989,7 +989,7 @@ class AsyncIndex(_BaseIndex):
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         locales: list[str] | None = None,
-        retrieve_vectors: bool | None = None,
+        retrieve_vectors: bool = False,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -5091,7 +5091,7 @@ class Index(_BaseIndex):
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
         locales: list[str] | None = None,
-        retrieve_vectors: bool | None = None,
+        retrieve_vectors: bool = False,
     ) -> SearchResults:
         """Search the index.
 
@@ -5265,7 +5265,7 @@ class Index(_BaseIndex):
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         locales: list[str] | None = None,
-        retrieve_vectors: bool | None = None,
+        retrieve_vectors: bool = False,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -8274,7 +8274,7 @@ def _process_search_parameters(
     vector: list[float] | None = None,
     hybrid: Hybrid | None = None,
     locales: list[str] | None = None,
-    retrieve_vectors: bool | None = None,
+    retrieve_vectors: bool = False,
 ) -> JsonDict:
     if attributes_to_retrieve is None:
         attributes_to_retrieve = ["*"]
