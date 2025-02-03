@@ -629,6 +629,8 @@ class AsyncClient(BaseClient):
                 q = query.model_dump(by_alias=True)
                 del q["limit"]
                 del q["offset"]
+                if query.retrieve_vectors is None:
+                    del q["retrieveVectors"]
                 processed_queries.append(q)
         else:
             processed_queries = [x.model_dump(by_alias=True) for x in queries]

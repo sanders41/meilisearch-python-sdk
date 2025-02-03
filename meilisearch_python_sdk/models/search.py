@@ -70,7 +70,7 @@ class SearchParams(CamelBase):
     vector: list[float] | None = None
     hybrid: Hybrid | None = None
     locales: list[str] | None = None
-    retrieve_vectors: bool = False
+    retrieve_vectors: bool | None = None
 
     @field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
     @classmethod
