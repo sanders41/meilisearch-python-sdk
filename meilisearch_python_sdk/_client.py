@@ -623,17 +623,18 @@ class AsyncClient(BaseClient):
             >>>     search_results = await client.search(queries)
         """
         url = "multi-search"
-        if federation:
-            processed_queries = []
-            for query in queries:
-                q = query.model_dump(by_alias=True)
+        processed_queries = []
+        for query in queries:
+            q = query.model_dump(by_alias=True)
+
+            if query.retrieve_vectors is None:
+                del q["retrieveVectors"]
+
+            if federation:
                 del q["limit"]
                 del q["offset"]
-                if query.retrieve_vectors is None:
-                    del q["retrieveVectors"]
-                processed_queries.append(q)
-        else:
-            processed_queries = [x.model_dump(by_alias=True) for x in queries]
+
+            processed_queries.append(q)
 
         if federation:
             federation_payload = federation.model_dump(by_alias=True)
@@ -1481,15 +1482,18 @@ class Client(BaseClient):
             >>> search_results = client.search(queries)
         """
         url = "multi-search"
-        if federation:
-            processed_queries = []
-            for query in queries:
-                q = query.model_dump(by_alias=True)
+        processed_queries = []
+        for query in queries:
+            q = query.model_dump(by_alias=True)
+
+            if query.retrieve_vectors is None:
+                del q["retrieveVectors"]
+
+            if federation:
                 del q["limit"]
                 del q["offset"]
-                processed_queries.append(q)
-        else:
-            processed_queries = [x.model_dump(by_alias=True) for x in queries]
+
+            processed_queries.append(q)
 
         if federation:
             federation_payload = federation.model_dump(by_alias=True)
