@@ -721,7 +721,7 @@ class AsyncIndex(_BaseIndex):
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
         locales: list[str] | None = None,
-        retrieve_vectors: bool = False,
+        retrieve_vectors: bool | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -989,7 +989,7 @@ class AsyncIndex(_BaseIndex):
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         locales: list[str] | None = None,
-        retrieve_vectors: bool = False,
+        retrieve_vectors: bool | None = None,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -5091,7 +5091,7 @@ class Index(_BaseIndex):
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
         locales: list[str] | None = None,
-        retrieve_vectors: bool = False,
+        retrieve_vectors: bool | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -5265,7 +5265,7 @@ class Index(_BaseIndex):
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         locales: list[str] | None = None,
-        retrieve_vectors: bool = False,
+        retrieve_vectors: bool | None = None,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -8274,7 +8274,7 @@ def _process_search_parameters(
     vector: list[float] | None = None,
     hybrid: Hybrid | None = None,
     locales: list[str] | None = None,
-    retrieve_vectors: bool = False,
+    retrieve_vectors: bool | None = None,
 ) -> JsonDict:
     if attributes_to_retrieve is None:
         attributes_to_retrieve = ["*"]
@@ -8300,7 +8300,6 @@ def _process_search_parameters(
         "attributesToSearchOn": attributes_to_search_on,
         "showRankingScore": show_ranking_score,
         "rankingScoreThreshold": ranking_score_threshold,
-        "retrieveVectors": retrieve_vectors,
     }
 
     if facet_name:
@@ -8323,6 +8322,9 @@ def _process_search_parameters(
 
     if locales:
         body["locales"] = locales
+
+    if retrieve_vectors is not None:
+        body["retrieveVectors"] = retrieve_vectors
 
     return body
 

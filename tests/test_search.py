@@ -483,6 +483,30 @@ def test_vector_search(index_with_documents_and_vectors):
     assert len(response.hits) >= 1
 
 
+def test_vector_search_retrieve_vectors(index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
+    response = index.search(
+        "",
+        vector=[0.1, 0.2],
+        hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
+        retrieve_vectors=True,
+    )
+    assert len(response.hits) >= 1
+    assert response.hits[0].get("_vectors") is not None
+
+
+def test_vector_search_retrieve_vectors_false(index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
+    response = index.search(
+        "",
+        vector=[0.1, 0.2],
+        hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
+        retrieve_vectors=False,
+    )
+    assert len(response.hits) >= 1
+    assert response.hits[0].get("_vectors") is None
+
+
 def test_basic_facet_search(index_with_documents):
     index = index_with_documents()
     update = index.update_filterable_attributes(["genre"])

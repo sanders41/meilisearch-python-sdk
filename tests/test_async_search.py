@@ -506,6 +506,30 @@ async def test_vector_search(async_index_with_documents_and_vectors):
     assert len(response.hits) >= 1
 
 
+async def test_vector_search_retrieve_vectors(async_index_with_documents_and_vectors):
+    index = await async_index_with_documents_and_vectors()
+    response = await index.search(
+        "",
+        vector=[0.1, 0.2],
+        hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
+        retrieve_vectors=True,
+    )
+    assert len(response.hits) >= 1
+    assert response.hits[0].get("_vectors") is not None
+
+
+async def test_vector_search_retrieve_vectors_false(async_index_with_documents_and_vectors):
+    index = await async_index_with_documents_and_vectors()
+    response = await index.search(
+        "",
+        vector=[0.1, 0.2],
+        hybrid=Hybrid(semantic_ratio=1.0, embedder="default"),
+        retrieve_vectors=False,
+    )
+    assert len(response.hits) >= 1
+    assert response.hits[0].get("_vectors") is None
+
+
 async def test_basic_facet_search(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
