@@ -43,7 +43,7 @@ dev = [
   "mkdocs==1.6.1",
   "mkdocs-material==9.6.2",
   "mkdocstrings[python]==0.28.0",
-  "mypy[faster-cache]==1.14.1",
+  "mypy[faster-cache]==1.15.0",
   "pre-commit==4.1.0",
   "pytest==8.3.4",
   "pytest-cov==6.0.0",
