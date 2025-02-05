@@ -304,6 +304,15 @@ async def enable_edit_by_function(base_url, ssl_verify):
         yield
 
 
+@pytest.fixture(scope="session", autouse=True)
+async def enable_proxy_search(base_url, ssl_verify):
+    async with HttpxAsyncClient(
+        base_url=base_url, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=ssl_verify
+    ) as client:
+        await client.patch("/experimental-features", json={"proxySearch": True})
+        yield
+
+
 @pytest.fixture
 async def create_tasks(async_empty_index, small_movies):
     """Ensures there are some tasks present for testing."""
