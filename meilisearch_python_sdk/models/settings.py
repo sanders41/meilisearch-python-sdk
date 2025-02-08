@@ -56,6 +56,7 @@ class OpenAiEmbedder(CamelBase):
     document_template: str | None = None
     document_template_max_bytes: int | None = None
     distribution: Distribution | None = None
+    binary_quantized: bool | None = None
 
 
 class HuggingFaceEmbedder(CamelBase):
@@ -65,6 +66,8 @@ class HuggingFaceEmbedder(CamelBase):
     document_template: str | None = None
     document_template_max_bytes: int | None = None
     distribution: Distribution | None = None
+    dimensions: int | None = None
+    binary_quantized: bool | None = None
 
 
 class OllamaEmbedder(CamelBase):
@@ -76,6 +79,7 @@ class OllamaEmbedder(CamelBase):
     document_template: str | None = None
     document_template_max_bytes: int | None = None
     distribution: Distribution | None = None
+    binary_quantized: bool | None = None
 
 
 class RestEmbedder(CamelBase):
@@ -89,12 +93,16 @@ class RestEmbedder(CamelBase):
     headers: JsonDict | None = None
     request: JsonDict
     response: JsonDict
+    binary_quantized: bool | None = None
 
 
 class UserProvidedEmbedder(CamelBase):
     source: str = "userProvided"
     dimensions: int
     distribution: Distribution | None = None
+    document_template: str | None = None
+    document_template_max_bytes: int | None = None
+    binary_quantized: bool | None = None
 
 
 class Embedders(CamelBase):

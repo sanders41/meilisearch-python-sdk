@@ -131,7 +131,7 @@ def test_get_settings_default(
     assert response.non_separator_tokens == []
     assert response.search_cutoff_ms is None
     assert response.dictionary == []
-    assert response.embedders is None
+    assert response.embedders == {}
     assert response.facet_search is True
     assert response.prefix_search == "indexingTime"
 
@@ -225,7 +225,7 @@ def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.faceting.max_values_per_facet == 100
     assert response.pagination.max_total_hits == 1000
     assert response.proximity_precision is ProximityPrecision.BY_WORD
-    assert response.embedders is None
+    assert response.embedders == {}
 
 
 def test_get_ranking_rules_default(empty_index, default_ranking_rules):
