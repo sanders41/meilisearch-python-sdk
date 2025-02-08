@@ -18,7 +18,7 @@ class FacetHits(CamelBase):
 
 class FacetSearchResults(CamelBase):
     facet_hits: list[FacetHits]
-    facet_query: str
+    facet_query: str | None
     processing_time_ms: int
 
 
