@@ -721,6 +721,7 @@ class AsyncIndex(_BaseIndex):
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
         locales: list[str] | None = None,
+        retrieve_vectors: bool | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -781,6 +782,7 @@ class AsyncIndex(_BaseIndex):
                 with caution.
             locales: Specifies the languages for the search. This parameter can only be used with
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
+            retrieve_vectors: Return document vector data with search result.
 
         Returns:
             Results of the search
@@ -824,6 +826,7 @@ class AsyncIndex(_BaseIndex):
             hybrid=hybrid,
             ranking_score_threshold=ranking_score_threshold,
             locales=locales,
+            retrieve_vectors=retrieve_vectors,
         )
         search_url = f"{self._base_url_with_uid}/search"
 
@@ -986,6 +989,7 @@ class AsyncIndex(_BaseIndex):
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         locales: list[str] | None = None,
+        retrieve_vectors: bool | None = None,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -1038,6 +1042,7 @@ class AsyncIndex(_BaseIndex):
                 with caution.
             locales: Specifies the languages for the search. This parameter can only be used with
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
+            retrieve_vectors: Return document vector data with search result.
 
         Returns:
             Results of the search
@@ -1085,6 +1090,7 @@ class AsyncIndex(_BaseIndex):
             ranking_score_threshold=ranking_score_threshold,
             vector=vector,
             locales=locales,
+            retrieve_vectors=retrieve_vectors,
         )
         search_url = f"{self._base_url_with_uid}/facet-search"
 
@@ -5085,6 +5091,7 @@ class Index(_BaseIndex):
         vector: list[float] | None = None,
         hybrid: Hybrid | None = None,
         locales: list[str] | None = None,
+        retrieve_vectors: bool | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -5145,6 +5152,7 @@ class Index(_BaseIndex):
                 with caution.
             locales: Specifies the languages for the search. This parameter can only be used with
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
+            retrieve_vectors: Return document vector data with search result.
 
         Returns:
             Results of the search
@@ -5188,6 +5196,7 @@ class Index(_BaseIndex):
             hybrid=hybrid,
             ranking_score_threshold=ranking_score_threshold,
             locales=locales,
+            retrieve_vectors=retrieve_vectors,
         )
 
         if self._pre_search_plugins:
@@ -5256,6 +5265,7 @@ class Index(_BaseIndex):
         ranking_score_threshold: float | None = None,
         vector: list[float] | None = None,
         locales: list[str] | None = None,
+        retrieve_vectors: bool | None = None,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -5308,6 +5318,7 @@ class Index(_BaseIndex):
                 with caution.
             locales: Specifies the languages for the search. This parameter can only be used with
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
+            retrieve_vectors: Return document vector data with search result.
 
         Returns:
             Results of the search
@@ -5355,6 +5366,7 @@ class Index(_BaseIndex):
             ranking_score_threshold=ranking_score_threshold,
             vector=vector,
             locales=locales,
+            retrieve_vectors=retrieve_vectors,
         )
 
         if self._pre_facet_search_plugins:
@@ -8262,6 +8274,7 @@ def _process_search_parameters(
     vector: list[float] | None = None,
     hybrid: Hybrid | None = None,
     locales: list[str] | None = None,
+    retrieve_vectors: bool | None = None,
 ) -> JsonDict:
     if attributes_to_retrieve is None:
         attributes_to_retrieve = ["*"]
@@ -8309,6 +8322,9 @@ def _process_search_parameters(
 
     if locales:
         body["locales"] = locales
+
+    if retrieve_vectors is not None:
+        body["retrieveVectors"] = retrieve_vectors
 
     return body
 
