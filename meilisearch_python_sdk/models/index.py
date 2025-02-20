@@ -40,5 +40,7 @@ class IndexInfo(IndexBase):
 
 class IndexStats(CamelBase):
     number_of_documents: int
+    number_of_embedded_documents: int | None = None
+    number_of_embeddings: int | None = None
     is_indexing: bool
     field_distribution: dict[str, int]
