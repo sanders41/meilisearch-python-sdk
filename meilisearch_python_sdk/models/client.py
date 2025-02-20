@@ -11,6 +11,7 @@ from meilisearch_python_sdk.models.index import IndexStats
 
 class ClientStats(CamelBase):
     database_size: int
+    used_database_size: int | None
     last_update: datetime | None = None
     indexes: dict[str, IndexStats] | None = None
 
