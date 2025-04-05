@@ -1288,12 +1288,21 @@ class AsyncIndex(_BaseIndex):
 
         return SimilarSearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
 
-    async def get_document(self, document_id: str) -> JsonDict:
+    async def get_document(
+        self,
+        document_id: str,
+        fields: list[str] | None = None,
+        retrieve_vectors: bool = False,
+    ) -> JsonDict:
         """Get one document with given document identifier.
 
         Args:
             document_id: Unique identifier of the document.
-
+            fields: Document attributes to show. If this value is None then all
+                attributes are retrieved. Defaults to None.
+            retrieve_vectors: If set to True the embedding vectors will be returned with the document.
+                Defaults to False. Note: This parameter can only be
+                used with Meilisearch >= v1.13.0
         Returns:
             The document information
 
@@ -1307,7 +1316,16 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     document = await index.get_document("1234")
         """
-        response = await self._http_requests.get(f"{self._documents_url}/{document_id}")
+        parameters: JsonDict = {
+            "retrieveVectors": retrieve_vectors,
+        }
+
+        if fields:
+            parameters["fields"] = fields
+
+        url = _build_encoded_url(f"{self._documents_url}/{document_id}", parameters)
+
+        response = await self._http_requests.get(url)
 
         return response.json()
 
@@ -1318,6 +1336,7 @@ class AsyncIndex(_BaseIndex):
         limit: int = 20,
         fields: list[str] | None = None,
         filter: Filter | None = None,
+        retrieve_vectors: bool = False,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -1328,6 +1347,9 @@ class AsyncIndex(_BaseIndex):
                 attributes are retrieved. Defaults to None.
             filter: Filter value information. Defaults to None. Note: This parameter can only be
                 used with Meilisearch >= v1.2.0
+            retrieve_vectors: If set to True the vectors will be returned with each document.
+                Defaults to False. Note: This parameter can only be
+                used with Meilisearch >= v1.13.0
 
         Returns:
             Documents info.
@@ -1346,6 +1368,7 @@ class AsyncIndex(_BaseIndex):
         parameters: JsonDict = {
             "offset": offset,
             "limit": limit,
+            "retrieveVectors": retrieve_vectors,
         }
 
         if not filter:
@@ -5470,12 +5493,21 @@ class Index(_BaseIndex):
 
         return SimilarSearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
 
-    def get_document(self, document_id: str) -> JsonDict:
+    def get_document(
+        self,
+        document_id: str,
+        fields: list[str] | None = None,
+        retrieve_vectors: bool = False,
+    ) -> JsonDict:
         """Get one document with given document identifier.
 
         Args:
             document_id: Unique identifier of the document.
-
+            fields: Document attributes to show. If this value is None then all
+                attributes are retrieved. Defaults to None.
+            retrieve_vectors: If set to True the embedding vectors will be returned with the document.
+                Defaults to False. Note: This parameter can only be
+                used with Meilisearch >= v1.13.0
         Returns:
             The document information
 
@@ -5489,8 +5521,16 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> document = index.get_document("1234")
         """
-        response = self._http_requests.get(f"{self._documents_url}/{document_id}")
+        parameters: JsonDict = {
+            "retrieveVectors": retrieve_vectors,
+        }
 
+        if fields:
+            parameters["fields"] = fields
+
+        url = _build_encoded_url(f"{self._documents_url}/{document_id}", parameters)
+
+        response = self._http_requests.get(url)
         return response.json()
 
     def get_documents(
@@ -5500,6 +5540,7 @@ class Index(_BaseIndex):
         limit: int = 20,
         fields: list[str] | None = None,
         filter: Filter | None = None,
+        retrieve_vectors: bool = False,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -5510,6 +5551,9 @@ class Index(_BaseIndex):
                 attributes are retrieved. Defaults to None.
             filter: Filter value information. Defaults to None. Note: This parameter can only be
                 used with Meilisearch >= v1.2.0
+            retrieve_vectors: If set to True the vectors will be returned with each document.
+                Defaults to False. Note: This parameter can only be
+                used with Meilisearch >= v1.13.0
 
         Returns:
             Documents info.
@@ -5528,6 +5572,7 @@ class Index(_BaseIndex):
         parameters: JsonDict = {
             "offset": offset,
             "limit": limit,
+            "retrieveVectors": retrieve_vectors,
         }
 
         if not filter:
