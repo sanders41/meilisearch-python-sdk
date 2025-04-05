@@ -1317,11 +1317,12 @@ class AsyncIndex(_BaseIndex):
             >>>     document = await index.get_document("1234")
         """
         parameters: JsonDict = {
-            "retrieveVectors": retrieve_vectors,
         }
 
         if fields:
             parameters["fields"] = fields
+        if retrieve_vectors:
+            parameters["retrieveVectors"] = retrieve_vectors
 
         url = _build_encoded_url(f"{self._documents_url}/{document_id}", parameters)
 
@@ -1368,7 +1369,6 @@ class AsyncIndex(_BaseIndex):
         parameters: JsonDict = {
             "offset": offset,
             "limit": limit,
-            "retrieveVectors": retrieve_vectors,
         }
 
         if not filter:
@@ -1382,6 +1382,8 @@ class AsyncIndex(_BaseIndex):
 
         if fields:
             parameters["fields"] = fields
+        if retrieve_vectors:
+            parameters["retrieveVectors"] = retrieve_vectors
 
         parameters["filter"] = filter
 
@@ -5522,11 +5524,12 @@ class Index(_BaseIndex):
             >>> document = index.get_document("1234")
         """
         parameters: JsonDict = {
-            "retrieveVectors": retrieve_vectors,
         }
 
         if fields:
             parameters["fields"] = fields
+        if retrieve_vectors:
+            parameters["retrieveVectors"] = retrieve_vectors
 
         url = _build_encoded_url(f"{self._documents_url}/{document_id}", parameters)
 
@@ -5572,7 +5575,6 @@ class Index(_BaseIndex):
         parameters: JsonDict = {
             "offset": offset,
             "limit": limit,
-            "retrieveVectors": retrieve_vectors,
         }
 
         if not filter:
@@ -5586,6 +5588,8 @@ class Index(_BaseIndex):
 
         if fields:
             parameters["fields"] = fields
+        if retrieve_vectors:
+            parameters["retrieveVectors"] = retrieve_vectors
 
         parameters["filter"] = filter
         response = self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
