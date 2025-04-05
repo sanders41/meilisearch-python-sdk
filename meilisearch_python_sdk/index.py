@@ -5527,7 +5527,7 @@ class Index(_BaseIndex):
         parameters: JsonDict = {}
 
         if fields:
-            parameters["fields"] = fields
+            parameters["fields"] = ",".join(fields)
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
 
