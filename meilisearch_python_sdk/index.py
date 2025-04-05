@@ -5498,6 +5498,7 @@ class Index(_BaseIndex):
     def get_document(
         self,
         document_id: str,
+        *,
         fields: list[str] | None = None,
         retrieve_vectors: bool = False,
     ) -> JsonDict:
