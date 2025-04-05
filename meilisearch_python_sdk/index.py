@@ -1322,7 +1322,7 @@ class AsyncIndex(_BaseIndex):
         if fields:
             parameters["fields"] = fields
         if retrieve_vectors:
-            parameters["retrieveVectors"] = retrieve_vectors
+            parameters["retrieveVectors"] = "true"
 
         url = _build_encoded_url(f"{self._documents_url}/{document_id}", parameters)
 
@@ -5529,7 +5529,7 @@ class Index(_BaseIndex):
         if fields:
             parameters["fields"] = fields
         if retrieve_vectors:
-            parameters["retrieveVectors"] = retrieve_vectors
+            parameters["retrieveVectors"] = "true"
 
         url = _build_encoded_url(f"{self._documents_url}/{document_id}", parameters)
 
