@@ -1316,8 +1316,7 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     document = await index.get_document("1234")
         """
-        parameters: JsonDict = {
-        }
+        parameters: JsonDict = {}
 
         if fields:
             parameters["fields"] = fields
@@ -5523,8 +5522,7 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> document = index.get_document("1234")
         """
-        parameters: JsonDict = {
-        }
+        parameters: JsonDict = {}
 
         if fields:
             parameters["fields"] = fields
