@@ -626,6 +626,20 @@ def test_get_document_inexistent(empty_index):
         index.get_document("123")
 
 
+def test_get_document_with_fields(index_with_documents):
+    index = index_with_documents()
+    response = index.get_document("500682", fields=["title", "overview"])
+    assert len(response.keys()) == 2
+    assert "title" in response.keys()
+    assert "overview" in response.keys()
+
+
+def test_get_document_with_vectors(index_with_documents):
+    index = index_with_documents()
+    response = index.get_document("500682", retrieve_vectors=True)
+    assert "_vectors" in response.keys()
+
+
 def test_get_documents_populated(index_with_documents):
     index = index_with_documents()
     response = index.get_documents()

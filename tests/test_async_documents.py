@@ -706,6 +706,20 @@ async def test_get_document_inexistent(async_empty_index):
         await index.get_document("123")
 
 
+async def test_get_document_with_fields(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.get_document("500682", fields=["title", "overview"])
+    assert len(response.keys()) == 2
+    assert "title" in response.keys()
+    assert "overview" in response.keys()
+
+
+async def test_get_document_with_vectors(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.get_document("500682", retrieve_vectors=True)
+    assert "_vectors" in response.keys()
+
+
 async def test_get_documents_populated(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.get_documents()
