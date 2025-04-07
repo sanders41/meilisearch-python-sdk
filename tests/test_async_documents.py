@@ -758,6 +758,14 @@ async def test_get_documents_filter_with_fields(async_index_with_documents):
     assert next(iter(genres)) == "action"
 
 
+async def test_get_documents_with_vectors(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents(retrieve_vectors=True)
+    assert all("_vectors" in x.keys() for x in response.results)
+
+
 @pytest.mark.parametrize("compress", (True, False))
 async def test_update_documents(compress, async_index_with_documents, small_movies):
     index = await async_index_with_documents()

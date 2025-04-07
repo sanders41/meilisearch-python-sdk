@@ -1371,6 +1371,9 @@ class AsyncIndex(_BaseIndex):
             "limit": limit,
         }
 
+        if retrieve_vectors:
+            parameters["retrieveVectors"] = "true"
+
         if not filter:
             if fields:
                 parameters["fields"] = ",".join(fields)
@@ -1382,8 +1385,6 @@ class AsyncIndex(_BaseIndex):
 
         if fields:
             parameters["fields"] = fields
-        if retrieve_vectors:
-            parameters["retrieveVectors"] = retrieve_vectors
 
         parameters["filter"] = filter
 
@@ -5577,6 +5578,9 @@ class Index(_BaseIndex):
             "limit": limit,
         }
 
+        if retrieve_vectors:
+            parameters["retrieveVectors"] = "true"
+
         if not filter:
             if fields:
                 parameters["fields"] = ",".join(fields)
@@ -5588,8 +5592,6 @@ class Index(_BaseIndex):
 
         if fields:
             parameters["fields"] = fields
-        if retrieve_vectors:
-            parameters["retrieveVectors"] = retrieve_vectors
 
         parameters["filter"] = filter
         response = self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
