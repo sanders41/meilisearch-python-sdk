@@ -706,6 +706,20 @@ async def test_get_document_inexistent(async_empty_index):
         await index.get_document("123")
 
 
+async def test_get_document_with_fields(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.get_document("500682", fields=["title", "overview"])
+    assert len(response.keys()) == 2
+    assert "title" in response.keys()
+    assert "overview" in response.keys()
+
+
+async def test_get_document_with_vectors(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.get_document("500682", retrieve_vectors=True)
+    assert "_vectors" in response.keys()
+
+
 async def test_get_documents_populated(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.get_documents()
@@ -742,6 +756,14 @@ async def test_get_documents_filter_with_fields(async_index_with_documents):
     genres = set([x["genre"] for x in response.results])
     assert len(genres) == 1
     assert next(iter(genres)) == "action"
+
+
+async def test_get_documents_with_vectors(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents(retrieve_vectors=True)
+    assert all("_vectors" in x.keys() for x in response.results)
 
 
 @pytest.mark.parametrize("compress", (True, False))
