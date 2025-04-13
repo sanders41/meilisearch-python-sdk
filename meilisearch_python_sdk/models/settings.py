@@ -68,6 +68,7 @@ class HuggingFaceEmbedder(CamelBase):
     distribution: Distribution | None = None
     dimensions: int | None = None
     binary_quantized: bool | None = None
+    pooling: Literal["useModel", "forceMean", "forceCls"] | None = None
 
 
 class OllamaEmbedder(CamelBase):
