@@ -19,7 +19,7 @@ from meilisearch_python_sdk.errors import (
     MeilisearchTaskFailedError,
     MeilisearchTimeoutError,
 )
-from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate
+from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate, Network
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.version import Version
 from meilisearch_python_sdk.types import JsonDict
@@ -1029,3 +1029,25 @@ def test_get_batch(client, empty_index, small_movies):
 def test_get_batch_not_found(client):
     with pytest.raises(BatchNotFoundError):
         client.get_batch(999999999)
+
+
+def test_get_networks(client):
+    response = client.get_networks()
+
+    assert isinstance(response, Network)
+
+
+def test_add_or_update_networks(client):
+    network = Network(
+        self_="remote_1",
+        remotes={
+            "remote_1": {"url": "http://localhost:7700", "searchApiKey": "xxxxxxxxxxxxxx"},
+            "remote_2": {"url": "http://localhost:7720", "searchApiKey": "xxxxxxxxxxxxxxx"},
+        },
+    )
+    response = client.add_or_update_networks(network=network)
+
+    assert response.self_ == "remote_1"
+    assert len(response.remotes) >= 2
+    assert "remote_1" in response.remotes
+    assert "remote_2" in response.remotes

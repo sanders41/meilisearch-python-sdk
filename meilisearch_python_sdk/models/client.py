@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime
 
 import pydantic
@@ -84,3 +85,13 @@ class KeySearch(CamelBase):
     offset: int
     limit: int
     total: int
+
+
+class Remote(CamelBase):
+    url: str | None = None
+    search_api_key: str | None = None
+
+
+class Network(CamelBase):
+    self_: str | None = pydantic.Field(None, alias="self")
+    remotes: Mapping[str, Remote] | None = None

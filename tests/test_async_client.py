@@ -22,7 +22,7 @@ from meilisearch_python_sdk.errors import (
     MeilisearchTaskFailedError,
     MeilisearchTimeoutError,
 )
-from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate
+from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate, Network
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.version import Version
 from meilisearch_python_sdk.types import JsonDict
@@ -1048,3 +1048,25 @@ async def test_get_batch(async_client, async_empty_index, small_movies):
 async def test_get_batch_not_found(async_client):
     with pytest.raises(BatchNotFoundError):
         await async_client.get_batch(999999999)
+
+
+async def test_get_networks(async_client):
+    response = await async_client.get_networks()
+
+    assert isinstance(response, Network)
+
+
+async def test_add_or_update_networks(async_client):
+    network = Network(
+        self_="remote_1",
+        remotes={
+            "remote_1": {"url": "http://localhost:7700", "searchApiKey": "xxxxxxxxxxxxxx"},
+            "remote_2": {"url": "http://localhost:7720", "searchApiKey": "xxxxxxxxxxxxxxx"},
+        },
+    )
+    response = await async_client.add_or_update_networks(network=network)
+
+    assert response.self_ == "remote_1"
+    assert len(response.remotes) >= 2
+    assert "remote_1" in response.remotes
+    assert "remote_2" in response.remotes
