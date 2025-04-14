@@ -556,6 +556,20 @@ def test_facet_search_locales(index_with_documents):
     assert response.facet_hits[0].count == 1
 
 
+def test_facet_search_exhaustive_facet_count(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.facet_search(
+        "How to Train Your Dragon",
+        facet_name="genre",
+        facet_query="cartoon",
+        exhaustive_facet_count=True,
+    )
+
+    assert response.facet_hits[0].value == "cartoon"
+
+
 @pytest.mark.parametrize("ranking_score_threshold", (-0.1, 1.1))
 def test_search_invalid_ranking_score_threshold(
     ranking_score_threshold, index_with_documents_and_vectors
