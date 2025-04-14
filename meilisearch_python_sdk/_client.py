@@ -22,6 +22,7 @@ from meilisearch_python_sdk.models.client import (
     KeyCreate,
     KeySearch,
     KeyUpdate,
+    Network,
 )
 from meilisearch_python_sdk.models.health import Health
 from meilisearch_python_sdk.models.index import IndexInfo
@@ -196,12 +197,66 @@ class AsyncClient(BaseClient):
         """
         await self.http_client.aclose()
 
+    async def add_or_update_networks(self, *, network: Network) -> Network:
+        """Set or update remote networks.
+
+        Args:
+            network: Information to use for the networks.
+
+        Returns:
+            An instance of Network containing the network information.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.client import Network, Remote
+            >>>
+            >>>
+            >>> network = Network(
+            >>> self_="remote_1",
+            >>>     remotes={
+            >>>         "remote_1": {"url": "http://localhost:7700", "searchApiKey": "xxxx"},
+            >>>         "remote_2": {"url": "http://localhost:7720", "searchApiKey": "xxxx"},
+            >>>     },
+            >>> )
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     response = await client.add_or_update_networks(network=network)
+        """
+        response = await self._http_requests.patch(
+            "network", network.model_dump(by_alias=True, exclude_none=True)
+        )
+
+        return Network(**response.json())
+
+    async def get_networks(self) -> Network:
+        """Fetches the remote-networks
+
+        Returns:
+            An instance of Network containing information about each remote.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>>
+            >>>
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     response = await client.get_networks()
+        """
+        response = await self._http_requests.get("network")
+
+        return Network(**response.json())
+
     async def create_dump(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch dump.
 
         Returns:
             The details of the task.
-
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -1060,6 +1115,61 @@ class Client(BaseClient):
         )
 
         self._http_requests = HttpRequests(self.http_client, json_handler=self.json_handler)
+
+    def add_or_update_networks(self, *, network: Network) -> Network:
+        """Set or update remote networks.
+
+        Args:
+            network: Information to use for the networks.
+
+        Returns:
+            An instance of Network containing the network information.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.client import Network, Remote
+            >>>
+            >>>
+            >>> network = Network(
+            >>> self_="remote_1",
+            >>>     remotes={
+            >>>         "remote_1": {"url": "http://localhost:7700", "searchApiKey": "xxxx"},
+            >>>         "remote_2": {"url": "http://localhost:7720", "searchApiKey": "xxxx"},
+            >>>     },
+            >>> )
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> response = client.add_or_update_networks(network=network)
+        """
+        response = self._http_requests.patch(
+            "network", network.model_dump(by_alias=True, exclude_none=True)
+        )
+
+        return Network(**response.json())
+
+    def get_networks(self) -> Network:
+        """Fetches the remote-networks
+
+        Returns:
+            An instance of Network containing information about each remote.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>>
+            >>>
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> response = client.get_networks()
+        """
+        response = self._http_requests.get("network")
+
+        return Network(**response.json())
 
     def create_dump(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch dump.
