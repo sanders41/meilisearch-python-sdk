@@ -990,6 +990,7 @@ class AsyncIndex(_BaseIndex):
         vector: list[float] | None = None,
         locales: list[str] | None = None,
         retrieve_vectors: bool | None = None,
+        exhaustive_facet_count: bool | None = None,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -1043,6 +1044,9 @@ class AsyncIndex(_BaseIndex):
             locales: Specifies the languages for the search. This parameter can only be used with
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
             retrieve_vectors: Return document vector data with search result.
+            exhaustive_facet_count: forcing the facet search to compute the facet counts the same
+                way as the paginated search. This parameter can only be used with Milisearch >=
+                v1.14.0. Defaults to None.
 
         Returns:
             Results of the search
@@ -1091,6 +1095,7 @@ class AsyncIndex(_BaseIndex):
             vector=vector,
             locales=locales,
             retrieve_vectors=retrieve_vectors,
+            exhaustive_facet_count=exhaustive_facet_count,
         )
         search_url = f"{self._base_url_with_uid}/facet-search"
 
@@ -1120,6 +1125,7 @@ class AsyncIndex(_BaseIndex):
                 show_ranking_score_details=show_ranking_score_details,
                 ranking_score_threshold=ranking_score_threshold,
                 vector=vector,
+                exhaustive_facet_count=exhaustive_facet_count,
             )
 
         if self._concurrent_facet_search_plugins:
@@ -1152,6 +1158,7 @@ class AsyncIndex(_BaseIndex):
                                 show_ranking_score_details=show_ranking_score_details,
                                 ranking_score_threshold=ranking_score_threshold,
                                 vector=vector,
+                                exhaustive_facet_count=exhaustive_facet_count,
                             )
                         )
 
@@ -1195,6 +1202,7 @@ class AsyncIndex(_BaseIndex):
                                 show_ranking_score_details=show_ranking_score_details,
                                 ranking_score_threshold=ranking_score_threshold,
                                 vector=vector,
+                                exhaustive_facet_count=exhaustive_facet_count,
                             )
                         )
 
@@ -5292,6 +5300,7 @@ class Index(_BaseIndex):
         vector: list[float] | None = None,
         locales: list[str] | None = None,
         retrieve_vectors: bool | None = None,
+        exhaustive_facet_count: bool | None = None,
     ) -> FacetSearchResults:
         """Search the index.
 
@@ -5345,6 +5354,9 @@ class Index(_BaseIndex):
             locales: Specifies the languages for the search. This parameter can only be used with
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
             retrieve_vectors: Return document vector data with search result.
+            exhaustive_facet_count: forcing the facet search to compute the facet counts the same
+                way as the paginated search. This parameter can only be used with Milisearch >=
+                v1.14.0. Defaults to None.
 
         Returns:
             Results of the search
@@ -5393,6 +5405,7 @@ class Index(_BaseIndex):
             vector=vector,
             locales=locales,
             retrieve_vectors=retrieve_vectors,
+            exhaustive_facet_count=exhaustive_facet_count,
         )
 
         if self._pre_facet_search_plugins:
@@ -5421,6 +5434,7 @@ class Index(_BaseIndex):
                 show_ranking_score_details=show_ranking_score_details,
                 ranking_score_threshold=ranking_score_threshold,
                 vector=vector,
+                exhaustive_facet_count=exhaustive_facet_count,
             )
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/facet-search", body=body)
@@ -8326,6 +8340,7 @@ def _process_search_parameters(
     hybrid: Hybrid | None = None,
     locales: list[str] | None = None,
     retrieve_vectors: bool | None = None,
+    exhaustive_facet_count: bool | None = None,
 ) -> JsonDict:
     if attributes_to_retrieve is None:
         attributes_to_retrieve = ["*"]
@@ -8376,6 +8391,9 @@ def _process_search_parameters(
 
     if retrieve_vectors is not None:
         body["retrieveVectors"] = retrieve_vectors
+
+    if exhaustive_facet_count is not None:
+        body["exhaustivefacetCount"] = exhaustive_facet_count
 
     return body
 
