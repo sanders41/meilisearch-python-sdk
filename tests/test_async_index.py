@@ -7,6 +7,9 @@ from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
+    Filter,
+    FilterableAttributeFeatures,
+    FilterableAttributes,
     LocalizedAttributes,
     MinWordSizeForTypos,
     OpenAiEmbedder,
@@ -61,11 +64,6 @@ def new_stop_words():
 @pytest.fixture
 def new_synonyms():
     return {"hp": ["harry potter"]}
-
-
-@pytest.fixture
-def filterable_attributes():
-    return ["release_date", "title"]
 
 
 @pytest.fixture
@@ -577,6 +575,20 @@ async def test_get_filterable_attributes(async_empty_index):
 
 
 @pytest.mark.parametrize("compress", (True, False))
+@pytest.mark.parametrize(
+    "filterable_attributes",
+    (
+        ["release_date", "title"],
+        [
+            FilterableAttributes(
+                attribute_patterns=["release_date", "title"],
+                features=FilterableAttributeFeatures(
+                    facet_search=True, filter=Filter(equality=True, comparison=False)
+                ),
+            ),
+        ],
+    ),
+)
 async def test_update_filterable_attributes(compress, async_empty_index, filterable_attributes):
     index = await async_empty_index()
     response = await index.update_filterable_attributes(filterable_attributes, compress=compress)
@@ -585,6 +597,20 @@ async def test_update_filterable_attributes(compress, async_empty_index, filtera
     assert sorted(response) == filterable_attributes
 
 
+@pytest.mark.parametrize(
+    "filterable_attributes",
+    (
+        ["release_date", "title"],
+        [
+            FilterableAttributes(
+                attribute_patterns=["release_date", "title"],
+                features=FilterableAttributeFeatures(
+                    facet_search=True, filter=Filter(equality=True, comparison=False)
+                ),
+            ),
+        ],
+    ),
+)
 async def test_reset_filterable_attributes(async_empty_index, filterable_attributes):
     index = await async_empty_index()
     response = await index.update_filterable_attributes(filterable_attributes)

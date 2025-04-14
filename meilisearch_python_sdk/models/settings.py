@@ -123,11 +123,26 @@ class LocalizedAttributes(CamelBase):
     attribute_patterns: list[str]
 
 
+class Filter(CamelBase):
+    equality: bool
+    comparison: bool
+
+
+class FilterableAttributeFeatures(CamelBase):
+    facet_search: bool
+    filter: Filter
+
+
+class FilterableAttributes(CamelBase):
+    attribute_patterns: list[str]
+    features: FilterableAttributeFeatures
+
+
 class MeilisearchSettings(CamelBase):
     synonyms: JsonDict | None = None
     stop_words: list[str] | None = None
     ranking_rules: list[str] | None = None
-    filterable_attributes: list[str] | None = None
+    filterable_attributes: list[str] | list[FilterableAttributes] | None = None
     distinct_attribute: str | None = None
     searchable_attributes: list[str] | None = None
     displayed_attributes: list[str] | None = None
