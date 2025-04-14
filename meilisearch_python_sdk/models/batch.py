@@ -26,6 +26,9 @@ class Stats(CamelBase):
     status: Status
     batch_types: JsonDict | None = Field(None, alias="types")
     index_uids: JsonDict | None = None
+    progress_trace: JsonDict | None = None
+    write_channel_congestion: JsonDict | None = None
+    internal_database_sizes: JsonDict | None = None
 
 
 class BatchResult(BatchId):
