@@ -29,6 +29,8 @@ from meilisearch_python_sdk.models.search import (
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
+    FilterableAttributeFeatures,
+    FilterableAttributes,
     HuggingFaceEmbedder,
     LocalizedAttributes,
     MeilisearchSettings,
@@ -3576,11 +3578,11 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    async def get_filterable_attributes(self) -> list[str] | None:
+    async def get_filterable_attributes(self) -> list[str] | list[FilterableAttributes] | None:
         """Get filterable attributes of the index.
 
         Returns:
-            List containing the filterable attributes of the index.
+            Filterable attributes of the index.
 
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
@@ -3597,10 +3599,24 @@ class AsyncIndex(_BaseIndex):
         if not response.json():
             return None
 
-        return response.json()
+        response_json = response.json()
+
+        if isinstance(response_json[0], str):
+            return response_json
+
+        filterable_attributes = []
+        for r in response_json:
+            filterable_attributes.append(
+                FilterableAttributes(
+                    attribute_patterns=r["attributePatterns"],
+                    features=FilterableAttributeFeatures(**r["features"]),
+                )
+            )
+
+        return filterable_attributes
 
     async def update_filterable_attributes(
-        self, body: list[str], *, compress: bool = False
+        self, body: list[str] | list[FilterableAttributes], *, compress: bool = False
     ) -> TaskInfo:
         """Update filterable attributes of the index.
 
@@ -3621,8 +3637,16 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_filterable_attributes(["genre", "director"])
         """
+        payload: list[str | JsonDict] = []
+
+        for b in body:
+            if isinstance(b, FilterableAttributes):
+                payload.append(b.model_dump(by_alias=True))
+            else:
+                payload.append(b)
+
         response = await self._http_requests.put(
-            f"{self._settings_url}/filterable-attributes", body, compress=compress
+            f"{self._settings_url}/filterable-attributes", payload, compress=compress
         )
 
         return TaskInfo(**response.json())
@@ -7170,7 +7194,7 @@ class Index(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    def get_filterable_attributes(self) -> list[str] | None:
+    def get_filterable_attributes(self) -> list[str] | list[FilterableAttributes] | None:
         """Get filterable attributes of the index.
 
         Returns:
@@ -7191,9 +7215,25 @@ class Index(_BaseIndex):
         if not response.json():
             return None
 
-        return response.json()
+        response_json = response.json()
 
-    def update_filterable_attributes(self, body: list[str], *, compress: bool = False) -> TaskInfo:
+        if isinstance(response_json[0], str):
+            return response_json
+
+        filterable_attributes = []
+        for r in response_json:
+            filterable_attributes.append(
+                FilterableAttributes(
+                    attribute_patterns=r["attributePatterns"],
+                    features=FilterableAttributeFeatures(**r["features"]),
+                )
+            )
+
+        return filterable_attributes
+
+    def update_filterable_attributes(
+        self, body: list[str] | list[FilterableAttributes], *, compress: bool = False
+    ) -> TaskInfo:
         """Update filterable attributes of the index.
 
         Args:
@@ -7213,8 +7253,16 @@ class Index(_BaseIndex):
             >>> index = client.index("movies")
             >>> index.update_filterable_attributes(["genre", "director"])
         """
+        payload: list[str | JsonDict] = []
+
+        for b in body:
+            if isinstance(b, FilterableAttributes):
+                payload.append(b.model_dump(by_alias=True))
+            else:
+                payload.append(b)
+
         response = self._http_requests.put(
-            f"{self._settings_url}/filterable-attributes", body, compress=compress
+            f"{self._settings_url}/filterable-attributes", payload, compress=compress
         )
 
         return TaskInfo(**response.json())
