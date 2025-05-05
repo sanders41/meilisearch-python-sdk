@@ -301,7 +301,7 @@ async def enable_edit_by_function(base_url, ssl_verify):
         base_url=base_url, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=ssl_verify
     ) as client:
         await client.patch("/experimental-features", json={"editDocumentsByFunction": True})
-        yield
+    yield
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -310,7 +310,7 @@ async def enable_network(base_url, ssl_verify):
         base_url=base_url, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=ssl_verify
     ) as client:
         await client.patch("/experimental-features", json={"network": True})
-        yield
+    yield
 
 
 @pytest.fixture

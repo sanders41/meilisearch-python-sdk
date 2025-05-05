@@ -27,6 +27,7 @@ from meilisearch_python_sdk.models.search import (
     SimilarSearchResults,
 )
 from meilisearch_python_sdk.models.settings import (
+    CompositeEmbedder,
     Embedders,
     Faceting,
     FilterableAttributeFeatures,
@@ -8459,7 +8460,12 @@ def _embedder_json_to_embedders_model(  # pragma: no cover
 
     embedders: dict[
         str,
-        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+        OpenAiEmbedder
+        | HuggingFaceEmbedder
+        | OllamaEmbedder
+        | RestEmbedder
+        | UserProvidedEmbedder
+        | CompositeEmbedder,
     ] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
@@ -8470,6 +8476,8 @@ def _embedder_json_to_embedders_model(  # pragma: no cover
             embedders[k] = OllamaEmbedder(**v)
         elif v.get("source") == "rest":
             embedders[k] = RestEmbedder(**v)
+        elif v.get("source") == "composit":
+            embedders[k] = CompositeEmbedder(**v)
         else:
             embedders[k] = UserProvidedEmbedder(**v)
 
@@ -8482,7 +8490,12 @@ def _embedder_json_to_settings_model(  # pragma: no cover
 ) -> (
     dict[
         str,
-        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+        OpenAiEmbedder
+        | HuggingFaceEmbedder
+        | OllamaEmbedder
+        | RestEmbedder
+        | UserProvidedEmbedder
+        | CompositeEmbedder,
     ]
     | None
 ):
@@ -8491,7 +8504,12 @@ def _embedder_json_to_settings_model(  # pragma: no cover
 
     embedders: dict[
         str,
-        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+        OpenAiEmbedder
+        | HuggingFaceEmbedder
+        | OllamaEmbedder
+        | RestEmbedder
+        | UserProvidedEmbedder
+        | CompositeEmbedder,
     ] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
@@ -8502,6 +8520,8 @@ def _embedder_json_to_settings_model(  # pragma: no cover
             embedders[k] = OllamaEmbedder(**v)
         elif v.get("source") == "rest":
             embedders[k] = RestEmbedder(**v)
+        elif v.get("source") == "composit":
+            embedders[k] = CompositeEmbedder(**v)
         else:
             embedders[k] = UserProvidedEmbedder(**v)
 
