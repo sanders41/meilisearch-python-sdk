@@ -106,10 +106,25 @@ class UserProvidedEmbedder(CamelBase):
     binary_quantized: bool | None = None
 
 
+class CompositeEmbedder(CamelBase):
+    source: str = "composite"
+    search_embedder: (
+        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder
+    )
+    indexing_embedder: (
+        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder
+    )
+
+
 class Embedders(CamelBase):
     embedders: dict[
         str,
-        OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder,
+        OpenAiEmbedder
+        | HuggingFaceEmbedder
+        | OllamaEmbedder
+        | RestEmbedder
+        | UserProvidedEmbedder
+        | CompositeEmbedder,
     ]
 
 
@@ -162,7 +177,8 @@ class MeilisearchSettings(CamelBase):
             | HuggingFaceEmbedder
             | OllamaEmbedder
             | RestEmbedder
-            | UserProvidedEmbedder,
+            | UserProvidedEmbedder
+            | CompositeEmbedder,
         ]
         | None
     ) = None  # Optional[Embedders] = None
