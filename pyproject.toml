@@ -47,9 +47,9 @@ dev = [
   "pre-commit==4.2.0",
   "pytest==8.3.5",
   "pytest-cov==6.1.1",
-  "pytest-asyncio==0.26.0",
-  "pytest-xdist==3.6.1",
-  "ruff==0.11.10",
+  "pytest-asyncio==1.0.0",
+  "pytest-xdist==3.7.0",
+  "ruff==0.11.11",
   "types-aiofiles==24.1.0.20250516",
   "typing-extensions==4.13.2",
   "types-ujson==5.10.0.20250326",
@@ -70,6 +70,7 @@ minversion = "6.0"
 addopts = "--cov=meilisearch_python_sdk --cov-report term-missing --no-cov-on-fail --ignore examples"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 markers = ["no_parallel"]
 
 [tool.mypy]
