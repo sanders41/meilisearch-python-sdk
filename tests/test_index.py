@@ -651,6 +651,7 @@ def test_update_typo_tolerance(compress, empty_index):
         enabled=True,
         disable_on_attributes=["title"],
         disable_on_words=["spiderman"],
+        disable_on_numbers=True,
         min_word_size_for_typos=MinWordSizeForTypos(one_typo=10, two_typos=20),
     )
     index = empty_index()
