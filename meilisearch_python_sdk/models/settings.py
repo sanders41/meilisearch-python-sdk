@@ -18,6 +18,7 @@ class TypoTolerance(CamelBase):
     enabled: bool = True
     disable_on_attributes: list[str] | None = None
     disable_on_words: list[str] | None = None
+    disable_on_numbers: bool | None = None
     min_word_size_for_typos: MinWordSizeForTypos | None = None
 
 
