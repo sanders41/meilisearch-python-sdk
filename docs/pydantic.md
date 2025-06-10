@@ -22,10 +22,11 @@ from camel_converter.pydantic_base import CamelBase
 from meilisearch_python_sdk import Client
 
 
-# Inheriting from CamelBase will allow your class to automatically convert
-# variables returned from the server in camelCase into snake_case. It will
-# also make it a Pydantic Model.
 class Movie(CamelBase):
+    """
+    Inheriting from CamelBase will allow your class to automatically convert variables returned
+    from the server in camelCase into snake_case. It will also make it a Pydantic Model.
+    """
     id: int
     title: str
     poster: str
@@ -70,10 +71,12 @@ from camel_converter.pydantic_base import CamelBase
 from meilisearch_python_sdk import Client
 
 
-# Inheriting from CamelBase will allow your class to automatically convert
-# variables returned from the server in camelCase into snake_case. It will
-# also make it a Pydantic Model.
 class Movie(CamelBase):
+    """
+    Inheriting from CamelBase will allow your class to automatically convert
+    variables returned from the server in camelCase into snake_case. It will
+    also make it a Pydantic Model.
+    """
     id: int
     title: str
     poster: str
