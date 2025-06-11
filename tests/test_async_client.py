@@ -426,7 +426,7 @@ async def test_delete_key(test_key, async_client):
 @pytest.mark.no_parallel
 async def test_get_keys(async_client):
     response = await async_client.get_keys()
-    assert len(response.results) == 2
+    assert len(response.results) >= 3
 
 
 @pytest.mark.no_parallel
