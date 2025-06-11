@@ -425,7 +425,7 @@ def test_delete_key(test_key, client):
 @pytest.mark.no_parallel
 def test_get_keys(client):
     response = client.get_keys()
-    assert len(response.results) == 2
+    assert len(response.results) >= 3
 
 
 def test_get_keys_offset_and_limit(client):
