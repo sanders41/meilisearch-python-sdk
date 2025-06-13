@@ -3785,7 +3785,7 @@ class AsyncIndex(_BaseIndex):
         """
         response = await self._http_requests.patch(
             f"{self._settings_url}/typo-tolerance",
-            typo_tolerance.model_dump(by_alias=True),
+            typo_tolerance.model_dump(by_alias=True, exclude_unset=True),
             compress=compress,
         )
 
@@ -7401,7 +7401,7 @@ class Index(_BaseIndex):
         """
         response = self._http_requests.patch(
             f"{self._settings_url}/typo-tolerance",
-            typo_tolerance.model_dump(by_alias=True),
+            typo_tolerance.model_dump(by_alias=True, exclude_unset=True),
             compress=compress,
         )
 
