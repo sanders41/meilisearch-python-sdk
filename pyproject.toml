@@ -45,7 +45,7 @@ dev = [
   "mkdocstrings[python]==0.29.1",
   "mypy[faster-cache]==1.16.1",
   "pre-commit==4.2.0",
-  "pytest==8.4.0",
+  "pytest==8.4.1",
   "pytest-cov==6.2.1",
   "pytest-asyncio==1.0.0",
   "pytest-xdist==3.7.0",
