@@ -454,7 +454,7 @@ name = "importlib-metadata"
 version = "8.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp" },
+    { name = "zipp", marker = "python_full_version < '3.10'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/76/66/650a33bd90f786193e4de4b3ad86ea60b53c89b669a5c7be931fac31cdb0/importlib_metadata-8.7.0.tar.gz", hash = "sha256:d13b81ad223b890aa16c5471f2ac3056cf76c5f10f82d6f9292f0b415f389000", size = 56641, upload-time = "2025-04-27T15:29:01.736Z" }
 wheels = [
@@ -668,7 +668,7 @@ dev = [
     { name = "pytest-xdist", specifier = "==3.8.0" },
     { name = "rich", specifier = "==14.0.0" },
     { name = "ruff", specifier = "==0.12.2" },
-    { name = "types-aiofiles", specifier = "==24.1.0.20250606" },
+    { name = "types-aiofiles", specifier = "==24.1.0.20250708" },
     { name = "types-ujson", specifier = "==5.10.0.20250326" },
     { name = "typing-extensions", specifier = "==4.14.1" },
 ]
@@ -1417,11 +1417,11 @@ wheels = [
 
 [[package]]
 name = "types-aiofiles"
-version = "24.1.0.20250606"
+version = "24.1.0.20250708"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/64/6e/fac4ffc896cb3faf2ac5d23747b65dd8bae1d9ee23305d1a3b12111c3989/types_aiofiles-24.1.0.20250606.tar.gz", hash = "sha256:48f9e26d2738a21e0b0f19381f713dcdb852a36727da8414b1ada145d40a18fe", size = 14364, upload-time = "2025-06-06T03:09:26.515Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/d6/5c44761bc11cb5c7505013a39f397a9016bfb3a5c932032b2db16c38b87b/types_aiofiles-24.1.0.20250708.tar.gz", hash = "sha256:c8207ed7385491ce5ba94da02658164ebd66b69a44e892288c9f20cbbf5284ff", size = 14322, upload-time = "2025-07-08T03:14:44.814Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/de/f2fa2ab8a5943898e93d8036941e05bfd1e1f377a675ee52c7c307dccb75/types_aiofiles-24.1.0.20250606-py3-none-any.whl", hash = "sha256:e568c53fb9017c80897a9aa15c74bf43b7ee90e412286ec1e0912b6e79301aee", size = 14276, upload-time = "2025-06-06T03:09:25.662Z" },
+    { url = "https://files.pythonhosted.org/packages/44/e9/4e0cc79c630040aae0634ac9393341dc2aff1a5be454be9741cc6cc8989f/types_aiofiles-24.1.0.20250708-py3-none-any.whl", hash = "sha256:07f8f06465fd415d9293467d1c66cd074b2c3b62b679e26e353e560a8cf63720", size = 14320, upload-time = "2025-07-08T03:14:44.009Z" },
 ]
 
 [[package]]
