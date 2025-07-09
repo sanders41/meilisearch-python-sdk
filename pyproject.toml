@@ -50,7 +50,7 @@ dev = [
   "pytest-asyncio==1.0.0",
   "pytest-xdist==3.8.0",
   "ruff==0.12.2",
-  "types-aiofiles==24.1.0.20250606",
+  "types-aiofiles==24.1.0.20250708",
   "typing-extensions==4.14.1",
   "types-ujson==5.10.0.20250326",
   "meilisearch==0.36.0",
