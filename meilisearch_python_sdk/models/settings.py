@@ -101,8 +101,8 @@ class RestEmbedder(CamelBase):
 
     @model_validator(mode="after")
     def check_document_template(self) -> RestEmbedder:
-        if self.indexing_fragments is None and self.document_template is not None:
-            raise ValueError("document_template must be None when infexing_fragments is set")
+        if self.indexing_fragments is not None and self.document_template is not None:
+            raise ValueError("document_template must be None when indexing_fragments is set")
 
         return self
 
