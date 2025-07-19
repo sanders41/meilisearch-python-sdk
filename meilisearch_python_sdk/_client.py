@@ -689,6 +689,9 @@ class AsyncClient(BaseClient):
                 del q["limit"]
                 del q["offset"]
 
+            if query.media is None:
+                del q["media"]
+
             processed_queries.append(q)
 
         if federation:
