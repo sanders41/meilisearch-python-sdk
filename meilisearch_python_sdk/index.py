@@ -1358,6 +1358,7 @@ class AsyncIndex(_BaseIndex):
         fields: list[str] | None = None,
         filter: Filter | None = None,
         retrieve_vectors: bool = False,
+        sort: str | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -1371,6 +1372,7 @@ class AsyncIndex(_BaseIndex):
             retrieve_vectors: If set to True the vectors will be returned with each document.
                 Defaults to False. Note: This parameter can only be
                 used with Meilisearch >= v1.13.0
+            sort: Attribute by which to sort the results. Defaults to None.
 
         Returns:
             Documents info.
@@ -1390,6 +1392,9 @@ class AsyncIndex(_BaseIndex):
             "offset": offset,
             "limit": limit,
         }
+
+        if sort:
+            parameters["sort"] = sort
 
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
@@ -5602,6 +5607,7 @@ class Index(_BaseIndex):
         fields: list[str] | None = None,
         filter: Filter | None = None,
         retrieve_vectors: bool = False,
+        sort: str | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -5615,6 +5621,7 @@ class Index(_BaseIndex):
             retrieve_vectors: If set to True the vectors will be returned with each document.
                 Defaults to False. Note: This parameter can only be
                 used with Meilisearch >= v1.13.0
+            sort: Attribute by which to sort the results. Defaults to None.
 
         Returns:
             Documents info.
@@ -5635,6 +5642,9 @@ class Index(_BaseIndex):
             "limit": limit,
         }
 
+        if sort:
+            parameters["sort"] = sort
+
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
 
@@ -5651,6 +5661,7 @@ class Index(_BaseIndex):
             parameters["fields"] = fields
 
         parameters["filter"] = filter
+
         response = self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
         return DocumentsInfo(**response.json())
