@@ -651,7 +651,7 @@ def test_get_documents_offset_optional_params(index_with_documents):
     response = index.get_documents()
     assert len(response.results) == 20
     response_offset_limit = index.get_documents(
-        limit=3, offset=1, fields=["title", "overview"], sort=["title"]
+        limit=3, offset=1, fields=["title", "overview"], sort=["title:asc"]
     )
     assert len(response_offset_limit.results) == 3
     assert response_offset_limit.results[0]["title"] == response.results[1]["title"]
