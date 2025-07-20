@@ -1061,7 +1061,7 @@ class AsyncClient(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import AsyncClient
-            >>> >>> documents = [
+            >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
@@ -1077,6 +1077,56 @@ class AsyncClient(BaseClient):
             interval_in_ms=interval_in_ms,
             raise_for_status=raise_for_status,
         )
+
+    # No cover because it requires multiple instances of Meilisearch
+    async def transfer_documents(  # pragma: no cover
+        self,
+        url: str,
+        *,
+        api_key: str | None = None,
+        payload_size: str | None = None,
+        indexes: JsonMapping | None = None,
+    ) -> TaskInfo:
+        """Transfer settings and documents from one Meilisearch instance to another.
+
+        Args:
+            url: Where to send our settings and documents.
+            api_key: The API key with the rights to send the requests. Usually the master key of
+                the remote machine. Defaults to None.
+            payload_size: Human readable size defining the size of the payloads to send. Defaults
+                to 50 MiB.
+            indexes: A set of patterns of matching the indexes you want to export. Defaults to all
+                indexes without filter.
+
+        Returns:
+            The details of the task.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+            MeilisearchTimeoutError: If the connection times out.
+
+        Examples
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>>     await index.transfer_documents(
+            >>>         "https://another-instance.com", api_key="otherMasterKey"
+            >>>     )
+        """
+        payload: JsonDict = {"url": url}
+
+        if api_key:
+            payload["apiKey"] = api_key
+
+        if payload:
+            payload["payloadSize"] = payload_size
+
+        if indexes:
+            payload["indexes"] = indexes
+
+        response = await self._http_requests.post(url, body=payload)
+
+        return TaskInfo(**response.json())
 
 
 class Client(BaseClient):
@@ -1971,7 +2021,7 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> >>> documents = [
+            >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
@@ -1987,6 +2037,54 @@ class Client(BaseClient):
             interval_in_ms=interval_in_ms,
             raise_for_status=raise_for_status,
         )
+
+    # No cover because it requires multiple instances of Meilisearch
+    def transfer_documents(  # pragma: no cover
+        self,
+        url: str,
+        *,
+        api_key: str | None = None,
+        payload_size: str | None = None,
+        indexes: JsonMapping | None = None,
+    ) -> TaskInfo:
+        """Transfer settings and documents from one Meilisearch instance to another.
+
+        Args:
+            url: Where to send our settings and documents.
+            api_key: The API key with the rights to send the requests. Usually the master key of
+                the remote machine. Defaults to None.
+            payload_size: Human readable size defining the size of the payloads to send. Defaults
+                to 50 MiB.
+            indexes: A set of patterns of matching the indexes you want to export. Defaults to all
+                indexes without filter.
+
+        Returns:
+            The details of the task.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+            MeilisearchTimeoutError: If the connection times out.
+
+        Examples
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index.transfer_documents("https://another-instance.com", api_key="otherMasterKey")
+        """
+        payload: JsonDict = {"url": url}
+
+        if api_key:
+            payload["apiKey"] = api_key
+
+        if payload:
+            payload["payloadSize"] = payload_size
+
+        if indexes:
+            payload["indexes"] = indexes
+
+        response = self._http_requests.post(url, body=payload)
+
+        return TaskInfo(**response.json())
 
 
 def _build_offset_limit_url(base: str, offset: int | None, limit: int | None) -> str:
