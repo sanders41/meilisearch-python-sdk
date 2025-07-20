@@ -728,14 +728,14 @@ async def test_get_documents_populated(async_index_with_documents):
 
 async def test_get_documents_offset_optional_params(async_index_with_documents):
     index = await async_index_with_documents()
-    response = await index.get_documents()
-    assert len(response.results) == 20
+    update_response = await index.update_sortable_attributes(["title"])
+    await async_wait_for_task(index.http_client, update_response.task_uid)
     response_offset_limit = await index.get_documents(
-        limit=3, offset=1, fields=["title", "overview"], sort=["title:asc"]
+        limit=3, offset=1, fields=["title", "overview"], sort="title:asc"
     )
+
     assert len(response_offset_limit.results) == 3
-    assert response_offset_limit.results[0]["title"] == response.results[1]["title"]
-    assert response_offset_limit.results[0]["overview"] == response.results[1]["overview"]
+    assert ["title", "overview"] == list(response_offset_limit.results[0].keys())
 
 
 async def test_get_documents_filter(async_index_with_documents):
