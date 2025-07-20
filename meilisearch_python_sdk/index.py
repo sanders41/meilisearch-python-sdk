@@ -1393,6 +1393,9 @@ class AsyncIndex(_BaseIndex):
             "limit": limit,
         }
 
+        if sort:
+            parameters["sort"] = sort
+
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
 
@@ -1409,9 +1412,6 @@ class AsyncIndex(_BaseIndex):
             parameters["fields"] = fields
 
         parameters["filter"] = filter
-
-        if sort:
-            parameters["sort"] = sort
 
         response = await self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
@@ -5642,6 +5642,9 @@ class Index(_BaseIndex):
             "limit": limit,
         }
 
+        if sort:
+            parameters["sort"] = sort
+
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
 
@@ -5658,9 +5661,6 @@ class Index(_BaseIndex):
             parameters["fields"] = fields
 
         parameters["filter"] = filter
-
-        if sort:
-            parameters["sort"] = sort
 
         response = self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
