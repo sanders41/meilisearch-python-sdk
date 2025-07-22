@@ -3,8 +3,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Literal
 
-import pydantic
 from camel_converter.pydantic_base import CamelBase
+from pydantic import field_validator, model_validator
 
 from meilisearch_python_sdk.types import JsonDict
 
@@ -26,7 +26,7 @@ class Faceting(CamelBase):
     max_values_per_facet: int
     sort_facet_values_by: dict[str, str] | None = None
 
-    @pydantic.field_validator("sort_facet_values_by")  # type: ignore[attr-defined]
+    @field_validator("sort_facet_values_by")  # type: ignore[attr-defined]
     @classmethod
     def validate_facet_order(cls, v: dict[str, str] | None) -> dict[str, str] | None:
         if not v:  # pragma: no cover
@@ -96,6 +96,15 @@ class RestEmbedder(CamelBase):
     request: JsonDict
     response: JsonDict
     binary_quantized: bool | None = None
+    indexing_fragments: JsonDict | None = None
+    search_fragment: JsonDict | None = None
+
+    @model_validator(mode="after")
+    def check_document_template(self) -> RestEmbedder:
+        if self.indexing_fragments is not None and self.document_template is not None:
+            raise ValueError("document_template must be None when indexing_fragments is set")
+
+        return self
 
 
 class UserProvidedEmbedder(CamelBase):

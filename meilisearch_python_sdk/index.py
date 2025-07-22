@@ -725,6 +725,7 @@ class AsyncIndex(_BaseIndex):
         hybrid: Hybrid | None = None,
         locales: list[str] | None = None,
         retrieve_vectors: bool | None = None,
+        media: JsonMapping | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -786,6 +787,13 @@ class AsyncIndex(_BaseIndex):
             locales: Specifies the languages for the search. This parameter can only be used with
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
             retrieve_vectors: Return document vector data with search result.
+            media: The content of media is used as if it were a document to generate request
+                fragments from the searchFragments parameter. Defaults to None. This parameter can
+                only be used with Meilisearch >= v1.16.0. In order to use this feature in
+                Meilisearch v1.16.0 you first need to enable the feature by sending a PATCH request
+                to /experimental-features with { "multimodal": true }. Because this feature is
+                experimental it may be removed or updated causing breaking changes in this library
+                without a major version bump so use with caution.
 
         Returns:
             Results of the search
@@ -830,6 +838,7 @@ class AsyncIndex(_BaseIndex):
             ranking_score_threshold=ranking_score_threshold,
             locales=locales,
             retrieve_vectors=retrieve_vectors,
+            media=media,
         )
         search_url = f"{self._base_url_with_uid}/search"
 
@@ -1349,6 +1358,7 @@ class AsyncIndex(_BaseIndex):
         fields: list[str] | None = None,
         filter: Filter | None = None,
         retrieve_vectors: bool = False,
+        sort: str | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -1362,6 +1372,7 @@ class AsyncIndex(_BaseIndex):
             retrieve_vectors: If set to True the vectors will be returned with each document.
                 Defaults to False. Note: This parameter can only be
                 used with Meilisearch >= v1.13.0
+            sort: Attribute by which to sort the results. Defaults to None.
 
         Returns:
             Documents info.
@@ -1381,6 +1392,9 @@ class AsyncIndex(_BaseIndex):
             "offset": offset,
             "limit": limit,
         }
+
+        if sort:
+            parameters["sort"] = sort
 
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
@@ -5151,6 +5165,7 @@ class Index(_BaseIndex):
         hybrid: Hybrid | None = None,
         locales: list[str] | None = None,
         retrieve_vectors: bool | None = None,
+        media: JsonMapping | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -5212,6 +5227,13 @@ class Index(_BaseIndex):
             locales: Specifies the languages for the search. This parameter can only be used with
                 Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
             retrieve_vectors: Return document vector data with search result.
+            media: The content of media is used as if it were a document to generate request
+                fragments from the searchFragments parameter. Defaults to None. This parameter can
+                only be used with Meilisearch >= v1.16.0. In order to use this feature in
+                Meilisearch v1.16.0 you first need to enable the feature by sending a PATCH request
+                to /experimental-features with { "multimodal": true }. Because this feature is
+                experimental it may be removed or updated causing breaking changes in this library
+                without a major version bump so use with caution.
 
         Returns:
             Results of the search
@@ -5256,6 +5278,7 @@ class Index(_BaseIndex):
             ranking_score_threshold=ranking_score_threshold,
             locales=locales,
             retrieve_vectors=retrieve_vectors,
+            media=media,
         )
 
         if self._pre_search_plugins:
@@ -5584,6 +5607,7 @@ class Index(_BaseIndex):
         fields: list[str] | None = None,
         filter: Filter | None = None,
         retrieve_vectors: bool = False,
+        sort: str | None = None,
     ) -> DocumentsInfo:
         """Get a batch documents from the index.
 
@@ -5597,6 +5621,7 @@ class Index(_BaseIndex):
             retrieve_vectors: If set to True the vectors will be returned with each document.
                 Defaults to False. Note: This parameter can only be
                 used with Meilisearch >= v1.13.0
+            sort: Attribute by which to sort the results. Defaults to None.
 
         Returns:
             Documents info.
@@ -5617,6 +5642,9 @@ class Index(_BaseIndex):
             "limit": limit,
         }
 
+        if sort:
+            parameters["sort"] = sort
+
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
 
@@ -5633,6 +5661,7 @@ class Index(_BaseIndex):
             parameters["fields"] = fields
 
         parameters["filter"] = filter
+
         response = self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
         return DocumentsInfo(**response.json())
@@ -8390,6 +8419,7 @@ def _process_search_parameters(
     locales: list[str] | None = None,
     retrieve_vectors: bool | None = None,
     exhaustive_facet_count: bool | None = None,
+    media: JsonMapping | None = None,
 ) -> JsonDict:
     if attributes_to_retrieve is None:
         attributes_to_retrieve = ["*"]
@@ -8443,6 +8473,9 @@ def _process_search_parameters(
 
     if exhaustive_facet_count is not None:
         body["exhaustivefacetCount"] = exhaustive_facet_count
+
+    if media is not None:
+        body["media"] = media
 
     return body
 
