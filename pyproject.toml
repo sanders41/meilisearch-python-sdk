@@ -42,7 +42,7 @@ all = ["orjson", "ujson"]
 dev = [
   "mkdocs==1.6.1",
   "mkdocs-material==9.6.15",
-  "mkdocstrings[python]==0.29.1",
+  "mkdocstrings[python]==0.30.0",
   "mypy[faster-cache]==1.17.0",
   "pre-commit==4.2.0",
   "pytest==8.4.1",
