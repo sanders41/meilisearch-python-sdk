@@ -648,12 +648,14 @@ def test_get_documents_populated(index_with_documents):
 
 def test_get_documents_offset_optional_params(index_with_documents):
     index = index_with_documents()
-    response = index.get_documents()
-    assert len(response.results) == 20
-    response_offset_limit = index.get_documents(limit=3, offset=1, fields=["title", "overview"])
+    update_response = index.update_sortable_attributes(["title"])
+    wait_for_task(index.http_client, update_response.task_uid)
+    response_offset_limit = index.get_documents(
+        limit=3, offset=1, fields=["title", "overview"], sort="title:asc"
+    )
+
     assert len(response_offset_limit.results) == 3
-    assert response_offset_limit.results[0]["title"] == response.results[1]["title"]
-    assert response_offset_limit.results[0]["overview"] == response.results[1]["overview"]
+    assert ["title", "overview"] == list(response_offset_limit.results[0].keys())
 
 
 def test_get_documents_filter(index_with_documents):

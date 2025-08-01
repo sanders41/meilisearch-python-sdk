@@ -6,7 +6,7 @@ from camel_converter.pydantic_base import CamelBase
 from pydantic import Field, field_validator
 
 from meilisearch_python_sdk.errors import MeilisearchError
-from meilisearch_python_sdk.types import Filter, JsonDict
+from meilisearch_python_sdk.types import Filter, JsonDict, JsonMapping
 
 T = TypeVar("T")
 
@@ -71,6 +71,7 @@ class SearchParams(CamelBase):
     hybrid: Hybrid | None = None
     locales: list[str] | None = None
     retrieve_vectors: bool | None = None
+    media: JsonMapping | None = None
 
     @field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
     @classmethod
