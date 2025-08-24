@@ -718,7 +718,7 @@ dev = [
     { name = "rich", specifier = "==14.1.0" },
     { name = "ruff", specifier = "==0.12.10" },
     { name = "types-aiofiles", specifier = "==24.1.0.20250822" },
-    { name = "types-ujson", specifier = "==5.10.0.20250326" },
+    { name = "types-ujson", specifier = "==5.10.0.20250822" },
     { name = "typing-extensions", specifier = "==4.14.1" },
 ]
 
@@ -1496,11 +1496,11 @@ wheels = [
 
 [[package]]
 name = "types-ujson"
-version = "5.10.0.20250326"
+version = "5.10.0.20250822"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cc/5c/c974451c4babdb4ae3588925487edde492d59a8403010b4642a554d09954/types_ujson-5.10.0.20250326.tar.gz", hash = "sha256:5469e05f2c31ecb3c4c0267cc8fe41bcd116826fbb4ded69801a645c687dd014", size = 8340, upload-time = "2025-03-26T02:53:39.197Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5c/bd/d372d44534f84864a96c19a7059d9b4d29db8541828b8b9dc3040f7a46d0/types_ujson-5.10.0.20250822.tar.gz", hash = "sha256:0a795558e1f78532373cf3f03f35b1f08bc60d52d924187b97995ee3597ba006", size = 8437, upload-time = "2025-08-22T03:02:19.433Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3e/c9/8a73a5f8fa6e70fc02eed506d5ac0ae9ceafbd2b8c9ad34a7de0f29900d6/types_ujson-5.10.0.20250326-py3-none-any.whl", hash = "sha256:acc0913f569def62ef6a892c8a47703f65d05669a3252391a97765cf207dca5b", size = 7644, upload-time = "2025-03-26T02:53:38.2Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/f2/d812543c350674d8b3f6e17c8922248ee3bb752c2a76f64beb8c538b40cf/types_ujson-5.10.0.20250822-py3-none-any.whl", hash = "sha256:3e9e73a6dc62ccc03449d9ac2c580cd1b7a8e4873220db498f7dd056754be080", size = 7657, upload-time = "2025-08-22T03:02:18.699Z" },
 ]
 
 [[package]]
