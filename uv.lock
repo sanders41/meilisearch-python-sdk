@@ -717,7 +717,7 @@ dev = [
     { name = "pytest-xdist", specifier = "==3.8.0" },
     { name = "rich", specifier = "==14.1.0" },
     { name = "ruff", specifier = "==0.12.10" },
-    { name = "types-aiofiles", specifier = "==24.1.0.20250809" },
+    { name = "types-aiofiles", specifier = "==24.1.0.20250822" },
     { name = "types-ujson", specifier = "==5.10.0.20250326" },
     { name = "typing-extensions", specifier = "==4.14.1" },
 ]
@@ -1487,11 +1487,11 @@ wheels = [
 
 [[package]]
 name = "types-aiofiles"
-version = "24.1.0.20250809"
+version = "24.1.0.20250822"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/03/b8/34a4f9da445a104d240bb26365a10ef68953bebdc812859ea46847c7fdcb/types_aiofiles-24.1.0.20250809.tar.gz", hash = "sha256:4dc9734330b1324d9251f92edfc94fd6827fbb829c593313f034a77ac33ae327", size = 14379, upload-time = "2025-08-09T03:14:41.555Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/19/48/c64471adac9206cc844afb33ed311ac5a65d2f59df3d861e0f2d0cad7414/types_aiofiles-24.1.0.20250822.tar.gz", hash = "sha256:9ab90d8e0c307fe97a7cf09338301e3f01a163e39f3b529ace82466355c84a7b", size = 14484, upload-time = "2025-08-22T03:02:23.039Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/28/78/0d8ffa40e9ec6cbbabe4d93675092fea1cadc4c280495375fc1f2fa42793/types_aiofiles-24.1.0.20250809-py3-none-any.whl", hash = "sha256:657c83f876047ffc242b34bfcd9167f201d1b02e914ee854f16e589aa95c0d45", size = 14300, upload-time = "2025-08-09T03:14:40.438Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/8e/5e6d2215e1d8f7c2a94c6e9d0059ae8109ce0f5681956d11bb0a228cef04/types_aiofiles-24.1.0.20250822-py3-none-any.whl", hash = "sha256:0ec8f8909e1a85a5a79aed0573af7901f53120dd2a29771dd0b3ef48e12328b0", size = 14322, upload-time = "2025-08-22T03:02:21.918Z" },
 ]
 
 [[package]]
