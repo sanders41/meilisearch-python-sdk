@@ -41,7 +41,7 @@ all = ["orjson", "ujson"]
 [dependency-groups]
 dev = [
   "mkdocs==1.6.1",
-  "mkdocs-material==9.6.17",
+  "mkdocs-material==9.6.18",
   "mkdocstrings[python]==0.30.0",
   "mypy[faster-cache]==1.17.1",
   "pre-commit==4.3.0",
@@ -49,11 +49,11 @@ dev = [
   "pytest-cov==6.2.1",
   "pytest-asyncio==1.1.0",
   "pytest-xdist==3.8.0",
-  "ruff==0.12.9",
-  "types-aiofiles==24.1.0.20250809",
+  "ruff==0.12.10",
+  "types-aiofiles==24.1.0.20250822",
   "typing-extensions==4.14.1",
-  "types-ujson==5.10.0.20250326",
-  "meilisearch==0.36.0",
+  "types-ujson==5.10.0.20250822",
+  "meilisearch==0.37.0",
   "rich==14.1.0",
 ]
 
