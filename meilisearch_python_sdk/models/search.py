@@ -95,6 +95,7 @@ class SearchResults(CamelBase, Generic[T]):
     page: int | None = None
     hits_per_page: int | None = None
     semantic_hit_count: int | None = None
+    query_vector: list[float] | None = None
 
 
 class SearchResultsWithUID(SearchResults, Generic[T]):
