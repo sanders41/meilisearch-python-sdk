@@ -51,7 +51,7 @@ dev = [
   "pytest-xdist==3.8.0",
   "ruff==0.12.10",
   "types-aiofiles==24.1.0.20250822",
-  "typing-extensions==4.14.1",
+  "typing-extensions==4.15.0",
   "types-ujson==5.10.0.20250822",
   "meilisearch==0.37.0",
   "rich==14.1.0",
