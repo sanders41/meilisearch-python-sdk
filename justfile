@@ -78,7 +78,7 @@
   uv run mkdocs build --strict
 
 @serve-docs:
-  mkdocs serve
+  uv run mkdocs serve
 
 @install:
   uv sync --frozen --all-extras
