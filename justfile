@@ -88,6 +88,3 @@
 
 @lock-upgrade:
   uv lock --upgrade
-
-@benchmark: start-meilisearch-detached && stop-meilisearch
-  -uv run benchmark/run_benchmark.py
