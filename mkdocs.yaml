@@ -4,6 +4,7 @@ site_url: https://meilisearch-python-sdk.paulsanders.dev
 
 theme:
   name: material
+  custom_dir: docs/overrides
   locale: en
   icon:
     repo: fontawesome/brands/github
@@ -44,3 +45,6 @@ plugins:
 
 extra_javascript:
   - "js/umami.js"
+
+extra_css:
+  - "css/custom.css"
