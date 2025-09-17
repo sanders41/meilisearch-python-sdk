@@ -81,7 +81,7 @@
   uv run mkdocs serve
 
 @install:
-  uv sync --frozen --all-extras
+  uv sync --all-extras
 
 @lock:
   uv lock
