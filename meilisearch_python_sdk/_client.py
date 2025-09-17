@@ -812,11 +812,13 @@ class AsyncClient(BaseClient):
 
         return Health(**response.json())
 
-    async def swap_indexes(self, indexes: list[tuple[str, str]]) -> TaskInfo:
+    async def swap_indexes(self, indexes: list[tuple[str, str]], rename: bool = False) -> TaskInfo:
         """Swap two indexes.
 
         Args:
             indexes: A list of tuples, each tuple should contain the indexes to swap.
+            rename: Use rename false if you are swapping two existing indexes. Use rename true if
+                the second index in your array does not exist. Default = False
 
         Returns:
             The details of the task.
@@ -830,7 +832,10 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.swap_indexes([("index_a", "index_b")])
         """
-        processed_indexes = [{"indexes": x} for x in indexes]
+        if rename:
+            processed_indexes = [{"indexes": x, "rename": True} for x in indexes]
+        else:
+            processed_indexes = [{"indexes": x} for x in indexes]
         response = await self._http_requests.post("swap-indexes", processed_indexes)
 
         return TaskInfo(**response.json())
@@ -1775,11 +1780,13 @@ class Client(BaseClient):
 
         return Health(**response.json())
 
-    def swap_indexes(self, indexes: list[tuple[str, str]]) -> TaskInfo:
+    def swap_indexes(self, indexes: list[tuple[str, str]], rename: bool = False) -> TaskInfo:
         """Swap two indexes.
 
         Args:
             indexes: A list of tuples, each tuple should contain the indexes to swap.
+            rename: Use rename false if you are swapping two existing indexes. Use rename true if
+                the second index in your array does not exist. Default = False
 
         Returns:
             The details of the task.
@@ -1793,7 +1800,10 @@ class Client(BaseClient):
             >>> client = Client("http://localhost.com", "masterKey")
             >>> index = client.swap_indexes([("index_a", "index_b")])
         """
-        processed_indexes = [{"indexes": x} for x in indexes]
+        if rename:
+            processed_indexes = [{"indexes": x, "rename": True} for x in indexes]
+        else:
+            processed_indexes = [{"indexes": x} for x in indexes]
         response = self._http_requests.post("swap-indexes", processed_indexes)
 
         return TaskInfo(**response.json())
