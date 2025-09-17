@@ -547,6 +547,21 @@ def test_swap_indexes(client, empty_index):
     assert task.task_type == "indexSwap"
 
 
+@pytest.mark.no_parallel
+def test_swap_indexes_rename(client, empty_index):
+    new_name = str(uuid4())
+    index = empty_index()
+    task = index.add_documents([{"id": 1, "title": index.uid}])
+    client.wait_for_task(task.task_uid)
+    swapTask = client.swap_indexes([(index.uid, new_name)], rename=True)
+    task = client.wait_for_task(swapTask.task_uid)
+
+    indexes = client.get_indexes()
+    uids = [index.uid for index in indexes]
+    assert index.uid not in uids
+    assert new_name in uids
+
+
 @pytest.mark.usefixtures("create_tasks")
 @pytest.mark.no_parallel
 def test_cancel_statuses(client):

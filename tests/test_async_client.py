@@ -550,6 +550,21 @@ async def test_swap_indexes(async_client, async_empty_index):
     assert task.task_type == "indexSwap"
 
 
+@pytest.mark.no_parallel
+async def test_swap_indexes_rename(async_client, async_empty_index):
+    new_name = str(uuid4())
+    index = await async_empty_index()
+    task = await index.add_documents([{"id": 1, "title": index.uid}])
+    await async_client.wait_for_task(task.task_uid)
+    swapTask = await async_client.swap_indexes([(index.uid, new_name)], rename=True)
+    task = async_client.wait_for_task(swapTask.task_uid)
+
+    indexes = await async_client.get_indexes()
+    uids = [index.uid for index in indexes]
+    assert index.uid not in uids
+    assert new_name in uids
+
+
 @pytest.mark.usefixtures("create_tasks")
 @pytest.mark.no_parallel
 async def test_cancel_task_statuses(async_client):
