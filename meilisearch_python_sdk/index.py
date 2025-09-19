@@ -3593,7 +3593,7 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    async def get_filterable_attributes(self) -> list[str] | list[FilterableAttributes] | None:
+    async def get_filterable_attributes(self) -> list[str | FilterableAttributes] | None:
         """Get filterable attributes of the index.
 
         Returns:
@@ -3616,22 +3616,22 @@ class AsyncIndex(_BaseIndex):
 
         response_json = response.json()
 
-        if isinstance(response_json[0], str):
-            return response_json
-
-        filterable_attributes = []
+        filterable_attributes: list[str | FilterableAttributes] = []
         for r in response_json:
-            filterable_attributes.append(
-                FilterableAttributes(
-                    attribute_patterns=r["attributePatterns"],
-                    features=FilterableAttributeFeatures(**r["features"]),
+            if isinstance(r, str):
+                filterable_attributes.append(r)
+            else:
+                filterable_attributes.append(
+                    FilterableAttributes(
+                        attribute_patterns=r["attributePatterns"],
+                        features=FilterableAttributeFeatures(**r["features"]),
+                    )
                 )
-            )
 
         return filterable_attributes
 
     async def update_filterable_attributes(
-        self, body: list[str] | list[FilterableAttributes], *, compress: bool = False
+        self, body: list[str | FilterableAttributes], *, compress: bool = False
     ) -> TaskInfo:
         """Update filterable attributes of the index.
 
@@ -7224,7 +7224,7 @@ class Index(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    def get_filterable_attributes(self) -> list[str] | list[FilterableAttributes] | None:
+    def get_filterable_attributes(self) -> list[str | FilterableAttributes] | None:
         """Get filterable attributes of the index.
 
         Returns:
@@ -7247,22 +7247,22 @@ class Index(_BaseIndex):
 
         response_json = response.json()
 
-        if isinstance(response_json[0], str):
-            return response_json
-
-        filterable_attributes = []
+        filterable_attributes: list[str | FilterableAttributes] = []
         for r in response_json:
-            filterable_attributes.append(
-                FilterableAttributes(
-                    attribute_patterns=r["attributePatterns"],
-                    features=FilterableAttributeFeatures(**r["features"]),
+            if isinstance(r, str):
+                filterable_attributes.append(r)
+            else:
+                filterable_attributes.append(
+                    FilterableAttributes(
+                        attribute_patterns=r["attributePatterns"],
+                        features=FilterableAttributeFeatures(**r["features"]),
+                    )
                 )
-            )
 
         return filterable_attributes
 
     def update_filterable_attributes(
-        self, body: list[str] | list[FilterableAttributes], *, compress: bool = False
+        self, body: list[str | FilterableAttributes], *, compress: bool = False
     ) -> TaskInfo:
         """Update filterable attributes of the index.
 

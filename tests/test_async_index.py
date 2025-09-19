@@ -586,6 +586,7 @@ async def test_get_filterable_attributes(async_empty_index):
                     facet_search=True, filter=Filter(equality=True, comparison=False)
                 ),
             ),
+            "genre",
         ],
     ),
 )
@@ -594,7 +595,7 @@ async def test_update_filterable_attributes(compress, async_empty_index, filtera
     response = await index.update_filterable_attributes(filterable_attributes, compress=compress)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_filterable_attributes()
-    assert sorted(response) == filterable_attributes
+    assert response == filterable_attributes
 
 
 @pytest.mark.parametrize(
