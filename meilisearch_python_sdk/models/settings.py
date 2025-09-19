@@ -167,7 +167,7 @@ class MeilisearchSettings(CamelBase):
     synonyms: JsonDict | None = None
     stop_words: list[str] | None = None
     ranking_rules: list[str] | None = None
-    filterable_attributes: list[str] | list[FilterableAttributes] | None = None
+    filterable_attributes: list[str | FilterableAttributes] | None = None
     distinct_attribute: str | None = None
     searchable_attributes: list[str] | None = None
     displayed_attributes: list[str] | None = None
