@@ -22,6 +22,7 @@ from meilisearch_python_sdk.errors import (
 from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate, Network
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.version import Version
+from meilisearch_python_sdk.models.webhook import WebhookCreate, WebhookUpdate
 from meilisearch_python_sdk.types import JsonDict
 
 
@@ -1066,3 +1067,48 @@ def test_add_or_update_networks(client):
     assert len(response.remotes) >= 2
     assert "remote_1" in response.remotes
     assert "remote_2" in response.remotes
+
+
+def test_get_webhooks(client, webhook):
+    response = client.get_webhooks()
+
+    assert response.results is not None
+    assert webhook in response.results
+
+
+def test_create_webhook(client):
+    webhook_config = WebhookCreate(
+        url="https://example.com/webhook", headers={"Authorization": "Bearer token"}
+    )
+    webhook = client.create_webhook(webhook_config)
+
+    try:
+        assert webhook.uuid is not None
+        assert webhook.url == "https://example.com/webhook"
+        assert webhook.headers == {"Authorization": "Bearer token"}
+        assert webhook.is_editable is True
+    finally:
+        client.delete_webhook(webhook.uuid)
+
+
+def test_get_webhook(client, webhook):
+    result = client.get_webhook(webhook.uuid)
+
+    assert result.uuid == webhook.uuid
+    assert result.url == webhook.url
+    assert result.is_editable == webhook.is_editable
+
+
+def test_update_webhook(client, webhook):
+    update = WebhookUpdate(url="https://example.com/new-webhook", headers={"X-Custom": "value"})
+    updated = client.update_webhook(uuid=webhook.uuid, webhook=update)
+
+    assert updated.uuid == webhook.uuid
+    assert updated.url == "https://example.com/new-webhook"
+    assert updated.headers == {"X-Custom": "value"}
+
+
+def test_delete_webhook(client, webhook):
+    status_code = client.delete_webhook(webhook.uuid)
+
+    assert status_code == 204

@@ -25,6 +25,7 @@ from meilisearch_python_sdk.errors import (
 from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate, Network
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.version import Version
+from meilisearch_python_sdk.models.webhook import WebhookCreate, WebhookUpdate
 from meilisearch_python_sdk.types import JsonDict
 
 
@@ -1085,3 +1086,48 @@ async def test_add_or_update_networks(async_client):
     assert len(response.remotes) >= 2
     assert "remote_1" in response.remotes
     assert "remote_2" in response.remotes
+
+
+async def test_get_webhooks(async_client, webhook):
+    response = await async_client.get_webhooks()
+
+    assert response.results is not None
+    assert webhook in response.results
+
+
+async def test_create_webhook(async_client):
+    webhook_config = WebhookCreate(
+        url="https://example.com/webhook", headers={"Authorization": "Bearer token"}
+    )
+    webhook = await async_client.create_webhook(webhook_config)
+
+    try:
+        assert webhook.uuid is not None
+        assert webhook.url == "https://example.com/webhook"
+        assert webhook.headers == {"Authorization": "Bearer token"}
+        assert webhook.is_editable is True
+    finally:
+        await async_client.delete_webhook(webhook.uuid)
+
+
+async def test_get_webhook(async_client, webhook):
+    result = await async_client.get_webhook(webhook.uuid)
+
+    assert result.uuid == webhook.uuid
+    assert result.url == webhook.url
+    assert result.is_editable == webhook.is_editable
+
+
+async def test_update_webhook(async_client, webhook):
+    update = WebhookUpdate(url="https://example.com/new-webhook", headers={"X-Custom": "value"})
+    updated = await async_client.update_webhook(uuid=webhook.uuid, webhook=update)
+
+    assert updated.uuid == webhook.uuid
+    assert updated.url == "https://example.com/new-webhook"
+    assert updated.headers == {"X-Custom": "value"}
+
+
+async def test_delete_webhook(async_client, webhook):
+    status_code = await async_client.delete_webhook(webhook.uuid)
+
+    assert status_code == 204

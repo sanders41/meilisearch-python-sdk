@@ -18,6 +18,7 @@ from httpx import AsyncClient as HttpxAsyncClient
 
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
+from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.json_handler import OrjsonHandler, UjsonHandler
 from meilisearch_python_sdk.models.settings import (
     Embedders,
@@ -29,6 +30,7 @@ from meilisearch_python_sdk.models.settings import (
     TypoTolerance,
     UserProvidedEmbedder,
 )
+from meilisearch_python_sdk.models.webhook import WebhookCreate
 
 MASTER_KEY = "masterKey"
 
@@ -353,3 +355,17 @@ def new_settings_localized():
             LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
         ],
     )
+
+
+@pytest.fixture
+def webhook(client):
+    webhook_config = WebhookCreate(url="https://example.com/webhook")
+    webhook = client.create_webhook(webhook_config)
+
+    yield webhook
+
+    try:
+        client.delete_webhook(webhook.uuid)
+    except MeilisearchApiError as e:
+        if "webhook_not_found" in str(e):
+            pass
