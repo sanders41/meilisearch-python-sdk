@@ -36,6 +36,7 @@ from meilisearch_python_sdk.models.search import (
 from meilisearch_python_sdk.models.settings import MeilisearchSettings
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 from meilisearch_python_sdk.models.version import Version
+from meilisearch_python_sdk.models.webhook import Webhook, WebhookCreate, Webhooks, WebhookUpdate
 from meilisearch_python_sdk.plugins import AsyncIndexPlugins, IndexPlugins
 from meilisearch_python_sdk.types import JsonDict
 
@@ -251,6 +252,124 @@ class AsyncClient(BaseClient):
         response = await self._http_requests.get("network")
 
         return Network(**response.json())
+
+    async def get_webhooks(self) -> Webhooks:
+        """Get all webhooks.
+
+        Returns:
+            An instance of Webhooks containing all configured webhooks.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     webhooks = await client.get_webhooks()
+        """
+        response = await self._http_requests.get("webhooks")
+
+        return Webhooks(**response.json())
+
+    async def get_webhook(self, uuid: str) -> Webhook:
+        """Get a specific webhook by UUID.
+
+        Args:
+            uuid: The webhook's unique identifier.
+
+        Returns:
+            An instance of Webhook containing the webhook information.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     webhook = await client.get_webhook("abc-123")
+        """
+        response = await self._http_requests.get(f"webhooks/{uuid}")
+
+        return Webhook(**response.json())
+
+    async def create_webhook(self, webhook: WebhookCreate) -> Webhook:
+        """Create a new webhook.
+
+        Args:
+            webhook: The webhook configuration to create.
+
+        Returns:
+            The created webhook.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.webhook import WebhookCreate
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     webhook_config = WebhookCreate(
+            >>>         url="https://example.com/webhook",
+            >>>         headers={"Authorization": "Bearer token"}
+            >>>     )
+            >>>     webhook = await client.create_webhook(webhook_config)
+        """
+        response = await self._http_requests.post(
+            "webhooks", webhook.model_dump(by_alias=True, exclude_none=True)
+        )
+
+        return Webhook(**response.json())
+
+    async def update_webhook(self, *, uuid: str, webhook: WebhookUpdate) -> Webhook:
+        """Update an existing webhook.
+
+        Args:
+            uuid: The webhook's unique identifier.
+            webhook: The webhook configuration updates.
+
+        Returns:
+            The updated webhook.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.webhook import WebhookUpdate
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     webhook_update = WebhookUpdate(url="https://example.com/new-webhook")
+            >>>     webhook = await client.update_webhook("abc-123", webhook_update)
+        """
+        response = await self._http_requests.patch(
+            f"webhooks/{uuid}", webhook.model_dump(by_alias=True, exclude_none=True)
+        )
+
+        return Webhook(**response.json())
+
+    async def delete_webhook(self, uuid: str) -> int:
+        """Delete a webhook.
+
+        Args:
+            uuid: The webhook's unique identifier.
+
+        Returns:
+            The Response status code. 204 signifies a successful delete.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     await client.delete_webhook("abc-123")
+        """
+        response = await self._http_requests.delete(f"webhooks/{uuid}")
+        return response.status_code
 
     async def create_dump(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch dump.
@@ -1228,6 +1347,124 @@ class Client(BaseClient):
         response = self._http_requests.get("network")
 
         return Network(**response.json())
+
+    def get_webhooks(self) -> Webhooks:
+        """Get all webhooks.
+
+        Returns:
+            An instance of Webhooks containing all configured webhooks.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> webhooks = client.get_webhooks()
+        """
+        response = self._http_requests.get("webhooks")
+
+        return Webhooks(**response.json())
+
+    def get_webhook(self, uuid: str) -> Webhook:
+        """Get a specific webhook by UUID.
+
+        Args:
+            uuid: The webhook's unique identifier.
+
+        Returns:
+            An instance of Webhook containing the webhook information.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> webhook = client.get_webhook("abc-123")
+        """
+        response = self._http_requests.get(f"webhooks/{uuid}")
+
+        return Webhook(**response.json())
+
+    def create_webhook(self, webhook: WebhookCreate) -> Webhook:
+        """Create a new webhook.
+
+        Args:
+            webhook: The webhook configuration to create.
+
+        Returns:
+            The created webhook.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.webhook import WebhookCreate
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> webhook_config = WebhookCreate(
+            >>>     url="https://example.com/webhook",
+            >>>     headers={"Authorization": "Bearer token"}
+            >>> )
+            >>> webhook = client.create_webhook(webhook_config)
+        """
+        response = self._http_requests.post(
+            "webhooks", webhook.model_dump(by_alias=True, exclude_none=True)
+        )
+
+        return Webhook(**response.json())
+
+    def update_webhook(self, *, uuid: str, webhook: WebhookUpdate) -> Webhook:
+        """Update an existing webhook.
+
+        Args:
+            uuid: The webhook's unique identifier.
+            webhook: The webhook configuration updates.
+
+        Returns:
+            The updated webhook.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import Client
+            >>> from meilisearch_python_sdk.models.webhook import WebhookUpdate
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> webhook_update = WebhookUpdate(url="https://example.com/new-webhook")
+            >>> webhook = client.update_webhook("abc-123", webhook_update)
+        """
+        response = self._http_requests.patch(
+            f"webhooks/{uuid}", webhook.model_dump(by_alias=True, exclude_none=True)
+        )
+
+        return Webhook(**response.json())
+
+    def delete_webhook(self, uuid: str) -> int:
+        """Delete a webhook.
+
+        Args:
+            uuid: The webhook's unique identifier.
+
+        Returns:
+            The Response status code. 204 signifies a successful delete.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> client.delete_webhook("abc-123")
+        """
+        response = self._http_requests.delete(f"webhooks/{uuid}")
+        return response.status_code
 
     def create_dump(self) -> TaskInfo:
         """Trigger the creation of a Meilisearch dump.
