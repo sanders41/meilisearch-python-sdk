@@ -5,7 +5,7 @@ on:
     # Set with UTC time
     - cron: "0 5 * * *"
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
 jobs:
   random-test-order:
     strategy:
