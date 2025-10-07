@@ -558,7 +558,7 @@ async def test_swap_indexes_rename(async_client, async_empty_index):
     task = await index.add_documents([{"id": 1, "title": index.uid}])
     await async_client.wait_for_task(task.task_uid)
     swapTask = await async_client.swap_indexes([(index.uid, new_name)], rename=True)
-    task = async_client.wait_for_task(swapTask.task_uid)
+    task = await async_client.wait_for_task(swapTask.task_uid)
 
     indexes = await async_client.get_indexes()
     uids = [index.uid for index in indexes]
