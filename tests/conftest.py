@@ -2,7 +2,6 @@ import asyncio
 import csv
 import json
 import ssl
-import sys
 from logging import warning
 from pathlib import Path
 from uuid import uuid4
@@ -55,10 +54,7 @@ def ssl_verify(http2_enabled):
             return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT) if http2_enabled else True
         return True  # recommended default
     else:  # truststore isn't installed
-        if sys.version_info >= (3, 10):  # should be available in 3.10+
-            warning("truststore not installed, your environment may be broken run uv sync")
-        # without truststore we can't verify the ssl (and when http2 is enabled, verification must be disabled)
-        return not http2_enabled
+        warning("truststore not installed, your environment may be broken run uv sync")
 
 
 @pytest.fixture(scope="session")

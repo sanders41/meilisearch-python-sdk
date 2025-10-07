@@ -6,14 +6,13 @@ build-backend = "hatchling.build"
 name = "meilisearch-python-sdk"
 description = "A Python client providing both async and sync support for the Meilisearch API"
 authors = [ { name = "Paul Sanders", email = "paul@paulsanders.dev" } ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
 readme = "README.md"
 keywords = ["meilisearch", "async", "python", "client", "sdk"]
 classifiers=[
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -27,8 +26,6 @@ dynamic = ["version"]
 dependencies = [
   "aiofiles>=0.7",
   "camel-converter[pydantic]>=1.0.0",
-  # allows pydantic to use pipe instead of Union
-  "eval-type-backport>=0.2.0; python_version < '3.10'",
   "httpx[http2]>=0.17",
   "pydantic>=2.0.0",
   "PyJWT>=2.3.0",
@@ -88,7 +85,7 @@ ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 fix = true
 
 [tool.ruff.lint]

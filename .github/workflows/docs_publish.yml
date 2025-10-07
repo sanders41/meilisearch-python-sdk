@@ -5,7 +5,7 @@ on:
       - published
   workflow_dispatch:
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
 jobs:
   deploy:
     runs-on: ubuntu-latest

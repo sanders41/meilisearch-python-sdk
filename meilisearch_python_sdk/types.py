@@ -1,16 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import MutableMapping
-from typing import TYPE_CHECKING, Any, Union
+from typing import Any, TypeAlias
 
-if TYPE_CHECKING:  # pragma: no cover
-    import sys
-
-    if sys.version_info >= (3, 10):
-        from typing import TypeAlias
-    else:
-        from typing_extensions import TypeAlias
-
-Filter: TypeAlias = Union[str, list[Union[str, list[str]]]]
+Filter: TypeAlias = str | list[str | list[str]]
 JsonDict: TypeAlias = dict[str, Any]
 JsonMapping: TypeAlias = MutableMapping[str, Any]
