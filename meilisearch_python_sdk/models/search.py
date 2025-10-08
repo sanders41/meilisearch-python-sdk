@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated, Generic, Literal, TypeVar
+from typing import Generic, Literal, TypeVar
 
 from camel_converter.pydantic_base import CamelBase
 from pydantic import Field, field_validator
@@ -83,12 +83,12 @@ class SearchParams(CamelBase):
 
 
 class SearchResults(CamelBase, Generic[T]):
-    hits: Annotated[list[T], Field()]
+    hits: list[T]
     offset: int | None = None
     limit: int | None = None
     estimated_total_hits: int | None = None
     processing_time_ms: int
-    query: Annotated[str, Field()]
+    query: str
     facet_distribution: JsonDict | None = None
     total_pages: int | None = None
     total_hits: int | None = None
@@ -103,7 +103,7 @@ class SearchResultsWithUID(SearchResults, Generic[T]):
 
 
 class SearchResultsFederated(CamelBase, Generic[T]):
-    hits: Annotated[list[T], Field()]
+    hits: list[T]
     offset: int | None = None
     limit: int | None = None
     estimated_total_hits: int | None = None
@@ -118,7 +118,7 @@ class SearchResultsFederated(CamelBase, Generic[T]):
 
 
 class SimilarSearchResults(CamelBase, Generic[T]):
-    hits: Annotated[list[T], Field()]
+    hits: list[T]
     id: str
     processing_time_ms: int
     limit: int | None = None
