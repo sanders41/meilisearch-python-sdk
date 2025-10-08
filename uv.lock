@@ -69,11 +69,11 @@ wheels = [
 
 [[package]]
 name = "camel-converter"
-version = "4.0.1"
+version = "5.0.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ee/3d/dd783586dc0c4aee5b6b88489666fdb2c0c344ea0aa8a5c10746cc423707/camel_converter-4.0.1.tar.gz", hash = "sha256:401414549ae4ac4073e38cdc4aa6d464dc534fc40aa06ff787bf0960b0c86535", size = 38915, upload-time = "2024-10-08T16:55:39.427Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a5/dd/f8df35e1d2b6360a27c1613937bde2f68db41b8a67cd856f105d2031a3ed/camel_converter-5.0.0.tar.gz", hash = "sha256:97d0cf15a75b40abab288c526c71143b468376dd61690fd1cb0a49d9e471f111", size = 58926, upload-time = "2025-10-07T18:01:04.577Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/e5/806359514cc8305f047bd6d39d63890298c0596f7328b534059724bd1a9e/camel_converter-4.0.1-py3-none-any.whl", hash = "sha256:0cba7ca1354a29ca2191983deecc9dcf28889f606c28d6ed18ac7d4586b163ac", size = 6243, upload-time = "2024-10-08T16:55:37.769Z" },
+    { url = "https://files.pythonhosted.org/packages/51/67/283543fc3ac6d6d8e9cd710e331ebf2323a284f66be304ac786c3b7bdeb4/camel_converter-5.0.0-py3-none-any.whl", hash = "sha256:5a64900bcba1ca047c504ee88cefa905a5bcac15cec06f6d6f9d1ebad46d4e80", size = 6254, upload-time = "2025-10-07T18:01:03.248Z" },
 ]
 
 [package.optional-dependencies]
