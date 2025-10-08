@@ -47,7 +47,7 @@ dev = [
   "pytest-cov==7.0.0",
   "pytest-asyncio==1.2.0",
   "pytest-xdist==3.8.0",
-  "ruff==0.13.3",
+  "ruff==0.14.0",
   "types-aiofiles==24.1.0.20250822",
   "typing-extensions==4.15.0",
   "types-ujson==5.10.0.20250822",
