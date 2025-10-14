@@ -470,6 +470,25 @@ class AsyncIndex(_BaseIndex):
 
         return plugins
 
+    async def compact(self) -> TaskInfo:
+        """Appends a new task to the queue to compact the database.
+
+        This defragments the LMDB database potentially speeds up indexing and searching.
+        NOTE: This is only available in Meilisearch v1.23.0+
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.compact()
+        """
+        response = await self._http_requests.post(f"{self._base_url_with_uid}/compact")
+        return TaskInfo(**response.json())
+
     async def delete(self) -> TaskInfo:
         """Deletes the index.
 
@@ -4920,6 +4939,25 @@ class Index(_BaseIndex):
             return None
 
         return plugins
+
+    def compact(self) -> TaskInfo:
+        """Appends a new task to the queue to compact the database.
+
+        This defragments the LMDB database potentially speeds up indexing and searching.
+        NOTE: This is only available in Meilisearch v1.23.0+
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_python_sdk import Client
+            >>> client = Client("http://localhost.com", "masterKey")
+            >>> index = client.index("movies")
+            >>> index.compact()
+        """
+        response = self._http_requests.post(f"{self._base_url_with_uid}/compact")
+        return TaskInfo(**response.json())
 
     def delete(self) -> TaskInfo:
         """Deletes the index.

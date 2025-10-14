@@ -1023,3 +1023,12 @@ def test_process_search_parameters_no_media():
     result = _process_search_parameters()
 
     assert "media" not in result.keys()
+
+
+def test_compact(client, index_with_documents):
+    index = index_with_documents()
+    task = index.compact()
+    client.wait_for_task(task.task_uid)
+    result = client.get_task(task_id=task.task_uid)
+
+    assert result.status == "succeeded"
