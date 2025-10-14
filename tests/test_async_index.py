@@ -1022,3 +1022,12 @@ async def test_reset_prefix_search_opt_out(async_empty_index):
     result = await index.get_settings()
 
     assert result.prefix_search == "indexingTime"
+
+
+async def test_compact(async_client, async_index_with_documents):
+    index = await async_index_with_documents()
+    task = await index.compact()
+    await async_client.wait_for_task(task.task_uid)
+    result = await async_client.get_task(task_id=task.task_uid)
+
+    assert result.status == "succeeded"
