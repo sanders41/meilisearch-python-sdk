@@ -1,16 +1,17 @@
 ## `client` Usage
 
-### Create a client
+### Create a client with a context manager
 
-To create a client:
+This client runs in a context manager which ensures that everything is cleaned up after the use of
+the client is done. To create a client:
 
 ```py
-from milisearch_python_sdk import Client
+from meilisearch-python-sdk import Client
 
 
-client = Client("http://localhost:7700", "masterKey")
-index = client.index("movies")
-...
+with Client("http://localhost:7700", "masterKey") as client:
+    index = client.index("movies")
+    ...
 ```
 
 ### Custom headers
@@ -21,13 +22,30 @@ client.
 ```py
 from meilisearch_python_sdk import Client
 
-client = Client(
+with Client(
     "http://127.0.0.1:7700",
     "masterKey",
     custom_headers={"header_key_1": "header_value_1", "header_key_2": "header_value_2"}
-)
-index = client.index("movies")
+) as client:
+    index = client.index("movies")
 ...
+```
+
+### Create a client without a context manager
+
+It is also possible to call the client without using a context manager, but in doing so you will
+need to make sure to do the cleanup yourself:
+
+```py
+from meilisearch-python-sdk import Client
+
+
+try:
+    client = Client("http://localhost:7700", "masterKey")
+    ...
+finally:
+    await client.close()
+
 ```
 
 ## `Client` API

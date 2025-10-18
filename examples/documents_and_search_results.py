@@ -50,17 +50,17 @@ def main() -> int:
     with open("../datasets/small_movies.json") as f:
         documents = json.load(f)
 
-    client = Client("http://127.0.0.1:7700", "masterKey")
-    plugins = IndexPlugins(
-        add_documents_plugins=(ModifyDocumentPlugin(),),
-        update_documents_plugins=(ModifyDocumentPlugin(),),
-        search_plugins=(FilterSearchResultsPlugin(),),
-    )
-    index = client.create_index("movies", primary_key="id", plugins=plugins)
-    task = index.add_documents(documents)
-    client.wait_for_task(task.task_uid)
-    result = index.search("cars")
-    print(result)  # noqa: T201
+    with Client("http://127.0.0.1:7700", "masterKey") as client:
+        plugins = IndexPlugins(
+            add_documents_plugins=(ModifyDocumentPlugin(),),
+            update_documents_plugins=(ModifyDocumentPlugin(),),
+            search_plugins=(FilterSearchResultsPlugin(),),
+        )
+        index = client.create_index("movies", primary_key="id", plugins=plugins)
+        task = index.add_documents(documents)
+        client.wait_for_task(task.task_uid)
+        result = index.search("cars")
+        print(result)  # noqa: T201
 
     return 0
 

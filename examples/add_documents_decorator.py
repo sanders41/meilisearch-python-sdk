@@ -19,12 +19,12 @@ def load_documents() -> list[dict[str, Any]]:
 
 
 def main() -> int:
-    client = Client("http://127.0.0.1:7700", "masterKey")
-    index = client.create_index("movies", "id")
-    load_documents()
-    documents = index.get_documents()
+    with Client("http://127.0.0.1:7700", "masterKey") as client:
+        index = client.create_index("movies", "id")
+        load_documents()
+        documents = index.get_documents()
 
-    print(documents)  # noqa: T201
+        print(documents)  # noqa: T201
 
     return 0
 

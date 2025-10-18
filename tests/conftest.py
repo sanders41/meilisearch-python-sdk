@@ -87,7 +87,8 @@ async def async_client_with_plugins(base_url, ssl_verify):
 
 @pytest.fixture(scope="session")
 def client(base_url, ssl_verify):
-    yield Client(base_url, MASTER_KEY, verify=ssl_verify)
+    with Client(base_url, MASTER_KEY, verify=ssl_verify) as client:
+        yield client
 
 
 @pytest.fixture(scope="session")

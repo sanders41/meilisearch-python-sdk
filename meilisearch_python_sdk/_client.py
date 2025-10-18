@@ -117,10 +117,10 @@ class BaseClient:
             >>>
             >>> expires_at = datetime.now(tz=timezone.utc) + timedelta(days=7)
             >>>
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> token = client.generate_tenant_token(
-            >>>     search_rules = ["*"], api_key=api_key, expires_at=expires_at
-            >>> )
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     token = client.generate_tenant_token(
+            >>>         search_rules = ["*"], api_key=api_key, expires_at=expires_at
+            >>>     )
         """
         if isinstance(search_rules, dict) and search_rules.get("indexes"):
             for index in search_rules["indexes"]:
@@ -1293,6 +1293,24 @@ class Client(BaseClient):
 
         self._http_requests = HttpRequests(self.http_client, json_handler=self.json_handler)
 
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        et: type[BaseException] | None,
+        ev: type[BaseException] | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def close(self) -> None:
+        """Closes the client.
+
+        This only needs to be used if the client was not created with a context manager.
+        """
+        self.http_client.close()
+
     def add_or_update_networks(self, *, network: Network) -> Network:
         """Set or update remote networks.
 
@@ -1318,8 +1336,8 @@ class Client(BaseClient):
             >>>         "remote_2": {"url": "http://localhost:7720", "searchApiKey": "xxxx"},
             >>>     },
             >>> )
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> response = client.add_or_update_networks(network=network)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     response = client.add_or_update_networks(network=network)
         """
         response = self._http_requests.patch(
             "network", network.model_dump(by_alias=True, exclude_none=True)
@@ -1341,8 +1359,8 @@ class Client(BaseClient):
             >>> from meilisearch_python_sdk import AsyncClient
             >>>
             >>>
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> response = client.get_networks()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     response = client.get_networks()
         """
         response = self._http_requests.get("network")
 
@@ -1360,8 +1378,8 @@ class Client(BaseClient):
 
         Examples:
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> webhooks = client.get_webhooks()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     webhooks = client.get_webhooks()
         """
         response = self._http_requests.get("webhooks")
 
@@ -1382,8 +1400,8 @@ class Client(BaseClient):
 
         Examples:
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> webhook = client.get_webhook("abc-123")
+            >>> with Client("http://localhost.com", "masterKey"):
+            >>>     webhook = client.get_webhook("abc-123")
         """
         response = self._http_requests.get(f"webhooks/{uuid}")
 
@@ -1405,12 +1423,12 @@ class Client(BaseClient):
         Examples:
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.webhook import WebhookCreate
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> webhook_config = WebhookCreate(
-            >>>     url="https://example.com/webhook",
-            >>>     headers={"Authorization": "Bearer token"}
-            >>> )
-            >>> webhook = client.create_webhook(webhook_config)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     webhook_config = WebhookCreate(
+            >>>         url="https://example.com/webhook",
+            >>>         headers={"Authorization": "Bearer token"}
+            >>>     )
+            >>>     webhook = client.create_webhook(webhook_config)
         """
         response = self._http_requests.post(
             "webhooks", webhook.model_dump(by_alias=True, exclude_none=True)
@@ -1435,9 +1453,9 @@ class Client(BaseClient):
         Examples:
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.webhook import WebhookUpdate
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> webhook_update = WebhookUpdate(url="https://example.com/new-webhook")
-            >>> webhook = client.update_webhook("abc-123", webhook_update)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     webhook_update = WebhookUpdate(url="https://example.com/new-webhook")
+            >>>     webhook = client.update_webhook("abc-123", webhook_update)
         """
         response = self._http_requests.patch(
             f"webhooks/{uuid}", webhook.model_dump(by_alias=True, exclude_none=True)
@@ -1460,8 +1478,8 @@ class Client(BaseClient):
 
         Examples:
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> client.delete_webhook("abc-123")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.delete_webhook("abc-123")
         """
         response = self._http_requests.delete(f"webhooks/{uuid}")
         return response.status_code
@@ -1478,8 +1496,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> client.create_dump()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.create_dump()
         """
         response = self._http_requests.post("dumps")
 
@@ -1525,8 +1543,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.create_index("movies")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.create_index("movies")
         """
         return Index.create(
             self.http_client,
@@ -1552,8 +1570,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> client.create_snapshot()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.create_snapshot()
         """
         response = self._http_requests.post("snapshots")
 
@@ -1574,8 +1592,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> client.delete_index_if_exists()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.delete_index_if_exists()
         """
         response = self._http_requests.delete(f"indexes/{uid}")
         status = self.wait_for_task(response.json()["taskUid"], timeout_in_ms=100000)
@@ -1602,8 +1620,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey") as client:
-            >>> indexes = client.get_indexes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     indexes = client.get_indexes()
         """
         url = _build_offset_limit_url("indexes", offset, limit)
         response = self._http_requests.get(url)
@@ -1638,8 +1656,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.get_index()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.get_index()
         """
         return Index(self.http_client, uid, json_handler=self.json_handler).fetch_info()
 
@@ -1659,8 +1677,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
         """
         return Index(self.http_client, uid=uid, plugins=plugins, json_handler=self.json_handler)
 
@@ -1677,8 +1695,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> stats = client.get_all_stats()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     stats = client.get_all_stats()
         """
         response = self._http_requests.get("stats")
 
@@ -1711,8 +1729,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.get_or_create_index("movies")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.get_or_create_index("movies")
         """
         try:
             index_instance = self.get_index(uid)
@@ -1741,13 +1759,13 @@ class Client(BaseClient):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilissearch_async_client.models.client import KeyCreate
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> key_info = KeyCreate(
-            >>>     description="My new key",
-            >>>     actions=["search"],
-            >>>     indexes=["movies"],
-            >>> )
-            >>> keys = client.create_key(key_info)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     key_info = KeyCreate(
+            >>>         description="My new key",
+            >>>         actions=["search"],
+            >>>         indexes=["movies"],
+            >>>     )
+            >>>     keys = client.create_key(key_info)
         """
         response = self._http_requests.post(
             "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
@@ -1770,8 +1788,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> client.delete_key("abc123")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.delete_key("abc123")
         """
         response = self._http_requests.delete(f"keys/{key}")
         return response.status_code
@@ -1793,8 +1811,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = AsyncClient("http://localhost.com", "masterKey")
-            >>> keys = client.get_keys()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     keys = client.get_keys()
         """
         url = _build_offset_limit_url("keys", offset, limit)
         response = self._http_requests.get(url)
@@ -1816,8 +1834,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> keys = client.get_key("abc123")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     keys = client.get_key("abc123")
         """
         response = self._http_requests.get(f"keys/{key}")
 
@@ -1840,12 +1858,12 @@ class Client(BaseClient):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilissearch_async_client.models.client import KeyUpdate
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> key_info = KeyUpdate(
-                    key="abc123",
-            >>>     indexes=["*"],
-            >>> )
-            >>> keys = client.update_key(key_info)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     key_info = KeyUpdate(
+                        key="abc123",
+            >>>         indexes=["*"],
+            >>>     )
+            >>>     keys = client.update_key(key_info)
         """
         payload = _build_update_key_payload(key, self.json_handler)
         response = self._http_requests.patch(f"keys/{key.key}", payload)
@@ -1879,12 +1897,12 @@ class Client(BaseClient):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.search import SearchParams
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> queries = [
-            >>>     SearchParams(index_uid="my_first_index", query"Some search"),
-            >>>     SearchParams(index_uid="my_second_index", query="Another search")
-            >>> ]
-            >>> search_results = client.search(queries)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     queries = [
+            >>>         SearchParams(index_uid="my_first_index", query"Some search"),
+            >>>         SearchParams(index_uid="my_second_index", query="Another search")
+            >>>     ]
+            >>>     search_results = client.search(queries)
         """
         url = "multi-search"
         processed_queries = []
@@ -1937,8 +1955,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.get_raw_index("movies")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.get_raw_index("movies")
         """
         response = self.http_client.get(f"indexes/{uid}")
 
@@ -1968,8 +1986,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.get_raw_indexes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.get_raw_indexes()
         """
         url = _build_offset_limit_url("indexes", offset, limit)
         response = self._http_requests.get(url)
@@ -1991,8 +2009,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> version = client.get_version()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     version = client.get_version()
         """
         response = self._http_requests.get("version")
 
@@ -2010,8 +2028,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> health = client.get_health()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     health = client.get_health()
         """
         response = self._http_requests.get("health")
 
@@ -2034,8 +2052,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.swap_indexes([("index_a", "index_b")])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.swap_indexes([("index_a", "index_b")])
         """
         if rename:
             processed_indexes = [{"indexes": x, "rename": True} for x in indexes]
@@ -2118,8 +2136,8 @@ class Client(BaseClient):
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.task import cancel_tasks
             >>>
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> client.cancel_tasks(uids=[1, 2])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.cancel_tasks(uids=[1, 2])
         """
         return _task.cancel_tasks(
             self.http_client,
@@ -2170,8 +2188,8 @@ class Client(BaseClient):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>>
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> client.delete_tasks(client, uids=[1, 2])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.delete_tasks(client, uids=[1, 2])
         """
         return _task.delete_tasks(
             self.http_client,
@@ -2202,8 +2220,8 @@ class Client(BaseClient):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>>
-            >>> client = AsyncClient("http://localhost.com", "masterKey")
-            >>> get_task(client, 1244)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.get_task(client, 1244)
         """
         return _task.get_task(self.http_client, task_id=task_id)
 
@@ -2233,8 +2251,8 @@ class Client(BaseClient):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>>
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> client.get_tasks(client)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     client.get_tasks(client)
         """
         return _task.get_tasks(self.http_client, index_ids=index_ids, types=types, reverse=reverse)
 
@@ -2272,10 +2290,10 @@ class Client(BaseClient):
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> response = await index.add_documents(documents)
-            >>> client.wait_for_task(response.update_id)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     response = await index.add_documents(documents)
+            >>>     client.wait_for_task(response.update_id)
         """
         return _task.wait_for_task(
             self.http_client,
@@ -2315,8 +2333,8 @@ class Client(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index.transfer_documents("https://another-instance.com", api_key="otherMasterKey")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index.transfer_documents("https://another-instance.com", api_key="otherMasterKey")
         """
         payload: JsonDict = {"url": url}
 

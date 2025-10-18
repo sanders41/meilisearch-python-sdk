@@ -37,9 +37,9 @@ documents = [
     {"id": uuid4(), "title": "test 1", "when": datetime.now()},
     {"id": uuid4(), "title": "Test 2", "when": datetime.now()},
 ]
-client = Client("http://127.0.0.1:7700", json_handler=BuiltinHandler(serializer=CustomEncoder))
-index = client.index("movies", primary_key="id")
-index.add_documents(documents)
+with Client("http://127.0.0.1:7700", json_handler=BuiltinHandler(serializer=CustomEncoder)) as client:
+    index = client.index("movies", primary_key="id")
+    index.add_documents(documents)
 ```
 
 ## orjson
@@ -57,9 +57,9 @@ documents = [
     {"id": uuid4(), "title": "test 1"},
     {"id": uuid4(), "title": "Test 2"},
 ]
-client = Client("http://127.0.0.1:7700", json_handler=OrjsonHandler())
-index = client.index("movies", primary_key="id")
-index.add_documents(documents)
+with Client("http://127.0.0.1:7700", json_handler=OrjsonHandler()) as client:
+    index = client.index("movies", primary_key="id")
+    index.add_documents(documents)
 ```
 
 ## ujson
@@ -77,7 +77,7 @@ documents = [
     {"id": uuid4(), "title": "test 1"},
     {"id": uuid4(), "title": "Test 2"},
 ]
-client = Client("http://127.0.0.1:7700", json_handler=UjsonHandler())
-index = client.index("movies", primary_key="id")
-index.add_documents(documents)
+with Client("http://127.0.0.1:7700", json_handler=UjsonHandler()) as client:
+    index = client.index("movies", primary_key="id")
+    index.add_documents(documents)
 ```

@@ -25,11 +25,11 @@ def update_settings(index: Index) -> TaskInfo:
 
 
 def main() -> int:
-    client = Client("http://127.0.0.1:7700", "masterKey")
-    index = client.create_index("movies", primary_key="id")
-    task = update_settings(index)
-    client.wait_for_task(task.task_uid)
-    add_documents(index)
+    with Client("http://127.0.0.1:7700", "masterKey") as client:
+        index = client.create_index("movies", primary_key="id")
+        task = update_settings(index)
+        client.wait_for_task(task.task_uid)
+        add_documents(index)
 
     return 0
 
