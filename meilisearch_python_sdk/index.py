@@ -4952,9 +4952,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.compact()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.compact()
         """
         response = self._http_requests.post(f"{self._base_url_with_uid}/compact")
         return TaskInfo(**response.json())
@@ -4971,9 +4971,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.delete()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.delete()
         """
         response = self._http_requests.delete(self._base_url_with_uid)
         return TaskInfo(**response.json())
@@ -4990,9 +4990,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.delete_if_exists()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.delete_if_exists()
         """
         response = self.delete()
         status = wait_for_task(self.http_client, response.task_uid, timeout_in_ms=100000)
@@ -5016,9 +5016,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> updated_index = index.update()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     updated_index = index.update()
         """
         payload = {"primaryKey": primary_key}
         response = self._http_requests.patch(self._base_url_with_uid, payload)
@@ -5039,9 +5039,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index_info = index.fetch_info()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index_info = index.fetch_info()
         """
         response = self._http_requests.get(self._base_url_with_uid)
         index_dict = response.json()
@@ -5062,9 +5062,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> primary_key = index.get_primary_key()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     primary_key = index.get_primary_key()
         """
         info = self.fetch_info()
         return info.primary_key
@@ -5121,8 +5121,8 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = index.create(client, "movies")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = index.create(client, "movies")
         """
         if not primary_key:
             payload = {"uid": uid}
@@ -5166,9 +5166,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> stats = index.get_stats()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     stats = index.get_stats()
         """
         response = self._http_requests.get(self._stats_url)
 
@@ -5282,9 +5282,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> search_results = index.search("Tron")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_results = index.search("Tron")
         """
         if ranking_score_threshold:
             _validate_ranking_score_threshold(ranking_score_threshold)
@@ -5453,13 +5453,13 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> search_results = index.search(
-            >>>     "Tron",
-            >>>     facet_name="genre",
-            >>>     facet_query="Sci-fi"
-            >>> )
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_results = index.search(
+            >>>         "Tron",
+            >>>         facet_name="genre",
+            >>>         facet_query="Sci-fi"
+            >>>     )
         """
         if ranking_score_threshold:
             _validate_ranking_score_threshold(ranking_score_threshold)
@@ -5572,9 +5572,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> search_results = index.search_similar_documents("123")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_results = index.search_similar_documents("123")
         """
         payload = {
             "id": id,
@@ -5621,9 +5621,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> document = index.get_document("1234")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     document = index.get_document("1234")
         """
         parameters: JsonDict = {}
 
@@ -5671,9 +5671,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> documents = index.get_documents()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     documents = index.get_documents()
         """
         parameters: JsonDict = {
             "offset": offset,
@@ -5732,9 +5732,9 @@ class Index(_BaseIndex):
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.add_documents(documents)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.add_documents(documents)
         """
         if primary_key:
             url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
@@ -5791,9 +5791,9 @@ class Index(_BaseIndex):
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.add_documents_in_batches(documents)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.add_documents_in_batches(documents)
         """
         return [
             self.add_documents(x, primary_key, compress=compress)
@@ -5838,9 +5838,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.add_documents_from_directory(directory_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.add_documents_from_directory(directory_path)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
@@ -5914,9 +5914,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.add_documents_from_directory_in_batches(directory_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.add_documents_from_directory_in_batches(directory_path)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
@@ -5987,9 +5987,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.add_documents_from_file(file_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.add_documents_from_file(file_path)
         """
         documents = _load_documents_from_file(file_path, json_handler=self._json_handler)
 
@@ -6029,9 +6029,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.add_documents_from_file_in_batches(file_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.add_documents_from_file_in_batches(file_path)
         """
         documents = _load_documents_from_file(
             file_path, csv_delimiter, json_handler=self._json_handler
@@ -6080,9 +6080,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.csv")
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.add_documents_from_raw_file(file_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.add_documents_from_raw_file(file_path)
         """
         upload_path = Path(file_path) if isinstance(file_path, str) else file_path
         if not upload_path.exists():
@@ -6148,9 +6148,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.edit_documents("doc.title = `${doc.title.to_upper()}`")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.edit_documents("doc.title = `${doc.title.to_upper()}`")
         """
         url = f"{self._documents_url}/edit"
         payload: JsonDict = {"function": function}
@@ -6193,9 +6193,9 @@ class Index(_BaseIndex):
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_documents(documents)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_documents(documents)
         """
         if primary_key:
             url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
@@ -6256,9 +6256,9 @@ class Index(_BaseIndex):
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_documents_in_batches(documents)
+            >>> with Client("http://localhost.com", "masterKey") client:
+            >>>     index = client.index("movies")
+            >>>     index.update_documents_in_batches(documents)
         """
         return [
             self.update_documents(x, primary_key, compress=compress)
@@ -6303,9 +6303,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_documents_from_directory(directory_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_documents_from_directory(directory_path)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
@@ -6378,9 +6378,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> directory_path = Path("/path/to/directory/containing/files")
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_documents_from_directory_in_batches(directory_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_documents_from_directory_in_batches(directory_path)
         """
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
@@ -6453,9 +6453,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
-            >>> client = Client("http://localhost.com", "masterKey") as client:
-            >>> index = client.index("movies")
-            >>> index.update_documents_from_file(file_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_documents_from_file(file_path)
         """
         documents = _load_documents_from_file(
             file_path, csv_delimiter, json_handler=self._json_handler
@@ -6492,9 +6492,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.json")
-            >>> client = Client("http://localhost.com", "masterKey") as client:
-            >>> index = client.index("movies")
-            >>> index.update_documents_from_file_in_batches(file_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_documents_from_file_in_batches(file_path)
         """
         documents = _load_documents_from_file(file_path, json_handler=self._json_handler)
 
@@ -6541,9 +6541,9 @@ class Index(_BaseIndex):
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import Client
             >>> file_path = Path("/path/to/file.csv")
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_documents_from_raw_file(file_path)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_documents_from_raw_file(file_path)
         """
         upload_path = Path(file_path) if isinstance(file_path, str) else file_path
         if not upload_path.exists():
@@ -6600,9 +6600,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.delete_document("1234")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.delete_document("1234")
         """
         if self._pre_delete_document_plugins:
             Index._run_plugins(
@@ -6633,9 +6633,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.delete_documents(["1234", "5678"])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.delete_documents(["1234", "5678"])
         """
         if self._pre_delete_documents_plugins:
             Index._run_plugins(self._pre_delete_documents_plugins, Event.PRE, ids=ids)
@@ -6666,9 +6666,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.delete_documents_by_filter("genre=horor"))
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.delete_documents_by_filter("genre=horor"))
         """
         if self._pre_delete_documents_by_filter_plugins:
             Index._run_plugins(
@@ -6705,14 +6705,14 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.delete_documents_in_batches_by_filter(
-            >>>     [
-            >>>         "genre=horor"),
-            >>>         "release_date=1520035200"),
-            >>>     ]
-            >>> )
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.delete_documents_in_batches_by_filter(
+            >>>         [
+            >>>             "genre=horor"),
+            >>>             "release_date=1520035200"),
+            >>>         ]
+            >>>     )
         """
         return [self.delete_documents_by_filter(filter) for filter in filters]
 
@@ -6728,9 +6728,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.delete_all_document()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.delete_all_document()
         """
         if self._pre_delete_all_documents_plugins:
             Index._run_plugins(self._pre_delete_all_documents_plugins, Event.PRE)
@@ -6758,9 +6758,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> settings = index.get_settings()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     settings = index.get_settings()
         """
         response = self._http_requests.get(self._settings_url)
         response_json = response.json()
@@ -6810,9 +6810,9 @@ class Index(_BaseIndex):
             >>>    displayed_attributes=["title", "description", "genre", "release_date"],
             >>>    sortable_attributes=["title", "release_date"],
             >>> )
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_settings(new_settings)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_settings(new_settings)
         """
         body_dict = {
             k: v
@@ -6835,9 +6835,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_settings()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_settings()
         """
         response = self._http_requests.delete(self._settings_url)
 
@@ -6855,9 +6855,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> ranking_rules = index.get_ranking_rules()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     ranking_rules = index.get_ranking_rules()
         """
         response = self._http_requests.get(f"{self._settings_url}/ranking-rules")
 
@@ -6889,9 +6889,9 @@ class Index(_BaseIndex):
             >>>      "release_date:desc",
             >>>      "rank:desc",
             >>> ],
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_ranking_rules(ranking_rules)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_ranking_rules(ranking_rules)
         """
         response = self._http_requests.put(
             f"{self._settings_url}/ranking-rules", ranking_rules, compress=compress
@@ -6911,9 +6911,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_ranking_rules()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_ranking_rules()
         """
         response = self._http_requests.delete(f"{self._settings_url}/ranking-rules")
 
@@ -6932,9 +6932,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> distinct_attribute = index.get_distinct_attribute()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     distinct_attribute = index.get_distinct_attribute()
         """
         response = self._http_requests.get(f"{self._settings_url}/distinct-attribute")
 
@@ -6959,9 +6959,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_distinct_attribute("url")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_distinct_attribute("url")
         """
         response = self._http_requests.put(
             f"{self._settings_url}/distinct-attribute", body, compress=compress
@@ -6981,9 +6981,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_distinct_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_distinct_attributes()
         """
         response = self._http_requests.delete(f"{self._settings_url}/distinct-attribute")
 
@@ -7001,9 +7001,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> searchable_attributes = index.get_searchable_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     searchable_attributes = index.get_searchable_attributes()
         """
         response = self._http_requests.get(f"{self._settings_url}/searchable-attributes")
 
@@ -7025,9 +7025,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_searchable_attributes(["title", "description", "genre"])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_searchable_attributes(["title", "description", "genre"])
         """
         response = self._http_requests.put(
             f"{self._settings_url}/searchable-attributes", body, compress=compress
@@ -7047,9 +7047,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_searchable_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_searchable_attributes()
         """
         response = self._http_requests.delete(f"{self._settings_url}/searchable-attributes")
 
@@ -7067,9 +7067,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> displayed_attributes = index.get_displayed_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     displayed_attributes = index.get_displayed_attributes()
         """
         response = self._http_requests.get(f"{self._settings_url}/displayed-attributes")
 
@@ -7091,11 +7091,11 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_displayed_attributes(
-            >>>     ["title", "description", "genre", "release_date"]
-            >>> )
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_displayed_attributes(
+            >>>         ["title", "description", "genre", "release_date"]
+            >>>     )
         """
         response = self._http_requests.put(
             f"{self._settings_url}/displayed-attributes", body, compress=compress
@@ -7115,9 +7115,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_displayed_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_displayed_attributes()
         """
         response = self._http_requests.delete(f"{self._settings_url}/displayed-attributes")
 
@@ -7135,9 +7135,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> stop_words = index.get_stop_words()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     stop_words = index.get_stop_words()
         """
         response = self._http_requests.get(f"{self._settings_url}/stop-words")
 
@@ -7162,9 +7162,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_stop_words(["the", "a", "an"])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_stop_words(["the", "a", "an"])
         """
         response = self._http_requests.put(
             f"{self._settings_url}/stop-words", body, compress=compress
@@ -7184,9 +7184,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_stop_words()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_stop_words()
         """
         response = self._http_requests.delete(f"{self._settings_url}/stop-words")
 
@@ -7204,9 +7204,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> synonyms = index.get_synonyms()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     synonyms = index.get_synonyms()
         """
         response = self._http_requests.get(f"{self._settings_url}/synonyms")
 
@@ -7230,11 +7230,11 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey") as client:
-            >>> index = client.index("movies")
-            >>> index.update_synonyms(
-            >>>     {"wolverine": ["xmen", "logan"], "logan": ["wolverine"]}
-            >>> )
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_synonyms(
+            >>>         {"wolverine": ["xmen", "logan"], "logan": ["wolverine"]}
+            >>>     )
         """
         response = self._http_requests.put(
             f"{self._settings_url}/synonyms", body, compress=compress
@@ -7254,9 +7254,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_synonyms()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_synonyms()
         """
         response = self._http_requests.delete(f"{self._settings_url}/synonyms")
 
@@ -7274,9 +7274,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> filterable_attributes = index.get_filterable_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     filterable_attributes = index.get_filterable_attributes()
         """
         response = self._http_requests.get(f"{self._settings_url}/filterable-attributes")
 
@@ -7317,9 +7317,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_filterable_attributes(["genre", "director"])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_filterable_attributes(["genre", "director"])
         """
         payload: list[str | JsonDict] = []
 
@@ -7347,9 +7347,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_filterable_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_filterable_attributes()
         """
         response = self._http_requests.delete(f"{self._settings_url}/filterable-attributes")
 
@@ -7367,9 +7367,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> sortable_attributes = index.get_sortable_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     sortable_attributes = index.get_sortable_attributes()
         """
         response = self._http_requests.get(f"{self._settings_url}/sortable-attributes")
 
@@ -7393,9 +7393,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_sortable_attributes(["title", "release_date"])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_sortable_attributes(["title", "release_date"])
         """
         response = self._http_requests.put(
             f"{self._settings_url}/sortable-attributes", sortable_attributes, compress=compress
@@ -7415,9 +7415,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_sortable_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_sortable_attributes()
         """
         response = self._http_requests.delete(f"{self._settings_url}/sortable-attributes")
 
@@ -7435,9 +7435,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> sortable_attributes = index.get_typo_tolerance()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     sortable_attributes = index.get_typo_tolerance()
         """
         response = self._http_requests.get(f"{self._settings_url}/typo-tolerance")
 
@@ -7461,10 +7461,10 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> TypoTolerance(enabled=False)
-            >>> index.update_typo_tolerance()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     TypoTolerance(enabled=False)
+            >>>     index.update_typo_tolerance()
         """
         response = self._http_requests.patch(
             f"{self._settings_url}/typo-tolerance",
@@ -7486,9 +7486,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_typo_tolerance()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_typo_tolerance()
         """
         response = self._http_requests.delete(f"{self._settings_url}/typo-tolerance")
 
@@ -7506,9 +7506,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> faceting = index.get_faceting()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     faceting = index.get_faceting()
         """
         response = self._http_requests.get(f"{self._settings_url}/faceting")
 
@@ -7530,9 +7530,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_faceting(faceting=Faceting(max_values_per_facet=100))
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_faceting(faceting=Faceting(max_values_per_facet=100))
         """
         response = self._http_requests.patch(
             f"{self._settings_url}/faceting",
@@ -7554,9 +7554,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_faceting()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_faceting()
         """
         response = self._http_requests.delete(f"{self._settings_url}/faceting")
 
@@ -7574,9 +7574,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> pagination_settings = index.get_pagination()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     pagination_settings = index.get_pagination()
         """
         response = self._http_requests.get(f"{self._settings_url}/pagination")
 
@@ -7599,9 +7599,9 @@ class Index(_BaseIndex):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.settings import Pagination
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_pagination(settings=Pagination(max_total_hits=123))
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_pagination(settings=Pagination(max_total_hits=123))
         """
         response = self._http_requests.patch(
             f"{self._settings_url}/pagination",
@@ -7623,9 +7623,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_pagination()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_pagination()
         """
         response = self._http_requests.delete(f"{self._settings_url}/pagination")
 
@@ -7643,9 +7643,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> separator_token_settings = index.get_separator_tokens()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     separator_token_settings = index.get_separator_tokens()
         """
         response = self._http_requests.get(f"{self._settings_url}/separator-tokens")
 
@@ -7669,9 +7669,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_separator_tokens(separator_tokenes=["|", "/")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_separator_tokens(separator_tokenes=["|", "/")
         """
         response = self._http_requests.put(
             f"{self._settings_url}/separator-tokens", separator_tokens, compress=compress
@@ -7691,9 +7691,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_separator_tokens()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_separator_tokens()
         """
         response = self._http_requests.delete(f"{self._settings_url}/separator-tokens")
 
@@ -7711,9 +7711,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> non_separator_token_settings = index.get_non_separator_tokens()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     non_separator_token_settings = index.get_non_separator_tokens()
         """
         response = self._http_requests.get(f"{self._settings_url}/non-separator-tokens")
 
@@ -7737,9 +7737,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_non_separator_tokens(non_separator_tokens=["@", "#")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_non_separator_tokens(non_separator_tokens=["@", "#")
         """
         response = self._http_requests.put(
             f"{self._settings_url}/non-separator-tokens", non_separator_tokens, compress=compress
@@ -7759,9 +7759,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_non_separator_tokens()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_non_separator_tokens()
         """
         response = self._http_requests.delete(f"{self._settings_url}/non-separator-tokens")
 
@@ -7779,9 +7779,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> search_cutoff_ms_settings = index.get_search_cutoff_ms()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     search_cutoff_ms_settings = index.get_search_cutoff_ms()
         """
         response = self._http_requests.get(f"{self._settings_url}/search-cutoff-ms")
 
@@ -7803,9 +7803,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_search_cutoff_ms(100)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_search_cutoff_ms(100)
         """
         response = self._http_requests.put(
             f"{self._settings_url}/search-cutoff-ms", search_cutoff_ms, compress=compress
@@ -7825,9 +7825,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_search_cutoff_ms()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_search_cutoff_ms()
         """
         response = self._http_requests.delete(f"{self._settings_url}/search-cutoff-ms")
 
@@ -7845,9 +7845,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> word_dictionary = index.get_word_dictionary()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     word_dictionary = index.get_word_dictionary()
         """
         response = self._http_requests.get(f"{self._settings_url}/dictionary")
 
@@ -7869,9 +7869,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_word_dictionary(dictionary=["S.O.S", "S.O")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_word_dictionary(dictionary=["S.O.S", "S.O")
         """
         response = self._http_requests.put(
             f"{self._settings_url}/dictionary", dictionary, compress=compress
@@ -7891,9 +7891,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_word_dictionary()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_word_dictionary()
         """
         response = self._http_requests.delete(f"{self._settings_url}/dictionary")
 
@@ -7911,9 +7911,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> proximity_precision = index.get_proximity_precision()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     proximity_precision = index.get_proximity_precision()
         """
         response = self._http_requests.get(f"{self._settings_url}/proximity-precision")
 
@@ -7938,9 +7938,9 @@ class Index(_BaseIndex):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.settings import ProximityPrecision
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE)
         """
         response = self._http_requests.put(
             f"{self._settings_url}/proximity-precision",
@@ -7962,9 +7962,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_proximity_precision()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_proximity_precision()
         """
         response = self._http_requests.delete(f"{self._settings_url}/proximity-precision")
 
@@ -7982,9 +7982,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> embedders = await index.get_embedders()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     embedders = await index.get_embedders()
         """
         response = self._http_requests.get(f"{self._settings_url}/embedders")
 
@@ -8007,11 +8007,11 @@ class Index(_BaseIndex):
         Examples
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.settings import Embedders, UserProvidedEmbedder
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_embedders(
-            >>>     Embedders(embedders={dimensions=512)})
-            >>> )
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_embedders(
+            >>>         Embedders(embedders={dimensions=512)})
+            >>>     )
         """
         payload = {}
         for key, embedder in embedders.embedders.items():
@@ -8040,9 +8040,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = AsyncClient("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_embedders()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_embedders()
         """
         response = self._http_requests.delete(f"{self._settings_url}/embedders")
 
@@ -8060,9 +8060,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import AsyncClient
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> localized_attributes = await index.get_localized_attributes()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     localized_attributes = await index.get_localized_attributes()
         """
         response = self._http_requests.get(f"{self._settings_url}/localized-attributes")
 
@@ -8092,12 +8092,12 @@ class Index(_BaseIndex):
             >>> from meilisearch_python_sdk.models.settings import LocalizedAttributes
             >>>
             >>>
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_localized_attributes([
-            >>>     LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
-            >>>     LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
-            >>> ])
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_localized_attributes([
+            >>>         LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
+            >>>         LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
+            >>>     ])
         """
         payload = [x.model_dump(by_alias=True) for x in localized_attributes]
         response = self._http_requests.put(
@@ -8138,9 +8138,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> facet_search = await index.get_facet_search()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     facet_search = await index.get_facet_search()
         """
         response = self._http_requests.get(f"{self._settings_url}/facet-search")
 
@@ -8162,9 +8162,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_facet_search(True)
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_facet_search(True)
         """
         response = self._http_requests.put(
             f"{self._settings_url}/facet-search",
@@ -8186,9 +8186,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> await index.reset_facet_search()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     await index.reset_facet_search()
         """
         response = self._http_requests.delete(f"{self._settings_url}/facet-search")
 
@@ -8206,9 +8206,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> prefix_search = index.get_prefix_search()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     prefix_search = index.get_prefix_search()
         """
         response = self._http_requests.get(f"{self._settings_url}/prefix-search")
 
@@ -8235,9 +8235,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_python_sdk import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.update_prefix_search("disabled")
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.update_prefix_search("disabled")
         """
         response = self._http_requests.put(
             f"{self._settings_url}/prefix-search",
@@ -8259,9 +8259,9 @@ class Index(_BaseIndex):
 
         Examples
             >>> from meilisearch_async_client import Client
-            >>> client = Client("http://localhost.com", "masterKey")
-            >>> index = client.index("movies")
-            >>> index.reset_prefix_search()
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index = client.index("movies")
+            >>>     index.reset_prefix_search()
         """
         response = self._http_requests.delete(f"{self._settings_url}/prefix-search")
 

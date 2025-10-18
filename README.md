@@ -66,15 +66,15 @@ async with AsyncClient('http://127.0.0.1:7700', 'masterKey') as client:
 ```py
 from meilisearch_python_sdk import Client
 
-client = Client('http://127.0.0.1:7700', 'masterKey')
-index = client.index("books")
+with Client('http://127.0.0.1:7700', 'masterKey') as client:
+    index = client.index("books")
 
-documents = [
-    {"id": 1, "title": "Ready Player One"},
-    {"id": 42, "title": "The Hitchhiker's Guide to the Galaxy"},
-]
+    documents = [
+        {"id": 1, "title": "Ready Player One"},
+        {"id": 42, "title": "The Hitchhiker's Guide to the Galaxy"},
+    ]
 
-index.add_documents(documents)
+    index.add_documents(documents)
 ```
 
 The server will return an update id that can be used to

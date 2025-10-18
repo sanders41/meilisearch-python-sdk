@@ -53,13 +53,13 @@ def search(index: Index, query: str) -> SearchResults[JsonDict]:
 
 
 def main() -> int:
-    client = Client("http://127.0.0.1:7700", "masterKey")
-    plugins = IndexPlugins(search_plugins=(SearchTrackerPlugin(),))
-    index = client.create_index("movies", primary_key="id", plugins=plugins)
-    task = add_documents(index)
-    client.wait_for_task(task.task_uid)
-    result = search(index, "Cars")
-    print(result)  # noqa: T201
+    with Client("http://127.0.0.1:7700", "masterKey") as client:
+        plugins = IndexPlugins(search_plugins=(SearchTrackerPlugin(),))
+        index = client.create_index("movies", primary_key="id", plugins=plugins)
+        task = add_documents(index)
+        client.wait_for_task(task.task_uid)
+        result = search(index, "Cars")
+        print(result)  # noqa: T201
 
     return 0
 
