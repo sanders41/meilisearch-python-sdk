@@ -55,7 +55,7 @@ Movie(
 ```
 
 By inheriting from CamelBase, or any of the other [provided models](https://github.com/sanders41/meilisearch-python-sdk/tree/main/meilisearch_python_sdk/models)
-you will be inheriting Pydantic models and therefore have access to the funcitonality Pydantic provides
+you will be inheriting Pydantic models and therefore have access to the functionality Pydantic provides
 such as [validators](https://pydantic-docs.helpmanual.io/usage/validators/) and [Fields](https://pydantic-docs.helpmanual.io/usage/model_config/#alias-precedence).
 Pydantic will also automatically deserialized the data into the correct data type based on the type
 hint provided.

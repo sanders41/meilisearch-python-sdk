@@ -10,7 +10,7 @@ from meilisearch_python_sdk._utils import use_task_groups
 
 
 class ConnectionInfo(NamedTuple):
-    """Infomation on how to connect to Meilisearch.
+    """Information on how to connect to Meilisearch.
 
     url: URL for the Meilisearch server.
     api_key: The API key for the server.
@@ -29,13 +29,13 @@ def async_add_documents(
     wait_for_task: bool = False,
     verify: bool = True,
 ) -> Callable:
-    """Decorator that takes the returned documents from a function and asyncronously adds them to Meilisearch.
+    """Decorator that takes the returned documents from a function and asynchronously adds them to Meilisearch.
 
     It is required that either an async_client or url is provided.
 
     Args:
         index_name: The name of the index to which the documents should be added.
-        connection_info: Either an AsyncClient instance ConnectionInfo with informtaion on how to
+        connection_info: Either an AsyncClient instance ConnectionInfo with information on how to
             connect to Meilisearch.
         batch_size: If provided the documents will be sent in batches of the specified size.
             Otherwise all documents are sent at once. Default = None.
@@ -46,7 +46,7 @@ def async_add_documents(
         verify: If set to `False` the decorator will not verify the SSL certificate of the server.
 
     Returns:
-        The list of documents proviced by the decorated function.
+        The list of documents provided by the decorated function.
 
     Raises:
         MeilisearchCommunicationError: If there was an error communicating with the server.
@@ -117,7 +117,7 @@ def add_documents(
 
     Args:
         index_name: The name of the index to which the documents should be added.
-        connection_info: Either an Client instance ConnectionInfo with informtaion on how to
+        connection_info: Either an Client instance ConnectionInfo with information on how to
             connect to Meilisearch.
         batch_size: If provided the documents will be sent in batches of the specified size.
             Otherwise all documents are sent at once. Default = None.
@@ -128,7 +128,7 @@ def add_documents(
         verify: If set to `False` the decorator will not verify the SSL certificate of the server.
 
     Returns:
-        The list of documents proviced by the decorated function.
+        The list of documents provided by the decorated function.
 
     Raises:
         MeilisearchCommunicationError: If there was an error communicating with the server.

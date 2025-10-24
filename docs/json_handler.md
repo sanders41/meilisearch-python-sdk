@@ -1,6 +1,6 @@
 # JSON Handler
 
-For json loads and dumps you have the option to use the `json` module from the standard libary,
+For json loads and dumps you have the option to use the `json` module from the standard library,
 orjson, or ujson. This done by setting the `json_handler` when creating the `AsyncClient` or
 `Client`. By default the standard library `json` module will be used. The examples below use
 `Client`, and the same options are available for `AsyncClient`.

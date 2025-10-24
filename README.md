@@ -196,7 +196,7 @@ Meilisearch takes to index the documents since that is outside of the library fu
 
 ![Add Documents in Batches](https://raw.githubusercontent.com/sanders41/meilisearch-python-sdk/main/assets/add_in_batches.png)
 
-### Muiltiple Searches
+### Multiple Searches
 
 This test compares how long it takes to complete 1000 searches (lower is better)
 

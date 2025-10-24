@@ -164,7 +164,7 @@ Now with the container running, run the test suite
 uv run pytest
 ```
 
-In additon to mainting the coverage percentage please ensure that all
+In addition to mainting the coverage percentage please ensure that all
 tests are passing before submitting a pull request.
 
 #### just

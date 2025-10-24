@@ -562,7 +562,7 @@ class AsyncIndex(_BaseIndex):
         return self
 
     async def fetch_info(self) -> Self:
-        """Gets the infromation about the index.
+        """Gets the information about the index.
 
         Returns:
             An instance of the AsyncIndex containing the retrieved information.
@@ -757,7 +757,7 @@ class AsyncIndex(_BaseIndex):
             attributes_to_retrieve: Attributes to display in the returned documents.
                 Defaults to ["*"].
             attributes_to_crop: Attributes whose values have to be cropped. Defaults to None.
-            crop_length: The maximun number of words to display. Defaults to 200.
+            crop_length: The maximum number of words to display. Defaults to 200.
             attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
                 Defaults to None.
             sort: Attributes by which to sort the results. Defaults to None.
@@ -765,7 +765,7 @@ class AsyncIndex(_BaseIndex):
                 matches should be returned or not. Defaults to False.
             highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
-            crop_marker: Marker to display when the number of words excedes the `crop_length`.
+            crop_marker: Marker to display when the number of words exceeds the `crop_length`.
                 Defaults to ...
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to
                 `last`.
@@ -1036,7 +1036,7 @@ class AsyncIndex(_BaseIndex):
             attributes_to_retrieve: Attributes to display in the returned documents.
                 Defaults to ["*"].
             attributes_to_crop: Attributes whose values have to be cropped. Defaults to None.
-            crop_length: The maximun number of words to display. Defaults to 200.
+            crop_length: The maximum number of words to display. Defaults to 200.
             attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
                 Defaults to None.
             sort: Attributes by which to sort the results. Defaults to None.
@@ -1044,7 +1044,7 @@ class AsyncIndex(_BaseIndex):
                 matches should be returned or not. Defaults to False.
             highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
-            crop_marker: Marker to display when the number of words excedes the `crop_length`.
+            crop_marker: Marker to display when the number of words exceeds the `crop_length`.
                 Defaults to ...
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to
                 `last`.
@@ -2907,7 +2907,7 @@ class AsyncIndex(_BaseIndex):
             MeilisearchApiError: If the Meilisearch API returned an error.
 
         Examples
-            >>> from meilisearch_pyrhon_sdk import AsyncClient
+            >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     await index.delete_documents_by_filter("genre=horor"))
@@ -5028,7 +5028,7 @@ class Index(_BaseIndex):
         return self
 
     def fetch_info(self) -> Self:
-        """Gets the infromation about the index.
+        """Gets the information about the index.
 
         Returns:
             An instance of the AsyncIndex containing the retrieved information.
@@ -5216,7 +5216,7 @@ class Index(_BaseIndex):
             attributes_to_retrieve: Attributes to display in the returned documents.
                 Defaults to ["*"].
             attributes_to_crop: Attributes whose values have to be cropped. Defaults to None.
-            crop_length: The maximun number of words to display. Defaults to 200.
+            crop_length: The maximum number of words to display. Defaults to 200.
             attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
                 Defaults to None.
             sort: Attributes by which to sort the results. Defaults to None.
@@ -5224,7 +5224,7 @@ class Index(_BaseIndex):
                 matches should be returned or not. Defaults to False.
             highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
-            crop_marker: Marker to display when the number of words excedes the `crop_length`.
+            crop_marker: Marker to display when the number of words exceeds the `crop_length`.
                 Defaults to ...
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to
                 `last`.
@@ -5401,7 +5401,7 @@ class Index(_BaseIndex):
             attributes_to_retrieve: Attributes to display in the returned documents.
                 Defaults to ["*"].
             attributes_to_crop: Attributes whose values have to be cropped. Defaults to None.
-            crop_length: The maximun number of words to display. Defaults to 200.
+            crop_length: The maximum number of words to display. Defaults to 200.
             attributes_to_highlight: Attributes whose values will contain highlighted matching terms.
                 Defaults to None.
             sort: Attributes by which to sort the results. Defaults to None.
@@ -5409,7 +5409,7 @@ class Index(_BaseIndex):
                 matches should be returned or not. Defaults to False.
             highlight_pre_tag: The opening tag for highlighting text. Defaults to <em>.
             highlight_post_tag: The closing tag for highlighting text. Defaults to </em>
-            crop_marker: Marker to display when the number of words excedes the `crop_length`.
+            crop_marker: Marker to display when the number of words exceeds the `crop_length`.
                 Defaults to ...
             matching_strategy: Specifies the matching strategy Meilisearch should use. Defaults to
                 `last`.

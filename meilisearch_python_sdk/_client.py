@@ -87,7 +87,7 @@ class BaseClient:
                 token.
             api_key: The API key to use to generate the token.
             expires_at: The timepoint at which the token should expire. If value is provided it
-                shoud be a UTC time in the future. Default = None.
+                should be a UTC time in the future. Default = None.
 
         Returns:
             A JWT token
@@ -1170,7 +1170,7 @@ class AsyncClient(BaseClient):
             timeout_in_ms: Amount of time in milliseconds to wait before raising a
                 MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
                 if the `None` option is used the wait time could be very long. Defaults to 5000.
-            interval_in_ms: Time interval in miliseconds to sleep between requests. Defaults to 50.
+            interval_in_ms: Time interval in milliseconds to sleep between requests. Defaults to 50.
             raise_for_status: When set to `True` a MeilisearchTaskFailedError will be raised if a task
                 has a failed status. Defaults to False.
 
@@ -2271,7 +2271,7 @@ class Client(BaseClient):
             timeout_in_ms: Amount of time in milliseconds to wait before raising a
                 MeilisearchTimeoutError. `None` can also be passed to wait indefinitely. Be aware that
                 if the `None` option is used the wait time could be very long. Defaults to 5000.
-            interval_in_ms: Time interval in miliseconds to sleep between requests. Defaults to 50.
+            interval_in_ms: Time interval in milliseconds to sleep between requests. Defaults to 50.
             raise_for_status: When set to `True` a MeilisearchTaskFailedError will be raised if a task
                 has a failed status. Defaults to False.
 

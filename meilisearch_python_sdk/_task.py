@@ -73,7 +73,7 @@ async def async_cancel_tasks(
     )
 
     if not parameters:
-        # Cancel all tasks if no parmaeters provided
+        # Cancel all tasks if no parameters provided
         parameters["statuses"] = "enqueued,processing"
 
     url = f"tasks/cancel?{urlencode(parameters)}"
@@ -107,7 +107,7 @@ async def async_delete_tasks(
     )
 
     if not parameters:
-        # delete all tasks if no parmaeters provided
+        # delete all tasks if no parameters provided
         parameters["statuses"] = "canceled,enqueued,failed,processing,succeeded"
 
     url = f"tasks?{urlencode(parameters)}"
@@ -214,7 +214,7 @@ def cancel_tasks(
     )
 
     if not parameters:
-        # Cancel all tasks if no parmaeters provided
+        # Cancel all tasks if no parameters provided
         parameters["statuses"] = "enqueued,processing"
 
     url = f"tasks/cancel?{urlencode(parameters)}"
@@ -248,7 +248,7 @@ def delete_tasks(
     )
 
     if not parameters:
-        # delete all tasks if no parmaeters provided
+        # delete all tasks if no parameters provided
         parameters["statuses"] = "canceled,enqueued,failed,processing,succeeded"
 
     url = f"tasks?{urlencode(parameters)}"
