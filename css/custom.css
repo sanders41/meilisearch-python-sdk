@@ -1,0 +1,45 @@
+.md-source__repository {
+  overflow: visible;
+}
+
+.md-footer {
+  padding: 16px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #111317;
+  color: #ffffff;
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.footer-btn,
+.bmc-wrapper iframe {
+  height: 40px;
+  width: 150px;
+  min-width: 120px;
+  max-width: 100%;
+  border-radius: 6px;
+  display: block;
+}
+
+.bmc-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+div.autodoc-docstring {
+  padding-left: 20px;
+  margin-bottom: 30px;
+  border-left: 5px solid rgba(230, 230, 230);
+}
+
+div.autodoc-members {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
