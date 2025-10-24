@@ -15,7 +15,7 @@ is done through a named tuple that specifies where the plugin should run. The op
 - update_documents_plugins: Run on the `update_document` method.
 
 When creating your plugin you specify if you want it to run before or after the default
-functionality. Additionaly plugins for async indexes can be run concurrently with the default
+functionality. Additionally plugins for async indexes can be run concurrently with the default
 functionality.
 
 ## Examples:
@@ -27,9 +27,9 @@ way to track this out of the box. A search plugin could be used to implement thi
 yourself.
 
 Note that in these examples the protocol is satisfied by providing the `CONNECURRENT_EVENT`,
-`POST_EVENT`, and `PRE_EVENT` vairables and the
+`POST_EVENT`, and `PRE_EVENT` variables and the
 `async def run_plugin(self, event: AsyncEvent, **kwargs: Any) -> None:` method for an async index,
-or the `POST_EVENT` and `PRE_EVENT` vairables , and
+or the `POST_EVENT` and `PRE_EVENT` variables , and
 `def run_plugin(self, event: Event, **kwargs: Any) -> None:` method for a non-async index. You
 class can contain any additional methods/variables needed as long as the protocol requirements
 have been satisfied.
@@ -160,12 +160,12 @@ if __name__ == "__main__":
 ### Modify documents and search results
 
 A pre event plugin can be used to modify the documents before sending for indexing. In this example
-a new `access` field will be added to the doocuments before they are added or updated. The example
+a new `access` field will be added to the documents before they are added or updated. The example
 will set every other record to `admin` access with the other records being set to `read`. This will
-illustrate the idea of modifing documents even it if doesn't make real world sense.
+illustrate the idea of modifying documents even it if doesn't make real world sense.
 
 A post search plugin, this type of search plugin can only be used post search because it requires
-the result of the search, will be used to remove records marked as `admin` before returing the result.
+the result of the search, will be used to remove records marked as `admin` before returning the result.
 In the real world this filtering would probably be done with a filterable field in Meilisearch,but
 again, this is just used here to illustrate the idea.
 

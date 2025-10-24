@@ -57,7 +57,7 @@ async def test_custom_search(async_index_with_documents):
     assert "dragon" in response.hits[0]["_formatted"]["title"].lower()
 
 
-async def test_custom_search_hightlight_tags_and_crop_marker(async_index_with_documents):
+async def test_custom_search_highlight_tags_and_crop_marker(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.search(
         "Dragon",
@@ -288,7 +288,7 @@ async def test_search_sort(sort, titles, async_index_with_documents):
     await async_wait_for_task(index.http_client, response.task_uid)
     stats = await index.get_stats()  # get this to get the total document count
 
-    # Using a placeholder search because ranking rules affect sort otherwaise meaning the results
+    # Using a placeholder search because ranking rules affect sort otherwise meaning the results
     # will almost never be in alphabetical order.
     response = await index.search(sort=sort, limit=stats.number_of_documents)
     assert response.hits[0]["title"] == titles[0]
@@ -482,14 +482,14 @@ async def test_attributes_to_search_on_search_no_match(async_index_with_document
     assert response.hits == []
 
 
-async def test_show_ranking_score_serach(async_index_with_documents):
+async def test_show_ranking_score_search(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.search("How to Train Your Dragon", show_ranking_score=True)
     assert response.hits[0]["id"] == "166428"
     assert "_rankingScore" in response.hits[0]
 
 
-async def test_show_ranking_details_serach(async_index_with_documents):
+async def test_show_ranking_details_search(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.search("How to Train Your Dragon", show_ranking_score_details=True)
     assert response.hits[0]["id"] == "166428"

@@ -57,7 +57,7 @@ def test_custom_search(index_with_documents):
     assert "dragon" in response.hits[0]["_formatted"]["title"].lower()
 
 
-def test_custom_search_hightlight_tags_and_crop_marker(index_with_documents):
+def test_custom_search_highlight_tags_and_crop_marker(index_with_documents):
     index = index_with_documents()
     response = index.search(
         "Dragon",
@@ -288,7 +288,7 @@ def test_search_sort(sort, titles, index_with_documents):
     wait_for_task(index.http_client, response.task_uid)
     stats = index.get_stats()  # get this to get the total document count
 
-    # Using a placeholder search because ranking rules affect sort otherwaise meaning the results
+    # Using a placeholder search because ranking rules affect sort otherwise meaning the results
     # will almost never be in alphabetical order.
     response = index.search(sort=sort, limit=stats.number_of_documents)
     assert response.hits[0]["title"] == titles[0]
@@ -459,14 +459,14 @@ def test_attributes_to_search_on_search_no_match(index_with_documents):
     assert response.hits == []
 
 
-def test_show_ranking_score_serach(index_with_documents):
+def test_show_ranking_score_search(index_with_documents):
     index = index_with_documents()
     response = index.search("How to Train Your Dragon", show_ranking_score=True)
     assert response.hits[0]["id"] == "166428"
     assert "_rankingScore" in response.hits[0]
 
 
-def test_show_ranking_details_serach(index_with_documents):
+def test_show_ranking_details_search(index_with_documents):
     index = index_with_documents()
     response = index.search("How to Train Your Dragon", show_ranking_score_details=True)
     assert response.hits[0]["id"] == "166428"
