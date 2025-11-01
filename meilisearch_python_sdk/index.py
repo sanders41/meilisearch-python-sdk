@@ -1383,7 +1383,7 @@ class AsyncIndex(_BaseIndex):
         """Get a batch documents from the index.
 
         Args:
-            ids: Array of document primary keys to retrieve. Defults to None (Gets all documents).
+            ids: Array of document primary keys to retrieve. Defaults to None (Gets all documents).
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
@@ -1668,8 +1668,8 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
-                the field names, and ever for should have a title.
+                ndjson. For csv files the first row of the document should be a header row
+                containing the field names, and ever for should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
@@ -1832,7 +1832,7 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
+                ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
@@ -2355,7 +2355,7 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
+                ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
@@ -2467,7 +2467,7 @@ class AsyncIndex(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
+                ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
@@ -5656,7 +5656,7 @@ class Index(_BaseIndex):
         """Get a batch documents from the index.
 
         Args:
-            ids: Array of document primary keys to retrieve. Defults to None (Gets all documents).
+            ids: Array of document primary keys to retrieve. Defaults to None (Gets all documents).
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
@@ -5827,7 +5827,7 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
+                ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
@@ -5903,7 +5903,7 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
+                ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
@@ -6292,7 +6292,7 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
+                ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
@@ -6367,8 +6367,8 @@ class Index(_BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
-                ndjson. For csv files the first row of the document should be a header row contining
-                the field names, and ever for should have a title.
+                ndjson. For csv files the first row of the document should be a header row
+                containing the field names, and ever for should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
