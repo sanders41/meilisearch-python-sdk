@@ -748,6 +748,18 @@ async def test_get_documents_filter(async_index_with_documents):
     assert next(iter(genres)) == "action"
 
 
+async def test_get_documents_ids(async_index_with_documents):
+    index = await async_index_with_documents()
+    documents = await index.get_documents()
+    assert len(documents.results) > 2
+    ids = [documents.results[0]["id"], documents.results[1]["id"]]
+    response = await index.get_documents(ids=ids)
+    assert len(response.results) == 2
+    retrieved_ids = [result["id"] for result in response.results]
+    assert ids[0] in retrieved_ids
+    assert ids[1] in retrieved_ids
+
+
 async def test_get_documents_filter_with_fields(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.update_filterable_attributes(["genre"])

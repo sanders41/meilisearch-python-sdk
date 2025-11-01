@@ -1372,6 +1372,7 @@ class AsyncIndex(_BaseIndex):
     async def get_documents(
         self,
         *,
+        ids: list[str] | None = None,
         offset: int = 0,
         limit: int = 20,
         fields: list[str] | None = None,
@@ -1382,6 +1383,7 @@ class AsyncIndex(_BaseIndex):
         """Get a batch documents from the index.
 
         Args:
+            ids: Array of document primary keys to retrieve. Defults to None (Gets all documents).
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
@@ -1418,7 +1420,7 @@ class AsyncIndex(_BaseIndex):
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
 
-        if not filter:
+        if not filter and not ids:
             if fields:
                 parameters["fields"] = ",".join(fields)
 
@@ -1431,6 +1433,9 @@ class AsyncIndex(_BaseIndex):
             parameters["fields"] = fields
 
         parameters["filter"] = filter
+
+        if ids:
+            parameters["ids"] = ids
 
         response = await self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
@@ -5640,6 +5645,7 @@ class Index(_BaseIndex):
     def get_documents(
         self,
         *,
+        ids: list[str] | None = None,
         offset: int = 0,
         limit: int = 20,
         fields: list[str] | None = None,
@@ -5650,6 +5656,7 @@ class Index(_BaseIndex):
         """Get a batch documents from the index.
 
         Args:
+            ids: Array of document primary keys to retrieve. Defults to None (Gets all documents).
             offset: Number of documents to skip. Defaults to 0.
             limit: Maximum number of documents returnedd. Defaults to 20.
             fields: Document attributes to show. If this value is None then all
@@ -5686,7 +5693,7 @@ class Index(_BaseIndex):
         if retrieve_vectors:
             parameters["retrieveVectors"] = "true"
 
-        if not filter:
+        if not filter and not ids:
             if fields:
                 parameters["fields"] = ",".join(fields)
 
@@ -5699,6 +5706,9 @@ class Index(_BaseIndex):
             parameters["fields"] = fields
 
         parameters["filter"] = filter
+
+        if ids:
+            parameters["ids"] = ids
 
         response = self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 

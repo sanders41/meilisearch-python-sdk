@@ -668,6 +668,18 @@ def test_get_documents_filter(index_with_documents):
     assert next(iter(genres)) == "action"
 
 
+def test_get_documents_ids(index_with_documents):
+    index = index_with_documents()
+    documents = index.get_documents()
+    assert len(documents.results) > 2
+    ids = [documents.results[0]["id"], documents.results[1]["id"]]
+    response = index.get_documents(ids=ids)
+    assert len(response.results) == 2
+    retrieved_ids = [result["id"] for result in response.results]
+    assert ids[0] in retrieved_ids
+    assert ids[1] in retrieved_ids
+
+
 def test_get_documents_with_vectors(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre"])
