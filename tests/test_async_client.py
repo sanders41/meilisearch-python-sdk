@@ -1131,3 +1131,11 @@ async def test_delete_webhook(async_client, webhook):
     status_code = await async_client.delete_webhook(webhook.uuid)
 
     assert status_code == 204
+
+
+async def test_experimental_features(async_client):
+    features = await async_client.get_experimental_features()
+    assert len(features) >= 1
+    key = next(iter(features))
+    update = await async_client.update_experimental_features({key: True})
+    assert update[key] is True

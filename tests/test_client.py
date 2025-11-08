@@ -1112,3 +1112,11 @@ def test_delete_webhook(client, webhook):
     status_code = client.delete_webhook(webhook.uuid)
 
     assert status_code == 204
+
+
+def test_experimental_features(client):
+    features = client.get_experimental_features()
+    assert len(features) >= 1
+    key = next(iter(features))
+    update = client.update_experimental_features({key: True})
+    assert update[key] is True

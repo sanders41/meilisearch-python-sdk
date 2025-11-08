@@ -5,6 +5,7 @@ from ssl import SSLContext
 from typing import TYPE_CHECKING, Any
 
 import jwt
+from camel_converter import dict_to_camel
 from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
@@ -1189,7 +1190,7 @@ class AsyncClient(BaseClient):
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
             >>>     {"id": 2, "title": "Movie 2", "genre": "drama"},
             >>> ]
-            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
             >>>     response = await index.add_documents(documents)
             >>>     await client.wait_for_task(client, response.update_id)
@@ -1232,7 +1233,7 @@ class AsyncClient(BaseClient):
 
         Examples
             >>> from meilisearch_python_sdk import AsyncClient
-            >>> async with Client("http://localhost.com", "masterKey") as client:
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await index.transfer_documents(
             >>>         "https://another-instance.com", api_key="otherMasterKey"
             >>>     )
@@ -1251,6 +1252,52 @@ class AsyncClient(BaseClient):
         response = await self._http_requests.post(url, body=payload)
 
         return TaskInfo(**response.json())
+
+    async def get_experimental_features(self) -> dict[str, bool]:
+        """Gets all experimental features and if they are enabled or not.
+
+        Returns:
+            The status of the experimental features.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+            MeilisearchTimeoutError: If the connection times out.
+
+        Examples
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     await index.get_experimental_feature()
+        """
+
+        response = await self._http_requests.get("/experimental-features")
+        return response.json()
+
+    async def update_experimental_features(self, features: dict[str, bool]) -> dict[str, bool]:
+        """Update the status of an experimental feature.
+
+        Args:
+            features: Dictionary of features to enable/disable. The dictionary keys can be in either
+            camel case or snake case, the conversion to the correct type will be handed for you by
+            the program. For example {"logsRoute": True} and {"logs_route": True} will both work.
+
+        Returns:
+            The status of the experimental features.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+            MeilisearchTimeoutError: If the connection times out.
+
+        Examples
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     await index.update_experimental_features({"logsRoute": True})
+        """
+        payload = dict_to_camel(features)
+        response = await self._http_requests.patch("/experimental-features", body=payload)
+
+        return response.json()
 
 
 class Client(BaseClient):
@@ -2350,6 +2397,52 @@ class Client(BaseClient):
         response = self._http_requests.post(url, body=payload)
 
         return TaskInfo(**response.json())
+
+    def get_experimental_features(self) -> dict[str, bool]:
+        """Gets all experimental features and if they are enabled or not.
+
+        Returns:
+            The status of the experimental features.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+            MeilisearchTimeoutError: If the connection times out.
+
+        Examples
+            >>> from meilisearch_python_sdk import Client
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index.get_experimental_feature()
+        """
+
+        response = self._http_requests.get("/experimental-features")
+        return response.json()
+
+    def update_experimental_features(self, features: dict[str, bool]) -> dict[str, bool]:
+        """Update the status of an experimental feature.
+
+        Args:
+            features: Dictionary of features to enable/disable. The dictionary keys can be in either
+            camel case or snake case, the conversion to the correct type will be handed for you by
+            the program. For example {"logsRoute": True} and {"logs_route": True} will both work.
+
+        Returns:
+            The status of the experimental features.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+            MeilisearchTimeoutError: If the connection times out.
+
+        Examples
+            >>> from meilisearch_python_sdk import Client
+            >>> with Client("http://localhost.com", "masterKey") as client:
+            >>>     index.update_experimental_features({"logsRoute": True})
+        """
+        payload = dict_to_camel(features)
+        response = self._http_requests.patch("/experimental-features", body=payload)
+
+        return response.json()
 
 
 def _build_offset_limit_url(base: str, offset: int | None, limit: int | None) -> str:
