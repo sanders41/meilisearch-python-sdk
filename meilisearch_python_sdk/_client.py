@@ -1278,8 +1278,8 @@ class AsyncClient(BaseClient):
 
         Args:
             features: Dictionary of features to enable/disable. The dictionary keys can be in either
-            camel case or snake case, the conversion to the correct type will be handed for you by
-            the program. For example {"logsRoute": True} and {"logs_route": True} will both work.
+                camel case or snake case, the conversion to the correct type will be handed for you by
+                the program. For example {"logsRoute": True} and {"logs_route": True} will both work.
 
         Returns:
             The status of the experimental features.
@@ -2423,8 +2423,8 @@ class Client(BaseClient):
 
         Args:
             features: Dictionary of features to enable/disable. The dictionary keys can be in either
-            camel case or snake case, the conversion to the correct type will be handed for you by
-            the program. For example {"logsRoute": True} and {"logs_route": True} will both work.
+                camel case or snake case, the conversion to the correct type will be handed for you by
+                the program. For example {"logsRoute": True} and {"logs_route": True} will both work.
 
         Returns:
             The status of the experimental features.
