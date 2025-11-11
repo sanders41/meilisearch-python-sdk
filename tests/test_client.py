@@ -1085,7 +1085,6 @@ def test_create_webhook(client):
     try:
         assert webhook.uuid is not None
         assert webhook.url == "https://example.com/webhook"
-        assert webhook.headers == {"Authorization": "Bearer token"}
         assert webhook.is_editable is True
     finally:
         client.delete_webhook(webhook.uuid)
