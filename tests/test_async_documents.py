@@ -439,6 +439,18 @@ async def test_add_documents_raw_file_csv(
     assert update.status == "succeeded"
 
 
+async def test_add_documents_raw_file_csv_with_custom_metadata(async_client, small_movies_csv_path):
+    index = async_client.index(str(uuid4()))
+    custom_metadata = "test metadata"
+    response = await index.add_documents_from_raw_file(
+        small_movies_csv_path, custom_metadata=custom_metadata
+    )
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    assert update.custom_metadata is not None
+    assert update.custom_metadata == custom_metadata
+
+
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
 )
@@ -1611,6 +1623,30 @@ async def test_edit_documents_by_function(async_index_with_documents):
         filter='id = "299537" OR id = "287947"',
     )
     await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_document("299537")
+
+    assert response["title"] == "CAPTAIN MARVEL"
+
+    response = await index.get_document("287947")
+
+    assert response["title"] == "Shazam!"
+
+
+async def test_edit_documents_by_function_with_custom_metadata(async_index_with_documents):
+    index = await async_index_with_documents()
+    custom_metadata = "test metadata"
+    task = await index.update_filterable_attributes(["id"])
+    await async_wait_for_task(index.http_client, task.task_uid)
+    response = await index.edit_documents(
+        function="if doc.id == context.docid {doc.title = `${doc.title.to_upper()}`}",
+        context={"docid": "299537"},
+        filter='id = "299537" OR id = "287947"',
+        custom_metadata=custom_metadata,
+    )
+    task = await async_wait_for_task(index.http_client, response.task_uid)
+    assert task.custom_metadata is not None
+    assert task.custom_metadata == custom_metadata
+
     response = await index.get_document("299537")
 
     assert response["title"] == "CAPTAIN MARVEL"

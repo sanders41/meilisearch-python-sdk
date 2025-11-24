@@ -2144,7 +2144,7 @@ class AsyncIndex(_BaseIndex):
         if csv_delimiter:
             parameters["csvDelimiter"] = csv_delimiter
         if custom_metadata:
-            parameters["customMetatdata"] = custom_metadata
+            parameters["customMetadata"] = custom_metadata
 
         if parameters:
             url = _build_encoded_url(self._documents_url, parameters)
@@ -2161,7 +2161,12 @@ class AsyncIndex(_BaseIndex):
         return TaskInfo(**response.json())
 
     async def edit_documents(
-        self, function: str, *, context: JsonDict | None = None, filter: str | None = None
+        self,
+        function: str,
+        *,
+        context: JsonDict | None = None,
+        filter: str | None = None,
+        custom_metadata: str | None = None,
     ) -> TaskInfo:
         """Edit documents with a function.
 
@@ -2173,6 +2178,7 @@ class AsyncIndex(_BaseIndex):
             function: Rhai function to use to update the documents.
             context: Parameters to use in the function. Defaults to None.
             filter: Filter the documents before applying the function. Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task.
@@ -2189,6 +2195,10 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.edit_documents("doc.title = `${doc.title.to_upper()}`")
         """
         url = f"{self._documents_url}/edit"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
+
         payload: JsonDict = {"function": function}
 
         if context:
