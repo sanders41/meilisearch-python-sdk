@@ -4,7 +4,7 @@ from httpx import Response
 from meilisearch_python_sdk._http_requests import HttpRequests
 from meilisearch_python_sdk._task import wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
-from meilisearch_python_sdk.index import _process_search_parameters
+from meilisearch_python_sdk.index._common import process_search_parameters
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
@@ -1013,14 +1013,14 @@ def test_reset_prefix_search_opt_out(empty_index):
 
 def test_process_search_parameters_media():
     expected = {"test": "test"}
-    result = _process_search_parameters(media=expected)
+    result = process_search_parameters(media=expected)
 
     assert result.get("media") is not None
     assert result["media"] == expected
 
 
 def test_process_search_parameters_no_media():
-    result = _process_search_parameters()
+    result = process_search_parameters()
 
     assert "media" not in result.keys()
 

@@ -12,7 +12,8 @@ from meilisearch_python_sdk.errors import (
     MeilisearchApiError,
     MeilisearchError,
 )
-from meilisearch_python_sdk.index import _combine_documents, _load_documents_from_file
+from meilisearch_python_sdk.index._common import combine_documents
+from meilisearch_python_sdk.index.index import _load_documents_from_file
 from meilisearch_python_sdk.json_handler import BuiltinHandler
 
 
@@ -1477,7 +1478,7 @@ def test_combine_documents():
         [{"id": 3, "name": "Test 3"}],
     ]
 
-    combined = _combine_documents(docs)
+    combined = combine_documents(docs)
 
     assert len(combined) == 3
     assert [1, 2, 3] == [x["id"] for x in combined]
