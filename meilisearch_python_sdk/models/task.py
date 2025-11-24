@@ -26,6 +26,7 @@ class TaskResult(TaskId):
     started_at: datetime | None = None
     finished_at: datetime | None = None
     batch_uid: int | None = None
+    custom_metadata: str | None = None
 
     @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
