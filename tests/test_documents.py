@@ -103,6 +103,16 @@ def test_add_documents(primary_key, expected_primary_key, compress, empty_index,
     assert update.status == "succeeded"
 
 
+def test_add_documents_with_custom_metadata(empty_index, small_movies):
+    index = empty_index()
+    custom_metadata = "test metadata"
+    response = index.add_documents(small_movies, custom_metadata=custom_metadata)
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    assert update.custom_metadata is not None
+    assert update.custom_metadata == custom_metadata
+
+
 @pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", (("release_date", "release_date"), (None, "id"))
@@ -1205,6 +1215,26 @@ def test_update_documents_raw_file_csv(
     assert response.results[0]["title"] != "Some title"
 
 
+def test_update_documents_raw_file_custom_metadata(client, small_movies_csv_path, small_movies):
+    small_movies[0]["title"] = "Some title"
+    custom_metadata = "test metadata"
+    movie_id = small_movies[0]["id"]
+    index = client.index(str(uuid4()))
+    response = index.add_documents(small_movies)
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert index.get_primary_key() == "id"
+    response = index.get_documents()
+    got_title = filter(lambda x: x["id"] == movie_id, response.results)
+    assert list(got_title)[0]["title"] == "Some title"
+    update = index.update_documents_from_raw_file(
+        small_movies_csv_path, primary_key="id", custom_metadata=custom_metadata
+    )
+    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    assert update.status == "succeeded"
+    assert update.custom_metadata is not None
+    assert update.custom_metadata == custom_metadata
+
+
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_raw_file_csv_with_delimiter(
@@ -1296,11 +1326,35 @@ def test_delete_document(index_with_documents):
         index.get_document("500682")
 
 
+def test_delete_document_with_custom_metadata(index_with_documents):
+    index = index_with_documents()
+    custom_metadata = "test metadata"
+    response = index.delete_document("500682", custom_metadata=custom_metadata)
+    task = wait_for_task(index.http_client, response.task_uid)
+    assert task.custom_metadata is not None
+    assert task.custom_metadata == custom_metadata
+    with pytest.raises(MeilisearchApiError):
+        index.get_document("500682")
+
+
 def test_delete_documents(index_with_documents):
     to_delete = ["522681", "450465", "329996"]
     index = index_with_documents()
     response = index.delete_documents(to_delete)
     wait_for_task(index.http_client, response.task_uid)
+    documents = index.get_documents()
+    ids = [x["id"] for x in documents.results]
+    assert to_delete not in ids
+
+
+def test_delete_documents_with_custom_metadata(index_with_documents):
+    to_delete = ["522681", "450465", "329996"]
+    custom_metadata = "test metadata"
+    index = index_with_documents()
+    response = index.delete_documents(to_delete, custom_metadata=custom_metadata)
+    task = wait_for_task(index.http_client, response.task_uid)
+    assert task.custom_metadata is not None
+    assert task.custom_metadata == custom_metadata
     documents = index.get_documents()
     ids = [x["id"] for x in documents.results]
     assert to_delete not in ids

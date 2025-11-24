@@ -107,6 +107,16 @@ async def test_add_documents(
     assert update.status == "succeeded"
 
 
+async def test_add_documents_with_custom_metadata(async_empty_index, small_movies):
+    index = await async_empty_index()
+    custom_metadata = "test metadata"
+    response = await index.add_documents(small_movies, custom_metadata=custom_metadata)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert update.status == "succeeded"
+    assert update.custom_metadata is not None
+    assert update.custom_metadata == custom_metadata
+
+
 @pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key, compress",
@@ -1325,6 +1335,28 @@ async def test_update_documents_raw_file_csv(
     assert response.results[0]["title"] != "Some title"
 
 
+async def test_update_documents_raw_file_custom_metadata(
+    async_client, small_movies_csv_path, small_movies
+):
+    small_movies[0]["title"] = "Some title"
+    custom_metadata = "test metadata"
+    movie_id = small_movies[0]["id"]
+    index = async_client.index(str(uuid4()))
+    response = await index.add_documents(small_movies)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    got_title = filter(lambda x: x["id"] == movie_id, response.results)
+    assert list(got_title)[0]["title"] == "Some title"
+    update = await index.update_documents_from_raw_file(
+        small_movies_csv_path, primary_key="id", custom_metadata=custom_metadata
+    )
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    assert update.status == "succeeded"
+    assert update.custom_metadata is not None
+    assert update.custom_metadata == custom_metadata
+
+
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("compress", (True, False))
 async def test_update_documents_raw_file_csv_with_delimiter(
@@ -1418,11 +1450,35 @@ async def test_delete_document(async_index_with_documents):
         await index.get_document("500682")
 
 
+async def test_delete_document_with_custom_metadata(async_index_with_documents):
+    index = await async_index_with_documents()
+    custom_metadata = "test metadata"
+    response = await index.delete_document("500682", custom_metadata=custom_metadata)
+    task = await async_wait_for_task(index.http_client, response.task_uid)
+    assert task.custom_metadata is not None
+    assert task.custom_metadata == custom_metadata
+    with pytest.raises(MeilisearchApiError):
+        await index.get_document("500682")
+
+
 async def test_delete_documents(async_index_with_documents):
     to_delete = ["522681", "450465", "329996"]
     index = await async_index_with_documents()
     response = await index.delete_documents(to_delete)
     await async_wait_for_task(index.http_client, response.task_uid)
+    documents = await index.get_documents()
+    ids = [x["id"] for x in documents.results]
+    assert to_delete not in ids
+
+
+async def test_delete_documents_with_custom_metadata(async_index_with_documents):
+    to_delete = ["522681", "450465", "329996"]
+    custom_metadata = "test metadata"
+    index = await async_index_with_documents()
+    response = await index.delete_documents(to_delete, custom_metadata=custom_metadata)
+    task = await async_wait_for_task(index.http_client, response.task_uid)
+    assert task.custom_metadata is not None
+    assert task.custom_metadata == custom_metadata
     documents = await index.get_documents()
     ids = [x["id"] for x in documents.results]
     assert to_delete not in ids
