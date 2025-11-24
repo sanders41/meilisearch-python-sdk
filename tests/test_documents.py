@@ -736,6 +736,24 @@ def test_update_documents(compress, index_with_documents, small_movies):
     assert response["title"] != "Some title"
 
 
+def test_update_documents_with_custom_metadata(index_with_documents, small_movies):
+    index = index_with_documents()
+    custom_metadata = "test metadata"
+    response = index.get_documents()
+    doc_id = response.results[0]["id"]
+    response.results[0]["title"] = "Some title"
+    update = index.update_documents([response.results[0]], custom_metadata=custom_metadata)
+    task = wait_for_task(index.http_client, update.task_uid)
+    assert task.custom_metadata is not None
+    assert task.custom_metadata == custom_metadata
+    response = index.get_document(doc_id)
+    assert response["title"] == "Some title"
+    update = index.update_documents(small_movies)
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.get_document(doc_id)
+    assert response["title"] != "Some title"
+
+
 @pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_with_primary_key(compress, client, small_movies):
     primary_key = "release_date"
@@ -1386,6 +1404,23 @@ def test_delete_documents_by_filter(index_with_documents):
     assert "cartoon" in genres
 
 
+def test_delete_documents_by_filter_with_custom_metadata(index_with_documents):
+    index = index_with_documents()
+    custom_metadata = "test metadata"
+    response = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_documents()
+    assert "action" in ([x.get("genre") for x in response.results])
+    response = index.delete_documents_by_filter("genre=action", custom_metadata=custom_metadata)
+    assert response.custom_metadata is not None
+    assert response.custom_metadata == custom_metadata
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_documents()
+    genres = [x.get("genre") for x in response.results]
+    assert "action" not in genres
+    assert "cartoon" in genres
+
+
 def test_delete_documents_in_batches_by_filter(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre", "release_date"])
@@ -1410,6 +1445,17 @@ def test_delete_documents_in_batches_by_filter(index_with_documents):
 def test_delete_all_documents(index_with_documents):
     index = index_with_documents()
     response = index.delete_all_documents()
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_documents()
+    assert response.results == []
+
+
+def test_delete_all_documents_with_custom_metadata(index_with_documents):
+    index = index_with_documents()
+    custom_metadata = "test metadata"
+    response = index.delete_all_documents(custom_metadata=custom_metadata)
+    assert response.custom_metadata is not None
+    assert response.custom_metadata == custom_metadata
     wait_for_task(index.http_client, response.task_uid)
     response = index.get_documents()
     assert response.results == []

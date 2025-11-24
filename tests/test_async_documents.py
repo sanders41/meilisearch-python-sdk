@@ -816,6 +816,24 @@ async def test_update_documents(compress, async_index_with_documents, small_movi
     assert response["title"] != "Some title"
 
 
+async def test_update_documents_with_custom_metadata(async_index_with_documents, small_movies):
+    index = await async_index_with_documents()
+    custom_metadata = "test metadata"
+    response = await index.get_documents()
+    doc_id = response.results[0]["id"]
+    response.results[0]["title"] = "Some title"
+    update = await index.update_documents([response.results[0]], custom_metadata=custom_metadata)
+    task = await async_wait_for_task(index.http_client, update.task_uid)
+    assert task.custom_metadata is not None
+    assert task.custom_metadata == custom_metadata
+    response = await index.get_document(doc_id)
+    assert response["title"] == "Some title"
+    update = await index.update_documents(small_movies)
+    await async_wait_for_task(index.http_client, update.task_uid)
+    response = await index.get_document(doc_id)
+    assert response["title"] != "Some title"
+
+
 @pytest.mark.parametrize("compress", (True, False))
 async def test_update_documents_with_primary_key(compress, async_client, small_movies):
     primary_key = "release_date"
@@ -1510,6 +1528,25 @@ async def test_delete_documents_by_filter(async_index_with_documents):
     assert "cartoon" in genres
 
 
+async def test_delete_documents_by_filter_with_custom_metadata(async_index_with_documents):
+    index = await async_index_with_documents()
+    custom_metadata = "test metadata"
+    response = await index.update_filterable_attributes(["genre"])
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents()
+    assert "action" in ([x.get("genre") for x in response.results])
+    response = await index.delete_documents_by_filter(
+        "genre=action", custom_metadata=custom_metadata
+    )
+    assert response.custom_metadata is not None
+    assert response.custom_metadata == custom_metadata
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents()
+    genres = [x.get("genre") for x in response.results]
+    assert "action" not in genres
+    assert "cartoon" in genres
+
+
 async def test_delete_documents_in_batches_by_filter(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.update_filterable_attributes(["genre", "release_date"])
@@ -1557,6 +1594,17 @@ async def test_delete_documents_in_batches_by_filter_with_concurrency_limit(
 async def test_delete_all_documents(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.delete_all_documents()
+    await async_wait_for_task(index.http_client, response.task_uid)
+    response = await index.get_documents()
+    assert response.results == []
+
+
+async def test_delete_all_documents_with_custom_metadata(async_index_with_documents):
+    index = await async_index_with_documents()
+    custom_metadata = "test metadata"
+    response = await index.delete_all_documents(custom_metadata=custom_metadata)
+    assert response.custom_metadata is not None
+    assert response.custom_metadata == custom_metadata
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents()
     assert response.results == []
