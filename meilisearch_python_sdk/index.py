@@ -1446,6 +1446,7 @@ class AsyncIndex(_BaseIndex):
         documents: Sequence[JsonMapping],
         primary_key: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents to the index.
@@ -1454,6 +1455,7 @@ class AsyncIndex(_BaseIndex):
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1473,8 +1475,16 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.add_documents(documents)
         """
+        params = {}
+
         if primary_key:
-            url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
+            params["primaryKey"] = primary_key
+
+        if custom_metadata:
+            params["customMetadata"] = custom_metadata
+
+        if params:
+            url = _build_encoded_url(self._documents_url, params)
         else:
             url = self._documents_url
 
@@ -1585,6 +1595,7 @@ class AsyncIndex(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         compress: bool = False,
         concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
@@ -1596,6 +1607,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
             concurrency_limit: If set this will limit the number of batches that will be sent
                 concurrently. This can be helpful if you find you are overloading the Meilisearch
@@ -1622,14 +1634,20 @@ class AsyncIndex(_BaseIndex):
             async with asyncio.Semaphore(concurrency_limit):
                 if not use_task_groups():
                     batches = [
-                        self.add_documents(x, primary_key, compress=compress)
+                        self.add_documents(
+                            x, primary_key, custom_metadata=custom_metadata, compress=compress
+                        )
                         for x in _batch(documents, batch_size)
                     ]
                     return await asyncio.gather(*batches)
 
                 async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                     tasks = [
-                        tg.create_task(self.add_documents(x, primary_key, compress=compress))
+                        tg.create_task(
+                            self.add_documents(
+                                x, primary_key, custom_metadata=custom_metadata, compress=compress
+                            )
+                        )
                         for x in _batch(documents, batch_size)
                     ]
 
@@ -1637,14 +1655,20 @@ class AsyncIndex(_BaseIndex):
 
         if not use_task_groups():
             batches = [
-                self.add_documents(x, primary_key, compress=compress)
+                self.add_documents(
+                    x, primary_key, custom_metadata=custom_metadata, compress=compress
+                )
                 for x in _batch(documents, batch_size)
             ]
             return await asyncio.gather(*batches)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
-                tg.create_task(self.add_documents(x, primary_key, compress=compress))
+                tg.create_task(
+                    self.add_documents(
+                        x, primary_key, custom_metadata=custom_metadata, compress=compress
+                    )
+                )
                 for x in _batch(documents, batch_size)
             ]
 
@@ -1655,6 +1679,7 @@ class AsyncIndex(_BaseIndex):
         directory_path: Path | str,
         *,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
@@ -1667,6 +1692,7 @@ class AsyncIndex(_BaseIndex):
             directory_path: Path to the directory that contains the json files.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row
                 containing the field names, and ever for should have a title.
@@ -1712,7 +1738,9 @@ class AsyncIndex(_BaseIndex):
             loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
-            response = await self.add_documents(combined, primary_key, compress=compress)
+            response = await self.add_documents(
+                combined, primary_key, custom_metadata=custom_metadata, compress=compress
+            )
 
             return [response]
 
@@ -1726,7 +1754,12 @@ class AsyncIndex(_BaseIndex):
                                 path, csv_delimiter, json_handler=self._json_handler
                             )
                             add_documents.append(
-                                self.add_documents(documents, primary_key, compress=compress)
+                                self.add_documents(
+                                    documents,
+                                    primary_key,
+                                    custom_metadata=custom_metadata,
+                                    compress=compress,
+                                )
                             )
 
                     _raise_on_no_documents(add_documents, document_type, directory_path)
@@ -1753,13 +1786,21 @@ class AsyncIndex(_BaseIndex):
                             )
                             if i == 0:
                                 all_results = [
-                                    await self.add_documents(documents, compress=compress)
+                                    await self.add_documents(
+                                        documents,
+                                        primary_key=primary_key,
+                                        custom_metadata=custom_metadata,
+                                        compress=compress,
+                                    )
                                 ]
                             else:
                                 tasks.append(
                                     tg.create_task(
                                         self.add_documents(
-                                            documents, primary_key, compress=compress
+                                            documents,
+                                            primary_key,
+                                            custom_metadata=custom_metadata,
+                                            compress=compress,
                                         )
                                     )
                                 )
@@ -1772,7 +1813,12 @@ class AsyncIndex(_BaseIndex):
                         path, csv_delimiter, json_handler=self._json_handler
                     )
                     add_documents.append(
-                        self.add_documents(documents, primary_key, compress=compress)
+                        self.add_documents(
+                            documents,
+                            primary_key,
+                            custom_metadata=custom_metadata,
+                            compress=compress,
+                        )
                     )
 
             _raise_on_no_documents(add_documents, document_type, directory_path)
@@ -1798,11 +1844,23 @@ class AsyncIndex(_BaseIndex):
                         path, csv_delimiter, json_handler=self._json_handler
                     )
                     if i == 0:
-                        all_results = [await self.add_documents(documents, compress=compress)]
+                        all_results = [
+                            await self.add_documents(
+                                documents,
+                                primary_key=primary_key,
+                                custom_metadata=custom_metadata,
+                                compress=compress,
+                            )
+                        ]
                     else:
                         tasks.append(
                             tg.create_task(
-                                self.add_documents(documents, primary_key, compress=compress)
+                                self.add_documents(
+                                    documents,
+                                    primary_key,
+                                    custom_metadata=custom_metadata,
+                                    compress=compress,
+                                )
                             )
                         )
 
@@ -1817,6 +1875,7 @@ class AsyncIndex(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
@@ -1831,6 +1890,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
@@ -1880,6 +1940,7 @@ class AsyncIndex(_BaseIndex):
                 combined,
                 batch_size=batch_size,
                 primary_key=primary_key,
+                custom_metadata=custom_metadata,
                 compress=compress,
                 concurrency_limit=concurrency_limit,
             )
@@ -1897,6 +1958,7 @@ class AsyncIndex(_BaseIndex):
                         documents,
                         batch_size=batch_size,
                         primary_key=primary_key,
+                        custom_metadata=custom_metadata,
                         compress=compress,
                         concurrency_limit=concurrency_limit,
                     )
@@ -1920,6 +1982,7 @@ class AsyncIndex(_BaseIndex):
         file_path: Path | str,
         primary_key: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents to the index from a json file.
@@ -1928,6 +1991,7 @@ class AsyncIndex(_BaseIndex):
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1951,7 +2015,9 @@ class AsyncIndex(_BaseIndex):
             file_path, json_handler=self._json_handler
         )
 
-        return await self.add_documents(documents, primary_key=primary_key, compress=compress)
+        return await self.add_documents(
+            documents, primary_key=primary_key, custom_metadata=custom_metadata, compress=compress
+        )
 
     async def add_documents_from_file_in_batches(
         self,
@@ -1959,6 +2025,7 @@ class AsyncIndex(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         csv_delimiter: str | None = None,
         compress: bool = False,
         concurrency_limit: int | None = None,
@@ -1971,6 +2038,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
@@ -2003,6 +2071,7 @@ class AsyncIndex(_BaseIndex):
             documents,
             batch_size=batch_size,
             primary_key=primary_key,
+            custom_metadata=custom_metadata,
             compress=compress,
             concurrency_limit=concurrency_limit,
         )
@@ -2012,6 +2081,7 @@ class AsyncIndex(_BaseIndex):
         file_path: Path | str,
         primary_key: str | None = None,
         *,
+        custom_metadata: str | None = None,
         csv_delimiter: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
@@ -2025,6 +2095,7 @@ class AsyncIndex(_BaseIndex):
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
@@ -2072,6 +2143,8 @@ class AsyncIndex(_BaseIndex):
             parameters["primaryKey"] = primary_key
         if csv_delimiter:
             parameters["csvDelimiter"] = csv_delimiter
+        if custom_metadata:
+            parameters["customMetadata"] = custom_metadata
 
         if parameters:
             url = _build_encoded_url(self._documents_url, parameters)
@@ -2088,7 +2161,12 @@ class AsyncIndex(_BaseIndex):
         return TaskInfo(**response.json())
 
     async def edit_documents(
-        self, function: str, *, context: JsonDict | None = None, filter: str | None = None
+        self,
+        function: str,
+        *,
+        context: JsonDict | None = None,
+        filter: str | None = None,
+        custom_metadata: str | None = None,
     ) -> TaskInfo:
         """Edit documents with a function.
 
@@ -2100,6 +2178,7 @@ class AsyncIndex(_BaseIndex):
             function: Rhai function to use to update the documents.
             context: Parameters to use in the function. Defaults to None.
             filter: Filter the documents before applying the function. Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task.
@@ -2116,6 +2195,10 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.edit_documents("doc.title = `${doc.title.to_upper()}`")
         """
         url = f"{self._documents_url}/edit"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
+
         payload: JsonDict = {"function": function}
 
         if context:
@@ -2133,6 +2216,7 @@ class AsyncIndex(_BaseIndex):
         documents: Sequence[JsonMapping],
         primary_key: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Update documents in the index.
@@ -2141,6 +2225,7 @@ class AsyncIndex(_BaseIndex):
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -2160,8 +2245,15 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_documents(documents)
         """
+        params = {}
         if primary_key:
-            url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
+            params["primaryKey"] = primary_key
+
+        if custom_metadata:
+            params["customMetadata"] = custom_metadata
+
+        if params:
+            url = _build_encoded_url(self._documents_url, params)
         else:
             url = self._documents_url
 
@@ -2273,6 +2365,7 @@ class AsyncIndex(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         compress: bool = False,
         concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
@@ -2286,6 +2379,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
             concurrency_limit: If set this will limit the number of batches that will be sent
                 concurrently. This can be helpful if you find you are overloading the Meilisearch
@@ -2312,28 +2406,43 @@ class AsyncIndex(_BaseIndex):
             async with asyncio.Semaphore(concurrency_limit):
                 if not use_task_groups():
                     batches = [
-                        self.update_documents(x, primary_key, compress=compress)
+                        self.update_documents(
+                            x,
+                            primary_key=primary_key,
+                            custom_metadata=custom_metadata,
+                            compress=compress,
+                        )
                         for x in _batch(documents, batch_size)
                     ]
                     return await asyncio.gather(*batches)
 
                 async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                     tasks = [
-                        tg.create_task(self.update_documents(x, primary_key, compress=compress))
+                        tg.create_task(
+                            self.update_documents(
+                                x, primary_key, custom_metadata=custom_metadata, compress=compress
+                            )
+                        )
                         for x in _batch(documents, batch_size)
                     ]
                 return [x.result() for x in tasks]
 
         if not use_task_groups():
             batches = [
-                self.update_documents(x, primary_key, compress=compress)
+                self.update_documents(
+                    x, primary_key, custom_metadata=custom_metadata, compress=compress
+                )
                 for x in _batch(documents, batch_size)
             ]
             return await asyncio.gather(*batches)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
-                tg.create_task(self.update_documents(x, primary_key, compress=compress))
+                tg.create_task(
+                    self.update_documents(
+                        x, primary_key, custom_metadata=custom_metadata, compress=compress
+                    )
+                )
                 for x in _batch(documents, batch_size)
             ]
         return [x.result() for x in tasks]
@@ -2343,6 +2452,7 @@ class AsyncIndex(_BaseIndex):
         directory_path: Path | str,
         *,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
@@ -2354,6 +2464,7 @@ class AsyncIndex(_BaseIndex):
             directory_path: Path to the directory that contains the json files.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
@@ -2396,7 +2507,9 @@ class AsyncIndex(_BaseIndex):
             loop = asyncio.get_running_loop()
             combined = await loop.run_in_executor(None, partial(_combine_documents, all_documents))
 
-            response = await self.update_documents(combined, primary_key, compress=compress)
+            response = await self.update_documents(
+                combined, primary_key, custom_metadata=custom_metadata, compress=compress
+            )
             return [response]
 
         if not use_task_groups():
@@ -2407,7 +2520,12 @@ class AsyncIndex(_BaseIndex):
                         path, csv_delimiter, json_handler=self._json_handler
                     )
                     update_documents.append(
-                        self.update_documents(documents, primary_key, compress=compress)
+                        self.update_documents(
+                            documents,
+                            primary_key,
+                            custom_metadata=custom_metadata,
+                            compress=compress,
+                        )
                     )
 
             _raise_on_no_documents(update_documents, document_type, directory_path)
@@ -2433,12 +2551,22 @@ class AsyncIndex(_BaseIndex):
                     )
                     if i == 0:
                         results = [
-                            await self.update_documents(documents, primary_key, compress=compress)
+                            await self.update_documents(
+                                documents,
+                                primary_key,
+                                custom_metadata=custom_metadata,
+                                compress=compress,
+                            )
                         ]
                     else:
                         tasks.append(
                             tg.create_task(
-                                self.update_documents(documents, primary_key, compress=compress)
+                                self.update_documents(
+                                    documents,
+                                    primary_key,
+                                    custom_metadata=custom_metadata,
+                                    compress=compress,
+                                )
                             )
                         )
 
@@ -2452,6 +2580,7 @@ class AsyncIndex(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
@@ -2466,6 +2595,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
@@ -2515,6 +2645,7 @@ class AsyncIndex(_BaseIndex):
                 combined,
                 batch_size=batch_size,
                 primary_key=primary_key,
+                custom_metadata=custom_metadata,
                 compress=compress,
                 concurrency_limit=concurrency_limit,
             )
@@ -2533,6 +2664,7 @@ class AsyncIndex(_BaseIndex):
                             documents,
                             batch_size=batch_size,
                             primary_key=primary_key,
+                            custom_metadata=custom_metadata,
                             compress=compress,
                             concurrency_limit=concurrency_limit,
                         )
@@ -2564,6 +2696,7 @@ class AsyncIndex(_BaseIndex):
                             documents,
                             batch_size=batch_size,
                             primary_key=primary_key,
+                            custom_metadata=custom_metadata,
                             compress=compress,
                             concurrency_limit=concurrency_limit,
                         )
@@ -2574,6 +2707,7 @@ class AsyncIndex(_BaseIndex):
                                     documents,
                                     batch_size=batch_size,
                                     primary_key=primary_key,
+                                    custom_metadata=custom_metadata,
                                     compress=compress,
                                     concurrency_limit=concurrency_limit,
                                 )
@@ -2590,6 +2724,7 @@ class AsyncIndex(_BaseIndex):
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
@@ -2600,6 +2735,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -2621,7 +2757,9 @@ class AsyncIndex(_BaseIndex):
             file_path, csv_delimiter, json_handler=self._json_handler
         )
 
-        return await self.update_documents(documents, primary_key=primary_key, compress=compress)
+        return await self.update_documents(
+            documents, primary_key=primary_key, custom_metadata=custom_metadata, compress=compress
+        )
 
     async def update_documents_from_file_in_batches(
         self,
@@ -2629,6 +2767,7 @@ class AsyncIndex(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         compress: bool = False,
         concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
@@ -2640,6 +2779,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
             concurrency_limit: If set this will limit the number of batches that will be sent
                 concurrently. This can be helpful if you find you are overloading the Meilisearch
@@ -2668,6 +2808,7 @@ class AsyncIndex(_BaseIndex):
             documents,
             batch_size=batch_size,
             primary_key=primary_key,
+            custom_metadata=custom_metadata,
             compress=compress,
             concurrency_limit=concurrency_limit,
         )
@@ -2678,6 +2819,7 @@ class AsyncIndex(_BaseIndex):
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
@@ -2692,6 +2834,7 @@ class AsyncIndex(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -2737,6 +2880,8 @@ class AsyncIndex(_BaseIndex):
             parameters["primaryKey"] = primary_key
         if csv_delimiter:
             parameters["csvDelimiter"] = csv_delimiter
+        if custom_metadata:
+            parameters["customMetadata"] = custom_metadata
 
         if parameters:
             url = _build_encoded_url(self._documents_url, parameters)
@@ -2752,11 +2897,14 @@ class AsyncIndex(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    async def delete_document(self, document_id: str) -> TaskInfo:
+    async def delete_document(
+        self, document_id: str, *, custom_metadata: str | None = None
+    ) -> TaskInfo:
         """Delete one document from the index.
 
         Args:
             document_id: Unique identifier of the document.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task status.
@@ -2772,6 +2920,9 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.delete_document("1234")
         """
         url = f"{self._documents_url}/{document_id}"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
 
         if self._pre_delete_document_plugins:
             await AsyncIndex._run_plugins(
@@ -2827,11 +2978,14 @@ class AsyncIndex(_BaseIndex):
 
         return result
 
-    async def delete_documents(self, ids: list[str]) -> TaskInfo:
+    async def delete_documents(
+        self, ids: list[str], *, custom_metadata: str | None = None
+    ) -> TaskInfo:
         """Delete multiple documents from the index.
 
         Args:
             ids: List of unique identifiers of documents.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             List of update ids to track the action.
@@ -2847,6 +3001,9 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.delete_documents(["1234", "5678"])
         """
         url = f"{self._documents_url}/delete-batch"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
 
         if self._pre_delete_documents_plugins:
             await AsyncIndex._run_plugins(
@@ -2898,11 +3055,14 @@ class AsyncIndex(_BaseIndex):
 
         return result
 
-    async def delete_documents_by_filter(self, filter: Filter) -> TaskInfo:
+    async def delete_documents_by_filter(
+        self, filter: Filter, *, custom_metadata: str | None = None
+    ) -> TaskInfo:
         """Delete documents from the index by filter.
 
         Args:
             filter: The filter value information.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task status.
@@ -2918,6 +3078,9 @@ class AsyncIndex(_BaseIndex):
             >>>     await index.delete_documents_by_filter("genre=horor"))
         """
         url = f"{self._documents_url}/delete"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
 
         if self._pre_delete_documents_by_filter_plugins:
             await AsyncIndex._run_plugins(
@@ -2974,7 +3137,11 @@ class AsyncIndex(_BaseIndex):
         return result
 
     async def delete_documents_in_batches_by_filter(
-        self, filters: list[str | list[str | list[str]]], concurrency_limit: int | None = None
+        self,
+        filters: list[str | list[str | list[str]]],
+        concurrency_limit: int | None = None,
+        *,
+        custom_metadata: str | None = None,
     ) -> list[TaskInfo]:
         """Delete batches of documents from the index by filter.
 
@@ -2983,6 +3150,7 @@ class AsyncIndex(_BaseIndex):
             concurrency_limit: If set this will limit the number of batches that will be sent
                 concurrently. This can be helpful if you find you are overloading the Meilisearch
                 server with requests. Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The a list of details of the task statuses.
@@ -3005,30 +3173,44 @@ class AsyncIndex(_BaseIndex):
         if concurrency_limit:
             async with asyncio.Semaphore(concurrency_limit):
                 if not use_task_groups():
-                    tasks = [self.delete_documents_by_filter(filter) for filter in filters]
+                    tasks = [
+                        self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
+                        for filter in filters
+                    ]
                     return await asyncio.gather(*tasks)
 
                 async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                     tg_tasks = [
-                        tg.create_task(self.delete_documents_by_filter(filter))
+                        tg.create_task(
+                            self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
+                        )
                         for filter in filters
                     ]
 
                 return [x.result() for x in tg_tasks]
 
         if not use_task_groups():
-            tasks = [self.delete_documents_by_filter(filter) for filter in filters]
+            tasks = [
+                self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
+                for filter in filters
+            ]
             return await asyncio.gather(*tasks)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tg_tasks = [
-                tg.create_task(self.delete_documents_by_filter(filter)) for filter in filters
+                tg.create_task(
+                    self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
+                )
+                for filter in filters
             ]
 
         return [x.result() for x in tg_tasks]
 
-    async def delete_all_documents(self) -> TaskInfo:
+    async def delete_all_documents(self, *, custom_metadata: str | None = None) -> TaskInfo:
         """Delete all documents from the index.
+
+        Args:
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task status.
@@ -3043,6 +3225,11 @@ class AsyncIndex(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.delete_all_document()
         """
+        if custom_metadata:
+            url = _build_encoded_url(self._documents_url, {"customMetadata": custom_metadata})
+        else:
+            url = self._documents_url
+
         if self._pre_delete_all_documents_plugins:
             await AsyncIndex._run_plugins(self._pre_delete_all_documents_plugins, AsyncEvent.PRE)
 
@@ -3052,7 +3239,7 @@ class AsyncIndex(_BaseIndex):
                 for plugin in self._concurrent_delete_all_documents_plugins:
                     tasks.append(plugin.run_plugin(event=AsyncEvent.CONCURRENT))
 
-                tasks.append(self._http_requests.delete(self._documents_url))
+                tasks.append(self._http_requests.delete(url))
 
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
@@ -3068,7 +3255,7 @@ class AsyncIndex(_BaseIndex):
                 for plugin in self._concurrent_delete_all_documents_plugins:
                     tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT))
 
-                response_coroutine = tg.create_task(self._http_requests.delete(self._documents_url))
+                response_coroutine = tg.create_task(self._http_requests.delete(url))
 
             response = await response_coroutine
             result = TaskInfo(**response.json())
@@ -3080,7 +3267,7 @@ class AsyncIndex(_BaseIndex):
                     result = post["generic_result"]
             return result
 
-        response = await self._http_requests.delete(self._documents_url)
+        response = await self._http_requests.delete(url)
         result = TaskInfo(**response.json())
         if self._post_delete_all_documents_plugins:
             post = await AsyncIndex._run_plugins(
@@ -5719,6 +5906,7 @@ class Index(_BaseIndex):
         documents: Sequence[JsonMapping],
         primary_key: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents to the index.
@@ -5727,6 +5915,7 @@ class Index(_BaseIndex):
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -5746,8 +5935,15 @@ class Index(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     index.add_documents(documents)
         """
+        params = {}
+
         if primary_key:
-            url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
+            params["primaryKey"] = primary_key
+        if custom_metadata:
+            params["customMetadata"] = custom_metadata
+
+        if params:
+            url = _build_encoded_url(self._documents_url, params)
         else:
             url = self._documents_url
 
@@ -5776,6 +5972,7 @@ class Index(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> list[TaskInfo]:
         """Adds documents in batches to reduce RAM usage with indexing.
@@ -5786,6 +5983,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -5806,7 +6004,7 @@ class Index(_BaseIndex):
             >>>     index.add_documents_in_batches(documents)
         """
         return [
-            self.add_documents(x, primary_key, compress=compress)
+            self.add_documents(x, primary_key, custom_metadata=custom_metadata, compress=compress)
             for x in _batch(documents, batch_size)
         ]
 
@@ -5815,6 +6013,7 @@ class Index(_BaseIndex):
         directory_path: Path | str,
         *,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
@@ -5826,6 +6025,7 @@ class Index(_BaseIndex):
             directory_path: Path to the directory that contains the json files.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
@@ -5867,7 +6067,9 @@ class Index(_BaseIndex):
 
             combined = _combine_documents(all_documents)
 
-            response = self.add_documents(combined, primary_key, compress=compress)
+            response = self.add_documents(
+                combined, primary_key, custom_metadata=custom_metadata, compress=compress
+            )
 
             return [response]
 
@@ -5877,7 +6079,11 @@ class Index(_BaseIndex):
                 documents = _load_documents_from_file(
                     path, csv_delimiter, json_handler=self._json_handler
                 )
-                responses.append(self.add_documents(documents, primary_key, compress=compress))
+                responses.append(
+                    self.add_documents(
+                        documents, primary_key, custom_metadata=custom_metadata, compress=compress
+                    )
+                )
 
         _raise_on_no_documents(responses, document_type, directory_path)
 
@@ -5889,6 +6095,7 @@ class Index(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
@@ -5902,6 +6109,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
@@ -5947,6 +6155,7 @@ class Index(_BaseIndex):
                 combined,
                 batch_size=batch_size,
                 primary_key=primary_key,
+                custom_metadata=custom_metadata,
                 compress=compress,
             )
 
@@ -5961,6 +6170,7 @@ class Index(_BaseIndex):
                         documents,
                         batch_size=batch_size,
                         primary_key=primary_key,
+                        custom_metadata=custom_metadata,
                         compress=compress,
                     )
                 )
@@ -5974,6 +6184,7 @@ class Index(_BaseIndex):
         file_path: Path | str,
         primary_key: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents to the index from a json file.
@@ -5982,6 +6193,7 @@ class Index(_BaseIndex):
             file_path: Path to the json file.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -6003,7 +6215,9 @@ class Index(_BaseIndex):
         """
         documents = _load_documents_from_file(file_path, json_handler=self._json_handler)
 
-        return self.add_documents(documents, primary_key=primary_key, compress=compress)
+        return self.add_documents(
+            documents, primary_key=primary_key, custom_metadata=custom_metadata, compress=compress
+        )
 
     def add_documents_from_file_in_batches(
         self,
@@ -6011,6 +6225,7 @@ class Index(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         csv_delimiter: str | None = None,
         compress: bool = False,
     ) -> list[TaskInfo]:
@@ -6022,6 +6237,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
@@ -6051,6 +6267,7 @@ class Index(_BaseIndex):
             documents,
             batch_size=batch_size,
             primary_key=primary_key,
+            custom_metadata=custom_metadata,
             compress=compress,
         )
 
@@ -6059,6 +6276,7 @@ class Index(_BaseIndex):
         file_path: Path | str,
         primary_key: str | None = None,
         *,
+        custom_metadata: str | None = None,
         csv_delimiter: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
@@ -6072,6 +6290,7 @@ class Index(_BaseIndex):
                 allowed.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
@@ -6119,6 +6338,8 @@ class Index(_BaseIndex):
             parameters["primaryKey"] = primary_key
         if csv_delimiter:
             parameters["csvDelimiter"] = csv_delimiter
+        if custom_metadata:
+            parameters["customMetadata"] = custom_metadata
 
         if parameters:
             url = _build_encoded_url(self._documents_url, parameters)
@@ -6135,7 +6356,12 @@ class Index(_BaseIndex):
         return TaskInfo(**response.json())
 
     def edit_documents(
-        self, function: str, *, context: JsonDict | None = None, filter: str | None = None
+        self,
+        function: str,
+        *,
+        context: JsonDict | None = None,
+        filter: str | None = None,
+        custom_metadata: str | None = None,
     ) -> TaskInfo:
         """Edit documents with a function.
 
@@ -6147,6 +6373,7 @@ class Index(_BaseIndex):
             function: Rhai function to use to update the documents.
             context: Parameters to use in the function. Defaults to None.
             filter: Filter the documents before applying the function. Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task.
@@ -6163,6 +6390,10 @@ class Index(_BaseIndex):
             >>>     index.edit_documents("doc.title = `${doc.title.to_upper()}`")
         """
         url = f"{self._documents_url}/edit"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
+
         payload: JsonDict = {"function": function}
 
         if context:
@@ -6180,6 +6411,7 @@ class Index(_BaseIndex):
         documents: Sequence[JsonMapping],
         primary_key: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Update documents in the index.
@@ -6188,6 +6420,7 @@ class Index(_BaseIndex):
             documents: List of documents.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -6207,8 +6440,15 @@ class Index(_BaseIndex):
             >>>     index = client.index("movies")
             >>>     index.update_documents(documents)
         """
+        params = {}
+
         if primary_key:
-            url = _build_encoded_url(self._documents_url, {"primaryKey": primary_key})
+            params["primaryKey"] = primary_key
+        if custom_metadata:
+            params["customMetadata"] = custom_metadata
+
+        if params:
+            url = _build_encoded_url(self._documents_url, params)
         else:
             url = self._documents_url
 
@@ -6239,6 +6479,7 @@ class Index(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
@@ -6251,6 +6492,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -6271,7 +6513,9 @@ class Index(_BaseIndex):
             >>>     index.update_documents_in_batches(documents)
         """
         return [
-            self.update_documents(x, primary_key, compress=compress)
+            self.update_documents(
+                x, primary_key, custom_metadata=custom_metadata, compress=compress
+            )
             for x in _batch(documents, batch_size)
         ]
 
@@ -6280,6 +6524,7 @@ class Index(_BaseIndex):
         directory_path: Path | str,
         *,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
@@ -6291,6 +6536,7 @@ class Index(_BaseIndex):
             directory_path: Path to the directory that contains the json files.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
                 the field names, and ever for should have a title.
@@ -6332,7 +6578,9 @@ class Index(_BaseIndex):
 
             combined = _combine_documents(all_documents)
 
-            response = self.update_documents(combined, primary_key, compress=compress)
+            response = self.update_documents(
+                combined, primary_key, custom_metadata=custom_metadata, compress=compress
+            )
             return [response]
 
         responses = []
@@ -6341,7 +6589,11 @@ class Index(_BaseIndex):
                 documents = _load_documents_from_file(
                     path, csv_delimiter, json_handler=self._json_handler
                 )
-                responses.append(self.update_documents(documents, primary_key, compress=compress))
+                responses.append(
+                    self.update_documents(
+                        documents, primary_key, custom_metadata=custom_metadata, compress=compress
+                    )
+                )
 
         _raise_on_no_documents(responses, document_type, directory_path)
 
@@ -6353,6 +6605,7 @@ class Index(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
@@ -6366,6 +6619,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row
                 containing the field names, and ever for should have a title.
@@ -6411,6 +6665,7 @@ class Index(_BaseIndex):
                 combined,
                 batch_size=batch_size,
                 primary_key=primary_key,
+                custom_metadata=custom_metadata,
                 compress=compress,
             )
 
@@ -6426,6 +6681,7 @@ class Index(_BaseIndex):
                         documents,
                         batch_size=batch_size,
                         primary_key=primary_key,
+                        custom_metadata=custom_metadata,
                         compress=compress,
                     )
                 )
@@ -6440,6 +6696,7 @@ class Index(_BaseIndex):
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
@@ -6450,6 +6707,7 @@ class Index(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -6471,7 +6729,9 @@ class Index(_BaseIndex):
             file_path, csv_delimiter, json_handler=self._json_handler
         )
 
-        return self.update_documents(documents, primary_key=primary_key, compress=compress)
+        return self.update_documents(
+            documents, primary_key=primary_key, custom_metadata=custom_metadata, compress=compress
+        )
 
     def update_documents_from_file_in_batches(
         self,
@@ -6479,6 +6739,7 @@ class Index(_BaseIndex):
         *,
         batch_size: int = 1000,
         primary_key: str | None = None,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
@@ -6489,6 +6750,7 @@ class Index(_BaseIndex):
                 Defaults to 1000.
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -6512,6 +6774,7 @@ class Index(_BaseIndex):
             documents,
             batch_size=batch_size,
             primary_key=primary_key,
+            custom_metadata=custom_metadata,
             compress=compress,
         )
 
@@ -6521,6 +6784,7 @@ class Index(_BaseIndex):
         primary_key: str | None = None,
         csv_delimiter: str | None = None,
         *,
+        custom_metadata: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
@@ -6535,6 +6799,7 @@ class Index(_BaseIndex):
                 Defaults to None.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -6580,6 +6845,8 @@ class Index(_BaseIndex):
             parameters["primaryKey"] = primary_key
         if csv_delimiter:
             parameters["csvDelimiter"] = csv_delimiter
+        if custom_metadata:
+            parameters["customMetadata"] = custom_metadata
 
         if parameters:
             url = _build_encoded_url(self._documents_url, parameters)
@@ -6595,11 +6862,12 @@ class Index(_BaseIndex):
 
         return TaskInfo(**response.json())
 
-    def delete_document(self, document_id: str) -> TaskInfo:
+    def delete_document(self, document_id: str, *, custom_metadata: str | None = None) -> TaskInfo:
         """Delete one document from the index.
 
         Args:
             document_id: Unique identifier of the document.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task status.
@@ -6619,7 +6887,12 @@ class Index(_BaseIndex):
                 self._pre_delete_document_plugins, Event.PRE, document_id=document_id
             )
 
-        response = self._http_requests.delete(f"{self._documents_url}/{document_id}")
+        url = f"{self._documents_url}/{document_id}"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
+
+        response = self._http_requests.delete(url)
         result = TaskInfo(**response.json())
         if self._post_delete_document_plugins:
             post = Index._run_plugins(self._post_delete_document_plugins, Event.POST, result=result)
@@ -6628,11 +6901,12 @@ class Index(_BaseIndex):
 
         return result
 
-    def delete_documents(self, ids: list[str]) -> TaskInfo:
+    def delete_documents(self, ids: list[str], *, custom_metadata: str | None = None) -> TaskInfo:
         """Delete multiple documents from the index.
 
         Args:
             ids: List of unique identifiers of documents.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             List of update ids to track the action.
@@ -6650,7 +6924,12 @@ class Index(_BaseIndex):
         if self._pre_delete_documents_plugins:
             Index._run_plugins(self._pre_delete_documents_plugins, Event.PRE, ids=ids)
 
-        response = self._http_requests.post(f"{self._documents_url}/delete-batch", ids)
+        url = f"{self._documents_url}/delete-batch"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
+
+        response = self._http_requests.post(url, ids)
         result = TaskInfo(**response.json())
         if self._post_delete_documents_plugins:
             post = Index._run_plugins(
@@ -6661,11 +6940,14 @@ class Index(_BaseIndex):
 
         return result
 
-    def delete_documents_by_filter(self, filter: Filter) -> TaskInfo:
+    def delete_documents_by_filter(
+        self, filter: Filter, *, custom_metadata: str | None = None
+    ) -> TaskInfo:
         """Delete documents from the index by filter.
 
         Args:
             filter: The filter value information.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task status.
@@ -6685,9 +6967,12 @@ class Index(_BaseIndex):
                 self._pre_delete_documents_by_filter_plugins, Event.PRE, filter=filter
             )
 
-        response = self._http_requests.post(
-            f"{self._documents_url}/delete", body={"filter": filter}
-        )
+        url = f"{self._documents_url}/delete"
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
+
+        response = self._http_requests.post(url, body={"filter": filter})
         result = TaskInfo(**response.json())
         if self._post_delete_documents_by_filter_plugins:
             post = Index._run_plugins(
@@ -6699,12 +6984,13 @@ class Index(_BaseIndex):
         return result
 
     def delete_documents_in_batches_by_filter(
-        self, filters: list[str | list[str | list[str]]]
+        self, filters: list[str | list[str | list[str]]], *, custom_metadata: str | None = None
     ) -> list[TaskInfo]:
         """Delete batches of documents from the index by filter.
 
         Args:
             filters: A list of filter value information.
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The a list of details of the task statuses.
@@ -6724,10 +7010,16 @@ class Index(_BaseIndex):
             >>>         ]
             >>>     )
         """
-        return [self.delete_documents_by_filter(filter) for filter in filters]
+        return [
+            self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
+            for filter in filters
+        ]
 
-    def delete_all_documents(self) -> TaskInfo:
+    def delete_all_documents(self, *, custom_metadata: str | None = None) -> TaskInfo:
         """Delete all documents from the index.
+
+        Args:
+            custom_metadata: An arbitrary string accessible via the task. Defaults to None.
 
         Returns:
             The details of the task status.
@@ -6745,7 +7037,12 @@ class Index(_BaseIndex):
         if self._pre_delete_all_documents_plugins:
             Index._run_plugins(self._pre_delete_all_documents_plugins, Event.PRE)
 
-        response = self._http_requests.delete(self._documents_url)
+        url = self._documents_url
+
+        if custom_metadata:
+            url = _build_encoded_url(url, {"customMetadata": custom_metadata})
+
+        response = self._http_requests.delete(url)
         result = TaskInfo(**response.json())
         if self._post_delete_all_documents_plugins:
             post = Index._run_plugins(
