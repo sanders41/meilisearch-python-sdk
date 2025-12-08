@@ -660,8 +660,8 @@ class AsyncClient(BaseClient):
             >>>     keys = await client.create_key(key_info)
         """
         response = await self._http_requests.post(
-            "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
-        )  # type: ignore[attr-defined]
+            "keys", key.model_dump(by_alias=True, mode="json")
+        )
 
         return Key(**response.json())
 
