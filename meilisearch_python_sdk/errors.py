@@ -36,10 +36,11 @@ class MeilisearchApiError(MeilisearchError):
         self.link = ""
         self.error_type = ""
         if response.content:
-            self.message = f"Error message: {response.json().get('message') or ''}"
-            self.code = f"{response.json().get('code') or ''}"
-            self.error_type = f"{response.json().get('type') or ''}"
-            self.link = f"Error documentation: {response.json().get('link') or ''}"
+            error_json = response.json()
+            self.message = f"Error message: {error_json.get('message') or ''}"
+            self.code = f"{error_json.get('code') or ''}"
+            self.error_type = f"{error_json.get('type') or ''}"
+            self.link = f"Error documentation: {error_json.get('link') or ''}"
         else:
             self.message = error
         super().__init__(self.message)
