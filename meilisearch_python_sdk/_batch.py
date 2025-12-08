@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from meilisearch_python_sdk._utils import get_async_client, get_client
+from meilisearch_python_sdk._utils import get_async_client, get_client, get_json_handler
 from meilisearch_python_sdk.errors import BatchNotFoundError
 from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
 
@@ -21,12 +21,13 @@ async def async_get_batch(
     client: HttpxAsyncClient | AsyncClient, batch_uid: int
 ) -> BatchResult | None:
     client_ = get_async_client(client)
+    json_handler = get_json_handler(client)
     response = await client_.get(f"batches/{batch_uid}")
 
     if response.status_code == 404:
         raise BatchNotFoundError(f"Batch {batch_uid} not found")
 
-    return BatchResult(**response.json())
+    return BatchResult(**json_handler.loads(response.content))
 
 
 async def async_get_batches(
@@ -46,6 +47,7 @@ async def async_get_batches(
     after_finished_at: datetime | None = None,
 ) -> BatchStatus:
     client_ = get_async_client(client)
+    json_handler = get_json_handler(client)
     params = _build_parameters(
         uids=uids,
         batch_uids=batch_uids,
@@ -62,17 +64,18 @@ async def async_get_batches(
     )
     response = await client_.get("batches", params=params)
 
-    return BatchStatus(**response.json())
+    return BatchStatus(**json_handler.loads(response.content))
 
 
 def get_batch(client: HttpxClient | Client, batch_uid: int) -> BatchResult | None:
     client_ = get_client(client)
+    json_handler = get_json_handler(client)
     response = client_.get(f"batches/{batch_uid}")
 
     if response.status_code == 404:
         raise BatchNotFoundError(f"Batch {batch_uid} not found")
 
-    return BatchResult(**response.json())
+    return BatchResult(**json_handler.loads(response.content))
 
 
 def get_batches(
@@ -92,6 +95,7 @@ def get_batches(
     after_finished_at: datetime | None = None,
 ) -> BatchStatus:
     client_ = get_client(client)
+    json_handler = get_json_handler(client)
     params = _build_parameters(
         uids=uids,
         batch_uids=batch_uids,
@@ -109,7 +113,7 @@ def get_batches(
 
     response = client_.get("batches", params=params)
 
-    return BatchStatus(**response.json())
+    return BatchStatus(**json_handler.loads(response.content))
 
 
 def _build_parameters(

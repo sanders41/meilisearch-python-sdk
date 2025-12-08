@@ -31,6 +31,10 @@ class AsyncHttpRequests:
         self.http_client = http_client
         self.json_handler = json_handler
 
+    def parse_json(self, response: Response) -> Any:
+        """Parse JSON response using the custom json_handler."""
+        return self.json_handler.loads(response.content)
+
     async def _send_request(
         self,
         http_method: Callable,
@@ -111,6 +115,10 @@ class HttpRequests:
     ) -> None:
         self.http_client = http_client
         self.json_handler = json_handler
+
+    def parse_json(self, response: Response) -> Any:
+        """Parse JSON response using the custom json_handler."""
+        return self.json_handler.loads(response.content)
 
     def _send_request(
         self,
