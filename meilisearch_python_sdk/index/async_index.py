@@ -452,7 +452,7 @@ class AsyncIndex(BaseIndex):
             >>>     index.compact()
         """
         response = await self._http_requests.post(f"{self._base_url_with_uid}/compact")
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def delete(self) -> TaskInfo:
         """Deletes the index.
@@ -471,7 +471,7 @@ class AsyncIndex(BaseIndex):
             >>>     await index.delete()
         """
         response = await self._http_requests.delete(self._base_url_with_uid)
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def delete_if_exists(self) -> bool:
         """Delete the index if it already exists.
@@ -520,10 +520,12 @@ class AsyncIndex(BaseIndex):
         payload = {"primaryKey": primary_key}
         response = await self._http_requests.patch(self._base_url_with_uid, payload)
         await async_wait_for_task(
-            self.http_client, response.json()["taskUid"], timeout_in_ms=100000
+            self.http_client,
+            self._http_requests.parse_json(response)["taskUid"],
+            timeout_in_ms=100000,
         )
         index_response = await self._http_requests.get(f"{self._base_url_with_uid}")
-        self.primary_key = index_response.json()["primaryKey"]
+        self.primary_key = self._http_requests.parse_json(index_response)["primaryKey"]
         return self
 
     async def fetch_info(self) -> Self:
@@ -543,7 +545,7 @@ class AsyncIndex(BaseIndex):
             >>>     index_info = await index.fetch_info()
         """
         response = await self._http_requests.get(self._base_url_with_uid)
-        index_dict = response.json()
+        index_dict = self._http_requests.parse_json(response)
         self._set_fetch_info(
             index_dict["primaryKey"], index_dict["createdAt"], index_dict["updatedAt"]
         )
@@ -634,12 +636,12 @@ class AsyncIndex(BaseIndex):
         response = await http_request.post(url, payload)
         await async_wait_for_task(
             http_client,
-            response.json()["taskUid"],
+            http_request.parse_json(response)["taskUid"],
             timeout_in_ms=timeout_in_ms,
         )
 
         index_response = await http_request.get(f"{url}/{uid}")
-        index_dict = index_response.json()
+        index_dict = http_request.parse_json(index_response)
         index = cls(
             http_client=http_client,
             uid=index_dict["uid"],
@@ -678,7 +680,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(self._stats_url)
 
-        return IndexStats(**response.json())
+        return IndexStats(**self._http_requests.parse_json(response))
 
     async def search(
         self,
@@ -935,7 +937,7 @@ class AsyncIndex(BaseIndex):
                 response_coroutine = tg.create_task(self._http_requests.post(search_url, body=body))
 
             response = await response_coroutine
-            result = SearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
+            result = SearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
             if self._post_search_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_search_plugins, AsyncEvent.POST, search_results=result
@@ -946,7 +948,7 @@ class AsyncIndex(BaseIndex):
             return result
 
         response = await self._http_requests.post(search_url, body=body)
-        result = SearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
+        result = SearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
 
         if self._post_search_plugins:
             post = await AsyncIndex._run_plugins(
@@ -1205,7 +1207,7 @@ class AsyncIndex(BaseIndex):
                 response_coroutine = tg.create_task(self._http_requests.post(search_url, body=body))
 
             response = await response_coroutine
-            result = FacetSearchResults(**response.json())
+            result = FacetSearchResults(**self._http_requests.parse_json(response))
             if self._post_facet_search_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_facet_search_plugins, AsyncEvent.POST, result=result
@@ -1216,7 +1218,7 @@ class AsyncIndex(BaseIndex):
             return result
 
         response = await self._http_requests.post(search_url, body=body)
-        result = FacetSearchResults(**response.json())
+        result = FacetSearchResults(**self._http_requests.parse_json(response))
         if self._post_facet_search_plugins:
             post = await AsyncIndex._run_plugins(
                 self._post_facet_search_plugins, AsyncEvent.POST, result=result
@@ -1290,7 +1292,7 @@ class AsyncIndex(BaseIndex):
             f"{self._base_url_with_uid}/similar", body=payload
         )
 
-        return SimilarSearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
+        return SimilarSearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
 
     async def get_document(
         self,
@@ -1332,7 +1334,7 @@ class AsyncIndex(BaseIndex):
 
         response = await self._http_requests.get(url)
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def get_documents(
         self,
@@ -1392,7 +1394,7 @@ class AsyncIndex(BaseIndex):
             url = build_encoded_url(self._documents_url, parameters)
             response = await self._http_requests.get(url)
 
-            return DocumentsInfo(**response.json())
+            return DocumentsInfo(**self._http_requests.parse_json(response))
 
         if fields:
             parameters["fields"] = fields
@@ -1404,7 +1406,7 @@ class AsyncIndex(BaseIndex):
 
         response = await self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
-        return DocumentsInfo(**response.json())
+        return DocumentsInfo(**self._http_requests.parse_json(response))
 
     async def add_documents(
         self,
@@ -1524,7 +1526,7 @@ class AsyncIndex(BaseIndex):
                 )
 
             response = await response_coroutine
-            result = TaskInfo(**response.json())
+            result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_add_documents_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_add_documents_plugins,
@@ -1540,7 +1542,7 @@ class AsyncIndex(BaseIndex):
 
         response = await self._http_requests.post(url, documents, compress=compress)
 
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_add_documents_plugins:
             post = await AsyncIndex._run_plugins(
                 self._post_add_documents_plugins,
@@ -2123,7 +2125,7 @@ class AsyncIndex(BaseIndex):
             url, body=data, content_type=content_type, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def edit_documents(
         self,
@@ -2174,7 +2176,7 @@ class AsyncIndex(BaseIndex):
 
         response = await self._http_requests.post(url, payload)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def update_documents(
         self,
@@ -2294,7 +2296,7 @@ class AsyncIndex(BaseIndex):
                 )
 
             response = await response_coroutine
-            result = TaskInfo(**response.json())
+            result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_update_documents_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_update_documents_plugins,
@@ -2310,7 +2312,7 @@ class AsyncIndex(BaseIndex):
             return result
 
         response = await self._http_requests.put(url, documents, compress=compress)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_update_documents_plugins:
             post = await AsyncIndex._run_plugins(
                 self._post_update_documents_plugins,
@@ -2860,7 +2862,7 @@ class AsyncIndex(BaseIndex):
             url, body=data, content_type=content_type, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def delete_document(
         self, document_id: str, *, custom_metadata: str | None = None
@@ -2923,7 +2925,7 @@ class AsyncIndex(BaseIndex):
                 response_coroutine = tg.create_task(self._http_requests.delete(url))
 
             response = await response_coroutine
-            result = TaskInfo(**response.json())
+            result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_delete_document_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_delete_document_plugins, event=AsyncEvent.POST, result=result
@@ -2933,7 +2935,7 @@ class AsyncIndex(BaseIndex):
             return result
 
         response = await self._http_requests.delete(url)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_document_plugins:
             post = await AsyncIndex._run_plugins(
                 self._post_delete_document_plugins, AsyncEvent.POST, result=result
@@ -3000,7 +3002,7 @@ class AsyncIndex(BaseIndex):
                 response_coroutine = tg.create_task(self._http_requests.post(url, ids))
 
             response = await response_coroutine
-            result = TaskInfo(**response.json())
+            result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_delete_documents_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_delete_documents_plugins, AsyncEvent.POST, result=result
@@ -3010,7 +3012,7 @@ class AsyncIndex(BaseIndex):
             return result
 
         response = await self._http_requests.post(url, ids)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_plugins:
             post = await AsyncIndex._run_plugins(
                 self._post_delete_documents_plugins, AsyncEvent.POST, result=result
@@ -3081,7 +3083,7 @@ class AsyncIndex(BaseIndex):
                 )
 
             response = await response_coroutine
-            result = TaskInfo(**response.json())
+            result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_delete_documents_by_filter_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_delete_documents_by_filter_plugins, AsyncEvent.POST, result=result
@@ -3092,7 +3094,7 @@ class AsyncIndex(BaseIndex):
             return result
 
         response = await self._http_requests.post(url, body={"filter": filter})
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_by_filter_plugins:
             post = await AsyncIndex._run_plugins(
                 self._post_delete_documents_by_filter_plugins, AsyncEvent.POST, result=result
@@ -3223,7 +3225,7 @@ class AsyncIndex(BaseIndex):
                 response_coroutine = tg.create_task(self._http_requests.delete(url))
 
             response = await response_coroutine
-            result = TaskInfo(**response.json())
+            result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_delete_all_documents_plugins:
                 post = await AsyncIndex._run_plugins(
                     self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
@@ -3233,7 +3235,7 @@ class AsyncIndex(BaseIndex):
             return result
 
         response = await self._http_requests.delete(url)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_all_documents_plugins:
             post = await AsyncIndex._run_plugins(
                 self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
@@ -3259,7 +3261,7 @@ class AsyncIndex(BaseIndex):
             >>>     settings = await index.get_settings()
         """
         response = await self._http_requests.get(self._settings_url)
-        response_json = response.json()
+        response_json = self._http_requests.parse_json(response)
         settings = MeilisearchSettings(**response_json)
 
         if response_json.get("embedders"):
@@ -3319,7 +3321,7 @@ class AsyncIndex(BaseIndex):
         }
         response = await self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_settings(self) -> TaskInfo:
         """Reset settings of the index to default values.
@@ -3339,7 +3341,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(self._settings_url)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_ranking_rules(self) -> list[str]:
         """Get ranking rules of the index.
@@ -3359,7 +3361,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/ranking-rules")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_ranking_rules(
         self, ranking_rules: list[str], *, compress: bool = False
@@ -3397,7 +3399,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/ranking-rules", ranking_rules, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_ranking_rules(self) -> TaskInfo:
         """Reset ranking rules of the index to default values.
@@ -3417,7 +3419,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/ranking-rules")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_distinct_attribute(self) -> str | None:
         """Get distinct attribute of the index.
@@ -3438,10 +3440,10 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/distinct-attribute")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_distinct_attribute(self, body: str, *, compress: bool = False) -> TaskInfo:
         """Update distinct attribute of the index.
@@ -3467,7 +3469,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/distinct-attribute", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_distinct_attribute(self) -> TaskInfo:
         """Reset distinct attribute of the index to default values.
@@ -3487,7 +3489,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/distinct-attribute")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_searchable_attributes(self) -> list[str]:
         """Get searchable attributes of the index.
@@ -3507,7 +3509,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/searchable-attributes")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_searchable_attributes(
         self, body: list[str], *, compress: bool = False
@@ -3535,7 +3537,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/searchable-attributes", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_searchable_attributes(self) -> TaskInfo:
         """Reset searchable attributes of the index to default values.
@@ -3555,7 +3557,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/searchable-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_displayed_attributes(self) -> list[str]:
         """Get displayed attributes of the index.
@@ -3575,7 +3577,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/displayed-attributes")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_displayed_attributes(
         self, body: list[str], *, compress: bool = False
@@ -3605,7 +3607,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/displayed-attributes", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_displayed_attributes(self) -> TaskInfo:
         """Reset displayed attributes of the index to default values.
@@ -3625,7 +3627,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/displayed-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_stop_words(self) -> list[str] | None:
         """Get stop words of the index.
@@ -3645,10 +3647,10 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/stop-words")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_stop_words(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update stop words of the index.
@@ -3674,7 +3676,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/stop-words", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_stop_words(self) -> TaskInfo:
         """Reset stop words of the index to default values.
@@ -3694,7 +3696,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/stop-words")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_synonyms(self) -> dict[str, list[str]] | None:
         """Get synonyms of the index.
@@ -3714,10 +3716,10 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/synonyms")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_synonyms(
         self, body: dict[str, list[str]], *, compress: bool = False
@@ -3747,7 +3749,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/synonyms", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_synonyms(self) -> TaskInfo:
         """Reset synonyms of the index to default values.
@@ -3767,7 +3769,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/synonyms")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_filterable_attributes(self) -> list[str | FilterableAttributes] | None:
         """Get filterable attributes of the index.
@@ -3787,10 +3789,10 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/filterable-attributes")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        response_json = response.json()
+        response_json = self._http_requests.parse_json(response)
 
         filterable_attributes: list[str | FilterableAttributes] = []
         for r in response_json:
@@ -3840,7 +3842,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/filterable-attributes", payload, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_filterable_attributes(self) -> TaskInfo:
         """Reset filterable attributes of the index to default values.
@@ -3860,7 +3862,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/filterable-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_sortable_attributes(self) -> list[str]:
         """Get sortable attributes of the AsyncIndex.
@@ -3880,7 +3882,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/sortable-attributes")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_sortable_attributes(
         self, sortable_attributes: list[str], *, compress: bool = False
@@ -3908,7 +3910,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/sortable-attributes", sortable_attributes, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_sortable_attributes(self) -> TaskInfo:
         """Reset sortable attributes of the index to default values.
@@ -3928,7 +3930,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/sortable-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_typo_tolerance(self) -> TypoTolerance:
         """Get typo tolerance for the index.
@@ -3948,7 +3950,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/typo-tolerance")
 
-        return TypoTolerance(**response.json())
+        return TypoTolerance(**self._http_requests.parse_json(response))
 
     async def update_typo_tolerance(
         self, typo_tolerance: TypoTolerance, *, compress: bool = False
@@ -3979,7 +3981,7 @@ class AsyncIndex(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_typo_tolerance(self) -> TaskInfo:
         """Reset typo tolerance to default values.
@@ -3999,7 +4001,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/typo-tolerance")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_faceting(self) -> Faceting:
         """Get faceting for the index.
@@ -4019,7 +4021,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/faceting")
 
-        return Faceting(**response.json())
+        return Faceting(**self._http_requests.parse_json(response))
 
     async def update_faceting(self, faceting: Faceting, *, compress: bool = False) -> TaskInfo:
         """Partially update the faceting settings for an index.
@@ -4047,7 +4049,7 @@ class AsyncIndex(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_faceting(self) -> TaskInfo:
         """Reset an index's faceting settings to their default value.
@@ -4067,7 +4069,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/faceting")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_pagination(self) -> Pagination:
         """Get pagination settings for the index.
@@ -4087,7 +4089,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/pagination")
 
-        return Pagination(**response.json())
+        return Pagination(**self._http_requests.parse_json(response))
 
     async def update_pagination(self, settings: Pagination, *, compress: bool = False) -> TaskInfo:
         """Partially update the pagination settings for an index.
@@ -4116,7 +4118,7 @@ class AsyncIndex(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_pagination(self) -> TaskInfo:
         """Reset an index's pagination settings to their default value.
@@ -4136,7 +4138,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/pagination")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_separator_tokens(self) -> list[str]:
         """Get separator token settings for the index.
@@ -4156,7 +4158,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/separator-tokens")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_separator_tokens(
         self, separator_tokens: list[str], *, compress: bool = False
@@ -4184,7 +4186,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/separator-tokens", separator_tokens, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_separator_tokens(self) -> TaskInfo:
         """Reset an index's separator tokens settings to the default value.
@@ -4204,7 +4206,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/separator-tokens")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_non_separator_tokens(self) -> list[str]:
         """Get non-separator token settings for the index.
@@ -4224,7 +4226,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/non-separator-tokens")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_non_separator_tokens(
         self, non_separator_tokens: list[str], *, compress: bool = False
@@ -4252,7 +4254,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/non-separator-tokens", non_separator_tokens, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_non_separator_tokens(self) -> TaskInfo:
         """Reset an index's non-separator tokens settings to the default value.
@@ -4272,7 +4274,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/non-separator-tokens")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_search_cutoff_ms(self) -> int | None:
         """Get search cutoff time in ms.
@@ -4292,7 +4294,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/search-cutoff-ms")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_search_cutoff_ms(
         self, search_cutoff_ms: int, *, compress: bool = False
@@ -4320,7 +4322,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/search-cutoff-ms", search_cutoff_ms, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_search_cutoff_ms(self) -> TaskInfo:
         """Reset the search cutoff time to the default value.
@@ -4340,7 +4342,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/search-cutoff-ms")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_word_dictionary(self) -> list[str]:
         """Get word dictionary settings for the index.
@@ -4360,7 +4362,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/dictionary")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_word_dictionary(
         self, dictionary: list[str], *, compress: bool = False
@@ -4388,7 +4390,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/dictionary", dictionary, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_word_dictionary(self) -> TaskInfo:
         """Reset an index's word dictionary settings to the default value.
@@ -4408,7 +4410,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/dictionary")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_proximity_precision(self) -> ProximityPrecision:
         """Get proximity precision settings for the index.
@@ -4428,7 +4430,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/proximity-precision")
 
-        return ProximityPrecision[to_snake(response.json()).upper()]
+        return ProximityPrecision[to_snake(self._http_requests.parse_json(response)).upper()]
 
     async def update_proximity_precision(
         self, proximity_precision: ProximityPrecision, *, compress: bool = False
@@ -4459,7 +4461,7 @@ class AsyncIndex(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_proximity_precision(self) -> TaskInfo:
         """Reset an index's proximity precision settings to the default value.
@@ -4479,7 +4481,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/proximity-precision")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_embedders(self) -> Embedders | None:
         """Get embedder settings for the index.
@@ -4499,7 +4501,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/embedders")
 
-        return embedder_json_to_embedders_model(response.json())
+        return embedder_json_to_embedders_model(self._http_requests.parse_json(response))
 
     async def update_embedders(self, embedders: Embedders, *, compress: bool = False) -> TaskInfo:
         """Update the embedders settings for an index.
@@ -4538,7 +4540,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/embedders", payload, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_embedders(self) -> TaskInfo:
         """Reset an index's embedders settings to the default value.
@@ -4558,7 +4560,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/embedders")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_localized_attributes(self) -> list[LocalizedAttributes] | None:
         """Get localized attributes settings for the index.
@@ -4578,10 +4580,10 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/localized-attributes")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        return [LocalizedAttributes(**x) for x in response.json()]
+        return [LocalizedAttributes(**x) for x in self._http_requests.parse_json(response)]
 
     async def update_localized_attributes(
         self, localized_attributes: list[LocalizedAttributes], *, compress: bool = False
@@ -4616,7 +4618,7 @@ class AsyncIndex(BaseIndex):
             f"{self._settings_url}/localized-attributes", payload, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_localized_attributes(self) -> TaskInfo:
         """Reset an index's localized attributes settings to the default value.
@@ -4636,7 +4638,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/localized-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_facet_search(self) -> bool | None:
         """Get setting for facet search opt-out.
@@ -4656,7 +4658,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/facet-search")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_facet_search(self, facet_search: bool, *, compress: bool = False) -> TaskInfo:
         """Update setting for facet search opt-out.
@@ -4684,7 +4686,7 @@ class AsyncIndex(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_facet_search(self) -> TaskInfo:
         """Reset the facet search opt-out settings.
@@ -4704,7 +4706,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/facet-search")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_prefix_search(self) -> str:
         """Get setting for prefix search opt-out.
@@ -4724,7 +4726,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.get(f"{self._settings_url}/prefix-search")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_prefix_search(
         self,
@@ -4757,7 +4759,7 @@ class AsyncIndex(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def reset_prefix_search(self) -> TaskInfo:
         """Reset the prefix search opt-out settings.
@@ -4777,7 +4779,7 @@ class AsyncIndex(BaseIndex):
         """
         response = await self._http_requests.delete(f"{self._settings_url}/prefix-search")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     @staticmethod
     async def _run_plugins(

@@ -333,7 +333,7 @@ class Index(BaseIndex):
             >>>     index.compact()
         """
         response = self._http_requests.post(f"{self._base_url_with_uid}/compact")
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def delete(self) -> TaskInfo:
         """Deletes the index.
@@ -352,7 +352,7 @@ class Index(BaseIndex):
             >>>     index.delete()
         """
         response = self._http_requests.delete(self._base_url_with_uid)
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def delete_if_exists(self) -> bool:
         """Delete the index if it already exists.
@@ -398,9 +398,13 @@ class Index(BaseIndex):
         """
         payload = {"primaryKey": primary_key}
         response = self._http_requests.patch(self._base_url_with_uid, payload)
-        wait_for_task(self.http_client, response.json()["taskUid"], timeout_in_ms=100000)
+        wait_for_task(
+            self.http_client,
+            self._http_requests.parse_json(response)["taskUid"],
+            timeout_in_ms=100000,
+        )
         index_response = self._http_requests.get(self._base_url_with_uid)
-        self.primary_key = index_response.json()["primaryKey"]
+        self.primary_key = self._http_requests.parse_json(index_response)["primaryKey"]
         return self
 
     def fetch_info(self) -> Self:
@@ -420,7 +424,7 @@ class Index(BaseIndex):
             >>>     index_info = index.fetch_info()
         """
         response = self._http_requests.get(self._base_url_with_uid)
-        index_dict = response.json()
+        index_dict = self._http_requests.parse_json(response)
         self._set_fetch_info(
             index_dict["primaryKey"], index_dict["createdAt"], index_dict["updatedAt"]
         )
@@ -509,9 +513,11 @@ class Index(BaseIndex):
         handler = json_handler if json_handler else BuiltinHandler()
         http_request = HttpRequests(http_client, handler)
         response = http_request.post(url, payload)
-        wait_for_task(http_client, response.json()["taskUid"], timeout_in_ms=timeout_in_ms)
+        wait_for_task(
+            http_client, http_request.parse_json(response)["taskUid"], timeout_in_ms=timeout_in_ms
+        )
         index_response = http_request.get(f"{url}/{uid}")
-        index_dict = index_response.json()
+        index_dict = http_request.parse_json(index_response)
         index = cls(
             http_client=http_client,
             uid=index_dict["uid"],
@@ -548,7 +554,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(self._stats_url)
 
-        return IndexStats(**response.json())
+        return IndexStats(**self._http_requests.parse_json(response))
 
     def search(
         self,
@@ -725,7 +731,7 @@ class Index(BaseIndex):
             )
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
-        result = SearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
+        result = SearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
         if self._post_search_plugins:
             post = Index._run_plugins(self._post_search_plugins, Event.POST, search_results=result)
             if post.get("search_result"):
@@ -900,7 +906,7 @@ class Index(BaseIndex):
             )
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/facet-search", body=body)
-        result = FacetSearchResults(**response.json())
+        result = FacetSearchResults(**self._http_requests.parse_json(response))
         if self._post_facet_search_plugins:
             post = Index._run_plugins(self._post_facet_search_plugins, Event.POST, result=result)
             if isinstance(post["generic_result"], FacetSearchResults):
@@ -970,7 +976,7 @@ class Index(BaseIndex):
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/similar", body=payload)
 
-        return SimilarSearchResults[self.hits_type](**response.json())  # type: ignore[name-defined]
+        return SimilarSearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
 
     def get_document(
         self,
@@ -1011,7 +1017,7 @@ class Index(BaseIndex):
         url = build_encoded_url(f"{self._documents_url}/{document_id}", parameters)
 
         response = self._http_requests.get(url)
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def get_documents(
         self,
@@ -1071,7 +1077,7 @@ class Index(BaseIndex):
             url = build_encoded_url(self._documents_url, parameters)
             response = self._http_requests.get(url)
 
-            return DocumentsInfo(**response.json())
+            return DocumentsInfo(**self._http_requests.parse_json(response))
 
         if fields:
             parameters["fields"] = fields
@@ -1083,7 +1089,7 @@ class Index(BaseIndex):
 
         response = self._http_requests.post(f"{self._documents_url}/fetch", body=parameters)
 
-        return DocumentsInfo(**response.json())
+        return DocumentsInfo(**self._http_requests.parse_json(response))
 
     def add_documents(
         self,
@@ -1142,7 +1148,7 @@ class Index(BaseIndex):
                 documents = pre["document_result"]
 
         response = self._http_requests.post(url, documents, compress=compress)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_add_documents_plugins:
             post = Index._run_plugins(self._post_add_documents_plugins, Event.POST, result=result)
             if isinstance(post.get("generic_result"), TaskInfo):
@@ -1537,7 +1543,7 @@ class Index(BaseIndex):
             url, body=data, content_type=content_type, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def edit_documents(
         self,
@@ -1588,7 +1594,7 @@ class Index(BaseIndex):
 
         response = self._http_requests.post(url, payload)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def update_documents(
         self,
@@ -1647,7 +1653,7 @@ class Index(BaseIndex):
                 documents = pre["document_result"]
 
         response = self._http_requests.put(url, documents, compress=compress)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_update_documents_plugins:
             post = Index._run_plugins(
                 self._post_update_documents_plugins, Event.POST, result=result
@@ -2044,7 +2050,7 @@ class Index(BaseIndex):
             url, body=data, content_type=content_type, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def delete_document(self, document_id: str, *, custom_metadata: str | None = None) -> TaskInfo:
         """Delete one document from the index.
@@ -2077,7 +2083,7 @@ class Index(BaseIndex):
             url = build_encoded_url(url, {"customMetadata": custom_metadata})
 
         response = self._http_requests.delete(url)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_document_plugins:
             post = Index._run_plugins(self._post_delete_document_plugins, Event.POST, result=result)
             if isinstance(post.get("generic_result"), TaskInfo):
@@ -2114,7 +2120,7 @@ class Index(BaseIndex):
             url = build_encoded_url(url, {"customMetadata": custom_metadata})
 
         response = self._http_requests.post(url, ids)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_plugins:
             post = Index._run_plugins(
                 self._post_delete_documents_plugins, Event.POST, result=result
@@ -2157,7 +2163,7 @@ class Index(BaseIndex):
             url = build_encoded_url(url, {"customMetadata": custom_metadata})
 
         response = self._http_requests.post(url, body={"filter": filter})
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_by_filter_plugins:
             post = Index._run_plugins(
                 self._post_delete_documents_by_filter_plugins, Event.POST, result=result
@@ -2227,7 +2233,7 @@ class Index(BaseIndex):
             url = build_encoded_url(url, {"customMetadata": custom_metadata})
 
         response = self._http_requests.delete(url)
-        result = TaskInfo(**response.json())
+        result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_all_documents_plugins:
             post = Index._run_plugins(
                 self._post_delete_all_documents_plugins, Event.POST, result=result
@@ -2254,7 +2260,7 @@ class Index(BaseIndex):
             >>>     settings = index.get_settings()
         """
         response = self._http_requests.get(self._settings_url)
-        response_json = response.json()
+        response_json = self._http_requests.parse_json(response)
         settings = MeilisearchSettings(**response_json)
 
         if response_json.get("embedders"):
@@ -2312,7 +2318,7 @@ class Index(BaseIndex):
         }
         response = self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_settings(self) -> TaskInfo:
         """Reset settings of the index to default values.
@@ -2332,7 +2338,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(self._settings_url)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_ranking_rules(self) -> list[str]:
         """Get ranking rules of the index.
@@ -2352,7 +2358,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/ranking-rules")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_ranking_rules(self, ranking_rules: list[str], *, compress: bool = False) -> TaskInfo:
         """Update ranking rules of the index.
@@ -2388,7 +2394,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/ranking-rules", ranking_rules, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_ranking_rules(self) -> TaskInfo:
         """Reset ranking rules of the index to default values.
@@ -2408,7 +2414,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/ranking-rules")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_distinct_attribute(self) -> str | None:
         """Get distinct attribute of the index.
@@ -2429,10 +2435,10 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/distinct-attribute")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_distinct_attribute(self, body: str, *, compress: bool = False) -> TaskInfo:
         """Update distinct attribute of the index.
@@ -2458,7 +2464,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/distinct-attribute", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_distinct_attribute(self) -> TaskInfo:
         """Reset distinct attribute of the index to default values.
@@ -2478,7 +2484,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/distinct-attribute")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_searchable_attributes(self) -> list[str]:
         """Get searchable attributes of the index.
@@ -2498,7 +2504,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/searchable-attributes")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_searchable_attributes(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update searchable attributes of the index.
@@ -2524,7 +2530,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/searchable-attributes", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_searchable_attributes(self) -> TaskInfo:
         """Reset searchable attributes of the index to default values.
@@ -2544,7 +2550,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/searchable-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_displayed_attributes(self) -> list[str]:
         """Get displayed attributes of the index.
@@ -2564,7 +2570,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/displayed-attributes")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_displayed_attributes(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update displayed attributes of the index.
@@ -2592,7 +2598,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/displayed-attributes", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_displayed_attributes(self) -> TaskInfo:
         """Reset displayed attributes of the index to default values.
@@ -2612,7 +2618,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/displayed-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_stop_words(self) -> list[str] | None:
         """Get stop words of the index.
@@ -2632,10 +2638,10 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/stop-words")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_stop_words(self, body: list[str], *, compress: bool = False) -> TaskInfo:
         """Update stop words of the index.
@@ -2661,7 +2667,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/stop-words", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_stop_words(self) -> TaskInfo:
         """Reset stop words of the index to default values.
@@ -2681,7 +2687,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/stop-words")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_synonyms(self) -> dict[str, list[str]] | None:
         """Get synonyms of the index.
@@ -2701,10 +2707,10 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/synonyms")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_synonyms(self, body: dict[str, list[str]], *, compress: bool = False) -> TaskInfo:
         """Update synonyms of the index.
@@ -2731,7 +2737,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/synonyms", body, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_synonyms(self) -> TaskInfo:
         """Reset synonyms of the index to default values.
@@ -2751,7 +2757,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/synonyms")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_filterable_attributes(self) -> list[str | FilterableAttributes] | None:
         """Get filterable attributes of the index.
@@ -2771,10 +2777,10 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/filterable-attributes")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        response_json = response.json()
+        response_json = self._http_requests.parse_json(response)
 
         filterable_attributes: list[str | FilterableAttributes] = []
         for r in response_json:
@@ -2824,7 +2830,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/filterable-attributes", payload, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_filterable_attributes(self) -> TaskInfo:
         """Reset filterable attributes of the index to default values.
@@ -2844,7 +2850,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/filterable-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_sortable_attributes(self) -> list[str]:
         """Get sortable attributes of the AsyncIndex.
@@ -2864,7 +2870,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/sortable-attributes")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_sortable_attributes(
         self, sortable_attributes: list[str], *, compress: bool = False
@@ -2892,7 +2898,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/sortable-attributes", sortable_attributes, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_sortable_attributes(self) -> TaskInfo:
         """Reset sortable attributes of the index to default values.
@@ -2912,7 +2918,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/sortable-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_typo_tolerance(self) -> TypoTolerance:
         """Get typo tolerance for the index.
@@ -2932,7 +2938,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/typo-tolerance")
 
-        return TypoTolerance(**response.json())
+        return TypoTolerance(**self._http_requests.parse_json(response))
 
     def update_typo_tolerance(
         self, typo_tolerance: TypoTolerance, *, compress: bool = False
@@ -2963,7 +2969,7 @@ class Index(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_typo_tolerance(self) -> TaskInfo:
         """Reset typo tolerance to default values.
@@ -2983,7 +2989,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/typo-tolerance")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_faceting(self) -> Faceting:
         """Get faceting for the index.
@@ -3003,7 +3009,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/faceting")
 
-        return Faceting(**response.json())
+        return Faceting(**self._http_requests.parse_json(response))
 
     def update_faceting(self, faceting: Faceting, *, compress: bool = False) -> TaskInfo:
         """Partially update the faceting settings for an index.
@@ -3031,7 +3037,7 @@ class Index(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_faceting(self) -> TaskInfo:
         """Reset an index's faceting settings to their default value.
@@ -3051,7 +3057,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/faceting")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_pagination(self) -> Pagination:
         """Get pagination settings for the index.
@@ -3071,7 +3077,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/pagination")
 
-        return Pagination(**response.json())
+        return Pagination(**self._http_requests.parse_json(response))
 
     def update_pagination(self, settings: Pagination, *, compress: bool = False) -> TaskInfo:
         """Partially update the pagination settings for an index.
@@ -3100,7 +3106,7 @@ class Index(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_pagination(self) -> TaskInfo:
         """Reset an index's pagination settings to their default value.
@@ -3120,7 +3126,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/pagination")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_separator_tokens(self) -> list[str]:
         """Get separator token settings for the index.
@@ -3140,7 +3146,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/separator-tokens")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_separator_tokens(
         self, separator_tokens: list[str], *, compress: bool = False
@@ -3168,7 +3174,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/separator-tokens", separator_tokens, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_separator_tokens(self) -> TaskInfo:
         """Reset an index's separator tokens settings to the default value.
@@ -3188,7 +3194,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/separator-tokens")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_non_separator_tokens(self) -> list[str]:
         """Get non-separator token settings for the index.
@@ -3208,7 +3214,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/non-separator-tokens")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_non_separator_tokens(
         self, non_separator_tokens: list[str], *, compress: bool = False
@@ -3236,7 +3242,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/non-separator-tokens", non_separator_tokens, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_non_separator_tokens(self) -> TaskInfo:
         """Reset an index's non-separator tokens settings to the default value.
@@ -3256,7 +3262,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/non-separator-tokens")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_search_cutoff_ms(self) -> int | None:
         """Get search cutoff time in ms.
@@ -3276,7 +3282,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/search-cutoff-ms")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_search_cutoff_ms(self, search_cutoff_ms: int, *, compress: bool = False) -> TaskInfo:
         """Update the search cutoff for an index.
@@ -3302,7 +3308,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/search-cutoff-ms", search_cutoff_ms, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_search_cutoff_ms(self) -> TaskInfo:
         """Reset the search cutoff time to the default value.
@@ -3322,7 +3328,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/search-cutoff-ms")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_word_dictionary(self) -> list[str]:
         """Get word dictionary settings for the index.
@@ -3342,7 +3348,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/dictionary")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_word_dictionary(self, dictionary: list[str], *, compress: bool = False) -> TaskInfo:
         """Update the word dictionary settings for an index.
@@ -3368,7 +3374,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/dictionary", dictionary, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_word_dictionary(self) -> TaskInfo:
         """Reset an index's word dictionary settings to the default value.
@@ -3388,7 +3394,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/dictionary")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_proximity_precision(self) -> ProximityPrecision:
         """Get proximity precision settings for the index.
@@ -3408,7 +3414,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/proximity-precision")
 
-        return ProximityPrecision[to_snake(response.json()).upper()]
+        return ProximityPrecision[to_snake(self._http_requests.parse_json(response)).upper()]
 
     def update_proximity_precision(
         self, proximity_precision: ProximityPrecision, *, compress: bool = False
@@ -3439,7 +3445,7 @@ class Index(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_proximity_precision(self) -> TaskInfo:
         """Reset an index's proximity precision settings to the default value.
@@ -3459,7 +3465,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/proximity-precision")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_embedders(self) -> Embedders | None:
         """Get embedder settings for the index.
@@ -3479,7 +3485,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/embedders")
 
-        return embedder_json_to_embedders_model(response.json())
+        return embedder_json_to_embedders_model(self._http_requests.parse_json(response))
 
     def update_embedders(self, embedders: Embedders, *, compress: bool = False) -> TaskInfo:
         """Update the embedders settings for an index.
@@ -3516,7 +3522,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/embedders", payload, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
     def reset_embedders(self) -> TaskInfo:  # pragma: no cover
@@ -3537,7 +3543,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/embedders")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_localized_attributes(self) -> list[LocalizedAttributes] | None:
         """Get localized attributes settings for the index.
@@ -3557,10 +3563,10 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/localized-attributes")
 
-        if not response.json():
+        if not self._http_requests.parse_json(response):
             return None
 
-        return [LocalizedAttributes(**x) for x in response.json()]
+        return [LocalizedAttributes(**x) for x in self._http_requests.parse_json(response)]
 
     def update_localized_attributes(
         self, localized_attributes: list[LocalizedAttributes], *, compress: bool = False
@@ -3595,7 +3601,7 @@ class Index(BaseIndex):
             f"{self._settings_url}/localized-attributes", payload, compress=compress
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_localized_attributes(self) -> TaskInfo:
         """Reset an index's localized attributes settings to the default value.
@@ -3615,7 +3621,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/localized-attributes")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_facet_search(self) -> bool:
         """Get setting for facet search opt-out.
@@ -3635,7 +3641,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/facet-search")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_facet_search(self, facet_search: bool, *, compress: bool = False) -> TaskInfo:
         """Update setting for facet search opt-out.
@@ -3663,7 +3669,7 @@ class Index(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_facet_search(self) -> TaskInfo:
         """Reset the facet search opt-out settings.
@@ -3683,7 +3689,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/facet-search")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_prefix_search(self) -> bool:
         """Get setting for prefix search opt-out.
@@ -3703,7 +3709,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.get(f"{self._settings_url}/prefix-search")
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_prefix_search(
         self,
@@ -3736,7 +3742,7 @@ class Index(BaseIndex):
             compress=compress,
         )
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def reset_prefix_search(self) -> TaskInfo:
         """Reset the prefix search opt-out settings.
@@ -3756,7 +3762,7 @@ class Index(BaseIndex):
         """
         response = self._http_requests.delete(f"{self._settings_url}/prefix-search")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     @staticmethod
     def _run_plugins(

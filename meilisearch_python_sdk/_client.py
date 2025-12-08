@@ -231,7 +231,7 @@ class AsyncClient(BaseClient):
             "network", network.model_dump(by_alias=True, exclude_none=True)
         )
 
-        return Network(**response.json())
+        return Network(**self._http_requests.parse_json(response))
 
     async def get_networks(self) -> Network:
         """Fetches the remote-networks
@@ -252,7 +252,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.get("network")
 
-        return Network(**response.json())
+        return Network(**self._http_requests.parse_json(response))
 
     async def get_webhooks(self) -> Webhooks:
         """Get all webhooks.
@@ -271,7 +271,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.get("webhooks")
 
-        return Webhooks(**response.json())
+        return Webhooks(**self._http_requests.parse_json(response))
 
     async def get_webhook(self, uuid: str) -> Webhook:
         """Get a specific webhook by UUID.
@@ -293,7 +293,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.get(f"webhooks/{uuid}")
 
-        return Webhook(**response.json())
+        return Webhook(**self._http_requests.parse_json(response))
 
     async def create_webhook(self, webhook: WebhookCreate) -> Webhook:
         """Create a new webhook.
@@ -322,7 +322,7 @@ class AsyncClient(BaseClient):
             "webhooks", webhook.model_dump(by_alias=True, exclude_none=True)
         )
 
-        return Webhook(**response.json())
+        return Webhook(**self._http_requests.parse_json(response))
 
     async def update_webhook(self, *, uuid: str, webhook: WebhookUpdate) -> Webhook:
         """Update an existing webhook.
@@ -349,7 +349,7 @@ class AsyncClient(BaseClient):
             f"webhooks/{uuid}", webhook.model_dump(by_alias=True, exclude_none=True)
         )
 
-        return Webhook(**response.json())
+        return Webhook(**self._http_requests.parse_json(response))
 
     async def delete_webhook(self, uuid: str) -> int:
         """Delete a webhook.
@@ -388,7 +388,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.post("dumps")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def create_index(
         self,
@@ -462,7 +462,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.post("snapshots")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def delete_index_if_exists(self, uid: str) -> bool:
         """Deletes an index if it already exists.
@@ -483,7 +483,9 @@ class AsyncClient(BaseClient):
             >>>     await client.delete_index_if_exists()
         """
         response = await self._http_requests.delete(f"indexes/{uid}")
-        status = await self.wait_for_task(response.json()["taskUid"], timeout_in_ms=100000)
+        status = await self.wait_for_task(
+            self._http_requests.parse_json(response)["taskUid"], timeout_in_ms=100000
+        )
         if status.status == "succeeded":
             return True
         return False
@@ -514,7 +516,7 @@ class AsyncClient(BaseClient):
         url = _build_offset_limit_url("indexes", offset, limit)
         response = await self._http_requests.get(url)
 
-        if not response.json()["results"]:
+        if not self._http_requests.parse_json(response)["results"]:
             return None
 
         return [
@@ -526,7 +528,7 @@ class AsyncClient(BaseClient):
                 updated_at=x["updatedAt"],
                 json_handler=self.json_handler,
             )
-            for x in response.json()["results"]
+            for x in self._http_requests.parse_json(response)["results"]
         ]
 
     async def get_index(self, uid: str) -> AsyncIndex:
@@ -592,7 +594,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.get("stats")
 
-        return ClientStats(**response.json())
+        return ClientStats(**self._http_requests.parse_json(response))
 
     async def get_or_create_index(
         self,
@@ -663,7 +665,7 @@ class AsyncClient(BaseClient):
             "keys", key.model_dump(by_alias=True, mode="json")
         )
 
-        return Key(**response.json())
+        return Key(**self._http_requests.parse_json(response))
 
     async def delete_key(self, key: str) -> int:
         """Deletes an API key.
@@ -710,7 +712,7 @@ class AsyncClient(BaseClient):
         url = _build_offset_limit_url("keys", offset, limit)
         response = await self._http_requests.get(url)
 
-        return KeySearch(**response.json())
+        return KeySearch(**self._http_requests.parse_json(response))
 
     async def get_key(self, key: str) -> Key:
         """Gets information about a specific API key.
@@ -732,7 +734,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.get(f"keys/{key}")
 
-        return Key(**response.json())
+        return Key(**self._http_requests.parse_json(response))
 
     async def update_key(self, key: KeyUpdate) -> Key:
         """Update an API key.
@@ -761,7 +763,7 @@ class AsyncClient(BaseClient):
         payload = _build_update_key_payload(key, self.json_handler)
         response = await self._http_requests.patch(f"keys/{key.key}", payload)
 
-        return Key(**response.json())
+        return Key(**self._http_requests.parse_json(response))
 
     async def multi_search(
         self,
@@ -831,10 +833,13 @@ class AsyncClient(BaseClient):
         )
 
         if federation:
-            results = response.json()
+            results = self._http_requests.parse_json(response)
             return SearchResultsFederated[hits_type](**results)
 
-        return [SearchResultsWithUID[hits_type](**x) for x in response.json()["results"]]
+        return [
+            SearchResultsWithUID[hits_type](**x)
+            for x in self._http_requests.parse_json(response)["results"]
+        ]
 
     async def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an AsyncIndex instance.
@@ -859,7 +864,7 @@ class AsyncClient(BaseClient):
         if response.status_code == 404:
             return None
 
-        return IndexInfo(**response.json())
+        return IndexInfo(**self._http_requests.parse_json(response))
 
     async def get_raw_indexes(
         self, *, offset: int | None = None, limit: int | None = None
@@ -889,10 +894,10 @@ class AsyncClient(BaseClient):
         url = _build_offset_limit_url("indexes", offset, limit)
         response = await self._http_requests.get(url)
 
-        if not response.json()["results"]:
+        if not self._http_requests.parse_json(response)["results"]:
             return None
 
-        return [IndexInfo(**x) for x in response.json()["results"]]
+        return [IndexInfo(**x) for x in self._http_requests.parse_json(response)["results"]]
 
     async def get_version(self) -> Version:
         """Get the Meilisearch version.
@@ -911,7 +916,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.get("version")
 
-        return Version(**response.json())
+        return Version(**self._http_requests.parse_json(response))
 
     async def health(self) -> Health:
         """Get health of the Meilisearch server.
@@ -930,7 +935,7 @@ class AsyncClient(BaseClient):
         """
         response = await self._http_requests.get("health")
 
-        return Health(**response.json())
+        return Health(**self._http_requests.parse_json(response))
 
     async def swap_indexes(self, indexes: list[tuple[str, str]], rename: bool = False) -> TaskInfo:
         """Swap two indexes.
@@ -958,7 +963,7 @@ class AsyncClient(BaseClient):
             processed_indexes = [{"indexes": x} for x in indexes]
         response = await self._http_requests.post("swap-indexes", processed_indexes)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_batch(self, batch_uid: int) -> BatchResult | None:
         return await async_get_batch(self, batch_uid)
@@ -1251,7 +1256,7 @@ class AsyncClient(BaseClient):
 
         response = await self._http_requests.post(url, body=payload)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_experimental_features(self) -> dict[str, bool]:
         """Gets all experimental features and if they are enabled or not.
@@ -1271,7 +1276,7 @@ class AsyncClient(BaseClient):
         """
 
         response = await self._http_requests.get("/experimental-features")
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     async def update_experimental_features(self, features: dict[str, bool]) -> dict[str, bool]:
         """Update the status of an experimental feature.
@@ -1297,7 +1302,7 @@ class AsyncClient(BaseClient):
         payload = dict_to_camel(features)
         response = await self._http_requests.patch("/experimental-features", body=payload)
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
 
 class Client(BaseClient):
@@ -1390,7 +1395,7 @@ class Client(BaseClient):
             "network", network.model_dump(by_alias=True, exclude_none=True)
         )
 
-        return Network(**response.json())
+        return Network(**self._http_requests.parse_json(response))
 
     def get_networks(self) -> Network:
         """Fetches the remote-networks
@@ -1411,7 +1416,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.get("network")
 
-        return Network(**response.json())
+        return Network(**self._http_requests.parse_json(response))
 
     def get_webhooks(self) -> Webhooks:
         """Get all webhooks.
@@ -1430,7 +1435,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.get("webhooks")
 
-        return Webhooks(**response.json())
+        return Webhooks(**self._http_requests.parse_json(response))
 
     def get_webhook(self, uuid: str) -> Webhook:
         """Get a specific webhook by UUID.
@@ -1452,7 +1457,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.get(f"webhooks/{uuid}")
 
-        return Webhook(**response.json())
+        return Webhook(**self._http_requests.parse_json(response))
 
     def create_webhook(self, webhook: WebhookCreate) -> Webhook:
         """Create a new webhook.
@@ -1481,7 +1486,7 @@ class Client(BaseClient):
             "webhooks", webhook.model_dump(by_alias=True, exclude_none=True)
         )
 
-        return Webhook(**response.json())
+        return Webhook(**self._http_requests.parse_json(response))
 
     def update_webhook(self, *, uuid: str, webhook: WebhookUpdate) -> Webhook:
         """Update an existing webhook.
@@ -1508,7 +1513,7 @@ class Client(BaseClient):
             f"webhooks/{uuid}", webhook.model_dump(by_alias=True, exclude_none=True)
         )
 
-        return Webhook(**response.json())
+        return Webhook(**self._http_requests.parse_json(response))
 
     def delete_webhook(self, uuid: str) -> int:
         """Delete a webhook.
@@ -1548,7 +1553,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.post("dumps")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def create_index(
         self,
@@ -1622,7 +1627,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.post("snapshots")
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def delete_index_if_exists(self, uid: str) -> bool:
         """Deletes an index if it already exists.
@@ -1643,7 +1648,9 @@ class Client(BaseClient):
             >>>     client.delete_index_if_exists()
         """
         response = self._http_requests.delete(f"indexes/{uid}")
-        status = self.wait_for_task(response.json()["taskUid"], timeout_in_ms=100000)
+        status = self.wait_for_task(
+            self._http_requests.parse_json(response)["taskUid"], timeout_in_ms=100000
+        )
         if status.status == "succeeded":
             return True
         return False
@@ -1673,7 +1680,7 @@ class Client(BaseClient):
         url = _build_offset_limit_url("indexes", offset, limit)
         response = self._http_requests.get(url)
 
-        if not response.json()["results"]:
+        if not self._http_requests.parse_json(response)["results"]:
             return None
 
         return [
@@ -1685,7 +1692,7 @@ class Client(BaseClient):
                 updated_at=x["updatedAt"],
                 json_handler=self.json_handler,
             )
-            for x in response.json()["results"]
+            for x in self._http_requests.parse_json(response)["results"]
         ]
 
     def get_index(self, uid: str) -> Index:
@@ -1747,7 +1754,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.get("stats")
 
-        return ClientStats(**response.json())
+        return ClientStats(**self._http_requests.parse_json(response))
 
     def get_or_create_index(
         self,
@@ -1818,7 +1825,7 @@ class Client(BaseClient):
             "keys", self.json_handler.loads(key.model_dump_json(by_alias=True))
         )  # type: ignore[attr-defined]
 
-        return Key(**response.json())
+        return Key(**self._http_requests.parse_json(response))
 
     def delete_key(self, key: str) -> int:
         """Deletes an API key.
@@ -1864,7 +1871,7 @@ class Client(BaseClient):
         url = _build_offset_limit_url("keys", offset, limit)
         response = self._http_requests.get(url)
 
-        return KeySearch(**response.json())
+        return KeySearch(**self._http_requests.parse_json(response))
 
     def get_key(self, key: str) -> Key:
         """Gets information about a specific API key.
@@ -1886,7 +1893,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.get(f"keys/{key}")
 
-        return Key(**response.json())
+        return Key(**self._http_requests.parse_json(response))
 
     def update_key(self, key: KeyUpdate) -> Key:
         """Update an API key.
@@ -1915,7 +1922,7 @@ class Client(BaseClient):
         payload = _build_update_key_payload(key, self.json_handler)
         response = self._http_requests.patch(f"keys/{key.key}", payload)
 
-        return Key(**response.json())
+        return Key(**self._http_requests.parse_json(response))
 
     def multi_search(
         self,
@@ -1982,10 +1989,13 @@ class Client(BaseClient):
         )
 
         if federation:
-            results = response.json()
+            results = self._http_requests.parse_json(response)
             return SearchResultsFederated[hits_type](**results)
 
-        return [SearchResultsWithUID[hits_type](**x) for x in response.json()["results"]]
+        return [
+            SearchResultsWithUID[hits_type](**x)
+            for x in self._http_requests.parse_json(response)["results"]
+        ]
 
     def get_raw_index(self, uid: str) -> IndexInfo | None:
         """Gets the index and returns all the index information rather than an Index instance.
@@ -2010,7 +2020,7 @@ class Client(BaseClient):
         if response.status_code == 404:
             return None
 
-        return IndexInfo(**response.json())
+        return IndexInfo(**self._http_requests.parse_json(response))
 
     def get_raw_indexes(
         self, *, offset: int | None = None, limit: int | None = None
@@ -2039,10 +2049,10 @@ class Client(BaseClient):
         url = _build_offset_limit_url("indexes", offset, limit)
         response = self._http_requests.get(url)
 
-        if not response.json()["results"]:
+        if not self._http_requests.parse_json(response)["results"]:
             return None
 
-        return [IndexInfo(**x) for x in response.json()["results"]]
+        return [IndexInfo(**x) for x in self._http_requests.parse_json(response)["results"]]
 
     def get_version(self) -> Version:
         """Get the Meilisearch version.
@@ -2061,7 +2071,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.get("version")
 
-        return Version(**response.json())
+        return Version(**self._http_requests.parse_json(response))
 
     def health(self) -> Health:
         """Get health of the Meilisearch server.
@@ -2080,7 +2090,7 @@ class Client(BaseClient):
         """
         response = self._http_requests.get("health")
 
-        return Health(**response.json())
+        return Health(**self._http_requests.parse_json(response))
 
     def swap_indexes(self, indexes: list[tuple[str, str]], rename: bool = False) -> TaskInfo:
         """Swap two indexes.
@@ -2108,7 +2118,7 @@ class Client(BaseClient):
             processed_indexes = [{"indexes": x} for x in indexes]
         response = self._http_requests.post("swap-indexes", processed_indexes)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_batch(self, batch_uid: int) -> BatchResult | None:
         return _get_batch(self, batch_uid)
@@ -2396,7 +2406,7 @@ class Client(BaseClient):
 
         response = self._http_requests.post(url, body=payload)
 
-        return TaskInfo(**response.json())
+        return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_experimental_features(self) -> dict[str, bool]:
         """Gets all experimental features and if they are enabled or not.
@@ -2416,7 +2426,7 @@ class Client(BaseClient):
         """
 
         response = self._http_requests.get("/experimental-features")
-        return response.json()
+        return self._http_requests.parse_json(response)
 
     def update_experimental_features(self, features: dict[str, bool]) -> dict[str, bool]:
         """Update the status of an experimental feature.
@@ -2442,7 +2452,7 @@ class Client(BaseClient):
         payload = dict_to_camel(features)
         response = self._http_requests.patch("/experimental-features", body=payload)
 
-        return response.json()
+        return self._http_requests.parse_json(response)
 
 
 def _build_offset_limit_url(base: str, offset: int | None, limit: int | None) -> str:

@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
+
 if TYPE_CHECKING:
     from meilisearch_python_sdk._client import AsyncClient, Client  # pragma: no cover
 
@@ -28,6 +30,15 @@ def get_client(
         return client
 
     return client.http_client
+
+
+def get_json_handler(
+    client: AsyncClient | Client | HttpxAsyncClient | HttpxClient,
+) -> BuiltinHandler | OrjsonHandler | UjsonHandler:
+    if isinstance(client, (HttpxAsyncClient, HttpxClient)):
+        return BuiltinHandler()
+
+    return client.json_handler
 
 
 def iso_to_date_time(iso_date: datetime | str | None) -> datetime | None:
