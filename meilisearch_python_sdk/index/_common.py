@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Generator, MutableMapping, Sequence
 from datetime import datetime
+from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlencode
@@ -87,7 +88,7 @@ def batch(
 
 
 def combine_documents(documents: list[list[Any]]) -> list[Any]:
-    return [x for y in documents for x in y]
+    return list(chain.from_iterable(documents))
 
 
 def plugin_has_method(
