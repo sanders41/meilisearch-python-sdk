@@ -213,7 +213,8 @@ def build_encoded_url(base_url: str, params: JsonMapping) -> str:
     return f"{base_url}?{urlencode(params)}"
 
 
-# TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+# Not coverted because it times out. It isn't an issue with the code here.
+# https://github.com/meilisearch/meilisearch/issues/4585
 def embedder_json_to_embedders_model(  # pragma: no cover
     embedder_json: JsonDict | None,
 ) -> Embedders | None:
@@ -246,7 +247,8 @@ def embedder_json_to_embedders_model(  # pragma: no cover
     return Embedders(embedders=embedders)
 
 
-# TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+# Not coverted because it times out. It isn't an issue with the code here.
+# https://github.com/meilisearch/meilisearch/issues/4585
 def embedder_json_to_settings_model(  # pragma: no cover
     embedder_json: JsonDict | None,
 ) -> (

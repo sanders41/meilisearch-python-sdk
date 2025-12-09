@@ -2264,7 +2264,8 @@ class Index(BaseIndex):
         settings = MeilisearchSettings(**response_json)
 
         if response_json.get("embedders"):
-            # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+            # Not coverted because it times out. It isn't an issue with the code here.
+            # https://github.com/meilisearch/meilisearch/issues/4585
             settings.embedders = embedder_json_to_settings_model(  # pragma: no cover
                 response_json["embedders"]
             )
@@ -3524,7 +3525,8 @@ class Index(BaseIndex):
 
         return TaskInfo(**self._http_requests.parse_json(response))
 
-    # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+    # Not coverted because it times out. It isn't an issue with the code here.
+    # https://github.com/meilisearch/meilisearch/issues/4585
     def reset_embedders(self) -> TaskInfo:  # pragma: no cover
         """Reset an index's embedders settings to the default value.
 
