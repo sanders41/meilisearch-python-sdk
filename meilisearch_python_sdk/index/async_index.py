@@ -1756,7 +1756,7 @@ class AsyncIndex(BaseIndex):
                         else:
                             tasks.append(tg.create_task(add_docs_with_limit(documents)))
 
-                return [*all_results, *[x.result() for x in tasks]]
+            return [*all_results, *[x.result() for x in tasks]]
 
         if not use_task_groups():
             add_documents = []
