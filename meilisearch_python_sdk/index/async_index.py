@@ -3249,7 +3249,8 @@ class AsyncIndex(BaseIndex):
         settings = MeilisearchSettings(**response_json)
 
         if response_json.get("embedders"):
-            # TODO: Add back after embedder setting issue fixed https://github.com/meilisearch/meilisearch/issues/4585
+            # Not coverted because it times out. It isn't an issue with the code here.
+            # https://github.com/meilisearch/meilisearch/issues/4585
             settings.embedders = embedder_json_to_settings_model(  # pragma: no cover
                 response_json["embedders"]
             )
