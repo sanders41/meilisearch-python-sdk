@@ -1598,27 +1598,24 @@ class AsyncIndex(BaseIndex):
             >>>     await index.add_documents_in_batches(documents)
         """
         if concurrency_limit:
-            async with asyncio.Semaphore(concurrency_limit):
-                if not use_task_groups():
-                    batches = [
-                        self.add_documents(
-                            x, primary_key, custom_metadata=custom_metadata, compress=compress
-                        )
-                        for x in batch(documents, batch_size)
-                    ]
-                    return await asyncio.gather(*batches)
+            semaphore = asyncio.Semaphore(concurrency_limit)
 
-                async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
-                    tasks = [
-                        tg.create_task(
-                            self.add_documents(
-                                x, primary_key, custom_metadata=custom_metadata, compress=compress
-                            )
-                        )
-                        for x in batch(documents, batch_size)
-                    ]
+            async def add_batch_with_limit(batch_data: Sequence[JsonMapping]) -> TaskInfo:
+                async with semaphore:
+                    return await self.add_documents(
+                        batch_data, primary_key, custom_metadata=custom_metadata, compress=compress
+                    )
 
-                return [x.result() for x in tasks]
+            if not use_task_groups():
+                batches = [add_batch_with_limit(data) for data in batch(documents, batch_size)]
+                return await asyncio.gather(*batches)
+
+            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+                tasks = [
+                    tg.create_task(add_batch_with_limit(x)) for x in batch(documents, batch_size)
+                ]
+
+            return [x.result() for x in tasks]
 
         if not use_task_groups():
             batches = [
@@ -1712,65 +1709,54 @@ class AsyncIndex(BaseIndex):
             return [response]
 
         if concurrency_limit:
-            async with asyncio.Semaphore(concurrency_limit):
-                if not use_task_groups():
-                    add_documents = []
-                    for path in directory.iterdir():
-                        if path.suffix == f".{document_type}":
-                            documents = await _async_load_documents_from_file(
-                                path, csv_delimiter, json_handler=self._json_handler
-                            )
-                            add_documents.append(
-                                self.add_documents(
-                                    documents,
-                                    primary_key,
-                                    custom_metadata=custom_metadata,
-                                    compress=compress,
-                                )
-                            )
+            semaphore = asyncio.Semaphore(concurrency_limit)
 
-                    raise_on_no_documents(add_documents, document_type, directory_path)
+            async def add_docs_with_limit(docs: Sequence[JsonMapping]) -> TaskInfo:
+                async with semaphore:
+                    return await self.add_documents(
+                        docs,
+                        primary_key,
+                        custom_metadata=custom_metadata,
+                        compress=compress,
+                    )
 
-                    if len(add_documents) > 1:
-                        # Send the first document on its own before starting the gather. Otherwise Meilisearch
-                        # returns an error because it thinks all entries are trying to create the same index.
-                        first_response = [await add_documents.pop()]
+            if not use_task_groups():
+                add_documents = []
+                for path in directory.iterdir():
+                    if path.suffix == f".{document_type}":
+                        documents = await _async_load_documents_from_file(
+                            path, csv_delimiter, json_handler=self._json_handler
+                        )
+                        add_documents.append(add_docs_with_limit(documents))
 
-                        responses = await asyncio.gather(*add_documents)
-                        responses = [*first_response, *responses]
-                    else:
-                        responses = [await add_documents[0]]
+                raise_on_no_documents(add_documents, document_type, directory_path)
 
-                    return responses
+                if len(add_documents) > 1:
+                    # Send the first document on its own before starting the gather. Otherwise Meilisearch
+                    # returns an error because it thinks all entries are trying to create the same index.
+                    first_response = [await add_documents.pop(0)]
 
-                async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
-                    tasks = []
-                    all_results = []
-                    for i, path in enumerate(directory.iterdir()):
-                        if path.suffix == f".{document_type}":
-                            documents = await _async_load_documents_from_file(
-                                path, csv_delimiter, json_handler=self._json_handler
-                            )
-                            if i == 0:
-                                all_results = [
-                                    await self.add_documents(
-                                        documents,
-                                        primary_key=primary_key,
-                                        custom_metadata=custom_metadata,
-                                        compress=compress,
-                                    )
-                                ]
-                            else:
-                                tasks.append(
-                                    tg.create_task(
-                                        self.add_documents(
-                                            documents,
-                                            primary_key,
-                                            custom_metadata=custom_metadata,
-                                            compress=compress,
-                                        )
-                                    )
-                                )
+                    responses = await asyncio.gather(*add_documents)
+                    responses = [*first_response, *responses]
+                else:
+                    responses = [await add_documents[0]]
+
+                return responses
+
+            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+                tasks = []
+                all_results = []
+                for i, path in enumerate(directory.iterdir()):
+                    if path.suffix == f".{document_type}":
+                        documents = await _async_load_documents_from_file(
+                            path, csv_delimiter, json_handler=self._json_handler
+                        )
+                        if i == 0:
+                            all_results = [await add_docs_with_limit(documents)]
+                        else:
+                            tasks.append(tg.create_task(add_docs_with_limit(documents)))
+
+            return [*all_results, *[x.result() for x in tasks]]
 
         if not use_task_groups():
             add_documents = []
@@ -2370,29 +2356,26 @@ class AsyncIndex(BaseIndex):
             >>>     await index.update_documents_in_batches(documents)
         """
         if concurrency_limit:
-            async with asyncio.Semaphore(concurrency_limit):
-                if not use_task_groups():
-                    batches = [
-                        self.update_documents(
-                            x,
-                            primary_key=primary_key,
-                            custom_metadata=custom_metadata,
-                            compress=compress,
-                        )
-                        for x in batch(documents, batch_size)
-                    ]
-                    return await asyncio.gather(*batches)
+            semaphore = asyncio.Semaphore(concurrency_limit)
 
-                async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
-                    tasks = [
-                        tg.create_task(
-                            self.update_documents(
-                                x, primary_key, custom_metadata=custom_metadata, compress=compress
-                            )
-                        )
-                        for x in batch(documents, batch_size)
-                    ]
-                return [x.result() for x in tasks]
+            async def update_batch_with_limit(batch_data: Sequence[JsonMapping]) -> TaskInfo:
+                async with semaphore:
+                    return await self.update_documents(
+                        batch_data,
+                        primary_key=primary_key,
+                        custom_metadata=custom_metadata,
+                        compress=compress,
+                    )
+
+            if not use_task_groups():
+                batches = [update_batch_with_limit(x) for x in batch(documents, batch_size)]
+                return await asyncio.gather(*batches)
+
+            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+                tasks = [
+                    tg.create_task(update_batch_with_limit(x)) for x in batch(documents, batch_size)
+                ]
+            return [x.result() for x in tasks]
 
         if not use_task_groups():
             batches = [
@@ -3138,23 +3121,24 @@ class AsyncIndex(BaseIndex):
             >>>     )
         """
         if concurrency_limit:
-            async with asyncio.Semaphore(concurrency_limit):
-                if not use_task_groups():
-                    tasks = [
-                        self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
-                        for filter in filters
-                    ]
-                    return await asyncio.gather(*tasks)
+            semaphore = asyncio.Semaphore(concurrency_limit)
 
-                async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
-                    tg_tasks = [
-                        tg.create_task(
-                            self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
-                        )
-                        for filter in filters
-                    ]
+            async def delete_with_limit(
+                filter_value: str | list[str | list[str]],
+            ) -> TaskInfo:
+                async with semaphore:
+                    return await self.delete_documents_by_filter(
+                        filter_value, custom_metadata=custom_metadata
+                    )
 
-                return [x.result() for x in tg_tasks]
+            if not use_task_groups():
+                tasks = [delete_with_limit(filter) for filter in filters]
+                return await asyncio.gather(*tasks)
+
+            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+                tg_tasks = [tg.create_task(delete_with_limit(filter)) for filter in filters]
+
+            return [x.result() for x in tg_tasks]
 
         if not use_task_groups():
             tasks = [
