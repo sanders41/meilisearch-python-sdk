@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Generator, MutableMapping, Sequence
 from datetime import datetime
-from itertools import chain
+from itertools import chain, islice
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlencode
@@ -82,9 +82,12 @@ class BaseIndex:
 def batch(
     documents: Sequence[MutableMapping], batch_size: int
 ) -> Generator[Sequence[MutableMapping], None, None]:
-    total_len = len(documents)
-    for i in range(0, total_len, batch_size):
-        yield documents[i : i + batch_size]
+    iterator = iter(documents)
+    while True:
+        batch_slice = list(islice(iterator, batch_size))
+        if not batch_slice:
+            break
+        yield batch_slice
 
 
 def combine_documents(documents: list[list[Any]]) -> list[Any]:
