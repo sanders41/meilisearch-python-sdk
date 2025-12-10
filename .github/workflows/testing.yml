@@ -52,7 +52,7 @@ jobs:
       - name: Test with pytest
         run: just test-parallel-ci
       - name: Upload coverage
-        uses: codecov/codecov-action@v5.5.1
+        uses: codecov/codecov-action@v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
@@ -92,7 +92,7 @@ jobs:
       - name: Test with pytest
         run: just test-parallel-ci-http2
       - name: Upload coverage
-        uses: codecov/codecov-action@v5.5.1
+        uses: codecov/codecov-action@v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
@@ -121,7 +121,7 @@ jobs:
       - name: Test with pytest
         run: just test-no-parallel-ci
       - name: Upload coverage
-        uses: codecov/codecov-action@v5.5.1
+        uses: codecov/codecov-action@v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
@@ -161,7 +161,7 @@ jobs:
       - name: Test with pytest
         run: just test-no-parallel-ci-http2
       - name: Upload coverage
-        uses: codecov/codecov-action@v5.5.1
+        uses: codecov/codecov-action@v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
