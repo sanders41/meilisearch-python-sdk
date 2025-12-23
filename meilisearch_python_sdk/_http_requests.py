@@ -55,7 +55,7 @@ class AsyncHttpRequests:
             else:
                 if body and compress:
                     if content_type == "application/json":
-                        body = gzip.compress(self.json_handler.dumps(body).encode("utf-8"))
+                        body = gzip.compress(self.json_handler.dump_bytes(body))
                     else:
                         body = gzip.compress((body).encode("utf-8"))
                 response = await http_method(path, content=body, headers=headers)
@@ -137,7 +137,7 @@ class HttpRequests:
             else:
                 if body and compress:
                     if content_type == "application/json":
-                        body = gzip.compress(self.json_handler.dumps(body).encode("utf-8"))
+                        body = gzip.compress(self.json_handler.dump_bytes(body))
                     else:
                         body = gzip.compress((body).encode("utf-8"))
                 response = http_method(path, content=body, headers=headers)
