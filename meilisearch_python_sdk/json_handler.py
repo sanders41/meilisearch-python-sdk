@@ -22,6 +22,10 @@ class _JsonHandler(ABC):
 
     @staticmethod
     @abstractmethod
+    def dump_bytes(obj: Any) -> bytes: ...
+
+    @staticmethod
+    @abstractmethod
     def loads(json_string: str | bytes | bytearray) -> Any: ...
 
 
@@ -42,6 +46,10 @@ class BuiltinHandler(_JsonHandler):
         return json.dumps(obj, cls=BuiltinHandler.serializer)
 
     @staticmethod
+    def dump_bytes(obj: Any) -> bytes:
+        return json.dumps(obj, cls=BuiltinHandler.serializer).encode("utf-8")
+
+    @staticmethod
     def loads(json_string: str | bytes | bytearray) -> Any:
         return json.loads(json_string)
 
@@ -56,6 +64,10 @@ class OrjsonHandler(_JsonHandler):
         return orjson.dumps(obj).decode("utf-8")
 
     @staticmethod
+    def dump_bytes(obj: Any) -> bytes:
+        return orjson.dumps(obj)
+
+    @staticmethod
     def loads(json_string: str | bytes | bytearray) -> Any:
         return orjson.loads(json_string)
 
@@ -68,6 +80,10 @@ class UjsonHandler(_JsonHandler):
     @staticmethod
     def dumps(obj: Any) -> str:
         return ujson.dumps(obj)
+
+    @staticmethod
+    def dump_bytes(obj: Any) -> bytes:
+        return ujson.dumps(obj).encode("utf-8")
 
     @staticmethod
     def loads(json_string: str | bytes | bytearray) -> Any:
