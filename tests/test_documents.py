@@ -755,6 +755,21 @@ def test_update_documents_with_custom_metadata(index_with_documents, small_movie
     assert response["title"] != "Some title"
 
 
+def test_update_documents_skip_creation(index_with_documents, small_movies):
+    index = index_with_documents()
+    response = index.get_documents()
+    doc_id = response.results[0]["id"]
+    response.results[0]["title"] = "Some title"
+    update = index.update_documents([response.results[0]], skip_creation=True)
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.get_document(doc_id)
+    assert response["title"] == "Some title"
+    update = index.update_documents(small_movies)
+    wait_for_task(index.http_client, update.task_uid)
+    response = index.get_document(doc_id)
+    assert response["title"] != "Some title"
+
+
 @pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_with_primary_key(compress, client, small_movies):
     primary_key = "release_date"

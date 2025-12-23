@@ -2170,6 +2170,7 @@ class AsyncIndex(BaseIndex):
         primary_key: str | None = None,
         *,
         custom_metadata: str | None = None,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> TaskInfo:
         """Update documents in the index.
@@ -2179,6 +2180,8 @@ class AsyncIndex(BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -2201,9 +2204,10 @@ class AsyncIndex(BaseIndex):
         params = {}
         if primary_key:
             params["primaryKey"] = primary_key
-
         if custom_metadata:
             params["customMetadata"] = custom_metadata
+        if skip_creation:
+            params["skipCreation"] = "true"
 
         if params:
             url = build_encoded_url(self._documents_url, params)
@@ -2320,6 +2324,7 @@ class AsyncIndex(BaseIndex):
         primary_key: str | None = None,
         custom_metadata: str | None = None,
         compress: bool = False,
+        skip_creation: bool = False,
         concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
@@ -2334,6 +2339,8 @@ class AsyncIndex(BaseIndex):
                 Defaults to None.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             concurrency_limit: If set this will limit the number of batches that will be sent
                 concurrently. This can be helpful if you find you are overloading the Meilisearch
                 server with requests. Defaults to None.
@@ -2364,6 +2371,7 @@ class AsyncIndex(BaseIndex):
                         batch_data,
                         primary_key=primary_key,
                         custom_metadata=custom_metadata,
+                        skip_creation=skip_creation,
                         compress=compress,
                     )
 
@@ -2380,7 +2388,11 @@ class AsyncIndex(BaseIndex):
         if not use_task_groups():
             batches = [
                 self.update_documents(
-                    x, primary_key, custom_metadata=custom_metadata, compress=compress
+                    x,
+                    primary_key,
+                    custom_metadata=custom_metadata,
+                    skip_creation=skip_creation,
+                    compress=compress,
                 )
                 for x in batch(documents, batch_size)
             ]
@@ -2390,7 +2402,11 @@ class AsyncIndex(BaseIndex):
             tasks = [
                 tg.create_task(
                     self.update_documents(
-                        x, primary_key, custom_metadata=custom_metadata, compress=compress
+                        x,
+                        primary_key,
+                        custom_metadata=custom_metadata,
+                        skip_creation=skip_creation,
+                        compress=compress,
                     )
                 )
                 for x in batch(documents, batch_size)
@@ -2406,6 +2422,7 @@ class AsyncIndex(BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
@@ -2422,6 +2439,8 @@ class AsyncIndex(BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -2458,7 +2477,11 @@ class AsyncIndex(BaseIndex):
             combined = await loop.run_in_executor(None, partial(combine_documents_, all_documents))
 
             response = await self.update_documents(
-                combined, primary_key, custom_metadata=custom_metadata, compress=compress
+                combined,
+                primary_key,
+                custom_metadata=custom_metadata,
+                skip_creation=skip_creation,
+                compress=compress,
             )
             return [response]
 
@@ -2474,6 +2497,7 @@ class AsyncIndex(BaseIndex):
                             documents,
                             primary_key,
                             custom_metadata=custom_metadata,
+                            skip_creation=skip_creation,
                             compress=compress,
                         )
                     )
@@ -2505,6 +2529,7 @@ class AsyncIndex(BaseIndex):
                                 documents,
                                 primary_key,
                                 custom_metadata=custom_metadata,
+                                skip_creation=skip_creation,
                                 compress=compress,
                             )
                         ]
@@ -2515,6 +2540,7 @@ class AsyncIndex(BaseIndex):
                                     documents,
                                     primary_key,
                                     custom_metadata=custom_metadata,
+                                    skip_creation=skip_creation,
                                     compress=compress,
                                 )
                             )
@@ -2535,6 +2561,7 @@ class AsyncIndex(BaseIndex):
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
         compress: bool = False,
+        skip_creation: bool = False,
         concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
@@ -2554,6 +2581,8 @@ class AsyncIndex(BaseIndex):
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             concurrency_limit: If set this will limit the number of batches that will be sent
                 concurrently. This can be helpful if you find you are overloading the Meilisearch
                 server with requests. Defaults to None.
@@ -2597,6 +2626,7 @@ class AsyncIndex(BaseIndex):
                 primary_key=primary_key,
                 custom_metadata=custom_metadata,
                 compress=compress,
+                skip_creation=skip_creation,
                 concurrency_limit=concurrency_limit,
             )
 
@@ -2616,6 +2646,7 @@ class AsyncIndex(BaseIndex):
                             primary_key=primary_key,
                             custom_metadata=custom_metadata,
                             compress=compress,
+                            skip_creation=skip_creation,
                             concurrency_limit=concurrency_limit,
                         )
                     )
@@ -2648,6 +2679,7 @@ class AsyncIndex(BaseIndex):
                             primary_key=primary_key,
                             custom_metadata=custom_metadata,
                             compress=compress,
+                            skip_creation=skip_creation,
                             concurrency_limit=concurrency_limit,
                         )
                     else:
@@ -2659,6 +2691,7 @@ class AsyncIndex(BaseIndex):
                                     primary_key=primary_key,
                                     custom_metadata=custom_metadata,
                                     compress=compress,
+                                    skip_creation=skip_creation,
                                     concurrency_limit=concurrency_limit,
                                 )
                             )
@@ -2675,6 +2708,7 @@ class AsyncIndex(BaseIndex):
         csv_delimiter: str | None = None,
         *,
         custom_metadata: str | None = None,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
@@ -2686,6 +2720,8 @@ class AsyncIndex(BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -2708,7 +2744,11 @@ class AsyncIndex(BaseIndex):
         )
 
         return await self.update_documents(
-            documents, primary_key=primary_key, custom_metadata=custom_metadata, compress=compress
+            documents,
+            primary_key=primary_key,
+            custom_metadata=custom_metadata,
+            skip_creation=skip_creation,
+            compress=compress,
         )
 
     async def update_documents_from_file_in_batches(
@@ -2719,6 +2759,7 @@ class AsyncIndex(BaseIndex):
         primary_key: str | None = None,
         custom_metadata: str | None = None,
         compress: bool = False,
+        skip_creation: bool = False,
         concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
@@ -2731,6 +2772,8 @@ class AsyncIndex(BaseIndex):
                 Defaults to None.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             concurrency_limit: If set this will limit the number of batches that will be sent
                 concurrently. This can be helpful if you find you are overloading the Meilisearch
                 server with requests. Defaults to None.
@@ -2760,6 +2803,7 @@ class AsyncIndex(BaseIndex):
             primary_key=primary_key,
             custom_metadata=custom_metadata,
             compress=compress,
+            skip_creation=skip_creation,
             concurrency_limit=concurrency_limit,
         )
 
@@ -2770,6 +2814,7 @@ class AsyncIndex(BaseIndex):
         csv_delimiter: str | None = None,
         *,
         custom_metadata: str | None = None,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
@@ -2785,6 +2830,8 @@ class AsyncIndex(BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -2832,6 +2879,8 @@ class AsyncIndex(BaseIndex):
             parameters["csvDelimiter"] = csv_delimiter
         if custom_metadata:
             parameters["customMetadata"] = custom_metadata
+        if skip_creation:
+            parameters["skipCreation"] = "true"
 
         if parameters:
             url = build_encoded_url(self._documents_url, parameters)

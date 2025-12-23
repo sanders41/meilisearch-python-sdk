@@ -118,6 +118,21 @@ async def test_add_documents_with_custom_metadata(async_empty_index, small_movie
     assert update.custom_metadata == custom_metadata
 
 
+async def test_update_documents_skip_creation(async_index_with_documents, small_movies):
+    index = await async_index_with_documents()
+    response = await index.get_documents()
+    doc_id = response.results[0]["id"]
+    response.results[0]["title"] = "Some title"
+    update = await index.update_documents([response.results[0]], skip_creation=True)
+    await async_wait_for_task(index.http_client, update.task_uid)
+    response = await index.get_document(doc_id)
+    assert response["title"] == "Some title"
+    update = await index.update_documents(small_movies)
+    await async_wait_for_task(index.http_client, update.task_uid)
+    response = await index.get_document(doc_id)
+    assert response["title"] != "Some title"
+
+
 @pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key, compress",
