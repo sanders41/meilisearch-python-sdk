@@ -118,6 +118,21 @@ async def test_add_documents_with_custom_metadata(async_empty_index, small_movie
     assert update.custom_metadata == custom_metadata
 
 
+async def test_update_documents_skip_creation(async_index_with_documents, small_movies):
+    index = await async_index_with_documents()
+    response = await index.get_documents()
+    doc_id = response.results[0]["id"]
+    response.results[0]["title"] = "Some title"
+    update = await index.update_documents([response.results[0]], skip_creation=True)
+    await async_wait_for_task(index.http_client, update.task_uid)
+    response = await index.get_document(doc_id)
+    assert response["title"] == "Some title"
+    update = await index.update_documents(small_movies)
+    await async_wait_for_task(index.http_client, update.task_uid)
+    response = await index.get_document(doc_id)
+    assert response["title"] != "Some title"
+
+
 @pytest.mark.parametrize("batch_size", (100, 500))
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key, compress",
@@ -1386,6 +1401,27 @@ async def test_update_documents_raw_file_custom_metadata(
     assert update.status == "succeeded"
     assert update.custom_metadata is not None
     assert update.custom_metadata == custom_metadata
+
+
+async def test_update_documents_raw_file_skip_creation(
+    async_client, small_movies_csv_path, small_movies
+):
+    small_movies[0]["title"] = "Some title"
+    movie_id = small_movies[0]["id"]
+    index = async_client.index(str(uuid4()))
+    response = await index.add_documents(small_movies)
+    update = await async_wait_for_task(index.http_client, response.task_uid)
+    assert await index.get_primary_key() == "id"
+    response = await index.get_documents()
+    got_title = filter(lambda x: x["id"] == movie_id, response.results)
+    assert list(got_title)[0]["title"] == "Some title"
+    update = await index.update_documents_from_raw_file(
+        small_movies_csv_path, primary_key="id", skip_creation=True
+    )
+    update = await async_wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    assert update.status == "succeeded"
+    response = await index.get_documents()
+    assert response.results[0]["title"] != "Some title"
 
 
 @pytest.mark.parametrize("path_type", ("path", "str"))

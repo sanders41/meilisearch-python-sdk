@@ -1602,6 +1602,7 @@ class Index(BaseIndex):
         primary_key: str | None = None,
         *,
         custom_metadata: str | None = None,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> TaskInfo:
         """Update documents in the index.
@@ -1611,6 +1612,8 @@ class Index(BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1636,6 +1639,8 @@ class Index(BaseIndex):
             params["primaryKey"] = primary_key
         if custom_metadata:
             params["customMetadata"] = custom_metadata
+        if skip_creation:
+            params["skipCreation"] = "true"
 
         if params:
             url = build_encoded_url(self._documents_url, params)
@@ -1670,6 +1675,7 @@ class Index(BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         custom_metadata: str | None = None,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> list[TaskInfo]:
         """Update documents in batches to reduce RAM usage with indexing.
@@ -1683,6 +1689,8 @@ class Index(BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1704,7 +1712,11 @@ class Index(BaseIndex):
         """
         return [
             self.update_documents(
-                x, primary_key, custom_metadata=custom_metadata, compress=compress
+                x,
+                primary_key,
+                custom_metadata=custom_metadata,
+                skip_creation=skip_creation,
+                compress=compress,
             )
             for x in batch(documents, batch_size)
         ]
@@ -1718,6 +1730,7 @@ class Index(BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
@@ -1734,6 +1747,8 @@ class Index(BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1769,7 +1784,11 @@ class Index(BaseIndex):
             combined = combine_documents_(all_documents)
 
             response = self.update_documents(
-                combined, primary_key, custom_metadata=custom_metadata, compress=compress
+                combined,
+                primary_key,
+                custom_metadata=custom_metadata,
+                skip_creation=skip_creation,
+                compress=compress,
             )
             return [response]
 
@@ -1781,7 +1800,11 @@ class Index(BaseIndex):
                 )
                 responses.append(
                     self.update_documents(
-                        documents, primary_key, custom_metadata=custom_metadata, compress=compress
+                        documents,
+                        primary_key,
+                        custom_metadata=custom_metadata,
+                        skip_creation=skip_creation,
+                        compress=compress,
                     )
                 )
 
@@ -1799,6 +1822,7 @@ class Index(BaseIndex):
         document_type: str = "json",
         csv_delimiter: str | None = None,
         combine_documents: bool = True,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> list[TaskInfo]:
         """Load all json files from a directory and update the documents.
@@ -1817,6 +1841,8 @@ class Index(BaseIndex):
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
                 before indexing them. Defaults to True.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1856,6 +1882,7 @@ class Index(BaseIndex):
                 batch_size=batch_size,
                 primary_key=primary_key,
                 custom_metadata=custom_metadata,
+                skip_creation=skip_creation,
                 compress=compress,
             )
 
@@ -1872,6 +1899,7 @@ class Index(BaseIndex):
                         batch_size=batch_size,
                         primary_key=primary_key,
                         custom_metadata=custom_metadata,
+                        skip_creation=skip_creation,
                         compress=compress,
                     )
                 )
@@ -1887,6 +1915,7 @@ class Index(BaseIndex):
         csv_delimiter: str | None = None,
         *,
         custom_metadata: str | None = None,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents in the index from a json file.
@@ -1898,6 +1927,8 @@ class Index(BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1920,7 +1951,11 @@ class Index(BaseIndex):
         )
 
         return self.update_documents(
-            documents, primary_key=primary_key, custom_metadata=custom_metadata, compress=compress
+            documents,
+            primary_key=primary_key,
+            custom_metadata=custom_metadata,
+            skip_creation=skip_creation,
+            compress=compress,
         )
 
     def update_documents_from_file_in_batches(
@@ -1930,6 +1965,7 @@ class Index(BaseIndex):
         batch_size: int = 1000,
         primary_key: str | None = None,
         custom_metadata: str | None = None,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> list[TaskInfo]:
         """Updates documents form a json file in batches to reduce RAM usage with indexing.
@@ -1941,6 +1977,8 @@ class Index(BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1965,6 +2003,7 @@ class Index(BaseIndex):
             batch_size=batch_size,
             primary_key=primary_key,
             custom_metadata=custom_metadata,
+            skip_creation=skip_creation,
             compress=compress,
         )
 
@@ -1975,6 +2014,7 @@ class Index(BaseIndex):
         csv_delimiter: str | None = None,
         *,
         custom_metadata: str | None = None,
+        skip_creation: bool = False,
         compress: bool = False,
     ) -> TaskInfo:
         """Directly send csv or ndjson files to Meilisearch without pre-processing.
@@ -1990,6 +2030,8 @@ class Index(BaseIndex):
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            skip_creation: When set to true, documents that don't exist in the index are silently
+                ignored rather than created. Default = False.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -2037,6 +2079,8 @@ class Index(BaseIndex):
             parameters["csvDelimiter"] = csv_delimiter
         if custom_metadata:
             parameters["customMetadata"] = custom_metadata
+        if skip_creation:
+            parameters["skipCreation"] = "true"
 
         if parameters:
             url = build_encoded_url(self._documents_url, parameters)
