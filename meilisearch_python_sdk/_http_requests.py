@@ -53,11 +53,19 @@ class AsyncHttpRequests:
                     path, content=self.json_handler.dumps(body), headers=headers
                 )
             else:
-                if body and compress:
+                if compress:
                     if content_type == "application/json":
                         body = gzip.compress(self.json_handler.dump_bytes(body))
                     else:
-                        body = gzip.compress((body).encode("utf-8"))
+                        if isinstance(body, bytes):
+                            data = body
+                        elif isinstance(body, bytearray):
+                            data = bytes(body)
+                        else:
+                            data = body.encode("utf-8")
+
+                        body = gzip.compress(data)
+
                 response = await http_method(path, content=body, headers=headers)
 
             response.raise_for_status()
@@ -135,11 +143,19 @@ class HttpRequests:
             elif content_type == "application/json" and not compress:
                 response = http_method(path, content=self.json_handler.dumps(body), headers=headers)
             else:
-                if body and compress:
+                if compress:
                     if content_type == "application/json":
                         body = gzip.compress(self.json_handler.dump_bytes(body))
                     else:
-                        body = gzip.compress((body).encode("utf-8"))
+                        if isinstance(body, bytes):
+                            data = body
+                        elif isinstance(body, bytearray):
+                            data = bytes(body)
+                        else:
+                            data = body.encode("utf-8")
+
+                        body = gzip.compress(data)
+
                 response = http_method(path, content=body, headers=headers)
 
             response.raise_for_status()

@@ -455,6 +455,17 @@ async def test_add_documents_raw_file_csv(
     assert update.status == "succeeded"
 
 
+@pytest.mark.parametrize("compress", (True, False))
+async def test_add_documents_raw_file_csv_empty(compress, async_client, tmp_path):
+    index = async_client.index(str(uuid4()))
+    path = tmp_path / "test.csv"
+    path.write_text("")
+    with pytest.raises(MeilisearchApiError) as ex:
+        await index.add_documents_from_raw_file(path, compress=compress)
+
+    assert "A csv payload is missing" in str(ex.value)
+
+
 async def test_add_documents_raw_file_csv_with_custom_metadata(async_client, small_movies_csv_path):
     index = async_client.index(str(uuid4()))
     custom_metadata = "test metadata"
