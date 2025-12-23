@@ -393,6 +393,17 @@ def test_add_documents_raw_file_csv(
     assert index.get_primary_key() == expected_primary_key
 
 
+@pytest.mark.parametrize("compress", (True, False))
+def test_add_documents_raw_file_csv_empty(compress, client, tmp_path):
+    index = client.index(str(uuid4()))
+    path = tmp_path / "test.csv"
+    path.write_text("")
+    with pytest.raises(MeilisearchApiError) as ex:
+        index.add_documents_from_raw_file(path, compress=compress)
+
+    assert "A csv payload is missing" in str(ex.value)
+
+
 def test_add_documents_raw_file_csv_with_custom_metadata(client, small_movies_csv_path):
     index = client.index(str(uuid4()))
     custom_metadata = "test metadata"
