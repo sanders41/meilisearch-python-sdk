@@ -1281,6 +1281,25 @@ def test_update_documents_raw_file_custom_metadata(client, small_movies_csv_path
     assert update.custom_metadata == custom_metadata
 
 
+def test_update_documents_raw_file_skip_creation(client, small_movies_csv_path, small_movies):
+    small_movies[0]["title"] = "Some title"
+    movie_id = small_movies[0]["id"]
+    index = client.index(str(uuid4()))
+    response = index.add_documents(small_movies)
+    update = wait_for_task(index.http_client, response.task_uid)
+    assert index.get_primary_key() == "id"
+    response = index.get_documents()
+    got_title = filter(lambda x: x["id"] == movie_id, response.results)
+    assert list(got_title)[0]["title"] == "Some title"
+    update = index.update_documents_from_raw_file(
+        small_movies_csv_path, primary_key="id", skip_creation=True
+    )
+    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    assert update.status == "succeeded"
+    response = index.get_documents()
+    assert response.results[0]["title"] != "Some title"
+
+
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("compress", (True, False))
 def test_update_documents_raw_file_csv_with_delimiter(
