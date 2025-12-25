@@ -69,6 +69,9 @@ asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 markers = ["no_parallel"]
 
+[tool.coverage.report]
+exclude_lines = ["if __name__ == .__main__.:", "if TYPE_CHECKING:", "pragma: no cover"]
+
 [tool.mypy]
 check_untyped_defs = true
 disallow_untyped_defs = true

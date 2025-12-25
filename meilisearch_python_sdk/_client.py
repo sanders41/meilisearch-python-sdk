@@ -41,7 +41,7 @@ from meilisearch_python_sdk.models.webhook import Webhook, WebhookCreate, Webhoo
 from meilisearch_python_sdk.plugins import AsyncIndexPlugins, IndexPlugins
 from meilisearch_python_sdk.types import JsonDict
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     import sys
     from types import TracebackType
 
