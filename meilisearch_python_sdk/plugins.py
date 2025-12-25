@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from enum import Enum
 from typing import TYPE_CHECKING, Any, NamedTuple, Protocol
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from meilisearch_python_sdk.models.search import FacetSearchResults, SearchResults
     from meilisearch_python_sdk.models.task import TaskInfo
     from meilisearch_python_sdk.types import JsonDict, JsonMapping

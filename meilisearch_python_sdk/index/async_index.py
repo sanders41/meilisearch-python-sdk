@@ -59,7 +59,7 @@ from meilisearch_python_sdk.plugins import (
 )
 from meilisearch_python_sdk.types import JsonDict
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     import sys
 
     from meilisearch_python_sdk.types import Filter, JsonMapping
