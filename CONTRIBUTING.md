@@ -76,7 +76,7 @@ git checkout main
 git pull upstream main --ff-only
 ```
 
-### Code Standards and tests (ruff, mypy, pytest, and pre-commit)
+### Code Standards and tests (ruff, mypy, pytest, and prek)
 
 meilisearch-python-sdk uses [ruff](https://github.com/charliermarsh/ruff), and
 [mypy](https://mypy.readthedocs.io/en/stable/) to ensure consistent code formatting.
@@ -94,18 +94,18 @@ uv run ruff check .
 uv run mypy meilisearch_python_sdk
 ```
 
-It is also suggested that you setup [pre-commit](https://pre-commit.com/) in order to run linting
-when you commit changes to you branch. To setup pre-commit for this project run:
+It is also suggested that you setup [prek](https://github.com/j178/prek) in order to run linting
+when you commit changes to you branch. To setup prek for this project run:
 
 ```sh
-pre-commit install
+prek install
 ```
 
-After this pre-commit will automatically run any time you check in code to your branches. You can
-also run pre-commit at any time with:
+After this prek will automatically run any time you check in code to your branches. You can
+also run prek at any time with:
 
 ```sh
-pre-commit run --all-files
+prek run --all-files
 ```
 
 ### Type Hints
@@ -224,7 +224,7 @@ Now you can commit your changes in your local repository:
 git commit -am 'Some short helpful message to describe your changes'
 ```
 
-If you setup pre-commit and any of the tests fail the commit will be cancelled and you will need to
+If you setup prek and any of the tests fail the commit will be cancelled and you will need to
 fix any errors. Once the errors are fixed you can run the same git commit command again.
 
 ## Push your changes
