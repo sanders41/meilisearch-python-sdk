@@ -21,12 +21,12 @@ from meilisearch_python_sdk.errors import (
     MeilisearchCommunicationError,
     MeilisearchError,
 )
-from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 
 
 class AsyncHttpRequests:
     def __init__(
-        self, http_client: AsyncClient, json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler
+        self, http_client: AsyncClient, json_handler: BuiltinHandler | OrjsonHandler
     ) -> None:
         self.http_client = http_client
         self.json_handler = json_handler
@@ -118,9 +118,7 @@ class AsyncHttpRequests:
 
 
 class HttpRequests:
-    def __init__(
-        self, http_client: Client, json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler
-    ) -> None:
+    def __init__(self, http_client: Client, json_handler: BuiltinHandler | OrjsonHandler) -> None:
         self.http_client = http_client
         self.json_handler = json_handler
 

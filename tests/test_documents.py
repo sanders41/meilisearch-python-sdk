@@ -349,17 +349,6 @@ def test_add_documents_from_file_orjson_handler(
     assert update.status == "succeeded"
 
 
-def test_add_documents_from_file_ujson_handler(
-    client_ujson_handler,
-    small_movies_path,
-):
-    index = client_ujson_handler.index(str(uuid4()))
-    response = index.add_documents_from_file(small_movies_path)
-
-    update = wait_for_task(index.http_client, response.task_uid)
-    assert update.status == "succeeded"
-
-
 @pytest.mark.parametrize(
     "primary_key, expected_primary_key", [("release_date", "release_date"), (None, "id")]
 )
@@ -1545,14 +1534,6 @@ def test_add_documents_custom_serializer(compress, empty_index):
 @pytest.mark.parametrize("compress", (True, False))
 def test_add_documents_orjson_handler(compress, client_orjson_handler, small_movies):
     index = client_orjson_handler.create_index(str(uuid4()))
-    response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
-    assert update.status == "succeeded"
-
-
-@pytest.mark.parametrize("compress", (True, False))
-def test_add_documents_ujson_handler(compress, client_ujson_handler, small_movies):
-    index = client_ujson_handler.create_index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid)
     assert update.status == "succeeded"

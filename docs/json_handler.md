@@ -1,9 +1,9 @@
 # JSON Handler
 
-For json loads and dumps you have the option to use the `json` module from the standard library,
-orjson, or ujson. This done by setting the `json_handler` when creating the `AsyncClient` or
-`Client`. By default the standard library `json` module will be used. The examples below use
-`Client`, and the same options are available for `AsyncClient`.
+For json loads and dumps you have the option to use the `json` module from the standard library, or
+orjson. This done by setting the `json_handler` when creating the `AsyncClient` or `Client`. By
+default the standard library `json` module will be used. The examples below use `Client`, and the
+same options are available for `AsyncClient`.
 
 ## Standard Library `json` Module
 
@@ -58,26 +58,6 @@ documents = [
     {"id": uuid4(), "title": "Test 2"},
 ]
 with Client("http://127.0.0.1:7700", json_handler=OrjsonHandler()) as client:
-    index = client.index("movies", primary_key="id")
-    index.add_documents(documents)
-```
-
-## ujson
-
-### Example
-
-```py
-from uuid import uuid4
-
-from meilisearch_python_sdk import Client
-from meilisearch_python_sdk.json_handler import UjsonHandler
-
-
-documents = [
-    {"id": uuid4(), "title": "test 1"},
-    {"id": uuid4(), "title": "Test 2"},
-]
-with Client("http://127.0.0.1:7700", json_handler=UjsonHandler()) as client:
     index = client.index("movies", primary_key="id")
     index.add_documents(documents)
 ```

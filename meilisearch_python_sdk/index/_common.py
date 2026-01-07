@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 
 from meilisearch_python_sdk._utils import iso_to_date_time
 from meilisearch_python_sdk.errors import MeilisearchError
-from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.search import (
     Hybrid,
 )
@@ -50,7 +50,7 @@ class BaseIndex:
         primary_key: str | None = None,
         created_at: str | datetime | None = None,
         updated_at: str | datetime | None = None,
-        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | None = None,
         hits_type: Any = JsonDict,
     ):
         self.uid = uid

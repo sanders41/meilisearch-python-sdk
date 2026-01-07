@@ -132,17 +132,6 @@ def test_create_index_orjson_handler(client_orjson_handler):
     assert isinstance(index.updated_at, datetime)
 
 
-def test_create_index_ujson_handler(client_ujson_handler):
-    uid = str(uuid4())
-    index = client_ujson_handler.create_index(uid=uid)
-
-    assert index.uid == uid
-
-    assert index.primary_key is None
-    assert isinstance(index.created_at, datetime)
-    assert isinstance(index.updated_at, datetime)
-
-
 def test_create_index_with_settings(client, new_settings):
     uid = str(uuid4())
     index = client.create_index(uid=uid, settings=new_settings)

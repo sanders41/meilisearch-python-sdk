@@ -18,7 +18,7 @@ from httpx import AsyncClient as HttpxAsyncClient
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
-from meilisearch_python_sdk.json_handler import OrjsonHandler, UjsonHandler
+from meilisearch_python_sdk.json_handler import OrjsonHandler
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
@@ -72,14 +72,6 @@ async def async_client_orjson_handler(base_url, ssl_verify):
 
 
 @pytest.fixture(scope="session")
-async def async_client_ujson_handler(base_url, ssl_verify):
-    async with AsyncClient(
-        base_url, MASTER_KEY, json_handler=UjsonHandler(), verify=ssl_verify
-    ) as client:
-        yield client
-
-
-@pytest.fixture(scope="session")
 async def async_client_with_plugins(base_url, ssl_verify):
     async with AsyncClient(base_url, MASTER_KEY, verify=ssl_verify) as client:
         yield client
@@ -94,11 +86,6 @@ def client(base_url, ssl_verify):
 @pytest.fixture(scope="session")
 def client_orjson_handler(base_url, ssl_verify):
     yield Client(base_url, MASTER_KEY, json_handler=OrjsonHandler(), verify=ssl_verify)
-
-
-@pytest.fixture(scope="session")
-def client_ujson_handler(base_url, ssl_verify):
-    yield Client(base_url, MASTER_KEY, json_handler=UjsonHandler(), verify=ssl_verify)
 
 
 @pytest.fixture(autouse=True)
