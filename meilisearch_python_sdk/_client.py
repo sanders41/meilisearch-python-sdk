@@ -16,7 +16,7 @@ from meilisearch_python_sdk._batch import get_batches as _get_batches
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
 from meilisearch_python_sdk.errors import InvalidRestriction, MeilisearchApiError
 from meilisearch_python_sdk.index import AsyncIndex, Index
-from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.client import (
     ClientStats,
     Key,
@@ -59,7 +59,7 @@ class BaseClient:
         self,
         api_key: str | None = None,
         custom_headers: dict[str, str] | None = None,
-        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | None = None,
     ) -> None:
         self.json_handler = json_handler if json_handler else BuiltinHandler()
         self._headers: dict[str, str] | None = None
@@ -153,7 +153,7 @@ class AsyncClient(BaseClient):
         timeout: int | None = None,
         verify: bool | SSLContext = True,
         custom_headers: dict[str, str] | None = None,
-        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | None = None,
         http2: bool = False,
     ) -> None:
         """Class initializer.
@@ -169,9 +169,9 @@ class AsyncClient(BaseClient):
             custom_headers: Custom headers to add when sending data to Meilisearch. Defaults to
                 None.
             json_handler: The module to use for json operations. The options are BuiltinHandler
-                (uses the json module from the standard library), OrjsonHandler (uses orjson), or
-                UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
-                extra needs to be included. Default: BuiltinHandler.
+                (uses the json module from the standard library), or OrjsonHandler (uses orjson).
+                Note that in order use orjson the corresponding extra needs to be included.
+                Default: BuiltinHandler.
             http2: Whether or not to use HTTP/2. Defaults to False.
         """
         super().__init__(api_key, custom_headers, json_handler)
@@ -1316,7 +1316,7 @@ class Client(BaseClient):
         timeout: int | None = None,
         verify: bool | SSLContext = True,
         custom_headers: dict[str, str] | None = None,
-        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | None = None,
         http2: bool = False,
     ) -> None:
         """Class initializer.
@@ -1332,9 +1332,9 @@ class Client(BaseClient):
             custom_headers: Custom headers to add when sending data to Meilisearch. Defaults to
                 None.
             json_handler: The module to use for json operations. The options are BuiltinHandler
-                (uses the json module from the standard library), OrjsonHandler (uses orjson), or
-                UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
-                extra needs to be included. Default: BuiltinHandler.
+                (uses the json module from the standard library), or OrjsonHandler (uses orjson).
+                Note that in order use orjson the corresponding extra needs to be included.
+                Default: BuiltinHandler.
             http2: If set to True, the client will use HTTP/2. Defaults to False.
         """
         super().__init__(api_key, custom_headers, json_handler)
@@ -2467,7 +2467,7 @@ def _build_offset_limit_url(base: str, offset: int | None, limit: int | None) ->
 
 
 def _build_update_key_payload(
-    key: KeyUpdate, json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler
+    key: KeyUpdate, json_handler: BuiltinHandler | OrjsonHandler
 ) -> JsonDict:
     # The json_handler.loads(key.json()) is because Pydantic can't serialize a date in a Python dict,
     # but can when converting to a json string.

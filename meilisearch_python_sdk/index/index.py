@@ -26,7 +26,7 @@ from meilisearch_python_sdk.index._common import (
     validate_ranking_score_threshold,
 )
 from meilisearch_python_sdk.index._common import combine_documents as combine_documents_
-from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler, UjsonHandler
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.documents import DocumentsInfo
 from meilisearch_python_sdk.models.index import IndexStats
 from meilisearch_python_sdk.models.search import (
@@ -81,7 +81,7 @@ class Index(BaseIndex):
         created_at: str | datetime | None = None,
         updated_at: str | datetime | None = None,
         plugins: IndexPlugins | None = None,
-        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | None = None,
         *,
         hits_type: Any = JsonDict,
     ):
@@ -96,9 +96,9 @@ class Index(BaseIndex):
             updated_at: The date and time the index was last updated. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
             json_handler: The module to use for json operations. The options are BuiltinHandler
-                (uses the json module from the standard library), OrjsonHandler (uses orjson), or
-                UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
-                extra needs to be included. Default: BuiltinHandler.
+                (uses the json module from the standard library), or OrjsonHandler (uses orjson).
+                Note that in order use orjson the corresponding extra needs to be included.
+                Default: BuiltinHandler.
             hits_type: Allows for a custom type to be passed to use for hits. Defaults to
                 JsonDict
         """
@@ -460,7 +460,7 @@ class Index(BaseIndex):
         wait: bool = True,
         timeout_in_ms: int | None = None,
         plugins: IndexPlugins | None = None,
-        json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler | None = None,
+        json_handler: BuiltinHandler | OrjsonHandler | None = None,
         hits_type: Any = JsonDict,
     ) -> Self:
         """Creates a new index.
@@ -486,9 +486,9 @@ class Index(BaseIndex):
                 if the `None` option is used the wait time could be very long. Defaults to None.
             plugins: Optional plugins can be provided to extend functionality.
             json_handler: The module to use for json operations. The options are BuiltinHandler
-                (uses the json module from the standard library), OrjsonHandler (uses orjson), or
-                UjsonHandler (uses ujson). Note that in order use orjson or ujson the corresponding
-                extra needs to be included. Default: BuiltinHandler.
+                (uses the json module from the standard library), or OrjsonHandler (uses orjson).
+                Note that in order use orjson the corresponding extra needs to be included.
+                Default: BuiltinHandler.
             hits_type: Allows for a custom type to be passed to use for hits. Defaults to
                 JsonDict
 
@@ -3855,7 +3855,7 @@ def _load_documents_from_file(
     file_path: Path | str,
     csv_delimiter: str | None = None,
     *,
-    json_handler: BuiltinHandler | OrjsonHandler | UjsonHandler,
+    json_handler: BuiltinHandler | OrjsonHandler,
 ) -> list[dict[Any, Any]]:
     if isinstance(file_path, str):
         file_path = Path(file_path)

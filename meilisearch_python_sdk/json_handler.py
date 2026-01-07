@@ -9,11 +9,6 @@ try:
 except ImportError:  # pragma: no cover
     orjson = None  # type: ignore
 
-try:
-    import ujson
-except ImportError:  # pragma: no cover
-    ujson = None  # type: ignore
-
 
 class _JsonHandler(ABC):
     @staticmethod
@@ -70,21 +65,3 @@ class OrjsonHandler(_JsonHandler):
     @staticmethod
     def loads(json_string: str | bytes | bytearray) -> Any:
         return orjson.loads(json_string)
-
-
-class UjsonHandler(_JsonHandler):
-    def __init__(self) -> None:
-        if ujson is None:  # pragma: no cover
-            raise ValueError("ujson must be installed to use the UjsonHandler")
-
-    @staticmethod
-    def dumps(obj: Any) -> str:
-        return ujson.dumps(obj)
-
-    @staticmethod
-    def dump_bytes(obj: Any) -> bytes:
-        return ujson.dumps(obj).encode("utf-8")
-
-    @staticmethod
-    def loads(json_string: str | bytes | bytearray) -> Any:
-        return ujson.loads(json_string)
