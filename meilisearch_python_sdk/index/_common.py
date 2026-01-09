@@ -10,9 +10,7 @@ from urllib.parse import urlencode
 from meilisearch_python_sdk._utils import iso_to_date_time
 from meilisearch_python_sdk.errors import MeilisearchError
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
-from meilisearch_python_sdk.models.search import (
-    Hybrid,
-)
+from meilisearch_python_sdk.models.search import Hybrid
 from meilisearch_python_sdk.models.settings import (
     CompositeEmbedder,
     Embedders,
@@ -33,14 +31,7 @@ from meilisearch_python_sdk.plugins import (
 from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:
-    import sys
-
     from meilisearch_python_sdk.types import Filter, JsonMapping
-
-    if sys.version_info >= (3, 11):
-        pass
-    else:
-        pass
 
 
 class BaseIndex:
