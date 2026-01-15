@@ -15,7 +15,11 @@ class ModifyDocumentPlugin:
     PRE_EVENT = True  # Specifies the plugin should be run before adding documents
 
     def run_document_plugin(
-        self, event: Event, *, documents: Sequence[JsonMapping], **kwargs: Any
+        self,
+        event: Event,
+        *,
+        documents: Sequence[JsonMapping],
+        **kwargs: Any,  # noqa: ANN401
     ) -> Sequence[JsonMapping]:
         updated = []
         for i, document in enumerate(documents):
@@ -34,7 +38,11 @@ class FilterSearchResultsPlugin:
     PRE_EVENT = False
 
     def run_post_search_plugin(
-        self, event: Event, *, search_results: SearchResults, **kwargs: Any
+        self,
+        event: Event,
+        *,
+        search_results: SearchResults,
+        **kwargs: Any,  # noqa: ANN401
     ) -> SearchResults:
         filtered_hits = []
         for hit in search_results.hits:

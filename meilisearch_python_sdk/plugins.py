@@ -27,7 +27,9 @@ class AsyncPlugin(Protocol):
     PRE_EVENT: bool
 
     async def run_plugin(
-        self, event: AsyncEvent, **kwargs: Any
+        self,
+        event: AsyncEvent,
+        **kwargs: Any,  # noqa: ANN401
     ) -> (
         None | list[JsonDict] | TaskInfo | list[TaskInfo] | SearchResults | FacetSearchResults
     ):  # pragma: no cover
@@ -45,7 +47,7 @@ class AsyncDocumentPlugin(Protocol):
         *,
         documents: Sequence[JsonMapping],
         primary_key: str | None,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> Sequence[JsonMapping] | None:  # pragma: no cover
         ...
 
@@ -60,7 +62,7 @@ class AsyncPostSearchPlugin(Protocol):
         event: AsyncEvent,
         *,
         search_results: SearchResults,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> SearchResults | None:  # pragma: no cover
         ...
 
@@ -70,7 +72,9 @@ class Plugin(Protocol):
     PRE_EVENT: bool
 
     def run_plugin(
-        self, event: Event, **kwargs: Any
+        self,
+        event: Event,
+        **kwargs: Any,  # noqa: ANN401
     ) -> (
         None | list[JsonDict] | TaskInfo | list[TaskInfo] | SearchResults | FacetSearchResults
     ):  # pragma: no cover
@@ -87,7 +91,7 @@ class DocumentPlugin(Protocol):
         *,
         documents: Sequence[JsonMapping],
         primary_key: str | None,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> Sequence[JsonMapping] | None:  # pragma: no cover
         ...
 
@@ -97,7 +101,11 @@ class PostSearchPlugin(Protocol):
     PRE_EVENT: bool
 
     def run_post_search_plugin(
-        self, event: Event, *, search_results: SearchResults, **kwargs: Any
+        self,
+        event: Event,
+        *,
+        search_results: SearchResults,
+        **kwargs: Any,  # noqa: ANN401
     ) -> SearchResults | None:  # pragma: no cover
         ...
 

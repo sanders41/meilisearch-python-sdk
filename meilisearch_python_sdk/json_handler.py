@@ -13,15 +13,15 @@ except ImportError:  # pragma: no cover
 class _JsonHandler(ABC):
     @staticmethod
     @abstractmethod
-    def dumps(obj: Any) -> str: ...
+    def dumps(obj: Any) -> str: ...  # noqa: ANN401
 
     @staticmethod
     @abstractmethod
-    def dump_bytes(obj: Any) -> bytes: ...
+    def dump_bytes(obj: Any) -> bytes: ...  # noqa: ANN401
 
     @staticmethod
     @abstractmethod
-    def loads(json_string: str | bytes | bytearray) -> Any: ...
+    def loads(json_string: str | bytes | bytearray) -> Any: ...  # noqa: ANN401
 
 
 class BuiltinHandler(_JsonHandler):
@@ -37,15 +37,15 @@ class BuiltinHandler(_JsonHandler):
         BuiltinHandler.serializer = serializer
 
     @staticmethod
-    def dumps(obj: Any) -> str:
+    def dumps(obj: Any) -> str:  # noqa: ANN401
         return json.dumps(obj, cls=BuiltinHandler.serializer)
 
     @staticmethod
-    def dump_bytes(obj: Any) -> bytes:
+    def dump_bytes(obj: Any) -> bytes:  # noqa: ANN401
         return json.dumps(obj, cls=BuiltinHandler.serializer).encode("utf-8")
 
     @staticmethod
-    def loads(json_string: str | bytes | bytearray) -> Any:
+    def loads(json_string: str | bytes | bytearray) -> Any:  # noqa: ANN401
         return json.loads(json_string)
 
 
@@ -55,13 +55,13 @@ class OrjsonHandler(_JsonHandler):
             raise ValueError("orjson must be installed to use the OrjsonHandler")
 
     @staticmethod
-    def dumps(obj: Any) -> str:
+    def dumps(obj: Any) -> str:  # noqa: ANN401
         return orjson.dumps(obj).decode("utf-8")
 
     @staticmethod
-    def dump_bytes(obj: Any) -> bytes:
+    def dump_bytes(obj: Any) -> bytes:  # noqa: ANN401
         return orjson.dumps(obj)
 
     @staticmethod
-    def loads(json_string: str | bytes | bytearray) -> Any:
+    def loads(json_string: str | bytes | bytearray) -> Any:  # noqa: ANN401
         return orjson.loads(json_string)

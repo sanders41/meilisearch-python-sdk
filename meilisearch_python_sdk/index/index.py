@@ -83,8 +83,8 @@ class Index(BaseIndex):
         plugins: IndexPlugins | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | None = None,
         *,
-        hits_type: Any = JsonDict,
-    ):
+        hits_type: type[Any] = JsonDict,
+    ) -> None:
         """Class initializer.
 
         Args:
@@ -461,7 +461,7 @@ class Index(BaseIndex):
         timeout_in_ms: int | None = None,
         plugins: IndexPlugins | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | None = None,
-        hits_type: Any = JsonDict,
+        hits_type: type[Any] = JsonDict,
     ) -> Self:
         """Creates a new index.
 
@@ -3814,7 +3814,7 @@ class Index(BaseIndex):
     def _run_plugins(
         plugins: Sequence[Plugin | DocumentPlugin | PostSearchPlugin],
         event: Event,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> dict[str, Any]:
         results: dict[str, Any] = {
             "generic_result": None,

@@ -42,8 +42,8 @@ class BaseIndex:
         created_at: str | datetime | None = None,
         updated_at: str | datetime | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | None = None,
-        hits_type: Any = JsonDict,
-    ):
+        hits_type: Any = JsonDict,  # noqa: ANN401
+    ) -> None:
         self.uid = uid
         self.primary_key = primary_key
         self.created_at: datetime | None = iso_to_date_time(created_at)

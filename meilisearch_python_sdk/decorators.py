@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import wraps
 from typing import Any, NamedTuple
 
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._utils import use_task_groups
+from meilisearch_python_sdk.types import JsonMapping
 
 
 class ConnectionInfo(NamedTuple):
@@ -75,7 +76,7 @@ def async_add_documents(
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        async def wrapper(*args: Any, **kwargs: Any) -> Any:
+        async def wrapper(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
             result = await func(*args, **kwargs)
             if isinstance(connection_info, AsyncClient):
                 await _async_add_documents(
@@ -157,7 +158,7 @@ def add_documents(
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
             result = func(*args, **kwargs)
             if isinstance(connection_info, Client):
                 _add_documents(
@@ -192,7 +193,7 @@ def add_documents(
 async def _async_add_documents(
     async_client: AsyncClient,
     index_name: str,
-    documents: Any,
+    documents: Sequence[JsonMapping],
     batch_size: int | None,
     primary_key: str | None,
     wait_for_task: bool,
@@ -221,7 +222,7 @@ async def _async_add_documents(
 def _add_documents(
     client: Client,
     index_name: str,
-    documents: Any,
+    documents: Sequence[JsonMapping],
     batch_size: int | None,
     primary_key: str | None,
     wait_for_task: bool,

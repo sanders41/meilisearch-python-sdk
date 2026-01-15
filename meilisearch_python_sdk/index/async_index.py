@@ -86,8 +86,8 @@ class AsyncIndex(BaseIndex):
         plugins: AsyncIndexPlugins | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | None = None,
         *,
-        hits_type: Any = JsonDict,
-    ):
+        hits_type: type[Any] = JsonDict,
+    ) -> None:
         """Class initializer.
 
         Args:
@@ -582,7 +582,7 @@ class AsyncIndex(BaseIndex):
         timeout_in_ms: int | None = None,
         plugins: AsyncIndexPlugins | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | None = None,
-        hits_type: Any = JsonDict,
+        hits_type: type[Any] = JsonDict,
     ) -> Self:
         """Creates a new index.
 
@@ -4819,7 +4819,7 @@ class AsyncIndex(BaseIndex):
     async def _run_plugins(
         plugins: Sequence[AsyncPlugin | AsyncDocumentPlugin | AsyncPostSearchPlugin],
         event: AsyncEvent,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> dict[str, Any]:
         generic_plugins = []
         document_plugins = []

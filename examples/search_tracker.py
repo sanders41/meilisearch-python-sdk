@@ -27,7 +27,7 @@ class SearchTrackerPlugin:
         finally:
             cursor.close()
 
-    def run_plugin(self, event: Event, **kwargs: Any) -> None:
+    def run_plugin(self, event: Event, **kwargs: Any) -> None:  # noqa: ANN401
         if kwargs.get("query"):
             self.save_search_query(kwargs["query"])
 
