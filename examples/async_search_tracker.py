@@ -31,7 +31,7 @@ class SearchTrackerPlugin:
         finally:
             cursor.close()
 
-    async def run_plugin(self, event: AsyncEvent, **kwargs: Any) -> None:
+    async def run_plugin(self, event: AsyncEvent, **kwargs: Any) -> None:  # noqa: ANN401
         """Note that this example uses sqlite which does not provide an async driver.
 
         Typically if you are using the AsyncClient you would also be using an async driver for the

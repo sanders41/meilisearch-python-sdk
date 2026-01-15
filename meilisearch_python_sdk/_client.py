@@ -399,7 +399,7 @@ class AsyncClient(BaseClient):
         wait: bool = True,
         timeout_in_ms: int | None = None,
         plugins: AsyncIndexPlugins | None = None,
-        hits_type: Any = JsonDict,
+        hits_type: Any = JsonDict,  # noqa: ANN401
     ) -> AsyncIndex:
         """Creates a new index.
 
@@ -602,7 +602,7 @@ class AsyncClient(BaseClient):
         primary_key: str | None = None,
         *,
         plugins: AsyncIndexPlugins | None = None,
-        hits_type: Any = JsonDict,
+        hits_type: Any = JsonDict,  # noqa: ANN401
     ) -> AsyncIndex:
         """Get an index, or create it if it doesn't exist.
 
@@ -770,7 +770,7 @@ class AsyncClient(BaseClient):
         queries: list[SearchParams],
         *,
         federation: Federation | FederationMerged | None = None,
-        hits_type: Any = JsonDict,
+        hits_type: Any = JsonDict,  # noqa: ANN401
     ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
 
@@ -1564,7 +1564,7 @@ class Client(BaseClient):
         wait: bool = True,
         timeout_in_ms: int | None = None,
         plugins: IndexPlugins | None = None,
-        hits_type: Any = JsonDict,
+        hits_type: Any = JsonDict,  # noqa: ANN401
     ) -> Index:
         """Creates a new index.
 
@@ -1762,7 +1762,7 @@ class Client(BaseClient):
         primary_key: str | None = None,
         *,
         plugins: IndexPlugins | None = None,
-        hits_type: Any = JsonDict,
+        hits_type: Any = JsonDict,  # noqa: ANN401
     ) -> Index:
         """Get an index, or create it if it doesn't exist.
 
@@ -1929,7 +1929,7 @@ class Client(BaseClient):
         queries: list[SearchParams],
         *,
         federation: Federation | FederationMerged | None = None,
-        hits_type: Any = JsonDict,
+        hits_type: Any = JsonDict,  # noqa: ANN401
     ) -> list[SearchResultsWithUID] | SearchResultsFederated:
         """Multi-index search.
 

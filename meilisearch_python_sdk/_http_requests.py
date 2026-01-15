@@ -31,7 +31,7 @@ class AsyncHttpRequests:
         self.http_client = http_client
         self.json_handler = json_handler
 
-    def parse_json(self, response: Response) -> Any:
+    def parse_json(self, response: Response) -> Any:  # noqa: ANN401
         """Parse JSON response using the custom json_handler."""
         return self.json_handler.loads(response.content)
 
@@ -39,7 +39,7 @@ class AsyncHttpRequests:
         self,
         http_method: Callable,
         path: str,
-        body: Any | None = None,
+        body: Any | None = None,  # noqa: ANN401
         content_type: str = "application/json",
         compress: bool = False,
     ) -> Response:
@@ -89,7 +89,7 @@ class AsyncHttpRequests:
     async def patch(
         self,
         path: str,
-        body: Any | None = None,
+        body: Any | None = None,  # noqa: ANN401
         content_type: str = "application/json",
         compress: bool = False,
     ) -> Response:
@@ -98,7 +98,7 @@ class AsyncHttpRequests:
     async def post(
         self,
         path: str,
-        body: Any | None = None,
+        body: Any | None = None,  # noqa: ANN401
         content_type: str = "application/json",
         compress: bool = False,
     ) -> Response:
@@ -107,7 +107,7 @@ class AsyncHttpRequests:
     async def put(
         self,
         path: str,
-        body: Any | None = None,
+        body: Any | None = None,  # noqa: ANN401
         content_type: str = "application/json",
         compress: bool = False,
     ) -> Response:
@@ -122,7 +122,7 @@ class HttpRequests:
         self.http_client = http_client
         self.json_handler = json_handler
 
-    def parse_json(self, response: Response) -> Any:
+    def parse_json(self, response: Response) -> Any:  # noqa: ANN401
         """Parse JSON response using the custom json_handler."""
         return self.json_handler.loads(response.content)
 
@@ -130,7 +130,7 @@ class HttpRequests:
         self,
         http_method: Callable,
         path: str,
-        body: Any | None = None,
+        body: Any | None = None,  # noqa: ANN401
         content_type: str = "application/json",
         compress: bool = False,
     ) -> Response:
@@ -177,7 +177,7 @@ class HttpRequests:
     def patch(
         self,
         path: str,
-        body: Any | None = None,
+        body: Any | None = None,  # noqa: ANN401
         content_type: str = "application/json",
         compress: bool = False,
     ) -> Response:
@@ -186,7 +186,7 @@ class HttpRequests:
     def post(
         self,
         path: str,
-        body: Any | None = None,
+        body: Any | None = None,  # noqa: ANN401
         content_type: str = "application/json",
         compress: bool = False,
     ) -> Response:
@@ -195,7 +195,7 @@ class HttpRequests:
     def put(
         self,
         path: str,
-        body: Any | None = None,
+        body: Any | None = None,  # noqa: ANN401
         content_type: str = "application/json",
         compress: bool = False,
     ) -> Response:
