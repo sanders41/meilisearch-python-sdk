@@ -31,7 +31,7 @@ from meilisearch_python_sdk.index._common import (
 from meilisearch_python_sdk.index._common import combine_documents as combine_documents_
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.documents import DocumentsInfo
-from meilisearch_python_sdk.models.index import IndexStats
+from meilisearch_python_sdk.models.index import Field, FieldsFilter, IndexStats
 from meilisearch_python_sdk.models.search import (
     FacetSearchResults,
     Hybrid,
@@ -4814,6 +4814,39 @@ class AsyncIndex(BaseIndex):
         response = await self._http_requests.delete(f"{self._settings_url}/prefix-search")
 
         return TaskInfo(**self._http_requests.parse_json(response))
+
+    async def fields(
+        self, offset: int = 0, limit: int = 20, filter: FieldsFilter | None = None
+    ) -> list[Field]:
+        """Get the field properties on an index.
+
+        Args:
+            offset: Number of fields to skip. Defaults to 0.
+            limit: Maximum number of fields returned. Defaults to 20.
+            filter: Filter fields to return based on properties. Defaults to None.
+
+        Returns:
+            A list of field properties
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     docs = [{"id": 1, "title": "Some Title}]
+            >>>     index = await client.index("movies")
+            >>>     await index.add_documents(docs)
+            >>>     fields = await index.fields()
+        """
+        filter_value = filter.model_dump(by_alias=True) if filter else None
+        response = await self._http_requests.post(
+            f"{self._base_url_with_uid}/fields",
+            body={"offset": offset, "limit": limit, "filter": filter_value},
+        )
+
+        return [Field(**field) for field in response.json()]
 
     @staticmethod
     async def _run_plugins(

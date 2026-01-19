@@ -44,3 +44,55 @@ class IndexStats(CamelBase):
     number_of_embeddings: int | None = None
     is_indexing: bool
     field_distribution: dict[str, int]
+
+
+class FieldsFilter(CamelBase):
+    attribute_patterns: str | None = None
+    displayed: bool | None = None
+    sortable: bool | None = None
+    searchable: bool | None = None
+    ranking_rule: bool | None = None
+    filterable: bool | None = None
+
+
+class FieldDisplayConfig(CamelBase):
+    enabled: bool
+
+
+class FieldSearchConfig(CamelBase):
+    enabled: bool
+
+
+class FieldSortableConfig(CamelBase):
+    enabled: bool
+
+
+class FieldRankingRuleConfig(CamelBase):
+    order: str | None = None
+
+
+class FieldDistinctConfig(CamelBase):
+    enabled: bool
+
+
+class FieldFilterableConfig(CamelBase):
+    enabled: bool
+    sort_by: str
+    facet_search: bool
+    equality: bool
+    comparison: bool
+
+
+class FieldLocalizedConfig(CamelBase):
+    locales: list[str]
+
+
+class Field(CamelBase):
+    name: str
+    displayed: FieldDisplayConfig
+    searchable: FieldSearchConfig
+    sortable: FieldSortableConfig
+    distinct: FieldDistinctConfig
+    ranking_rule: FieldRankingRuleConfig
+    filterable: FieldFilterableConfig
+    localized: FieldLocalizedConfig
