@@ -4,6 +4,7 @@ from httpx import Response
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests
 from meilisearch_python_sdk._task import async_wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.models.index import FieldsFilter
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
@@ -1031,3 +1032,26 @@ async def test_compact(async_client, async_index_with_documents):
     result = await async_client.get_task(task_id=task.task_uid)
 
     assert result.status == "succeeded"
+
+
+async def test_fields(async_index_with_documents):
+    index = await async_index_with_documents()
+    result = await index.fields()
+    assert "genre" in [field.name for field in result]
+
+
+async def test_fields_with_limit_and_offset(async_index_with_documents):
+    index = await async_index_with_documents()
+    result = await index.fields(limit=2, offset=2)
+    assert len(result) == 2
+    assert "overview" in [field.name for field in result]
+
+
+async def test_fields_with_filter(async_client, async_index_with_documents):
+    filter = FieldsFilter(sortable=True)
+    index = await async_index_with_documents()
+    task = await index.update_sortable_attributes(["title"])
+    await async_client.wait_for_task(task.task_uid)
+    result = await index.fields(filter=filter)
+    assert len(result) == 1
+    assert "title" in result[0].name
