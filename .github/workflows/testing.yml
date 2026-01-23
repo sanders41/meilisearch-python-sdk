@@ -51,6 +51,7 @@ jobs:
         run: just install
       - name: Test with pytest
         run: just test-parallel-ci
+      - name: Upload coverage
         uses: codecov/codecov-action@v5.5.2
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -93,8 +94,9 @@ jobs:
         run: just test-parallel-ci-http2
       - name: Upload coverage
         uses: codecov/codecov-action@v5.5.2
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
   no-parallel-testing:
@@ -122,8 +124,9 @@ jobs:
         run: just test-no-parallel-ci
       - name: Upload coverage
         uses: codecov/codecov-action@v5.5.2
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
   no-parallel-testing-http2:
@@ -162,8 +165,9 @@ jobs:
         run: just test-no-parallel-ci-http2
       - name: Upload coverage
         uses: codecov/codecov-action@v5.5.2
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
   example-testing:
     strategy:
