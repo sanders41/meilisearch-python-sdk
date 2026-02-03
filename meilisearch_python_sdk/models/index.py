@@ -96,3 +96,10 @@ class Field(CamelBase):
     ranking_rule: FieldRankingRuleConfig
     filterable: FieldFilterableConfig
     localized: FieldLocalizedConfig
+
+
+class FieldResults(CamelBase):
+    fields: list[Field]
+    offset: int
+    limit: int
+    total: int
