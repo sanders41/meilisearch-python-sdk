@@ -1037,14 +1037,14 @@ async def test_compact(async_client, async_index_with_documents):
 async def test_fields(async_index_with_documents):
     index = await async_index_with_documents()
     result = await index.fields()
-    assert "genre" in [field.name for field in result]
+    assert "genre" in [field.name for field in result.fields]
 
 
 async def test_fields_with_limit_and_offset(async_index_with_documents):
     index = await async_index_with_documents()
     result = await index.fields(limit=2, offset=2)
-    assert len(result) == 2
-    assert "overview" in [field.name for field in result]
+    assert len(result.fields) == 2
+    assert "overview" in [field.name for field in result.fields]
 
 
 async def test_fields_with_filter(async_client, async_index_with_documents):
@@ -1053,5 +1053,5 @@ async def test_fields_with_filter(async_client, async_index_with_documents):
     task = await index.update_sortable_attributes(["title"])
     await async_client.wait_for_task(task.task_uid)
     result = await index.fields(filter=filter)
-    assert len(result) == 1
-    assert "title" in result[0].name
+    assert len(result.fields) == 1
+    assert "title" in result.fields[0].name

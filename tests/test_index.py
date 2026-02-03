@@ -1038,14 +1038,14 @@ def test_compact(client, index_with_documents):
 def test_fields(index_with_documents):
     index = index_with_documents()
     result = index.fields()
-    assert "genre" in [field.name for field in result]
+    assert "genre" in [field.name for field in result.fields]
 
 
 def test_fields_with_limit_and_offset(index_with_documents):
     index = index_with_documents()
     result = index.fields(limit=2, offset=2)
-    assert len(result) == 2
-    assert "overview" in [field.name for field in result]
+    assert len(result.fields) == 2
+    assert "overview" in [field.name for field in result.fields]
 
 
 def test_fields_with_filter(client, index_with_documents):
@@ -1054,5 +1054,5 @@ def test_fields_with_filter(client, index_with_documents):
     task = index.update_sortable_attributes(["title"])
     client.wait_for_task(task.task_uid)
     result = index.fields(filter=filter)
-    assert len(result) == 1
-    assert "title" in result[0].name
+    assert len(result.fields) == 1
+    assert "title" in result.fields[0].name
