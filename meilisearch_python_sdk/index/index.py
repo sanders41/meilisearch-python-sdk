@@ -586,6 +586,7 @@ class Index(BaseIndex):
         locales: list[str] | None = None,
         retrieve_vectors: bool | None = None,
         media: JsonMapping | None = None,
+        show_performance_details: bool = False,
     ) -> SearchResults:
         """Search the index.
 
@@ -654,6 +655,8 @@ class Index(BaseIndex):
                 to /experimental-features with { "multimodal": true }. Because this feature is
                 experimental it may be removed or updated causing breaking changes in this library
                 without a major version bump so use with caution.
+            show_performance_details: When set to true, the search response contains a performance
+                trace. Default False.
 
         Returns:
             Results of the search
@@ -699,6 +702,7 @@ class Index(BaseIndex):
             locales=locales,
             retrieve_vectors=retrieve_vectors,
             media=media,
+            show_performance_details=show_performance_details,
         )
 
         if self._pre_search_plugins:

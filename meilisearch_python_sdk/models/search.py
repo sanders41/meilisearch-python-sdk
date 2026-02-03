@@ -72,6 +72,7 @@ class SearchParams(CamelBase):
     locales: list[str] | None = None
     retrieve_vectors: bool | None = None
     media: JsonMapping | None = None
+    show_performance_details: bool | None = None
 
     @field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
     @classmethod
@@ -96,6 +97,7 @@ class SearchResults(CamelBase, Generic[T]):
     hits_per_page: int | None = None
     semantic_hit_count: int | None = None
     query_vector: list[float] | None = None
+    performance_details: JsonDict | None = None
 
 
 class SearchResultsWithUID(SearchResults, Generic[T]):
