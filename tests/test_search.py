@@ -612,6 +612,24 @@ def test_multi_search_ranking_score_threshold(client, index_with_documents):
     assert len(result[0].hits) > 0
 
 
+def test_multi_search_show_performance_details(client, index_with_documents):
+    index1 = index_with_documents()
+    index2 = index_with_documents()
+    response = client.multi_search(
+        [
+            SearchParams(
+                index_uid=index1.uid,
+                query="How to Train Your Dragon",
+                show_performance_details=True,
+            ),
+            SearchParams(index_uid=index2.uid, query=""),
+        ],
+    )
+
+    assert response[0].performance_details is not None
+    assert response[1].performance_details is None
+
+
 def test_facet_search_ranking_score_threshold(index_with_documents_and_vectors):
     index = index_with_documents_and_vectors()
     update = index.update_filterable_attributes(["genre"])
@@ -683,3 +701,9 @@ def test_search_show_matches_position(index_with_documents):
     index = index_with_documents()
     response = index.search("with", show_matches_position=True)
     assert "_matchesPosition" in response.hits[0]
+
+
+async def test_search_show_performance_parameters(async_index_with_documents):
+    index = await async_index_with_documents()
+    response = await index.search(show_performance_details=True)
+    assert response.performance_details is not None

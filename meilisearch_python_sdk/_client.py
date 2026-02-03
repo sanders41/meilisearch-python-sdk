@@ -814,6 +814,9 @@ class AsyncClient(BaseClient):
             if query.media is None:
                 del q["media"]
 
+            if query.show_performance_details is None:
+                del q["showPerformanceDetails"]
+
             processed_queries.append(q)
 
         if federation:
@@ -1969,6 +1972,12 @@ class Client(BaseClient):
             if federation:
                 del q["limit"]
                 del q["offset"]
+
+            if query.media is None:
+                del q["media"]
+
+            if query.show_performance_details is None:
+                del q["showPerformanceDetails"]
 
             processed_queries.append(q)
 

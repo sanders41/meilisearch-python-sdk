@@ -140,6 +140,7 @@ def process_search_parameters(
     retrieve_vectors: bool | None = None,
     exhaustive_facet_count: bool | None = None,
     media: JsonMapping | None = None,
+    show_performance_details: bool = False,
 ) -> JsonDict:
     if attributes_to_retrieve is None:
         attributes_to_retrieve = ["*"]
@@ -196,6 +197,9 @@ def process_search_parameters(
 
     if media is not None:
         body["media"] = media
+
+    if show_performance_details:
+        body["showPerformanceDetails"] = True
 
     return body
 
