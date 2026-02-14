@@ -48,7 +48,7 @@ Movie(
     id = 287947,
     title = "Shazam!",
     poster = "https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg",
-    overview = "A boy is given the ability to become an adult superhero in times of need with a single magic word.",
+    overview = "A boy is given the ability to become an adult superhero with a single magic word.",
     release_date = datetime.datetime(2019, 3, 23, 0, 0, tzinfo=datetime.timezone.utc),
     genre = "action",
 )

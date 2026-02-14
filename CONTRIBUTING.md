@@ -47,7 +47,7 @@ This creates the directory meilisearch-python-sdk and connects your repository t
 ### Working with the code
 
 Note: This project uses uv to manage dependencies. If you do not already have uv installed you will
-need to install it with the instructions [here](https://docs.astral.sh/uv/getting-started/installation/)
+need to install it with the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/)
 
 First the requirements need to be installed.
 

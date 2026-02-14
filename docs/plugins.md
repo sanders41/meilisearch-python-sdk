@@ -18,7 +18,7 @@ When creating your plugin you specify if you want it to run before or after the 
 functionality. Additionally plugins for async indexes can be run concurrently with the default
 functionality.
 
-## Examples:
+## Examples
 
 ### Search metrics
 
