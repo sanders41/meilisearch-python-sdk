@@ -711,6 +711,15 @@ def test_get_documents_with_vectors(index_with_documents):
     assert all("_vectors" in x.keys() for x in response.results)
 
 
+def test_get_documents_with_vectors_and_filter(index_with_documents):
+    index = index_with_documents()
+    response = index.update_filterable_attributes(["genre"])
+    wait_for_task(index.http_client, response.task_uid)
+    response = index.get_documents(retrieve_vectors=True, filter="genre=action")
+    assert len(response.results) > 0
+    assert all("_vectors" in x.keys() for x in response.results)
+
+
 def test_get_documents_filter_with_fields(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre"])

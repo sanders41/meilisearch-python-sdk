@@ -1388,10 +1388,9 @@ class AsyncIndex(BaseIndex):
         if sort:
             parameters["sort"] = sort
 
-        if retrieve_vectors:
-            parameters["retrieveVectors"] = "true"
-
         if not filter and not ids:
+            if retrieve_vectors:
+                parameters["retrieveVectors"] = "true"
             if fields:
                 parameters["fields"] = ",".join(fields)
 
@@ -1399,6 +1398,9 @@ class AsyncIndex(BaseIndex):
             response = await self._http_requests.get(url)
 
             return DocumentsInfo(**self._http_requests.parse_json(response))
+
+        if retrieve_vectors:
+            parameters["retrieveVectors"] = True
 
         if fields:
             parameters["fields"] = fields
