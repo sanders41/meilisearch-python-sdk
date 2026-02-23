@@ -25,7 +25,7 @@ from meilisearch_python_sdk.models.settings import (
 
 @pytest.fixture
 def default_ranking_rules():
-    return ["words", "typo", "proximity", "attribute", "sort", "exactness"]
+    return ["words", "typo", "proximity", "attributeRank", "sort", "wordPosition", "exactness"]
 
 
 @pytest.fixture
