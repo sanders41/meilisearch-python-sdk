@@ -4736,17 +4736,24 @@ async def _run_plugins(
                 search_plugins.append(plugin.run_post_search_plugin(event=event, **kwargs))  # type: ignore[union-attr]
         if generic_plugins:
             generic_results = await asyncio.gather(*generic_plugins)
-            if generic_results:
-                results["generic_result"] = generic_results[-1]
+            for result in reversed(generic_results):
+                if result is not None:
+                    results["generic_result"] = result
+                    break
 
         if document_plugins:
             document_results = await asyncio.gather(*document_plugins)
-            if document_results:
-                results["document_result"] = document_results[-1]
+            for result in reversed(document_results):
+                if result is not None:
+                    results["document_result"] = result
+                    break
+
         if search_plugins:
             search_results = await asyncio.gather(*search_plugins)
-            if search_results:
-                results["search_result"] = search_results[-1]
+            for result in reversed(search_results):
+                if result is not None:
+                    results["search_result"] = result
+                    break
 
         return results
 
@@ -4767,16 +4774,22 @@ async def _run_plugins(
                 )
 
     if generic_tasks:
-        for result in reversed(generic_tasks):
-            if result:
-                results["generic_result"] = await result
+        for task in reversed(generic_tasks):
+            if task.result() is not None:
+                results["generic_result"] = task.result()
                 break
 
     if document_tasks:
-        results["document_result"] = await document_tasks[-1]
+        for task in reversed(document_tasks):
+            if task.result() is not None:
+                results["document_result"] = task.result()
+                break
 
     if search_tasks:
-        results["search_result"] = await search_tasks[-1]
+        for task in reversed(search_tasks):
+            if task.result() is not None:
+                results["search_result"] = task.result()
+                break
 
     return results
 
