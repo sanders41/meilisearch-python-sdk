@@ -15,7 +15,7 @@ from httpx import AsyncClient
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests
 from meilisearch_python_sdk._task import async_wait_for_task
 from meilisearch_python_sdk._utils import use_task_groups
-from meilisearch_python_sdk.errors import InvalidDocumentError, MeilisearchError
+from meilisearch_python_sdk.errors import InvalidDocumentError
 from meilisearch_python_sdk.index._common import (
     BaseIndex,
     batch,
@@ -24,6 +24,7 @@ from meilisearch_python_sdk.index._common import (
     embedder_json_to_settings_model,
     filter_plugins,
     plugin_has_method,
+    prepare_raw_file_upload,
     process_search_parameters,
     raise_on_no_documents,
     validate_file_type,
@@ -1930,25 +1931,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.add_documents_from_raw_file(file_path)
         """
-        upload_path = Path(file_path) if isinstance(file_path, str) else file_path
-        if not upload_path.exists():
-            raise MeilisearchError("No file found at the specified path")
-
-        if upload_path.suffix not in (".csv", ".ndjson"):
-            raise ValueError("Only csv and ndjson files can be sent as binary files")
-
-        if csv_delimiter and upload_path.suffix != ".csv":
-            raise ValueError("A csv_delimiter can only be used with csv files")
-
-        if (
-            csv_delimiter
-            and len(csv_delimiter) != 1
-            or csv_delimiter
-            and not csv_delimiter.isascii()
-        ):
-            raise ValueError("csv_delimiter must be a single ascii character")
-
-        content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
+        upload_path, content_type = prepare_raw_file_upload(file_path, csv_delimiter)
         parameters = {}
 
         if primary_key:
@@ -2711,25 +2694,7 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_documents_from_raw_file(file_path)
         """
-        upload_path = Path(file_path) if isinstance(file_path, str) else file_path
-        if not upload_path.exists():
-            raise MeilisearchError("No file found at the specified path")
-
-        if upload_path.suffix not in (".csv", ".ndjson"):
-            raise ValueError("Only csv and ndjson files can be sent as binary files")
-
-        if csv_delimiter and upload_path.suffix != ".csv":
-            raise ValueError("A csv_delimiter can only be used with csv files")
-
-        if (
-            csv_delimiter
-            and len(csv_delimiter) != 1
-            or csv_delimiter
-            and not csv_delimiter.isascii()
-        ):
-            raise ValueError("csv_delimiter must be a single ascii character")
-
-        content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
+        upload_path, content_type = prepare_raw_file_upload(file_path, csv_delimiter)
         parameters = {}
 
         if primary_key:

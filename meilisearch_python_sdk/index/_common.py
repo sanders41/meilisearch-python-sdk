@@ -301,6 +301,27 @@ def filter_plugins(
     return [plugin for plugin in plugins if getattr(plugin, plugin_event, False)] or None
 
 
+def prepare_raw_file_upload(
+    file_path: Path | str,
+    csv_delimiter: str | None,
+) -> tuple[Path, str]:
+    upload_path = Path(file_path) if isinstance(file_path, str) else file_path
+    if not upload_path.exists():
+        raise MeilisearchError("No file found at the specified path")
+
+    if upload_path.suffix not in (".csv", ".ndjson"):
+        raise ValueError("Only csv and ndjson files can be sent as binary files")
+
+    if csv_delimiter and upload_path.suffix != ".csv":
+        raise ValueError("A csv_delimiter can only be used with csv files")
+
+    if csv_delimiter and len(csv_delimiter) != 1 or csv_delimiter and not csv_delimiter.isascii():
+        raise ValueError("csv_delimiter must be a single ascii character")
+
+    content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
+    return upload_path, content_type
+
+
 def validate_file_type(file_path: Path) -> None:
     if file_path.suffix not in (".json", ".csv", ".ndjson"):
         raise MeilisearchError("File must be a json, ndjson, or csv file")
