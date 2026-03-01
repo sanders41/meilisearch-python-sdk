@@ -19,6 +19,7 @@ from meilisearch_python_sdk.index._common import (
     build_encoded_url,
     embedder_json_to_embedders_model,
     embedder_json_to_settings_model,
+    filter_plugins,
     plugin_has_method,
     process_search_parameters,
     raise_on_no_documents,
@@ -119,202 +120,112 @@ class Index(BaseIndex):
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.add_documents_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.add_documents_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_add_documents_plugins(self) -> list[Plugin | DocumentPlugin] | None:
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.add_documents_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.add_documents_plugins, "PRE_EVENT")
 
     @cached_property
     def _post_delete_all_documents_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.delete_all_documents_plugins if plugin.POST_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_all_documents_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_delete_all_documents_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.delete_all_documents_plugins if plugin.PRE_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_all_documents_plugins, "PRE_EVENT")
 
     @cached_property
     def _post_delete_document_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.delete_document_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_document_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_delete_document_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.delete_document_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_document_plugins, "PRE_EVENT")
 
     @cached_property
     def _post_delete_documents_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.delete_documents_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_delete_documents_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.delete_documents_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_plugins, "PRE_EVENT")
 
     @cached_property
     def _post_delete_documents_by_filter_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = [
-            plugin
-            for plugin in self.plugins.delete_documents_by_filter_plugins
-            if plugin.POST_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_by_filter_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_delete_documents_by_filter_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.delete_documents_by_filter_plugins if plugin.PRE_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_by_filter_plugins, "PRE_EVENT")
 
     @cached_property
     def _post_facet_search_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.facet_search_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.facet_search_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_facet_search_plugins(self) -> list[Plugin] | None:
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.facet_search_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.facet_search_plugins, "PRE_EVENT")
 
     @cached_property
     def _post_search_plugins(self) -> list[Plugin | PostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.search_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_search_plugins(self) -> list[Plugin | PostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.search_plugins, "PRE_EVENT")
 
     @cached_property
     def _post_update_documents_plugins(self) -> list[Plugin | DocumentPlugin] | None:
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.update_documents_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.update_documents_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_update_documents_plugins(self) -> list[Plugin | DocumentPlugin] | None:
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.update_documents_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.update_documents_plugins, "PRE_EVENT")
 
     def compact(self) -> TaskInfo:
         """Appends a new task to the queue to compact the database.
@@ -706,7 +617,7 @@ class Index(BaseIndex):
         )
 
         if self._pre_search_plugins:
-            Index._run_plugins(
+            _run_plugins(
                 self._pre_search_plugins,
                 Event.PRE,
                 query=query,
@@ -737,7 +648,7 @@ class Index(BaseIndex):
         response = self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
         result = SearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
         if self._post_search_plugins:
-            post = Index._run_plugins(self._post_search_plugins, Event.POST, search_results=result)
+            post = _run_plugins(self._post_search_plugins, Event.POST, search_results=result)
             if post.get("search_result"):
                 result = post["search_result"]
 
@@ -881,7 +792,7 @@ class Index(BaseIndex):
         )
 
         if self._pre_facet_search_plugins:
-            Index._run_plugins(
+            _run_plugins(
                 self._pre_facet_search_plugins,
                 Event.PRE,
                 query=query,
@@ -912,7 +823,7 @@ class Index(BaseIndex):
         response = self._http_requests.post(f"{self._base_url_with_uid}/facet-search", body=body)
         result = FacetSearchResults(**self._http_requests.parse_json(response))
         if self._post_facet_search_plugins:
-            post = Index._run_plugins(self._post_facet_search_plugins, Event.POST, result=result)
+            post = _run_plugins(self._post_facet_search_plugins, Event.POST, result=result)
             if isinstance(post["generic_result"], FacetSearchResults):
                 result = post["generic_result"]
 
@@ -1144,7 +1055,7 @@ class Index(BaseIndex):
             url = self._documents_url
 
         if self._pre_add_documents_plugins:
-            pre = Index._run_plugins(
+            pre = _run_plugins(
                 self._pre_add_documents_plugins,
                 Event.PRE,
                 documents=documents,
@@ -1156,7 +1067,7 @@ class Index(BaseIndex):
         response = self._http_requests.post(url, documents, compress=compress)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_add_documents_plugins:
-            post = Index._run_plugins(self._post_add_documents_plugins, Event.POST, result=result)
+            post = _run_plugins(self._post_add_documents_plugins, Event.POST, result=result)
             if isinstance(post.get("generic_result"), TaskInfo):
                 result = post["generic_result"]
 
@@ -1654,7 +1565,7 @@ class Index(BaseIndex):
             url = self._documents_url
 
         if self._pre_update_documents_plugins:
-            pre = Index._run_plugins(
+            pre = _run_plugins(
                 self._pre_update_documents_plugins,
                 Event.PRE,
                 documents=documents,
@@ -1666,9 +1577,7 @@ class Index(BaseIndex):
         response = self._http_requests.put(url, documents, compress=compress)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_update_documents_plugins:
-            post = Index._run_plugins(
-                self._post_update_documents_plugins, Event.POST, result=result
-            )
+            post = _run_plugins(self._post_update_documents_plugins, Event.POST, result=result)
             if isinstance(post.get("generic_result"), TaskInfo):
                 result = post["generic_result"]
 
@@ -2123,9 +2032,7 @@ class Index(BaseIndex):
             >>>     index.delete_document("1234")
         """
         if self._pre_delete_document_plugins:
-            Index._run_plugins(
-                self._pre_delete_document_plugins, Event.PRE, document_id=document_id
-            )
+            _run_plugins(self._pre_delete_document_plugins, Event.PRE, document_id=document_id)
 
         url = f"{self._documents_url}/{document_id}"
 
@@ -2135,7 +2042,7 @@ class Index(BaseIndex):
         response = self._http_requests.delete(url)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_document_plugins:
-            post = Index._run_plugins(self._post_delete_document_plugins, Event.POST, result=result)
+            post = _run_plugins(self._post_delete_document_plugins, Event.POST, result=result)
             if isinstance(post.get("generic_result"), TaskInfo):
                 result = post["generic_result"]
 
@@ -2162,7 +2069,7 @@ class Index(BaseIndex):
             >>>     index.delete_documents(["1234", "5678"])
         """
         if self._pre_delete_documents_plugins:
-            Index._run_plugins(self._pre_delete_documents_plugins, Event.PRE, ids=ids)
+            _run_plugins(self._pre_delete_documents_plugins, Event.PRE, ids=ids)
 
         url = f"{self._documents_url}/delete-batch"
 
@@ -2172,9 +2079,7 @@ class Index(BaseIndex):
         response = self._http_requests.post(url, ids)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_plugins:
-            post = Index._run_plugins(
-                self._post_delete_documents_plugins, Event.POST, result=result
-            )
+            post = _run_plugins(self._post_delete_documents_plugins, Event.POST, result=result)
             if isinstance(post.get("generic_result"), TaskInfo):
                 result = post["generic_result"]
 
@@ -2203,9 +2108,7 @@ class Index(BaseIndex):
             >>>     index.delete_documents_by_filter("genre=horor"))
         """
         if self._pre_delete_documents_by_filter_plugins:
-            Index._run_plugins(
-                self._pre_delete_documents_by_filter_plugins, Event.PRE, filter=filter
-            )
+            _run_plugins(self._pre_delete_documents_by_filter_plugins, Event.PRE, filter=filter)
 
         url = f"{self._documents_url}/delete"
 
@@ -2215,7 +2118,7 @@ class Index(BaseIndex):
         response = self._http_requests.post(url, body={"filter": filter})
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_by_filter_plugins:
-            post = Index._run_plugins(
+            post = _run_plugins(
                 self._post_delete_documents_by_filter_plugins, Event.POST, result=result
             )
             if isinstance(post.get("generic_result"), TaskInfo):
@@ -2275,7 +2178,7 @@ class Index(BaseIndex):
             >>>     index.delete_all_document()
         """
         if self._pre_delete_all_documents_plugins:
-            Index._run_plugins(self._pre_delete_all_documents_plugins, Event.PRE)
+            _run_plugins(self._pre_delete_all_documents_plugins, Event.PRE)
 
         url = self._documents_url
 
@@ -2285,9 +2188,7 @@ class Index(BaseIndex):
         response = self._http_requests.delete(url)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_all_documents_plugins:
-            post = Index._run_plugins(
-                self._post_delete_all_documents_plugins, Event.POST, result=result
-            )
+            post = _run_plugins(self._post_delete_all_documents_plugins, Event.POST, result=result)
             if isinstance(post.get("generic_result"), TaskInfo):
                 result = post["generic_result"]
 
@@ -3856,45 +3757,45 @@ class Index(BaseIndex):
             total=response_json["total"],
         )
 
-    @staticmethod
-    def _run_plugins(
-        plugins: Sequence[Plugin | DocumentPlugin | PostSearchPlugin],
-        event: Event,
-        **kwargs: Any,  # noqa: ANN401
-    ) -> dict[str, Any]:
-        results: dict[str, Any] = {
-            "generic_result": None,
-            "document_result": None,
-            "search_result": None,
-        }
-        generic_tasks = []
-        document_tasks = []
-        search_tasks = []
-        for plugin in plugins:
-            if plugin_has_method(plugin, "run_plugin"):
-                generic_tasks.append(plugin.run_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-            if plugin_has_method(plugin, "run_document_plugin"):
-                document_tasks.append(
-                    plugin.run_document_plugin(event=event, **kwargs)  # type: ignore[union-attr]
-                )
-            if plugin_has_method(plugin, "run_post_search_plugin"):
-                search_tasks.append(
-                    plugin.run_post_search_plugin(event=event, **kwargs)  # type: ignore[union-attr]
-                )
 
-        if generic_tasks:
-            for result in reversed(generic_tasks):
-                if result:
-                    results["generic_result"] = result
-                    break
+def _run_plugins(
+    plugins: Sequence[Plugin | DocumentPlugin | PostSearchPlugin],
+    event: Event,
+    **kwargs: Any,  # noqa: ANN401
+) -> dict[str, Any]:
+    results: dict[str, Any] = {
+        "generic_result": None,
+        "document_result": None,
+        "search_result": None,
+    }
+    generic_tasks = []
+    document_tasks = []
+    search_tasks = []
+    for plugin in plugins:
+        if plugin_has_method(plugin, "run_plugin"):
+            generic_tasks.append(plugin.run_plugin(event=event, **kwargs))  # type: ignore[union-attr]
+        if plugin_has_method(plugin, "run_document_plugin"):
+            document_tasks.append(
+                plugin.run_document_plugin(event=event, **kwargs)  # type: ignore[union-attr]
+            )
+        if plugin_has_method(plugin, "run_post_search_plugin"):
+            search_tasks.append(
+                plugin.run_post_search_plugin(event=event, **kwargs)  # type: ignore[union-attr]
+            )
 
-        if document_tasks:
-            results["document_result"] = document_tasks[-1]
+    if generic_tasks:
+        for result in reversed(generic_tasks):
+            if result:
+                results["generic_result"] = result
+                break
 
-        if search_tasks:
-            results["search_result"] = search_tasks[-1]
+    if document_tasks:
+        results["document_result"] = document_tasks[-1]
 
-        return results
+    if search_tasks:
+        results["search_result"] = search_tasks[-1]
+
+    return results
 
 
 def _load_documents_from_file(

@@ -31,7 +31,7 @@ from meilisearch_python_sdk.plugins import (
 from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:
-    from meilisearch_python_sdk.types import Filter, JsonMapping
+    from meilisearch_python_sdk.types import Filter, JsonMapping, PluginEvent
 
 
 class BaseIndex:
@@ -285,6 +285,20 @@ def embedder_json_to_settings_model(  # pragma: no cover
             embedders[k] = UserProvidedEmbedder(**v)
 
     return embedders
+
+
+def filter_plugins(
+    plugins: Sequence[
+        AsyncPlugin
+        | AsyncDocumentPlugin
+        | AsyncPostSearchPlugin
+        | Plugin
+        | DocumentPlugin
+        | PostSearchPlugin,
+    ],
+    plugin_event: PluginEvent,
+) -> list[Any] | None:
+    return [plugin for plugin in plugins if getattr(plugin, plugin_event, False)] or None
 
 
 def validate_file_type(file_path: Path) -> None:

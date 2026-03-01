@@ -22,6 +22,7 @@ from meilisearch_python_sdk.index._common import (
     build_encoded_url,
     embedder_json_to_embedders_model,
     embedder_json_to_settings_model,
+    filter_plugins,
     plugin_has_method,
     process_search_parameters,
     raise_on_no_documents,
@@ -122,278 +123,147 @@ class AsyncIndex(BaseIndex):
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.add_documents_plugins if plugin.CONCURRENT_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.add_documents_plugins, "CONCURRENT_EVENT")
 
     @cached_property
     def _post_add_documents_plugins(self) -> list[AsyncPlugin | AsyncDocumentPlugin] | None:
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.add_documents_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.add_documents_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_add_documents_plugins(self) -> list[AsyncPlugin | AsyncDocumentPlugin] | None:
         if not self.plugins or not self.plugins.add_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.add_documents_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.add_documents_plugins, "PRE_EVENT")
 
     @cached_property
     def _concurrent_delete_all_documents_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = [
-            plugin
-            for plugin in self.plugins.delete_all_documents_plugins
-            if plugin.CONCURRENT_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_all_documents_plugins, "CONCURRENT_EVENT")
 
     @cached_property
     def _post_delete_all_documents_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.delete_all_documents_plugins if plugin.POST_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_all_documents_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_delete_all_documents_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_all_documents_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.delete_all_documents_plugins if plugin.PRE_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_all_documents_plugins, "PRE_EVENT")
 
     @cached_property
     def _concurrent_delete_document_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.delete_document_plugins if plugin.CONCURRENT_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_document_plugins, "CONCURRENT_EVENT")
 
     @cached_property
     def _post_delete_document_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.delete_document_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_document_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_delete_document_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_document_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.delete_document_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_document_plugins, "PRE_EVENT")
 
     @cached_property
     def _concurrent_delete_documents_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.delete_documents_plugins if plugin.CONCURRENT_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_plugins, "CONCURRENT_EVENT")
 
     @cached_property
     def _post_delete_documents_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.delete_documents_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_delete_documents_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.delete_documents_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_plugins, "PRE_EVENT")
 
     @cached_property
     def _concurrent_delete_documents_by_filter_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = [
-            plugin
-            for plugin in self.plugins.delete_documents_by_filter_plugins
-            if plugin.CONCURRENT_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_by_filter_plugins, "CONCURRENT_EVENT")
 
     @cached_property
     def _post_delete_documents_by_filter_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = [
-            plugin
-            for plugin in self.plugins.delete_documents_by_filter_plugins
-            if plugin.POST_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_by_filter_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_delete_documents_by_filter_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.delete_documents_by_filter_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.delete_documents_by_filter_plugins if plugin.PRE_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.delete_documents_by_filter_plugins, "PRE_EVENT")
 
     @cached_property
     def _concurrent_facet_search_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.facet_search_plugins if plugin.CONCURRENT_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.facet_search_plugins, "CONCURRENT_EVENT")
 
     @cached_property
     def _post_facet_search_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.facet_search_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.facet_search_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_facet_search_plugins(self) -> list[AsyncPlugin] | None:
         if not self.plugins or not self.plugins.facet_search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.facet_search_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.facet_search_plugins, "PRE_EVENT")
 
     @cached_property
     def _concurrent_search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.CONCURRENT_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.search_plugins, "CONCURRENT_EVENT")
 
     @cached_property
     def _post_search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.search_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_search_plugins(self) -> list[AsyncPlugin | AsyncPostSearchPlugin] | None:
         if not self.plugins or not self.plugins.search_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.search_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.search_plugins, "PRE_EVENT")
 
     @cached_property
     def _concurrent_update_documents_plugins(
@@ -402,38 +272,21 @@ class AsyncIndex(BaseIndex):
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = [
-            plugin for plugin in self.plugins.update_documents_plugins if plugin.CONCURRENT_EVENT
-        ]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.update_documents_plugins, "CONCURRENT_EVENT")
 
     @cached_property
     def _post_update_documents_plugins(self) -> list[AsyncPlugin | AsyncDocumentPlugin] | None:
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.update_documents_plugins if plugin.POST_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.update_documents_plugins, "POST_EVENT")
 
     @cached_property
     def _pre_update_documents_plugins(self) -> list[AsyncPlugin | AsyncDocumentPlugin] | None:
         if not self.plugins or not self.plugins.update_documents_plugins:
             return None
 
-        plugins = [plugin for plugin in self.plugins.update_documents_plugins if plugin.PRE_EVENT]
-
-        if not plugins:
-            return None
-
-        return plugins
+        return filter_plugins(self.plugins.update_documents_plugins, "PRE_EVENT")
 
     async def compact(self) -> TaskInfo:
         """Appends a new task to the queue to compact the database.
@@ -833,7 +686,7 @@ class AsyncIndex(BaseIndex):
         search_url = f"{self._base_url_with_uid}/search"
 
         if self._pre_search_plugins:
-            await AsyncIndex._run_plugins(
+            await _run_plugins(
                 self._pre_search_plugins,
                 AsyncEvent.PRE,
                 query=query,
@@ -899,7 +752,7 @@ class AsyncIndex(BaseIndex):
                 responses = await asyncio.gather(*concurrent_tasks)
                 result = SearchResults[self.hits_type](**responses[-1].json())  # type: ignore[name-defined]
                 if self._post_search_plugins:
-                    post = await AsyncIndex._run_plugins(
+                    post = await _run_plugins(
                         self._post_search_plugins, AsyncEvent.POST, search_results=result
                     )
                     if post.get("search_result"):
@@ -943,7 +796,7 @@ class AsyncIndex(BaseIndex):
             response = await response_coroutine
             result = SearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
             if self._post_search_plugins:
-                post = await AsyncIndex._run_plugins(
+                post = await _run_plugins(
                     self._post_search_plugins, AsyncEvent.POST, search_results=result
                 )
                 if post.get("search_result"):
@@ -955,7 +808,7 @@ class AsyncIndex(BaseIndex):
         result = SearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
 
         if self._post_search_plugins:
-            post = await AsyncIndex._run_plugins(
+            post = await _run_plugins(
                 self._post_search_plugins, AsyncEvent.POST, search_results=result
             )
             if post.get("search_result"):
@@ -1102,7 +955,7 @@ class AsyncIndex(BaseIndex):
         search_url = f"{self._base_url_with_uid}/facet-search"
 
         if self._pre_facet_search_plugins:
-            await AsyncIndex._run_plugins(
+            await _run_plugins(
                 self._pre_facet_search_plugins,
                 AsyncEvent.PRE,
                 query=query,
@@ -1168,7 +1021,7 @@ class AsyncIndex(BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = FacetSearchResults(**responses[-1].json())
                 if self._post_facet_search_plugins:
-                    post = await AsyncIndex._run_plugins(
+                    post = await _run_plugins(
                         self._post_facet_search_plugins, AsyncEvent.POST, result=result
                     )
                     if isinstance(post["generic_result"], FacetSearchResults):
@@ -1213,7 +1066,7 @@ class AsyncIndex(BaseIndex):
             response = await response_coroutine
             result = FacetSearchResults(**self._http_requests.parse_json(response))
             if self._post_facet_search_plugins:
-                post = await AsyncIndex._run_plugins(
+                post = await _run_plugins(
                     self._post_facet_search_plugins, AsyncEvent.POST, result=result
                 )
                 if isinstance(post["generic_result"], FacetSearchResults):
@@ -1224,7 +1077,7 @@ class AsyncIndex(BaseIndex):
         response = await self._http_requests.post(search_url, body=body)
         result = FacetSearchResults(**self._http_requests.parse_json(response))
         if self._post_facet_search_plugins:
-            post = await AsyncIndex._run_plugins(
+            post = await _run_plugins(
                 self._post_facet_search_plugins, AsyncEvent.POST, result=result
             )
             if isinstance(post["generic_result"], FacetSearchResults):
@@ -1462,7 +1315,7 @@ class AsyncIndex(BaseIndex):
             url = self._documents_url
 
         if self._pre_add_documents_plugins:
-            pre = await AsyncIndex._run_plugins(
+            pre = await _run_plugins(
                 self._pre_add_documents_plugins,
                 AsyncEvent.PRE,
                 documents=documents,
@@ -1497,7 +1350,7 @@ class AsyncIndex(BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_add_documents_plugins:
-                    post = await AsyncIndex._run_plugins(
+                    post = await _run_plugins(
                         self._post_add_documents_plugins,
                         AsyncEvent.POST,
                         result=result,
@@ -1534,7 +1387,7 @@ class AsyncIndex(BaseIndex):
             response = await response_coroutine
             result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_add_documents_plugins:
-                post = await AsyncIndex._run_plugins(
+                post = await _run_plugins(
                     self._post_add_documents_plugins,
                     AsyncEvent.POST,
                     result=result,
@@ -1550,7 +1403,7 @@ class AsyncIndex(BaseIndex):
 
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_add_documents_plugins:
-            post = await AsyncIndex._run_plugins(
+            post = await _run_plugins(
                 self._post_add_documents_plugins,
                 AsyncEvent.POST,
                 result=result,
@@ -2221,7 +2074,7 @@ class AsyncIndex(BaseIndex):
             url = self._documents_url
 
         if self._pre_update_documents_plugins:
-            pre = await AsyncIndex._run_plugins(
+            pre = await _run_plugins(
                 self._pre_update_documents_plugins,
                 AsyncEvent.PRE,
                 documents=documents,
@@ -2256,7 +2109,7 @@ class AsyncIndex(BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_update_documents_plugins:
-                    post = await AsyncIndex._run_plugins(
+                    post = await _run_plugins(
                         self._post_update_documents_plugins,
                         AsyncEvent.POST,
                         result=result,
@@ -2294,7 +2147,7 @@ class AsyncIndex(BaseIndex):
             response = await response_coroutine
             result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_update_documents_plugins:
-                post = await AsyncIndex._run_plugins(
+                post = await _run_plugins(
                     self._post_update_documents_plugins,
                     AsyncEvent.POST,
                     result=result,
@@ -2310,7 +2163,7 @@ class AsyncIndex(BaseIndex):
         response = await self._http_requests.put(url, documents, compress=compress)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_update_documents_plugins:
-            post = await AsyncIndex._run_plugins(
+            post = await _run_plugins(
                 self._post_update_documents_plugins,
                 AsyncEvent.POST,
                 result=result,
@@ -2930,7 +2783,7 @@ class AsyncIndex(BaseIndex):
             url = build_encoded_url(url, {"customMetadata": custom_metadata})
 
         if self._pre_delete_document_plugins:
-            await AsyncIndex._run_plugins(
+            await _run_plugins(
                 self._pre_delete_document_plugins, AsyncEvent.PRE, document_id=document_id
             )
 
@@ -2947,7 +2800,7 @@ class AsyncIndex(BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_delete_document_plugins:
-                    post = await AsyncIndex._run_plugins(
+                    post = await _run_plugins(
                         self._post_delete_document_plugins, AsyncEvent.POST, result=result
                     )
                     if isinstance(post.get("generic_result"), TaskInfo):
@@ -2965,7 +2818,7 @@ class AsyncIndex(BaseIndex):
             response = await response_coroutine
             result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_delete_document_plugins:
-                post = await AsyncIndex._run_plugins(
+                post = await _run_plugins(
                     self._post_delete_document_plugins, event=AsyncEvent.POST, result=result
                 )
                 if isinstance(post["generic_result"], TaskInfo):
@@ -2975,7 +2828,7 @@ class AsyncIndex(BaseIndex):
         response = await self._http_requests.delete(url)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_document_plugins:
-            post = await AsyncIndex._run_plugins(
+            post = await _run_plugins(
                 self._post_delete_document_plugins, AsyncEvent.POST, result=result
             )
             if isinstance(post["generic_result"], TaskInfo):
@@ -3011,9 +2864,7 @@ class AsyncIndex(BaseIndex):
             url = build_encoded_url(url, {"customMetadata": custom_metadata})
 
         if self._pre_delete_documents_plugins:
-            await AsyncIndex._run_plugins(
-                self._pre_delete_documents_plugins, AsyncEvent.PRE, ids=ids
-            )
+            await _run_plugins(self._pre_delete_documents_plugins, AsyncEvent.PRE, ids=ids)
 
         if self._concurrent_delete_documents_plugins:
             if not use_task_groups():
@@ -3026,7 +2877,7 @@ class AsyncIndex(BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_delete_documents_plugins:
-                    post = await AsyncIndex._run_plugins(
+                    post = await _run_plugins(
                         self._post_delete_documents_plugins, AsyncEvent.POST, result=result
                     )
                     if isinstance(post.get("generic_result"), TaskInfo):
@@ -3042,7 +2893,7 @@ class AsyncIndex(BaseIndex):
             response = await response_coroutine
             result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_delete_documents_plugins:
-                post = await AsyncIndex._run_plugins(
+                post = await _run_plugins(
                     self._post_delete_documents_plugins, AsyncEvent.POST, result=result
                 )
                 if isinstance(post["generic_result"], TaskInfo):
@@ -3052,7 +2903,7 @@ class AsyncIndex(BaseIndex):
         response = await self._http_requests.post(url, ids)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_plugins:
-            post = await AsyncIndex._run_plugins(
+            post = await _run_plugins(
                 self._post_delete_documents_plugins, AsyncEvent.POST, result=result
             )
             if isinstance(post["generic_result"], TaskInfo):
@@ -3088,7 +2939,7 @@ class AsyncIndex(BaseIndex):
             url = build_encoded_url(url, {"customMetadata": custom_metadata})
 
         if self._pre_delete_documents_by_filter_plugins:
-            await AsyncIndex._run_plugins(
+            await _run_plugins(
                 self._pre_delete_documents_by_filter_plugins, AsyncEvent.PRE, filter=filter
             )
 
@@ -3103,7 +2954,7 @@ class AsyncIndex(BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_delete_documents_by_filter_plugins:
-                    post = await AsyncIndex._run_plugins(
+                    post = await _run_plugins(
                         self._post_delete_documents_by_filter_plugins,
                         AsyncEvent.POST,
                         result=result,
@@ -3123,7 +2974,7 @@ class AsyncIndex(BaseIndex):
             response = await response_coroutine
             result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_delete_documents_by_filter_plugins:
-                post = await AsyncIndex._run_plugins(
+                post = await _run_plugins(
                     self._post_delete_documents_by_filter_plugins, AsyncEvent.POST, result=result
                 )
                 if isinstance(post["generic_result"], TaskInfo):
@@ -3134,7 +2985,7 @@ class AsyncIndex(BaseIndex):
         response = await self._http_requests.post(url, body={"filter": filter})
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_by_filter_plugins:
-            post = await AsyncIndex._run_plugins(
+            post = await _run_plugins(
                 self._post_delete_documents_by_filter_plugins, AsyncEvent.POST, result=result
             )
             if isinstance(post.get("generic_result"), TaskInfo):
@@ -3237,7 +3088,7 @@ class AsyncIndex(BaseIndex):
             url = self._documents_url
 
         if self._pre_delete_all_documents_plugins:
-            await AsyncIndex._run_plugins(self._pre_delete_all_documents_plugins, AsyncEvent.PRE)
+            await _run_plugins(self._pre_delete_all_documents_plugins, AsyncEvent.PRE)
 
         if self._concurrent_delete_all_documents_plugins:
             if not use_task_groups():
@@ -3250,7 +3101,7 @@ class AsyncIndex(BaseIndex):
                 responses = await asyncio.gather(*tasks)
                 result = TaskInfo(**responses[-1].json())
                 if self._post_delete_all_documents_plugins:
-                    post = await AsyncIndex._run_plugins(
+                    post = await _run_plugins(
                         self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
                     )
                     if isinstance(post.get("generic_result"), TaskInfo):
@@ -3266,7 +3117,7 @@ class AsyncIndex(BaseIndex):
             response = await response_coroutine
             result = TaskInfo(**self._http_requests.parse_json(response))
             if self._post_delete_all_documents_plugins:
-                post = await AsyncIndex._run_plugins(
+                post = await _run_plugins(
                     self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
                 )
                 if isinstance(post.get("generic_result"), TaskInfo):
@@ -3276,7 +3127,7 @@ class AsyncIndex(BaseIndex):
         response = await self._http_requests.delete(url)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_all_documents_plugins:
-            post = await AsyncIndex._run_plugins(
+            post = await _run_plugins(
                 self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
             )
             if isinstance(post.get("generic_result"), TaskInfo):
@@ -4861,73 +4712,73 @@ class AsyncIndex(BaseIndex):
             total=response_json["total"],
         )
 
-    @staticmethod
-    async def _run_plugins(
-        plugins: Sequence[AsyncPlugin | AsyncDocumentPlugin | AsyncPostSearchPlugin],
-        event: AsyncEvent,
-        **kwargs: Any,  # noqa: ANN401
-    ) -> dict[str, Any]:
-        generic_plugins = []
-        document_plugins = []
-        search_plugins = []
-        results: dict[str, Any] = {
-            "generic_result": None,
-            "document_result": None,
-            "search_result": None,
-        }
-        if not use_task_groups():
-            for plugin in plugins:
-                if plugin_has_method(plugin, "run_plugin"):
-                    generic_plugins.append(plugin.run_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-                if plugin_has_method(plugin, "run_document_plugin"):
-                    document_plugins.append(plugin.run_document_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-                if plugin_has_method(plugin, "run_post_search_plugin"):
-                    search_plugins.append(plugin.run_post_search_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-            if generic_plugins:
-                generic_results = await asyncio.gather(*generic_plugins)
-                if generic_results:
-                    results["generic_result"] = generic_results[-1]
 
-            if document_plugins:
-                document_results = await asyncio.gather(*document_plugins)
-                if document_results:
-                    results["document_result"] = document_results[-1]
-            if search_plugins:
-                search_results = await asyncio.gather(*search_plugins)
-                if search_results:
-                    results["search_result"] = search_results[-1]
+async def _run_plugins(
+    plugins: Sequence[AsyncPlugin | AsyncDocumentPlugin | AsyncPostSearchPlugin],
+    event: AsyncEvent,
+    **kwargs: Any,  # noqa: ANN401
+) -> dict[str, Any]:
+    generic_plugins = []
+    document_plugins = []
+    search_plugins = []
+    results: dict[str, Any] = {
+        "generic_result": None,
+        "document_result": None,
+        "search_result": None,
+    }
+    if not use_task_groups():
+        for plugin in plugins:
+            if plugin_has_method(plugin, "run_plugin"):
+                generic_plugins.append(plugin.run_plugin(event=event, **kwargs))  # type: ignore[union-attr]
+            if plugin_has_method(plugin, "run_document_plugin"):
+                document_plugins.append(plugin.run_document_plugin(event=event, **kwargs))  # type: ignore[union-attr]
+            if plugin_has_method(plugin, "run_post_search_plugin"):
+                search_plugins.append(plugin.run_post_search_plugin(event=event, **kwargs))  # type: ignore[union-attr]
+        if generic_plugins:
+            generic_results = await asyncio.gather(*generic_plugins)
+            if generic_results:
+                results["generic_result"] = generic_results[-1]
 
-            return results
-
-        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
-            generic_tasks = []
-            document_tasks = []
-            search_tasks = []
-            for plugin in plugins:
-                if plugin_has_method(plugin, "run_plugin"):
-                    generic_tasks.append(tg.create_task(plugin.run_plugin(event=event, **kwargs)))  # type: ignore[union-attr]
-                if plugin_has_method(plugin, "run_document_plugin"):
-                    document_tasks.append(
-                        tg.create_task(plugin.run_document_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-                    )
-                if plugin_has_method(plugin, "run_post_search_plugin"):
-                    search_tasks.append(
-                        tg.create_task(plugin.run_post_search_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-                    )
-
-        if generic_tasks:
-            for result in reversed(generic_tasks):
-                if result:
-                    results["generic_result"] = await result
-                    break
-
-        if document_tasks:
-            results["document_result"] = await document_tasks[-1]
-
-        if search_tasks:
-            results["search_result"] = await search_tasks[-1]
+        if document_plugins:
+            document_results = await asyncio.gather(*document_plugins)
+            if document_results:
+                results["document_result"] = document_results[-1]
+        if search_plugins:
+            search_results = await asyncio.gather(*search_plugins)
+            if search_results:
+                results["search_result"] = search_results[-1]
 
         return results
+
+    async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+        generic_tasks = []
+        document_tasks = []
+        search_tasks = []
+        for plugin in plugins:
+            if plugin_has_method(plugin, "run_plugin"):
+                generic_tasks.append(tg.create_task(plugin.run_plugin(event=event, **kwargs)))  # type: ignore[union-attr]
+            if plugin_has_method(plugin, "run_document_plugin"):
+                document_tasks.append(
+                    tg.create_task(plugin.run_document_plugin(event=event, **kwargs))  # type: ignore[union-attr]
+                )
+            if plugin_has_method(plugin, "run_post_search_plugin"):
+                search_tasks.append(
+                    tg.create_task(plugin.run_post_search_plugin(event=event, **kwargs))  # type: ignore[union-attr]
+                )
+
+    if generic_tasks:
+        for result in reversed(generic_tasks):
+            if result:
+                results["generic_result"] = await result
+                break
+
+    if document_tasks:
+        results["document_result"] = await document_tasks[-1]
+
+    if search_tasks:
+        results["search_result"] = await search_tasks[-1]
+
+    return results
 
 
 async def _async_load_documents_from_file(
