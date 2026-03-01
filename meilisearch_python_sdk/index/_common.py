@@ -315,12 +315,7 @@ def prepare_raw_file_upload(
     if csv_delimiter and upload_path.suffix != ".csv":
         raise ValueError("A csv_delimiter can only be used with csv files")
 
-    if (
-        csv_delimiter
-        and len(csv_delimiter) != 1
-        or csv_delimiter
-        and not csv_delimiter.isascii()
-    ):
+    if csv_delimiter and len(csv_delimiter) != 1 or csv_delimiter and not csv_delimiter.isascii():
         raise ValueError("csv_delimiter must be a single ascii character")
 
     content_type = "text/csv" if upload_path.suffix == ".csv" else "application/x-ndjson"
