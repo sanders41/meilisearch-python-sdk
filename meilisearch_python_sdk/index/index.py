@@ -3785,15 +3785,21 @@ def _run_plugins(
 
     if generic_tasks:
         for result in reversed(generic_tasks):
-            if result:
+            if result is not None:
                 results["generic_result"] = result
                 break
 
     if document_tasks:
-        results["document_result"] = document_tasks[-1]
+        for result in reversed(document_tasks):
+            if result is not None:
+                results["document_result"] = result
+                break
 
     if search_tasks:
-        results["search_result"] = search_tasks[-1]
+        for result in reversed(search_tasks):
+            if result is not None:
+                results["search_result"] = result
+                break
 
     return results
 
