@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import datetime
 
-import pydantic
 from camel_converter.pydantic_base import CamelBase
 
 
@@ -14,22 +13,6 @@ class IndexBase(CamelBase):
 class IndexInfo(IndexBase):
     created_at: datetime
     updated_at: datetime
-
-    @pydantic.field_validator("created_at", mode="before")  # type: ignore[attr-defined]
-    @classmethod
-    def validate_created_at(cls, v: str | datetime) -> datetime:
-        if isinstance(v, str):
-            return datetime.fromisoformat(v)
-
-        return v
-
-    @pydantic.field_validator("updated_at", mode="before")  # type: ignore[attr-defined]
-    @classmethod
-    def validate_updated_at(cls, v: str | datetime) -> datetime:
-        if isinstance(v, str):
-            return datetime.fromisoformat(v)
-
-        return v
 
 
 class IndexStats(CamelBase):

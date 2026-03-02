@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import datetime
 
-import pydantic
 from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
 
@@ -27,30 +26,6 @@ class TaskResult(TaskId):
     batch_uid: int | None = None
     custom_metadata: str | None = None
 
-    @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
-    @classmethod
-    def validate_enqueued_at(cls, v: str | datetime) -> datetime:
-        if isinstance(v, str):
-            return datetime.fromisoformat(v)
-
-        return v
-
-    @pydantic.field_validator("started_at", mode="before")  # type: ignore[attr-defined]
-    @classmethod
-    def validate_started_at(cls, v: str | datetime | None) -> datetime | None:
-        if isinstance(v, str):
-            return datetime.fromisoformat(v)
-
-        return v
-
-    @pydantic.field_validator("finished_at", mode="before")  # type: ignore[attr-defined]
-    @classmethod
-    def validate_finished_at(cls, v: str | datetime | None) -> datetime | None:
-        if isinstance(v, str):
-            return datetime.fromisoformat(v)
-
-        return v
-
 
 class TaskStatus(CamelBase):
     results: list[TaskResult]
@@ -68,11 +43,3 @@ class TaskInfo(CamelBase):
     enqueued_at: datetime
     batch_uid: int | None = None
     custom_metadata: str | None = None
-
-    @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
-    @classmethod
-    def validate_enqueued_at(cls, v: str | datetime) -> datetime:
-        if isinstance(v, str):
-            return datetime.fromisoformat(v)
-
-        return v

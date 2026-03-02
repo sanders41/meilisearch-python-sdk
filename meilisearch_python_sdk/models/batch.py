@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from camel_converter.pydantic_base import CamelBase
-from pydantic import Field, field_validator
+from pydantic import Field
 
 from meilisearch_python_sdk.types import JsonDict
 
@@ -37,22 +37,6 @@ class BatchResult(BatchId):
     duration: str | None = None
     started_at: datetime | None = None
     finished_at: datetime | None = None
-
-    @field_validator("started_at", mode="before")  # type: ignore[attr-defined]
-    @classmethod
-    def validate_started_at(cls, v: str | None) -> datetime | None:
-        if v is None:
-            return None
-
-        return datetime.fromisoformat(v)
-
-    @field_validator("finished_at", mode="before")  # type: ignore[attr-defined]
-    @classmethod
-    def validate_finished_at(cls, v: str | None) -> datetime | None:
-        if v is None:
-            return None
-
-        return datetime.fromisoformat(v)
 
 
 class BatchStatus(CamelBase):
