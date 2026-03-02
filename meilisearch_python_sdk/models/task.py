@@ -6,7 +6,6 @@ import pydantic
 from camel_converter.pydantic_base import CamelBase
 from pydantic import Field
 
-from meilisearch_python_sdk._utils import iso_to_date_time
 from meilisearch_python_sdk.types import JsonDict
 
 
@@ -30,23 +29,27 @@ class TaskResult(TaskId):
 
     @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_enqueued_at(cls, v: str) -> datetime:
-        converted = iso_to_date_time(v)
+    def validate_enqueued_at(cls, v: str | datetime) -> datetime:
+        if isinstance(v, str):
+            return datetime.fromisoformat(v)
 
-        if not converted:  # pragma: no cover
-            raise ValueError("enqueued_at is required")
-
-        return converted
+        return v
 
     @pydantic.field_validator("started_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_started_at(cls, v: str) -> datetime | None:
-        return iso_to_date_time(v)
+    def validate_started_at(cls, v: str | datetime | None) -> datetime | None:
+        if isinstance(v, str):
+            return datetime.fromisoformat(v)
+
+        return v
 
     @pydantic.field_validator("finished_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_finished_at(cls, v: str) -> datetime | None:
-        return iso_to_date_time(v)
+    def validate_finished_at(cls, v: str | datetime | None) -> datetime | None:
+        if isinstance(v, str):
+            return datetime.fromisoformat(v)
+
+        return v
 
 
 class TaskStatus(CamelBase):
@@ -68,10 +71,8 @@ class TaskInfo(CamelBase):
 
     @pydantic.field_validator("enqueued_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_enqueued_at(cls, v: str) -> datetime:
-        converted = iso_to_date_time(v)
+    def validate_enqueued_at(cls, v: str | datetime) -> datetime:
+        if isinstance(v, str):
+            return datetime.fromisoformat(v)
 
-        if not converted:  # pragma: no cover
-            raise ValueError("enqueued_at is required")
-
-        return converted
+        return v

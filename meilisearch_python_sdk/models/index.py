@@ -5,8 +5,6 @@ from datetime import datetime
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 
-from meilisearch_python_sdk._utils import iso_to_date_time
-
 
 class IndexBase(CamelBase):
     uid: str
@@ -19,23 +17,19 @@ class IndexInfo(IndexBase):
 
     @pydantic.field_validator("created_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_created_at(cls, v: str) -> datetime:
-        converted = iso_to_date_time(v)
+    def validate_created_at(cls, v: str | datetime) -> datetime:
+        if isinstance(v, str):
+            return datetime.fromisoformat(v)
 
-        if not converted:  # pragma: no cover
-            raise ValueError("created_at is required")
-
-        return converted
+        return v
 
     @pydantic.field_validator("updated_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_updated_at(cls, v: str) -> datetime:
-        converted = iso_to_date_time(v)
+    def validate_updated_at(cls, v: str | datetime) -> datetime:
+        if isinstance(v, str):
+            return datetime.fromisoformat(v)
 
-        if not converted:  # pragma: no cover
-            raise ValueError("updated_at is required")
-
-        return converted
+        return v
 
 
 class IndexStats(CamelBase):

@@ -6,7 +6,6 @@ from datetime import datetime
 import pydantic
 from camel_converter.pydantic_base import CamelBase
 
-from meilisearch_python_sdk._utils import iso_to_date_time
 from meilisearch_python_sdk.models.index import IndexStats
 
 
@@ -19,7 +18,7 @@ class ClientStats(CamelBase):
     @pydantic.field_validator("last_update", mode="before")  # type: ignore[attr-defined]
     @classmethod
     def validate_last_update(cls, v: str) -> datetime | None:
-        return iso_to_date_time(v)
+        return datetime.fromisoformat(v)
 
 
 class _KeyBase(CamelBase):
@@ -34,8 +33,11 @@ class _KeyBase(CamelBase):
 
     @pydantic.field_validator("expires_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
-    def validate_expires_at(cls, v: str) -> datetime | None:
-        return iso_to_date_time(v)
+    def validate_expires_at(cls, v: str | None) -> datetime | None:
+        if v is None:
+            return None
+
+        return datetime.fromisoformat(v)
 
 
 class Key(_KeyBase):
@@ -46,7 +48,7 @@ class Key(_KeyBase):
     @pydantic.field_validator("created_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
     def validate_created_at(cls, v: str) -> datetime:
-        converted = iso_to_date_time(v)
+        converted = datetime.fromisoformat(v)
 
         if not converted:  # pragma: no cover
             raise ValueError("created_at is required")
@@ -56,7 +58,7 @@ class Key(_KeyBase):
     @pydantic.field_validator("updated_at", mode="before")  # type: ignore[attr-defined]
     @classmethod
     def validate_updated_at(cls, v: str) -> datetime | None:
-        return iso_to_date_time(v)
+        return datetime.fromisoformat(v)
 
 
 class KeyCreate(CamelBase):
