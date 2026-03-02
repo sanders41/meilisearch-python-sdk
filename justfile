@@ -30,6 +30,12 @@
 @test-no-parallel *args="":
   -uv run pytest -m "no_parallel" {{args}}
 
+@test-combined *args="":
+  echo running no parallel
+  just --justfile {{justfile()}} test-no-parallel {{args}}
+  echo running parallel
+  just --justfile {{justfile()}} test-parallel {{args}}
+
 @test-parallel-http2 *args="":
   -uv run pytest -n auto -m "not no_parallel" --http2 {{args}}
 

@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlencode
 
-from meilisearch_python_sdk._utils import iso_to_date_time
+from pydantic import TypeAdapter
+
 from meilisearch_python_sdk.errors import MeilisearchError
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.search import Hybrid
@@ -34,6 +35,9 @@ if TYPE_CHECKING:
     from meilisearch_python_sdk.types import Filter, JsonMapping, PluginEvent
 
 
+_datetime_adapter: TypeAdapter[datetime] = TypeAdapter(datetime)
+
+
 class BaseIndex:
     def __init__(
         self,
@@ -46,8 +50,16 @@ class BaseIndex:
     ) -> None:
         self.uid = uid
         self.primary_key = primary_key
-        self.created_at: datetime | None = iso_to_date_time(created_at)
-        self.updated_at: datetime | None = iso_to_date_time(updated_at)
+        self.created_at: datetime | None = (
+            _datetime_adapter.validate_python(created_at)
+            if isinstance(created_at, str)
+            else created_at
+        )
+        self.updated_at: datetime | None = (
+            _datetime_adapter.validate_python(updated_at)
+            if isinstance(updated_at, str)
+            else updated_at
+        )
         self.hits_type = hits_type
         self._base_url = "indexes/"
         self._base_url_with_uid = f"{self._base_url}{self.uid}"
@@ -66,8 +78,8 @@ class BaseIndex:
         self, primary_key: str, created_at_iso_str: str, updated_at_iso_str: str
     ) -> None:
         self.primary_key = primary_key
-        self.created_at = iso_to_date_time(created_at_iso_str)
-        self.updated_at = iso_to_date_time(updated_at_iso_str)
+        self.created_at = _datetime_adapter.validate_python(created_at_iso_str)
+        self.updated_at = _datetime_adapter.validate_python(updated_at_iso_str)
 
 
 def batch(
