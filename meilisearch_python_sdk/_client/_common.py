@@ -50,7 +50,8 @@ def build_multi_search_payload(
     return processed_queries, federation_payload
 
 
-def build_transfer_documents_payload(
+# No cover because it requires multiple instances of Meilisearch
+def build_transfer_documents_payload(  # pragma: no cover
     url: str,
     api_key: str | None,
     payload_size: str | None,
