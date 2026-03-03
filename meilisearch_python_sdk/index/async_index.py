@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Sequence
 from csv import DictReader
 from datetime import datetime
 from functools import cached_property, partial
@@ -63,6 +62,7 @@ from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:
     import sys
+    from collections.abc import Sequence
 
     from meilisearch_python_sdk.types import Filter, JsonMapping
 

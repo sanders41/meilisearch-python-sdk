@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from ssl import SSLContext
 from typing import TYPE_CHECKING, Any
 
 from camel_converter import dict_to_camel
@@ -47,6 +46,7 @@ from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:
     import sys
+    from ssl import SSLContext
     from types import TracebackType
 
     from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus

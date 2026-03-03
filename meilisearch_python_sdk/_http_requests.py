@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import gzip
-from collections.abc import Callable
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from httpx import (
     AsyncClient,
@@ -21,7 +20,11 @@ from meilisearch_python_sdk.errors import (
     MeilisearchCommunicationError,
     MeilisearchError,
 )
-from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 
 
 class AsyncHttpRequests:
