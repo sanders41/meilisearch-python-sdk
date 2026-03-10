@@ -300,7 +300,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     client.create_dump()
@@ -347,7 +347,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.create_index("movies")
@@ -374,7 +374,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     client.create_snapshot()
@@ -396,7 +396,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     client.delete_index_if_exists()
@@ -426,7 +426,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     indexes = client.get_indexes()
@@ -463,7 +463,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.get_index()
@@ -484,7 +484,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -502,7 +502,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     stats = client.get_all_stats()
@@ -536,7 +536,7 @@ class Client(BaseClient):
             MeilisearchApiError: If the Meilisearch API returned an error.MeilisearchTimeoutError: If the connection times out.
             MeilisearchTimeoutError: If the connection times out.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.get_or_create_index("movies")
@@ -565,7 +565,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> from meilissearch_async_client.models.client import KeyCreate
             >>> with Client("http://localhost.com", "masterKey") as client:
@@ -595,7 +595,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     client.delete_key("abc123")
@@ -618,7 +618,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     keys = client.get_keys()
@@ -641,7 +641,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     keys = client.get_key("abc123")
@@ -664,7 +664,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> from meilissearch_async_client.models.client import KeyUpdate
             >>> with Client("http://localhost.com", "masterKey") as client:
@@ -703,7 +703,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.models.search import SearchParams
             >>> with Client("http://localhost.com", "masterKey") as client:
@@ -746,7 +746,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.get_raw_index("movies")
@@ -777,7 +777,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.get_raw_indexes()
@@ -801,7 +801,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     version = client.get_version()
@@ -820,7 +820,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     health = client.get_health()
@@ -844,7 +844,7 @@ class Client(BaseClient):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.swap_indexes([("index_a", "index_b")])
@@ -923,7 +923,7 @@ class Client(BaseClient):
             MeilisearchApiError: If the Meilisearch API returned an error.
             MeilisearchTimeoutError: If the connection times out.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> from meilisearch_python_sdk.task import cancel_tasks
             >>>
@@ -976,7 +976,7 @@ class Client(BaseClient):
             MeilisearchApiError: If the Meilisearch API returned an error.
             MeilisearchTimeoutError: If the connection times out.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>>
             >>> with Client("http://localhost.com", "masterKey") as client:
@@ -1008,7 +1008,7 @@ class Client(BaseClient):
             MeilisearchApiError: If the Meilisearch API returned an error.
             MeilisearchTimeoutError: If the connection times out.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>>
             >>> with Client("http://localhost.com", "masterKey") as client:
@@ -1039,7 +1039,7 @@ class Client(BaseClient):
             MeilisearchApiError: If the Meilisearch API returned an error.
             MeilisearchTimeoutError: If the connection times out.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>>
             >>> with Client("http://localhost.com", "masterKey") as client:
@@ -1075,7 +1075,7 @@ class Client(BaseClient):
             MeilisearchTimeoutError: If the connection times out.
             MeilisearchTaskFailedError: If `raise_for_status` is `True` and a task has a failed status.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -1122,7 +1122,7 @@ class Client(BaseClient):
             MeilisearchApiError: If the Meilisearch API returned an error.
             MeilisearchTimeoutError: If the connection times out.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index.transfer_documents("https://another-instance.com", api_key="otherMasterKey")
@@ -1144,7 +1144,7 @@ class Client(BaseClient):
             MeilisearchApiError: If the Meilisearch API returned an error.
             MeilisearchTimeoutError: If the connection times out.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index.get_experimental_feature()
@@ -1169,7 +1169,7 @@ class Client(BaseClient):
             MeilisearchApiError: If the Meilisearch API returned an error.
             MeilisearchTimeoutError: If the connection times out.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import Client
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index.update_experimental_features({"logsRoute": True})

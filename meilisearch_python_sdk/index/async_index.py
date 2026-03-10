@@ -299,7 +299,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -318,7 +318,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -337,7 +337,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -365,7 +365,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -392,7 +392,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -415,7 +415,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -474,7 +474,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await index.create(client, "movies")
@@ -526,7 +526,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -645,7 +645,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -911,7 +911,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1124,7 +1124,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1175,7 +1175,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1228,7 +1228,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchApiError: If the Meilisearch API returned an error.
 
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -1292,7 +1292,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -1447,7 +1447,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -1538,7 +1538,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -1725,7 +1725,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -1816,7 +1816,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
@@ -1868,7 +1868,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
@@ -1923,7 +1923,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.csv")
@@ -1983,7 +1983,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -2033,7 +2033,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -2194,7 +2194,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> documents = [
             >>>     {"id": 1, "title": "Movie 1", "genre": "comedy"},
@@ -2294,7 +2294,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -2438,7 +2438,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> directory_path = Path("/path/to/directory/containing/files")
@@ -2573,7 +2573,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
@@ -2627,7 +2627,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.json")
@@ -2686,7 +2686,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from pathlib import Path
             >>> from meilisearch_python_sdk import AsyncClient
             >>> file_path = Path("/path/to/file.csv")
@@ -2736,7 +2736,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -2817,7 +2817,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -2892,7 +2892,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -2980,7 +2980,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3041,7 +3041,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3109,7 +3109,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3144,7 +3144,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk import MeilisearchSettings
             >>> new_settings = MeilisearchSettings(
@@ -3189,7 +3189,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3209,7 +3209,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3235,7 +3235,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> ranking_rules=[
             >>>      "words",
@@ -3267,7 +3267,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3288,7 +3288,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3315,7 +3315,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3337,7 +3337,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3357,7 +3357,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3383,7 +3383,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3405,7 +3405,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3425,7 +3425,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3451,7 +3451,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3475,7 +3475,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3495,7 +3495,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3522,7 +3522,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3544,7 +3544,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3564,7 +3564,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3593,7 +3593,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3617,7 +3617,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3637,7 +3637,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3680,7 +3680,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3710,7 +3710,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3730,7 +3730,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3756,7 +3756,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3778,7 +3778,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3798,7 +3798,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3824,7 +3824,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3849,7 +3849,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3869,7 +3869,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3893,7 +3893,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3917,7 +3917,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3937,7 +3937,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -3961,7 +3961,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import Pagination
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
@@ -3986,7 +3986,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4006,7 +4006,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4032,7 +4032,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4054,7 +4054,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4074,7 +4074,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4100,7 +4100,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4122,7 +4122,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4142,7 +4142,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4168,7 +4168,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4190,7 +4190,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4210,7 +4210,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4236,7 +4236,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4258,7 +4258,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4278,7 +4278,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4304,7 +4304,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import ProximityPrecision
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
@@ -4329,7 +4329,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4349,7 +4349,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4373,7 +4373,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import Embedders, UserProvidedEmbedder
             >>>
@@ -4408,7 +4408,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4428,7 +4428,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4457,7 +4457,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> from meilisearch_python_sdk.models.settings import LocalizedAttributes
             >>>
@@ -4486,7 +4486,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4506,7 +4506,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4530,7 +4530,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4554,7 +4554,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
@@ -4574,7 +4574,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.index("movies")
@@ -4603,7 +4603,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.index("movies")
@@ -4627,7 +4627,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = await client.index("movies")
@@ -4654,7 +4654,7 @@ class AsyncIndex(BaseIndex):
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
 
-        Examples
+        Examples:
             >>> from meilisearch_async_client import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     docs = [{"id": 1, "title": "Some Title}]
