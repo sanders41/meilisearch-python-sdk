@@ -133,7 +133,7 @@ SearchResults(
 ### Custom Search
 
 Information about the parameters can be found in the
-[search parameters](https://docs.meilisearch.com/reference/features/search_parameters.html) section
+[search parameters](https://www.meilisearch.com/docs/reference/api/search/search-with-post) section
 of the documentation.
 
 #### AsyncClient
