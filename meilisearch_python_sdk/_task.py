@@ -53,7 +53,7 @@ async def async_cancel_tasks(
         MeilisearchApiError: If the Meilisearch API returned an error.
         MeilisearchTimeoutError: If the connection times out.
 
-    Examples
+    Examples:
         >>> from meilisearch_python_sdk import AsyncClient
         >>> from meilisearch_python_sdk.task import cancel_tasks
         >>>

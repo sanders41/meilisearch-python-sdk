@@ -54,7 +54,7 @@ def async_add_documents(
         MeilisearchApiError: If the Meilisearch API returned an error.
         ValueError: If neither an async_client nor an url is provided.
 
-    Examples
+    Examples:
         >>> from meilisearch_python_sdk import AsyncClient
         >>> from meilisearch_python_sdk.decorators import async_add_documents, ConnectionInfo
         >>>
@@ -136,7 +136,7 @@ def add_documents(
         MeilisearchApiError: If the Meilisearch API returned an error.
         ValueError: If neither an async_client nor an url is provided.
 
-    Examples
+    Examples:
         >>> from meilisearch_python_sdk import Client
         >>> from meilisearch_python_sdk.decorators import add_documents, ConnectionInfo
         >>>
