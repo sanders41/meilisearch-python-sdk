@@ -980,10 +980,9 @@ class Index(BaseIndex):
             "limit": limit,
         }
 
-        if sort:
-            parameters["sort"] = sort
-
         if not filter and not ids:
+            if sort:
+                parameters["sort"] = sort
             if retrieve_vectors:
                 parameters["retrieveVectors"] = "true"
             if fields:
@@ -993,6 +992,9 @@ class Index(BaseIndex):
             response = self._http_requests.get(url)
 
             return DocumentsInfo(**self._http_requests.parse_json(response))
+
+        if sort:
+            parameters["sort"] = sort.split(",")
 
         if retrieve_vectors:
             parameters["retrieveVectors"] = True

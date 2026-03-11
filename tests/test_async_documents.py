@@ -17,6 +17,7 @@ from meilisearch_python_sdk.errors import (
 from meilisearch_python_sdk.index._common import combine_documents
 from meilisearch_python_sdk.index.async_index import _async_load_documents_from_file
 from meilisearch_python_sdk.json_handler import BuiltinHandler
+from meilisearch_python_sdk.models.settings import MeilisearchSettings
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -766,10 +767,10 @@ async def test_get_documents_populated(async_index_with_documents):
 
 async def test_get_documents_offset_optional_params(async_index_with_documents):
     index = await async_index_with_documents()
-    update_response = await index.update_sortable_attributes(["title"])
+    update_response = await index.update_sortable_attributes(["title", "genre"])
     await async_wait_for_task(index.http_client, update_response.task_uid)
     response_offset_limit = await index.get_documents(
-        limit=3, offset=1, fields=["title", "overview"], sort="title:asc"
+        limit=3, offset=1, fields=["title", "overview"], sort="title:asc,genre:desc"
     )
 
     assert len(response_offset_limit.results) == 3
@@ -779,8 +780,22 @@ async def test_get_documents_offset_optional_params(async_index_with_documents):
 async def test_get_documents_filter(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.update_filterable_attributes(["genre"])
+    update_response = await index.update_sortable_attributes(["title", "genre"])
+    await async_wait_for_task(index.http_client, update_response.task_uid)
     await async_wait_for_task(index.http_client, response.task_uid)
     response = await index.get_documents(filter="genre=action")
+    genres = set([x["genre"] for x in response.results])
+    assert len(genres) == 1
+    assert next(iter(genres)) == "action"
+
+
+async def test_get_documents_filter_and_sort(async_index_with_documents):
+    index = await async_index_with_documents()
+    task = await index.update_settings(
+        MeilisearchSettings(filterable_attributes=["genre"], sortable_attributes=["title", "genre"])
+    )
+    await async_wait_for_task(index.http_client, task.task_uid)
+    response = await index.get_documents(filter="genre=action", sort="title:asc,genre:desc")
     genres = set([x["genre"] for x in response.results])
     assert len(genres) == 1
     assert next(iter(genres)) == "action"
