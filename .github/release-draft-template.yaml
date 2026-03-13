@@ -14,7 +14,7 @@ version-resolver:
   default: patch
 categories:
   - title: "⚠️ Breaking changes"
-    label:
+    labels:
       - "breaking-change"
   - title: "Features"
     labels:
