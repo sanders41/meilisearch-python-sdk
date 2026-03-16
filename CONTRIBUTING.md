@@ -250,6 +250,13 @@ meilisearch-python-sdk project. When you’re ready to ask for a code review, fi
 Before you do, once again make sure that you have followed all the guidelines outlined in this
 document regarding code style, tests, and documentation.
 
+### Automated Code and AI
+
+Pull Pequests authored and/or co-authored by AI (for example LLMs) will not be accepted. You can use
+these tools, however as the person submitting the Pull Request you are responsible for manually
+reviewing and testing 100% of the changes before creating a Pull Request, and the AI should not be
+listed as a creator. Failure to do this will result in the Pull Request being closed.
+
 ### Make the pull request
 
 If everything looks good, you are ready to make a pull request. This is how you let the maintainers
