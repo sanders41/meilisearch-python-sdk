@@ -73,10 +73,7 @@ if TYPE_CHECKING:
 
 
 class AsyncIndex(BaseIndex):
-    """AsyncIndex class gives access to all indexes routes and child routes.
-
-    https://docs.meilisearch.com/reference/api/indexes.html
-    """
+    """AsyncIndex class gives access to all indexes routes and child routes."""
 
     def __init__(
         self,

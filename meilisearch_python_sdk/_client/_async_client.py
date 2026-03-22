@@ -498,7 +498,6 @@ class AsyncClient(BaseClient):
 
         Returns:
             Information about database size and all indexes.
-            https://docs.meilisearch.com/reference/api/stats.html
 
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
