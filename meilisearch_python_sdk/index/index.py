@@ -70,10 +70,7 @@ if TYPE_CHECKING:
 
 
 class Index(BaseIndex):
-    """Index class gives access to all indexes routes and child routes.
-
-    https://docs.meilisearch.com/reference/api/indexes.html
-    """
+    """Index class gives access to all indexes routes and child routes."""
 
     def __init__(
         self,
