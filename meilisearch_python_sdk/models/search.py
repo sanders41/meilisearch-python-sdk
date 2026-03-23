@@ -35,12 +35,10 @@ class Federation(CamelBase):
     limit: int = 20
     offset: int = 0
     facets_by_index: dict[str, list[str]] | None = None
+    distinct: str | None = None
 
 
-class FederationMerged(CamelBase):
-    limit: int = 20
-    offset: int = 0
-    facets_by_index: dict[str, list[str]] | None = None
+class FederationMerged(Federation):
     merge_facets: MergeFacets | None
 
 

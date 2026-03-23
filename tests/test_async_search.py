@@ -401,6 +401,28 @@ async def test_multi_search_federated(async_client, async_index_with_documents, 
     assert "_federation" in response.hits[0]
 
 
+async def test_multi_search_federated_with_distinct(
+    async_client, async_index_with_documents, async_empty_index
+):
+    index1 = await async_index_with_documents()
+    task = await index1.update_filterable_attributes(["title"])
+    await async_client.wait_for_task(task.task_uid)
+    index2 = await async_empty_index()
+    task = await index2.update_filterable_attributes(["title"])
+    await async_client.wait_for_task(task.task_uid)
+    response = await async_client.multi_search(
+        [
+            SearchParams(index_uid=index1.uid, query="How to Train Your Dragon"),
+            SearchParams(index_uid=index2.uid, query=""),
+        ],
+        federation=Federation(distinct="title"),
+    )
+
+    assert response.hits[0]["id"] == "166428"
+    assert "_formatted" not in response.hits[0]
+    assert "_federation" in response.hits[0]
+
+
 async def test_multi_search_federated_facets_by_index(
     async_client, async_index_with_documents, async_empty_index
 ):
