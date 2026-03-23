@@ -42,8 +42,11 @@ def build_multi_search_payload(
 
     if federation:
         federation_payload: JsonDict | None = federation.model_dump(by_alias=True)
-        if federation_payload is not None and federation.facets_by_index is None:
-            del federation_payload["facetsByIndex"]
+        if federation_payload is not None:
+            if federation.facets_by_index is None:
+                del federation_payload["facetsByIndex"]
+            if federation.distinct is None:
+                del federation_payload["distinct"]
     else:
         federation_payload = None
 
