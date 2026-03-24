@@ -470,12 +470,20 @@ class Client(BaseClient):
         """
         return Index(self.http_client, uid, json_handler=self.json_handler).fetch_info()
 
-    def index(self, uid: str, *, plugins: IndexPlugins | None = None) -> Index:
+    def index(
+        self,
+        uid: str,
+        *,
+        plugins: IndexPlugins | None = None,
+        hits_type: type[Any] = JsonDict,
+    ) -> Index:
         """Create a local reference to an index identified by UID, without making an HTTP call.
 
         Args:
             uid: The index's unique identifier.
             plugins: Optional plugins can be provided to extend functionality.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
             An Index instance.
@@ -489,7 +497,13 @@ class Client(BaseClient):
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
         """
-        return Index(self.http_client, uid=uid, plugins=plugins, json_handler=self.json_handler)
+        return Index(
+            self.http_client,
+            uid=uid,
+            plugins=plugins,
+            json_handler=self.json_handler,
+            hits_type=hits_type,
+        )
 
     def get_all_stats(self) -> ClientStats:
         """Get stats for all indexes.
