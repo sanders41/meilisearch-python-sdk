@@ -468,7 +468,9 @@ class AsyncClient(BaseClient):
         """
         return await AsyncIndex(self.http_client, uid, json_handler=self.json_handler).fetch_info()
 
-    def index(self, uid: str, *, plugins: AsyncIndexPlugins | None = None) -> AsyncIndex:
+    def index(
+        self, uid: str, *, plugins: AsyncIndexPlugins | None = None, hits_type: type[Any] = JsonDict
+    ) -> AsyncIndex:
         """Create a local reference to an index identified by UID, without making an HTTP call.
 
         Because no network call is made this method is not awaitable.
@@ -476,6 +478,8 @@ class AsyncClient(BaseClient):
         Args:
             uid: The index's unique identifier.
             plugins: Optional plugins can be provided to extend functionality.
+            hits_type: Allows for a custom type to be passed to use for hits. Defaults to
+                JsonDict
 
         Returns:
             An AsyncIndex instance.
@@ -490,7 +494,11 @@ class AsyncClient(BaseClient):
             >>>     index = client.index("movies")
         """
         return AsyncIndex(
-            self.http_client, uid=uid, plugins=plugins, json_handler=self.json_handler
+            self.http_client,
+            uid=uid,
+            plugins=plugins,
+            json_handler=self.json_handler,
+            hits_type=hits_type,
         )
 
     async def get_all_stats(self) -> ClientStats:

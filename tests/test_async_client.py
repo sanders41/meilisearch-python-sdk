@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import jwt
 import pytest
+from camel_converter.pydantic_base import CamelBase
 from httpx import AsyncClient as HttpxAsyncClient
 from httpx import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
 
@@ -280,6 +281,17 @@ def test_index(async_client):
     response = async_client.index(uid)
 
     assert response.uid == uid
+
+
+def test_index_with_hits_type(async_client):
+    class SomeClass(CamelBase):
+        id: str
+
+    uid = str(uuid4())
+    response = async_client.index(uid, hits_type=SomeClass)
+
+    assert response.uid == uid
+    assert response.hits_type == SomeClass
 
 
 async def test_get_or_create_index_with_primary_key(async_client):
