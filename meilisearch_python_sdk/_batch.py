@@ -30,7 +30,7 @@ async def async_get_batch(
     except MeilisearchApiError as e:
         if e.status_code == 404:
             raise BatchNotFoundError(f"Batch {batch_uid} not found") from e
-        raise
+        raise  # pragma: no cover
 
     return BatchResult(**json_handler.loads(response.content))
 
@@ -83,7 +83,7 @@ def get_batch(
     except MeilisearchApiError as e:
         if e.status_code == 404:
             raise BatchNotFoundError(f"Batch {batch_uid} not found") from e
-        raise
+        raise  # pragma: no cover
 
     return BatchResult(**json_handler.loads(response.content))
 
