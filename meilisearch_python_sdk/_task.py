@@ -10,17 +10,19 @@ from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_sdk._utils import get_async_client, get_client, get_json_handler
+from meilisearch_python_sdk._utils import get_async_client, get_client
 from meilisearch_python_sdk.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 
 if TYPE_CHECKING:
     from meilisearch_python_sdk._client import AsyncClient, Client  # pragma: no cover
+    from meilisearch_python_sdk.types import JsonHandler
 
 
 async def async_cancel_tasks(
     client: HttpxAsyncClient | AsyncClient,
     *,
+    json_handler: JsonHandler,
     uids: list[int] | None = None,
     index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
@@ -77,8 +79,8 @@ async def async_cancel_tasks(
 
     url = f"tasks/cancel?{urlencode(parameters)}"
     client_ = get_async_client(client)
-    json_handler = get_json_handler(client)
-    response = await client_.post(url)
+    http_requests = AsyncHttpRequests(client_, json_handler)
+    response = await http_requests.post(url)
 
     return TaskInfo(**json_handler.loads(response.content))
 
@@ -86,6 +88,7 @@ async def async_cancel_tasks(
 async def async_delete_tasks(
     client: HttpxAsyncClient | AsyncClient,
     *,
+    json_handler: JsonHandler,
     uids: list[int] | None = None,
     index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
@@ -112,19 +115,20 @@ async def async_delete_tasks(
 
     url = f"tasks?{urlencode(parameters)}"
     client_ = get_async_client(client)
-    json_handler = get_json_handler(client)
-    response = await client_.delete(url)
+    http_requests = AsyncHttpRequests(client_, json_handler)
+    response = await http_requests.delete(url)
 
     return TaskInfo(**json_handler.loads(response.content))
 
 
 async def async_get_task(
     client: HttpxAsyncClient | AsyncClient,
+    json_handler: JsonHandler,
     task_id: int,
 ) -> TaskResult:
     client_ = get_async_client(client)
-    json_handler = get_json_handler(client)
-    response = await client_.get(f"tasks/{task_id}")
+    http_requests = AsyncHttpRequests(client_, json_handler)
+    response = await http_requests.get(f"tasks/{task_id}")
 
     return TaskResult(**json_handler.loads(response.content))
 
@@ -132,6 +136,7 @@ async def async_get_task(
 async def async_get_tasks(
     client: HttpxAsyncClient | AsyncClient,
     *,
+    json_handler: JsonHandler,
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
     reverse: bool | None = None,
@@ -147,8 +152,8 @@ async def async_get_tasks(
             else f"{url}?reverse={str(reverse).lower()}"
         )
     client_ = get_async_client(client)
-    json_handler = get_json_handler(client)
-    response = await client_.get(url)
+    http_requests = AsyncHttpRequests(client_, json_handler)
+    response = await http_requests.get(url)
 
     return TaskStatus(**json_handler.loads(response.content))
 
@@ -157,14 +162,14 @@ async def async_wait_for_task(
     client: HttpxAsyncClient | AsyncClient,
     task_id: int,
     *,
+    json_handler: JsonHandler,
     timeout_in_ms: int | None = 5000,
     interval_in_ms: int = 50,
     raise_for_status: bool = False,
 ) -> TaskResult:
     client_ = get_async_client(client)
-    json_handler = get_json_handler(client)
-    url = f"tasks/{task_id}"
     http_requests = AsyncHttpRequests(client_, json_handler)
+    url = f"tasks/{task_id}"
     start_time = datetime.now()
     elapsed_time = 0.0
 
@@ -196,6 +201,7 @@ async def async_wait_for_task(
 def cancel_tasks(
     client: HttpxClient | Client,
     *,
+    json_handler: JsonHandler,
     uids: list[int] | None = None,
     index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
@@ -222,8 +228,8 @@ def cancel_tasks(
 
     url = f"tasks/cancel?{urlencode(parameters)}"
     client_ = get_client(client)
-    json_handler = get_json_handler(client)
-    response = client_.post(url)
+    http_requests = HttpRequests(client_, json_handler)
+    response = http_requests.post(url)
 
     return TaskInfo(**json_handler.loads(response.content))
 
@@ -231,6 +237,7 @@ def cancel_tasks(
 def delete_tasks(
     client: HttpxClient | Client,
     *,
+    json_handler: JsonHandler,
     uids: list[int] | None = None,
     index_uids: list[int] | None = None,
     statuses: list[str] | None = None,
@@ -257,16 +264,16 @@ def delete_tasks(
 
     url = f"tasks?{urlencode(parameters)}"
     client_ = get_client(client)
-    json_handler = get_json_handler(client)
-    response = client_.delete(url)
+    http_requests = HttpRequests(client_, json_handler)
+    response = http_requests.delete(url)
 
     return TaskInfo(**json_handler.loads(response.content))
 
 
-def get_task(client: HttpxClient | Client, task_id: int) -> TaskResult:
+def get_task(client: HttpxClient | Client, json_handler: JsonHandler, task_id: int) -> TaskResult:
     client_ = get_client(client)
-    json_handler = get_json_handler(client)
-    response = client_.get(f"tasks/{task_id}")
+    http_requests = HttpRequests(client_, json_handler)
+    response = http_requests.get(f"tasks/{task_id}")
 
     return TaskResult(**json_handler.loads(response.content))
 
@@ -274,6 +281,7 @@ def get_task(client: HttpxClient | Client, task_id: int) -> TaskResult:
 def get_tasks(
     client: HttpxClient | Client,
     *,
+    json_handler: JsonHandler,
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
     reverse: bool | None = None,
@@ -289,8 +297,8 @@ def get_tasks(
             else f"{url}?reverse={str(reverse).lower()}"
         )
     client_ = get_client(client)
-    json_handler = get_json_handler(client)
-    response = client_.get(url)
+    http_requests = HttpRequests(client_, json_handler)
+    response = http_requests.get(url)
 
     return TaskStatus(**json_handler.loads(response.content))
 
@@ -299,14 +307,14 @@ def wait_for_task(
     client: HttpxClient | Client,
     task_id: int,
     *,
+    json_handler: JsonHandler,
     timeout_in_ms: int | None = 5000,
     interval_in_ms: int = 50,
     raise_for_status: bool = False,
 ) -> TaskResult:
     client_ = get_client(client)
-    json_handler = get_json_handler(client)
-    url = f"tasks/{task_id}"
     http_requests = HttpRequests(client_, json_handler=json_handler)
+    url = f"tasks/{task_id}"
     start_time = datetime.now()
     elapsed_time = 0.0
 

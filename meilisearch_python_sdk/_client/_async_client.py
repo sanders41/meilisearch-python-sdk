@@ -866,7 +866,7 @@ class AsyncClient(BaseClient):
         return TaskInfo(**self._http_requests.parse_json(response))
 
     async def get_batch(self, batch_uid: int) -> BatchResult | None:
-        return await async_get_batch(self, batch_uid)
+        return await async_get_batch(self, self.json_handler, batch_uid)
 
     async def get_batches(
         self,
@@ -886,6 +886,7 @@ class AsyncClient(BaseClient):
     ) -> BatchStatus:
         return await async_get_batches(
             self,
+            json_handler=self.json_handler,
             uids=uids,
             batch_uids=batch_uids,
             index_uids=index_uids,
@@ -942,6 +943,7 @@ class AsyncClient(BaseClient):
         """
         return await _task.async_cancel_tasks(
             self.http_client,
+            json_handler=self.json_handler,
             uids=uids,
             index_uids=index_uids,
             statuses=statuses,
@@ -973,7 +975,9 @@ class AsyncClient(BaseClient):
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     await client.get_task(client, 1244)
         """
-        return await _task.async_get_task(self.http_client, task_id=task_id)
+        return await _task.async_get_task(
+            self.http_client, json_handler=self.json_handler, task_id=task_id
+        )
 
     async def delete_tasks(
         self,
@@ -1018,6 +1022,7 @@ class AsyncClient(BaseClient):
         """
         return await _task.async_delete_tasks(
             self.http_client,
+            json_handler=self.json_handler,
             uids=uids,
             index_uids=index_uids,
             statuses=statuses,
@@ -1058,7 +1063,11 @@ class AsyncClient(BaseClient):
             >>>     await client.get_tasks()
         """
         return await _task.async_get_tasks(
-            self.http_client, index_ids=index_ids, types=types, reverse=reverse
+            self.http_client,
+            json_handler=self.json_handler,
+            index_ids=index_ids,
+            types=types,
+            reverse=reverse,
         )
 
     async def wait_for_task(
@@ -1103,6 +1112,7 @@ class AsyncClient(BaseClient):
         return await _task.async_wait_for_task(
             self.http_client,
             task_id=task_id,
+            json_handler=self.json_handler,
             timeout_in_ms=timeout_in_ms,
             interval_in_ms=interval_in_ms,
             raise_for_status=raise_for_status,

@@ -70,7 +70,6 @@ class AsyncHttpRequests:
                         body = gzip.compress(data)
 
                 response = await http_method(path, content=body, headers=headers)
-
             response.raise_for_status()
             return response
 

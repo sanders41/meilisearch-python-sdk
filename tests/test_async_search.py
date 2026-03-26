@@ -42,7 +42,7 @@ async def test_search_with_empty_query(async_index_with_documents):
 async def test_distinct_search(async_index_with_documents):
     index = await async_index_with_documents()
     task = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, task.task_uid)
+    await async_wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     response = await index.search("with", distinct="genre")
     genres = dict(Counter([x.get("genre") for x in response.hits]))
     assert genres == {None: 9, "action": 1}
@@ -149,7 +149,7 @@ async def test_custom_search_params_with_string_list(async_index_with_documents)
 async def test_custom_search_params_with_facets(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.search("world", facets=["genre"])
     assert len(response.hits) == 12
     assert response.facet_distribution is not None
@@ -162,7 +162,7 @@ async def test_custom_search_params_with_facets(async_index_with_documents):
 async def test_custom_search_params_with_facet_filters(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.search("world", filter=[["genre = action"]])
     assert len(response.hits) == 3
     assert response.facet_distribution is None
@@ -171,7 +171,7 @@ async def test_custom_search_params_with_facet_filters(async_index_with_document
 async def test_custom_search_params_with_multiple_facet_filters(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.search(
         "world", filter=["genre = action", ["genre = action", "genre = action"]]
     )
@@ -222,9 +222,9 @@ async def test_custom_search_facet_filters_with_space(async_client):
 
     index = async_client.index("books")
     update = await index.add_documents(dataset)
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.search("h", filter=["genre = 'sci fi'"])
     assert len(response.hits) == 1
     assert response.hits[0]["title"] == "The Hobbit"
@@ -256,7 +256,7 @@ async def test_custom_search_params_with_pagination_parameters_at_zero(async_ind
 async def test_custom_search_params_with_many_params(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.search(
         "world", filter=[["genre = action"]], attributes_to_retrieve=["title", "poster"]
     )
@@ -285,7 +285,9 @@ async def test_custom_search_params_with_many_params(async_index_with_documents)
 async def test_search_sort(sort, titles, async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.update_sortable_attributes(["title"])
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     stats = await index.get_stats()  # get this to get the total document count
 
     # Using a placeholder search because ranking rules affect sort otherwise meaning the results
@@ -555,7 +557,7 @@ async def test_vector_search_retrieve_vectors_false(async_index_with_documents_a
 async def test_basic_facet_search(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.facet_search(
         "How to Train Your Dragon", facet_name="genre", facet_query="cartoon"
     )
@@ -566,7 +568,7 @@ async def test_basic_facet_search(async_index_with_documents):
 async def test_basic_facet_search_not_found(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.facet_search(
         "How to Train Your Dragon", facet_name="genre", facet_query="horror"
     )
@@ -576,7 +578,7 @@ async def test_basic_facet_search_not_found(async_index_with_documents):
 async def test_custom_facet_search(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.facet_search(
         "Dragon", facet_name="genre", facet_query="cartoon", attributes_to_highlight=["title"]
     )
@@ -587,7 +589,7 @@ async def test_custom_facet_search(async_index_with_documents):
 async def test_facet_search_locales(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.facet_search(
         "How to Train Your Dragon",
         facet_name="genre",
@@ -601,7 +603,7 @@ async def test_facet_search_locales(async_index_with_documents):
 async def test_facet_search_exhaustive_facet_count(async_index_with_documents):
     index = await async_index_with_documents()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.facet_search(
         "How to Train Your Dragon",
         facet_name="genre",
@@ -675,7 +677,7 @@ async def test_multi_search_show_performance_details(async_client, async_index_w
 async def test_facet_search_ranking_score_threshold(async_index_with_documents_and_vectors):
     index = await async_index_with_documents_and_vectors()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.facet_search(
         "How to Train Your Dragon",
         facet_name="genre",
@@ -691,7 +693,7 @@ async def test_facet_search_invalid_ranking_score_threshold(
 ):
     index = await async_index_with_documents_and_vectors()
     update = await index.update_filterable_attributes(["genre"])
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     with pytest.raises(MeilisearchError) as e:
         await index.facet_search(
             "How to Train Your Dragon",

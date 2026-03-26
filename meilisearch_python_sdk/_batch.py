@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING
+from urllib.parse import urlencode
 
-from meilisearch_python_sdk._utils import get_async_client, get_client, get_json_handler
-from meilisearch_python_sdk.errors import BatchNotFoundError
+from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
+from meilisearch_python_sdk._utils import get_async_client, get_client
+from meilisearch_python_sdk.errors import BatchNotFoundError, MeilisearchApiError
 from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
 
 if TYPE_CHECKING:
@@ -15,17 +17,20 @@ if TYPE_CHECKING:
         AsyncClient,
         Client,
     )
+    from meilisearch_python_sdk.types import JsonHandler
 
 
 async def async_get_batch(
-    client: HttpxAsyncClient | AsyncClient, batch_uid: int
+    client: HttpxAsyncClient | AsyncClient, json_handler: JsonHandler, batch_uid: int
 ) -> BatchResult | None:
     client_ = get_async_client(client)
-    json_handler = get_json_handler(client)
-    response = await client_.get(f"batches/{batch_uid}")
-
-    if response.status_code == 404:
-        raise BatchNotFoundError(f"Batch {batch_uid} not found")
+    http_requests = AsyncHttpRequests(client_, json_handler)
+    try:
+        response = await http_requests.get(f"batches/{batch_uid}")
+    except MeilisearchApiError as e:
+        if e.status_code == 404:
+            raise BatchNotFoundError(f"Batch {batch_uid} not found") from e
+        raise  # pragma: no cover
 
     return BatchResult(**json_handler.loads(response.content))
 
@@ -33,6 +38,7 @@ async def async_get_batch(
 async def async_get_batches(
     client: HttpxAsyncClient | AsyncClient,
     *,
+    json_handler: JsonHandler,
     uids: list[int] | None = None,
     batch_uids: list[int] | None = None,
     index_uids: list[int] | None = None,
@@ -47,7 +53,7 @@ async def async_get_batches(
     after_finished_at: datetime | None = None,
 ) -> BatchStatus:
     client_ = get_async_client(client)
-    json_handler = get_json_handler(client)
+    http_requests = AsyncHttpRequests(client_, json_handler)
     params = _build_parameters(
         uids=uids,
         batch_uids=batch_uids,
@@ -62,18 +68,22 @@ async def async_get_batches(
         before_started_at=before_started_at,
         after_finished_at=after_finished_at,
     )
-    response = await client_.get("batches", params=params)
+    response = await http_requests.get(f"batches?{urlencode(params)}")
 
     return BatchStatus(**json_handler.loads(response.content))
 
 
-def get_batch(client: HttpxClient | Client, batch_uid: int) -> BatchResult | None:
+def get_batch(
+    client: HttpxClient | Client, json_handler: JsonHandler, batch_uid: int
+) -> BatchResult | None:
     client_ = get_client(client)
-    json_handler = get_json_handler(client)
-    response = client_.get(f"batches/{batch_uid}")
-
-    if response.status_code == 404:
-        raise BatchNotFoundError(f"Batch {batch_uid} not found")
+    http_requests = HttpRequests(client_, json_handler)
+    try:
+        response = http_requests.get(f"batches/{batch_uid}")
+    except MeilisearchApiError as e:
+        if e.status_code == 404:
+            raise BatchNotFoundError(f"Batch {batch_uid} not found") from e
+        raise  # pragma: no cover
 
     return BatchResult(**json_handler.loads(response.content))
 
@@ -81,6 +91,7 @@ def get_batch(client: HttpxClient | Client, batch_uid: int) -> BatchResult | Non
 def get_batches(
     client: HttpxClient | Client,
     *,
+    json_handler: JsonHandler,
     uids: list[int] | None = None,
     batch_uids: list[int] | None = None,
     index_uids: list[int] | None = None,
@@ -95,7 +106,7 @@ def get_batches(
     after_finished_at: datetime | None = None,
 ) -> BatchStatus:
     client_ = get_client(client)
-    json_handler = get_json_handler(client)
+    http_requests = HttpRequests(client_, json_handler)
     params = _build_parameters(
         uids=uids,
         batch_uids=batch_uids,
@@ -111,7 +122,7 @@ def get_batches(
         after_finished_at=after_finished_at,
     )
 
-    response = client_.get("batches", params=params)
+    response = http_requests.get(f"batches?{urlencode(params)}")
 
     return BatchStatus(**json_handler.loads(response.content))
 
