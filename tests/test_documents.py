@@ -100,7 +100,7 @@ def test_get_documents_default(empty_index):
 def test_add_documents(primary_key, expected_primary_key, compress, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies, primary_key, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -109,7 +109,7 @@ def test_add_documents_with_custom_metadata(empty_index, small_movies):
     index = empty_index()
     custom_metadata = "test metadata"
     response = index.add_documents(small_movies, custom_metadata=custom_metadata)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     assert update.custom_metadata is not None
     assert update.custom_metadata == custom_metadata
@@ -129,7 +129,10 @@ def test_add_documents_in_batches(
     )
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in response]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in response
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
     assert index.get_primary_key() == expected_primary_key
 
@@ -158,7 +161,10 @@ def test_add_documents_from_directory(
     responses = index.add_documents_from_directory(
         path, combine_documents=combine_documents, compress=compress
     )
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -176,7 +182,10 @@ def test_add_documents_from_directory_csv_path(
     responses = index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", compress=compress
     )
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -198,7 +207,10 @@ def test_add_documents_from_directory_csv_path_with_delimiter(
         csv_delimiter=";",
         compress=compress,
     )
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -216,7 +228,10 @@ def test_add_documents_from_directory_ndjson(
     responses = index.add_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson", compress=compress
     )
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -269,7 +284,10 @@ def test_add_documents_from_directory_in_batchs(
         path, batch_size=batch_size, combine_documents=combine_documents, compress=compress
     )
 
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -293,7 +311,10 @@ def test_add_documents_from_directory_in_batchs_csv(
         compress=compress,
     )
 
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -317,7 +338,10 @@ def test_add_documents_from_directory_in_batchs_ndjson(
         compress=compress,
     )
 
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -334,7 +358,7 @@ def test_add_documents_from_file(
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     response = index.add_documents_from_file(path, primary_key, compress=compress)
 
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -346,7 +370,7 @@ def test_add_documents_from_file_orjson_handler(
     index = client_orjson_handler.index(str(uuid4()))
     response = index.add_documents_from_file(small_movies_path)
 
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
 
 
@@ -362,7 +386,7 @@ def test_add_documents_from_file_csv(
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = index.add_documents_from_file(path, primary_key, compress=compress)
 
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -378,7 +402,7 @@ def test_add_documents_raw_file_csv(
     index = client.index(str(uuid4()))
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     response = index.add_documents_from_raw_file(path, primary_key, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     assert index.get_primary_key() == expected_primary_key
 
@@ -400,7 +424,7 @@ def test_add_documents_raw_file_csv_with_custom_metadata(client, small_movies_cs
     response = index.add_documents_from_raw_file(
         small_movies_csv_path, custom_metadata=custom_metadata
     )
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     assert update.custom_metadata is not None
     assert update.custom_metadata == custom_metadata
@@ -428,7 +452,7 @@ def test_add_documents_raw_file_csv_delimiter(
     response = index.add_documents_from_raw_file(
         path, primary_key, csv_delimiter=";", compress=compress
     )
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -444,7 +468,7 @@ def test_add_documents_raw_file_ndjson(
     index = client.index(str(uuid4()))
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = index.add_documents_from_raw_file(path, primary_key, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -490,7 +514,7 @@ def test_add_documents_from_file_ndjson(
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     response = index.add_documents_from_file(path, primary_key, compress=compress)
 
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == expected_primary_key
     assert update.status == "succeeded"
 
@@ -526,7 +550,10 @@ def test_add_documents_from_file_in_batches(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in response]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in response
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
     assert index.get_primary_key() == expected_primary_key
 
@@ -555,7 +582,10 @@ def test_add_documents_from_file_in_batches_csv(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in response]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in response
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
     assert index.get_primary_key() == expected_primary_key
 
@@ -588,7 +618,10 @@ def test_add_documents_from_file_in_batches_csv_with_delimiter(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in response]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in response
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
     assert index.get_primary_key() == expected_primary_key
 
@@ -626,7 +659,10 @@ def test_add_documents_from_file_in_batches_ndjson(
 
     assert ceil(len(small_movies) / batch_size) == len(response)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in response]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in response
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
     assert index.get_primary_key() == expected_primary_key
 
@@ -673,7 +709,7 @@ def test_get_documents_populated(index_with_documents):
 def test_get_documents_offset_optional_params(index_with_documents):
     index = index_with_documents()
     update_response = index.update_sortable_attributes(["title", "genre"])
-    wait_for_task(index.http_client, update_response.task_uid)
+    wait_for_task(index.http_client, update_response.task_uid, json_handler=index._json_handler)
     response_offset_limit = index.get_documents(
         limit=3, offset=1, fields=["title", "overview"], sort="title:asc,genre:desc"
     )
@@ -685,7 +721,7 @@ def test_get_documents_offset_optional_params(index_with_documents):
 def test_get_documents_filter(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre"])
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents(filter="genre=action")
     genres = set([x["genre"] for x in response.results])
     assert len(genres) == 1
@@ -697,7 +733,7 @@ def test_get_documents_filter_and_sort(index_with_documents):
     task = index.update_settings(
         MeilisearchSettings(filterable_attributes=["genre"], sortable_attributes=["title", "genre"])
     )
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     response = index.get_documents(filter="genre=action", sort="title:asc,genre:desc")
     genres = set([x["genre"] for x in response.results])
     assert len(genres) == 1
@@ -719,7 +755,7 @@ def test_get_documents_ids(index_with_documents):
 def test_get_documents_with_vectors(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre"])
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents(retrieve_vectors=True)
     assert all("_vectors" in x.keys() for x in response.results)
 
@@ -727,7 +763,7 @@ def test_get_documents_with_vectors(index_with_documents):
 def test_get_documents_with_vectors_and_filter(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre"])
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents(retrieve_vectors=True, filter="genre=action")
     assert len(response.results) > 0
     assert all("_vectors" in x.keys() for x in response.results)
@@ -736,7 +772,7 @@ def test_get_documents_with_vectors_and_filter(index_with_documents):
 def test_get_documents_filter_with_fields(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre"])
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents(fields=["genre"], filter="genre=action")
     genres = set([x["genre"] for x in response.results])
     assert len(genres) == 1
@@ -750,11 +786,11 @@ def test_update_documents(compress, index_with_documents, small_movies):
     doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
     update = index.update_documents([response.results[0]], compress=compress)
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = index.get_document(doc_id)
     assert response["title"] == "Some title"
     update = index.update_documents(small_movies)
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = index.get_document(doc_id)
     assert response["title"] != "Some title"
 
@@ -766,13 +802,13 @@ def test_update_documents_with_custom_metadata(index_with_documents, small_movie
     doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
     update = index.update_documents([response.results[0]], custom_metadata=custom_metadata)
-    task = wait_for_task(index.http_client, update.task_uid)
+    task = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     assert task.custom_metadata is not None
     assert task.custom_metadata == custom_metadata
     response = index.get_document(doc_id)
     assert response["title"] == "Some title"
     update = index.update_documents(small_movies)
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = index.get_document(doc_id)
     assert response["title"] != "Some title"
 
@@ -783,11 +819,11 @@ def test_update_documents_skip_creation(index_with_documents, small_movies):
     doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
     update = index.update_documents([response.results[0]], skip_creation=True)
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = index.get_document(doc_id)
     assert response["title"] == "Some title"
     update = index.update_documents(small_movies)
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = index.get_document(doc_id)
     assert response["title"] != "Some title"
 
@@ -797,7 +833,7 @@ def test_update_documents_with_primary_key(compress, client, small_movies):
     primary_key = "release_date"
     index = client.index(str(uuid4()))
     update = index.update_documents(small_movies, primary_key=primary_key, compress=compress)
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == primary_key
 
 
@@ -808,7 +844,7 @@ def test_update_documents_in_batches(batch_size, compress, index_with_documents,
     doc_id = response.results[0]["id"]
     response.results[0]["title"] = "Some title"
     update = index.update_documents([response.results[0]], compress=compress)
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
 
     response = index.get_document(doc_id)
     assert response["title"] == "Some title"
@@ -817,7 +853,10 @@ def test_update_documents_in_batches(batch_size, compress, index_with_documents,
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    [wait_for_task(index.http_client, x.task_uid) for x in updates]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in updates
+    ]
 
     response = index.get_document(doc_id)
     assert response["title"] != "Some title"
@@ -832,7 +871,10 @@ def test_update_documents_in_batches_with_primary_key(batch_size, compress, clie
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in updates]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in updates
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
     assert index.get_primary_key() == primary_key
 
@@ -861,7 +903,10 @@ def test_update_documents_from_directory(
     responses = index.update_documents_from_directory(
         path, combine_documents=combine_documents, compress=compress
     )
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -879,7 +924,10 @@ def test_update_documents_from_directory_csv(
     responses = index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="csv", compress=compress
     )
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -901,7 +949,10 @@ def test_update_documents_from_directory_csv_with_delimiter(
         csv_delimiter=";",
         compress=compress,
     )
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -929,7 +980,10 @@ def test_update_documents_from_directory_ndjson(
     responses = index.update_documents_from_directory(
         path, combine_documents=combine_documents, document_type="ndjson", compress=compress
     )
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -961,7 +1015,10 @@ def test_update_documents_from_directory_in_batchs(
         path, batch_size=batch_size, combine_documents=combine_documents, compress=compress
     )
 
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == total_documents
 
@@ -985,7 +1042,10 @@ def test_update_documents_from_directory_in_batchs_csv(
         compress=compress,
     )
 
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -1010,7 +1070,10 @@ def test_update_documents_from_directory_in_batchs_csv_delimiter(
         compress=compress,
     )
 
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -1046,7 +1109,10 @@ def test_update_documents_from_directory_in_batchs_ndjson(
         compress=compress,
     )
 
-    [wait_for_task(index.http_client, x.task_uid) for x in responses]
+    [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in responses
+    ]
     stats = index.get_stats()
     assert stats.number_of_documents == 20
 
@@ -1058,14 +1124,14 @@ def test_update_documents_from_file(path_type, compress, client, small_movies, s
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_path) if path_type == "str" else small_movies_path
     update = index.update_documents_from_file(path, compress=compress)
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1080,14 +1146,14 @@ def test_update_documents_from_file_csv(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     update = index.update_documents_from_file(path, compress=compress)
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1102,7 +1168,7 @@ def test_update_documents_from_file_csv_with_delimiter(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1113,7 +1179,7 @@ def test_update_documents_from_file_csv_with_delimiter(
         else small_movies_csv_path_semicolon_delimiter
     )
     update = index.update_documents_from_file(path, csv_delimiter=";", compress=compress)
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1139,14 +1205,14 @@ def test_update_documents_from_file_ndjson(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     update = index.update_documents_from_file(path, compress=compress)
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1159,7 +1225,7 @@ def test_update_documents_from_file_with_primary_key(compress, client, small_mov
     update = index.update_documents_from_file(
         small_movies_path, primary_key=primary_key, compress=compress
     )
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == primary_key
 
 
@@ -1180,7 +1246,7 @@ def test_update_documents_from_file_in_batches(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1191,7 +1257,10 @@ def test_update_documents_from_file_in_batches(
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in updates]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in updates
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
 
     response = index.get_documents()
@@ -1208,7 +1277,7 @@ def test_update_documents_from_file_in_batches_csv(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1219,7 +1288,10 @@ def test_update_documents_from_file_in_batches_csv(
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in updates]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in updates
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
 
     response = index.get_documents()
@@ -1236,7 +1308,7 @@ def test_update_documents_from_file_in_batches_ndjson(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1247,7 +1319,10 @@ def test_update_documents_from_file_in_batches_ndjson(
     )
     assert ceil(len(small_movies) / batch_size) == len(updates)
 
-    tasks = [wait_for_task(index.http_client, x.task_uid) for x in updates]
+    tasks = [
+        wait_for_task(index.http_client, x.task_uid, json_handler=index._json_handler)
+        for x in updates
+    ]
     assert {"succeeded"} == {x.status for x in tasks}
 
     response = index.get_documents()
@@ -1270,14 +1345,14 @@ def test_update_documents_raw_file_csv(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_csv_path) if path_type == "str" else small_movies_csv_path
     update = index.update_documents_from_raw_file(path, primary_key="id", compress=compress)
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1289,7 +1364,7 @@ def test_update_documents_raw_file_custom_metadata(client, small_movies_csv_path
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1297,7 +1372,7 @@ def test_update_documents_raw_file_custom_metadata(client, small_movies_csv_path
     update = index.update_documents_from_raw_file(
         small_movies_csv_path, primary_key="id", custom_metadata=custom_metadata
     )
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     assert update.custom_metadata is not None
     assert update.custom_metadata == custom_metadata
@@ -1308,7 +1383,7 @@ def test_update_documents_raw_file_skip_creation(client, small_movies_csv_path, 
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1316,7 +1391,7 @@ def test_update_documents_raw_file_skip_creation(client, small_movies_csv_path, 
     update = index.update_documents_from_raw_file(
         small_movies_csv_path, primary_key="id", skip_creation=True
     )
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1331,7 +1406,7 @@ def test_update_documents_raw_file_csv_with_delimiter(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
@@ -1344,7 +1419,7 @@ def test_update_documents_raw_file_csv_with_delimiter(
     update = index.update_documents_from_raw_file(
         path, primary_key="id", csv_delimiter=";", compress=compress
     )
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1376,14 +1451,14 @@ def test_update_documents_raw_file_ndjson(
     movie_id = small_movies[0]["id"]
     index = client.index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert index.get_primary_key() == "id"
     response = index.get_documents()
     got_title = filter(lambda x: x["id"] == movie_id, response.results)
     assert list(got_title)[0]["title"] == "Some title"
     path = str(small_movies_ndjson_path) if path_type == "str" else small_movies_ndjson_path
     update = index.update_documents_from_raw_file(path, compress=compress)
-    update = wait_for_task(index.http_client, update.task_uid)  # type: ignore
+    update = wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)  # type: ignore
     assert update.status == "succeeded"
     response = index.get_documents()
     assert response.results[0]["title"] != "Some title"
@@ -1408,7 +1483,7 @@ def test_update_document_raw_file_extension_error(client, tmp_path):
 def test_delete_document(index_with_documents):
     index = index_with_documents()
     response = index.delete_document("500682")
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     with pytest.raises(MeilisearchApiError):
         index.get_document("500682")
 
@@ -1417,7 +1492,7 @@ def test_delete_document_with_custom_metadata(index_with_documents):
     index = index_with_documents()
     custom_metadata = "test metadata"
     response = index.delete_document("500682", custom_metadata=custom_metadata)
-    task = wait_for_task(index.http_client, response.task_uid)
+    task = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert task.custom_metadata is not None
     assert task.custom_metadata == custom_metadata
     with pytest.raises(MeilisearchApiError):
@@ -1428,7 +1503,7 @@ def test_delete_documents(index_with_documents):
     to_delete = ["522681", "450465", "329996"]
     index = index_with_documents()
     response = index.delete_documents(to_delete)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     documents = index.get_documents()
     ids = [x["id"] for x in documents.results]
     assert to_delete not in ids
@@ -1439,7 +1514,7 @@ def test_delete_documents_with_custom_metadata(index_with_documents):
     custom_metadata = "test metadata"
     index = index_with_documents()
     response = index.delete_documents(to_delete, custom_metadata=custom_metadata)
-    task = wait_for_task(index.http_client, response.task_uid)
+    task = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert task.custom_metadata is not None
     assert task.custom_metadata == custom_metadata
     documents = index.get_documents()
@@ -1450,11 +1525,11 @@ def test_delete_documents_with_custom_metadata(index_with_documents):
 def test_delete_documents_by_filter(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre"])
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents()
     assert "action" in ([x.get("genre") for x in response.results])
     response = index.delete_documents_by_filter("genre=action")
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents()
     genres = [x.get("genre") for x in response.results]
     assert "action" not in genres
@@ -1465,13 +1540,13 @@ def test_delete_documents_by_filter_with_custom_metadata(index_with_documents):
     index = index_with_documents()
     custom_metadata = "test metadata"
     response = index.update_filterable_attributes(["genre"])
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents()
     assert "action" in ([x.get("genre") for x in response.results])
     response = index.delete_documents_by_filter("genre=action", custom_metadata=custom_metadata)
     assert response.custom_metadata is not None
     assert response.custom_metadata == custom_metadata
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents()
     genres = [x.get("genre") for x in response.results]
     assert "action" not in genres
@@ -1481,7 +1556,7 @@ def test_delete_documents_by_filter_with_custom_metadata(index_with_documents):
 def test_delete_documents_in_batches_by_filter(index_with_documents):
     index = index_with_documents()
     response = index.update_filterable_attributes(["genre", "release_date"])
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents()
     assert "action" in [x.get("genre") for x in response.results]
     assert 1520035200 in [x.get("release_date") for x in response.results]
@@ -1489,7 +1564,7 @@ def test_delete_documents_in_batches_by_filter(index_with_documents):
         ["genre=action", "release_date=1520035200"]
     )
     for task in response:
-        wait_for_task(index.http_client, task.task_uid)
+        wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     response = index.get_documents()
     genres = [x.get("genre") for x in response.results]
     release_dates = [x.get("release_date") for x in response.results]
@@ -1502,7 +1577,7 @@ def test_delete_documents_in_batches_by_filter(index_with_documents):
 def test_delete_all_documents(index_with_documents):
     index = index_with_documents()
     response = index.delete_all_documents()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents()
     assert response.results == []
 
@@ -1513,7 +1588,7 @@ def test_delete_all_documents_with_custom_metadata(index_with_documents):
     response = index.delete_all_documents(custom_metadata=custom_metadata)
     assert response.custom_metadata is not None
     assert response.custom_metadata == custom_metadata
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_documents()
     assert response.results == []
 
@@ -1549,7 +1624,7 @@ def test_add_documents_custom_serializer(compress, empty_index):
     index = empty_index()
     index._json_handler = BuiltinHandler(serializer=CustomEncoder)
     response = index.add_documents(documents, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
 
 
@@ -1557,20 +1632,20 @@ def test_add_documents_custom_serializer(compress, empty_index):
 def test_add_documents_orjson_handler(compress, client_orjson_handler, small_movies):
     index = client_orjson_handler.create_index(str(uuid4()))
     response = index.add_documents(small_movies, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
 
 
 def test_edit_documents_by_function(index_with_documents):
     index = index_with_documents()
     task = index.update_filterable_attributes(["id"])
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     response = index.edit_documents(
         function="if doc.id == context.docid {doc.title = `${doc.title.to_upper()}`}",
         context={"docid": "299537"},
         filter='id = "299537" OR id = "287947"',
     )
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_document("299537")
 
     assert response["title"] == "CAPTAIN MARVEL"
@@ -1584,14 +1659,14 @@ def test_edit_documents_by_function_with_custom_metadata(index_with_documents):
     index = index_with_documents()
     custom_metadata = "test metadata"
     task = index.update_filterable_attributes(["id"])
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     response = index.edit_documents(
         function="if doc.id == context.docid {doc.title = `${doc.title.to_upper()}`}",
         context={"docid": "299537"},
         filter='id = "299537" OR id = "287947"',
         custom_metadata=custom_metadata,
     )
-    task = wait_for_task(index.http_client, response.task_uid)
+    task = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert task.custom_metadata is not None
     assert task.custom_metadata == custom_metadata
 

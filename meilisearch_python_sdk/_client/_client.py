@@ -868,7 +868,7 @@ class Client(BaseClient):
         return TaskInfo(**self._http_requests.parse_json(response))
 
     def get_batch(self, batch_uid: int) -> BatchResult | None:
-        return _get_batch(self, batch_uid)
+        return _get_batch(self, self.json_handler, batch_uid)
 
     def get_batches(
         self,
@@ -888,6 +888,7 @@ class Client(BaseClient):
     ) -> BatchStatus:
         return _get_batches(
             self,
+            json_handler=self.json_handler,
             uids=uids,
             batch_uids=batch_uids,
             index_uids=index_uids,
@@ -945,6 +946,7 @@ class Client(BaseClient):
         """
         return _task.cancel_tasks(
             self.http_client,
+            json_handler=self.json_handler,
             uids=uids,
             index_uids=index_uids,
             statuses=statuses,
@@ -997,6 +999,7 @@ class Client(BaseClient):
         """
         return _task.delete_tasks(
             self.http_client,
+            json_handler=self.json_handler,
             uids=uids,
             index_uids=index_uids,
             statuses=statuses,
@@ -1027,7 +1030,7 @@ class Client(BaseClient):
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     client.get_task(client, 1244)
         """
-        return _task.get_task(self.http_client, task_id=task_id)
+        return _task.get_task(self.http_client, self.json_handler, task_id)
 
     def get_tasks(
         self,
@@ -1058,7 +1061,13 @@ class Client(BaseClient):
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     client.get_tasks(client)
         """
-        return _task.get_tasks(self.http_client, index_ids=index_ids, types=types, reverse=reverse)
+        return _task.get_tasks(
+            self.http_client,
+            json_handler=self.json_handler,
+            index_ids=index_ids,
+            types=types,
+            reverse=reverse,
+        )
 
     def wait_for_task(
         self,
@@ -1102,6 +1111,7 @@ class Client(BaseClient):
         return _task.wait_for_task(
             self.http_client,
             task_id=task_id,
+            json_handler=self.json_handler,
             timeout_in_ms=timeout_in_ms,
             interval_in_ms=interval_in_ms,
             raise_for_status=raise_for_status,

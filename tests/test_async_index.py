@@ -85,13 +85,17 @@ def sortable_attributes():
 async def test_delete_index(async_client, async_indexes_sample):
     _, index_uid, index_uid2 = async_indexes_sample
     response = await async_client.index(uid=index_uid).delete()
-    await async_wait_for_task(async_client, response.task_uid)
+    await async_wait_for_task(
+        async_client, response.task_uid, json_handler=async_client.json_handler
+    )
 
     with pytest.raises(MeilisearchApiError):
         await async_client.get_index(uid=index_uid)
 
     response = await async_client.index(uid=index_uid2).delete()
-    await async_wait_for_task(async_client, response.task_uid)
+    await async_wait_for_task(
+        async_client, response.task_uid, json_handler=async_client.json_handler
+    )
 
     with pytest.raises(MeilisearchApiError):
         await async_client.get_index(uid=index_uid2)
@@ -109,7 +113,7 @@ async def test_update_index(async_client, async_indexes_sample):
 async def test_get_stats(async_empty_index, small_movies):
     index = await async_empty_index()
     update = await index.add_documents(small_movies)
-    await async_wait_for_task(index.http_client, update.task_uid)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = await index.get_stats()
 
     assert response.number_of_documents == 30
@@ -147,7 +151,9 @@ async def test_get_settings_default(
 async def test_update_settings(compress, async_empty_index, new_settings):
     index = await async_empty_index()
     response = await index.update_settings(new_settings, compress=compress)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_settings()
     assert response.ranking_rules == new_settings.ranking_rules
@@ -176,7 +182,9 @@ async def test_update_settings(compress, async_empty_index, new_settings):
 async def test_update_settings_localized(compress, async_empty_index, new_settings_localized):
     index = await async_empty_index()
     response = await index.update_settings(new_settings_localized, compress=compress)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_settings()
     assert response.ranking_rules == new_settings_localized.ranking_rules
@@ -204,7 +212,9 @@ async def test_update_settings_localized(compress, async_empty_index, new_settin
 async def test_reset_settings(async_empty_index, new_settings, default_ranking_rules):
     index = await async_empty_index()
     response = await index.update_settings(new_settings)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_settings()
     assert response.ranking_rules == new_settings.ranking_rules
@@ -218,7 +228,9 @@ async def test_reset_settings(async_empty_index, new_settings, default_ranking_r
     assert response.pagination == new_settings.pagination
     assert response.proximity_precision == new_settings.proximity_precision
     response = await index.reset_settings()
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_settings()
     assert response.ranking_rules == default_ranking_rules
@@ -245,7 +257,9 @@ async def test_get_ranking_rules_default(async_empty_index, default_ranking_rule
 async def test_update_ranking_rules(compress, async_empty_index, new_ranking_rules):
     index = await async_empty_index()
     response = await index.update_ranking_rules(new_ranking_rules, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_ranking_rules()
     assert response == new_ranking_rules
 
@@ -254,11 +268,15 @@ async def test_update_ranking_rules(compress, async_empty_index, new_ranking_rul
 async def test_reset_ranking_rules(async_empty_index, new_ranking_rules, default_ranking_rules):
     index = await async_empty_index()
     response = await index.update_ranking_rules(new_ranking_rules)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_ranking_rules()
     assert response == new_ranking_rules
     response = await index.reset_ranking_rules()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_ranking_rules()
     assert response == default_ranking_rules
 
@@ -273,7 +291,9 @@ async def test_get_distinct_attribute(async_empty_index, default_distinct_attrib
 async def test_update_distinct_attribute(compress, async_empty_index, new_distinct_attribute):
     index = await async_empty_index()
     response = await index.update_distinct_attribute(new_distinct_attribute, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_distinct_attribute()
     assert response == new_distinct_attribute
 
@@ -283,12 +303,16 @@ async def test_reset_distinct_attribute(
 ):
     index = await async_empty_index()
     response = await index.update_distinct_attribute(new_distinct_attribute)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_distinct_attribute()
     assert response == new_distinct_attribute
     response = await index.reset_distinct_attribute()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_distinct_attribute()
     assert response == default_distinct_attribute
 
@@ -298,7 +322,9 @@ async def test_get_searchable_attributes(async_empty_index, small_movies):
     response = await index.get_searchable_attributes()
     assert response == ["*"]
     response = await index.add_documents(small_movies, primary_key="id")
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     get_attributes = await index.get_searchable_attributes()
     assert get_attributes == ["*"]
 
@@ -309,7 +335,9 @@ async def test_update_searchable_attributes(compress, async_empty_index, new_sea
     response = await index.update_searchable_attributes(
         new_searchable_attributes, compress=compress
     )
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_searchable_attributes()
     assert response == new_searchable_attributes
 
@@ -317,12 +345,16 @@ async def test_update_searchable_attributes(compress, async_empty_index, new_sea
 async def test_reset_searchable_attributes(async_empty_index, new_searchable_attributes):
     index = await async_empty_index()
     response = await index.update_searchable_attributes(new_searchable_attributes)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_searchable_attributes()
     assert response == new_searchable_attributes
     response = await index.reset_searchable_attributes()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_searchable_attributes()
     assert response == ["*"]
 
@@ -332,7 +364,9 @@ async def test_get_displayed_attributes(async_empty_index, small_movies):
     response = await index.get_displayed_attributes()
     assert response == ["*"]
     response = await index.add_documents(small_movies)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     get_attributes = await index.get_displayed_attributes()
     assert get_attributes == ["*"]
 
@@ -341,7 +375,9 @@ async def test_get_displayed_attributes(async_empty_index, small_movies):
 async def test_update_displayed_attributes(compress, async_empty_index, displayed_attributes):
     index = await async_empty_index()
     response = await index.update_displayed_attributes(displayed_attributes, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_displayed_attributes()
     assert response == displayed_attributes
 
@@ -349,12 +385,16 @@ async def test_update_displayed_attributes(compress, async_empty_index, displaye
 async def test_reset_displayed_attributes(async_empty_index, displayed_attributes):
     index = await async_empty_index()
     response = await index.update_displayed_attributes(displayed_attributes)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_displayed_attributes()
     assert response == displayed_attributes
     response = await index.reset_displayed_attributes()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_displayed_attributes()
     assert response == ["*"]
 
@@ -370,7 +410,9 @@ async def test_update_pagination(compress, async_empty_index):
     pagination = Pagination(max_total_hits=17)
     index = await async_empty_index()
     response = await index.update_pagination(pagination, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_pagination()
     assert pagination.model_dump() == pagination.model_dump()
 
@@ -378,9 +420,13 @@ async def test_update_pagination(compress, async_empty_index):
 async def test_reset_pagination(async_empty_index, default_pagination):
     index = await async_empty_index()
     response = await index.update_pagination(Pagination(max_total_hits=17))
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.reset_pagination()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_pagination()
     assert response.model_dump() == default_pagination.model_dump()
 
@@ -396,7 +442,9 @@ async def test_update_separator_tokens(compress, async_empty_index):
     index = await async_empty_index()
     expected = ["/", "|"]
     response = await index.update_separator_tokens(expected, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_separator_tokens()
     assert response == expected
 
@@ -405,12 +453,16 @@ async def test_reset_separator_tokens(async_empty_index):
     index = await async_empty_index()
     expected = ["/", "|"]
     response = await index.update_separator_tokens(expected)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_separator_tokens()
     assert response == expected
     response = await index.reset_separator_tokens()
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_separator_tokens()
     assert response == []
@@ -427,7 +479,9 @@ async def test_update_non_separator_tokens(compress, async_empty_index):
     index = await async_empty_index()
     expected = ["#", "@"]
     response = await index.update_non_separator_tokens(expected, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_non_separator_tokens()
     assert response == expected
 
@@ -436,12 +490,16 @@ async def test_reset_non_separator_tokens(async_empty_index):
     index = await async_empty_index()
     expected = ["#", "@"]
     response = await index.update_non_separator_tokens(expected)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_non_separator_tokens()
     assert response == expected
     response = await index.reset_non_separator_tokens()
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_non_separator_tokens()
     assert response == []
@@ -458,7 +516,9 @@ async def test_update_search_cutoff_ms(compress, async_empty_index):
     index = await async_empty_index()
     expected = 100
     response = await index.update_search_cutoff_ms(expected, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_search_cutoff_ms()
     assert response == expected
 
@@ -467,12 +527,16 @@ async def test_reset_search_cutoff_ms(async_empty_index):
     index = await async_empty_index()
     expected = 100
     response = await index.update_search_cutoff_ms(expected)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_search_cutoff_ms()
     assert response == expected
     response = await index.reset_search_cutoff_ms()
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_search_cutoff_ms()
     assert response is None
@@ -489,7 +553,9 @@ async def test_update_word_dictionary(compress, async_empty_index):
     index = await async_empty_index()
     expected = ["S.O", "S.O.S"]
     response = await index.update_word_dictionary(expected, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_word_dictionary()
     assert response == expected
 
@@ -498,12 +564,16 @@ async def test_reset_word_dictionary(async_empty_index):
     index = await async_empty_index()
     expected = ["S.O", "S.O.S"]
     response = await index.update_word_dictionary(expected)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_word_dictionary()
     assert response == expected
     response = await index.reset_word_dictionary()
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_word_dictionary()
     assert response == []
@@ -519,7 +589,9 @@ async def test_get_stop_words_default(async_empty_index):
 async def test_update_stop_words(compress, async_empty_index, new_stop_words):
     index = await async_empty_index()
     response = await index.update_stop_words(new_stop_words, compress=compress)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_stop_words()
     assert response == new_stop_words
@@ -528,12 +600,16 @@ async def test_update_stop_words(compress, async_empty_index, new_stop_words):
 async def test_reset_stop_words(async_empty_index, new_stop_words):
     index = await async_empty_index()
     response = await index.update_stop_words(new_stop_words)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_stop_words()
     assert response == new_stop_words
     response = await index.reset_stop_words()
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_stop_words()
     assert response is None
@@ -549,7 +625,9 @@ async def test_get_synonyms_default(async_empty_index):
 async def test_update_synonyms(compress, async_empty_index, new_synonyms):
     index = await async_empty_index()
     response = await index.update_synonyms(new_synonyms, compress=compress)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_synonyms()
     assert response == new_synonyms
@@ -558,12 +636,16 @@ async def test_update_synonyms(compress, async_empty_index, new_synonyms):
 async def test_reset_synonyms(async_empty_index, new_synonyms):
     index = await async_empty_index()
     response = await index.update_synonyms(new_synonyms)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_synonyms()
     assert response == new_synonyms
     response = await index.reset_synonyms()
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_synonyms()
     assert response is None
@@ -594,7 +676,9 @@ async def test_get_filterable_attributes(async_empty_index):
 async def test_update_filterable_attributes(compress, async_empty_index, filterable_attributes):
     index = await async_empty_index()
     response = await index.update_filterable_attributes(filterable_attributes, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_filterable_attributes()
     assert response == filterable_attributes
 
@@ -616,12 +700,16 @@ async def test_update_filterable_attributes(compress, async_empty_index, filtera
 async def test_reset_filterable_attributes(async_empty_index, filterable_attributes):
     index = await async_empty_index()
     response = await index.update_filterable_attributes(filterable_attributes)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_filterable_attributes()
     assert sorted(response) == filterable_attributes
     response = await index.reset_filterable_attributes()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_filterable_attributes()
     assert response is None
 
@@ -636,7 +724,9 @@ async def test_get_sortable_attributes(async_empty_index):
 async def test_update_sortable_attributes(compress, async_empty_index, sortable_attributes):
     index = await async_empty_index()
     response = await index.update_sortable_attributes(sortable_attributes, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_sortable_attributes()
     assert sorted(response) == sortable_attributes
 
@@ -644,12 +734,16 @@ async def test_update_sortable_attributes(compress, async_empty_index, sortable_
 async def test_reset_sortable_attributes(async_empty_index, sortable_attributes):
     index = await async_empty_index()
     response = await index.update_sortable_attributes(sortable_attributes)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_sortable_attributes()
     assert response == sortable_attributes
     response = await index.reset_sortable_attributes()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_sortable_attributes()
     assert response == []
 
@@ -671,7 +765,9 @@ async def test_update_typo_tolerance(compress, async_empty_index):
     )
     index = await async_empty_index()
     response = await index.update_typo_tolerance(typo_tolerance, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_typo_tolerance()
     assert response.model_dump() == typo_tolerance.model_dump()
 
@@ -679,9 +775,13 @@ async def test_update_typo_tolerance(compress, async_empty_index):
 async def test_reset_typo_tolerance(async_empty_index):
     index = await async_empty_index()
     response = await index.update_typo_tolerance(TypoTolerance(enabled=False))
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.reset_typo_tolerance()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_typo_tolerance()
     assert response.enabled is True
 
@@ -697,7 +797,9 @@ async def test_update_faceting(compress, async_empty_index):
     faceting = Faceting(max_values_per_facet=17)
     index = await async_empty_index()
     response = await index.update_faceting(faceting, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_faceting()
     expected = faceting.model_dump()
     expected["sort_facet_values_by"] = {"*": "alpha"}
@@ -716,7 +818,9 @@ async def test_update_proximity_precision(compress, async_empty_index):
     response = await index.update_proximity_precision(
         ProximityPrecision.BY_ATTRIBUTE, compress=compress
     )
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_proximity_precision()
     assert response == ProximityPrecision.BY_ATTRIBUTE
 
@@ -724,12 +828,16 @@ async def test_update_proximity_precision(compress, async_empty_index):
 async def test_reset_proximity_precision(async_empty_index):
     index = await async_empty_index()
     response = await index.update_proximity_precision(ProximityPrecision.BY_WORD)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_proximity_precision()
     assert response == ProximityPrecision.BY_WORD
     response = await index.reset_proximity_precision()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_proximity_precision()
     assert response is ProximityPrecision.BY_WORD
 
@@ -757,7 +865,9 @@ async def test_update_embedders(compress, async_empty_index):
     )
     index = await async_empty_index()
     response = await index.update_embedders(embedders, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
     assert response.embedders["test2"].source == "openAi"
@@ -780,14 +890,18 @@ async def test_reset_embedders(async_empty_index):
     )
     index = await async_empty_index()
     response = await index.update_embedders(embedders)
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
     response = await index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
     assert response.embedders["test2"].source == "openAi"
     assert response.embedders["test4"].source == "rest"
     response = await index.reset_embedders()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_embedders()
     assert response is None
 
@@ -821,7 +935,9 @@ async def test_update_faceting_sort_facet_values(
     )
     index = await async_empty_index()
     response = await index.update_faceting(faceting, compress=compress)
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_faceting()
     assert response.model_dump() == expected
 
@@ -837,9 +953,13 @@ def test_update_faceting_sort_facet_values_invalid_sort_type():
 async def test_reset_faceting(async_empty_index, default_faceting):
     index = await async_empty_index()
     response = await index.update_faceting(Faceting(max_values_per_facet=17))
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.reset_faceting()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_faceting()
     assert response.model_dump() == default_faceting.model_dump()
 
@@ -934,7 +1054,9 @@ async def test_update_localized_attributes(compress, async_empty_index):
         ],
         compress=compress,
     )
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_localized_attributes()
     assert response == [
         LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
@@ -950,7 +1072,9 @@ async def test_reset_localized_attributes(async_empty_index):
             LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
         ]
     )
-    update = await async_wait_for_task(index.http_client, response.task_uid)
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     assert update.status == "succeeded"
 
     response = await index.get_localized_attributes()
@@ -960,7 +1084,9 @@ async def test_reset_localized_attributes(async_empty_index):
     ]
 
     response = await index.reset_localized_attributes()
-    await async_wait_for_task(index.http_client, response.task_uid)
+    await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
     response = await index.get_localized_attributes()
     assert response is None
 
@@ -974,7 +1100,7 @@ async def test_get_facet_search_opt_out(async_empty_index):
 async def test_update_facet_search_opt_out(async_empty_index):
     index = await async_empty_index()
     task = await index.update_facet_search(False)
-    await async_wait_for_task(index.http_client, task.task_uid)
+    await async_wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = await index.get_settings()
 
     assert result.facet_search is False
@@ -983,13 +1109,13 @@ async def test_update_facet_search_opt_out(async_empty_index):
 async def test_reset_facet_search_opt_out(async_empty_index):
     index = await async_empty_index()
     task = await index.update_facet_search(False)
-    await async_wait_for_task(index.http_client, task.task_uid)
+    await async_wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = await index.get_settings()
 
     assert result.facet_search is False
 
     task = await index.reset_facet_search()
-    await async_wait_for_task(index.http_client, task.task_uid)
+    await async_wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = await index.get_settings()
 
     assert result.facet_search is True
@@ -1004,7 +1130,7 @@ async def test_get_prefix_search_opt_out(async_empty_index):
 async def test_update_prefix_search_opt_out(async_empty_index):
     index = await async_empty_index()
     task = await index.update_prefix_search("disabled")
-    await async_wait_for_task(index.http_client, task.task_uid)
+    await async_wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = await index.get_settings()
 
     assert result.prefix_search == "disabled"
@@ -1013,13 +1139,13 @@ async def test_update_prefix_search_opt_out(async_empty_index):
 async def test_reset_prefix_search_opt_out(async_empty_index):
     index = await async_empty_index()
     task = await index.update_prefix_search("disabled")
-    await async_wait_for_task(index.http_client, task.task_uid)
+    await async_wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = await index.get_settings()
 
     assert result.prefix_search == "disabled"
 
     task = await index.reset_prefix_search()
-    await async_wait_for_task(index.http_client, task.task_uid)
+    await async_wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = await index.get_settings()
 
     assert result.prefix_search == "indexingTime"

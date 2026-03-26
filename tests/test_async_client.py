@@ -482,7 +482,7 @@ async def test_create_dump(async_client, async_index_with_documents):
     response = await async_client.create_dump()
     await async_client.wait_for_task(response.task_uid)
 
-    dump_status = await async_get_task(index.http_client, response.task_uid)
+    dump_status = await async_get_task(index.http_client, index._json_handler, response.task_uid)
     assert dump_status.status == "succeeded"
     assert dump_status.task_type == "dumpCreation"
 
@@ -493,7 +493,9 @@ async def test_create_snapshot(async_client, async_index_with_documents):
     response = await async_client.create_snapshot()
     await async_client.wait_for_task(response.task_uid)
 
-    snapshot_status = await async_get_task(index.http_client, response.task_uid)
+    snapshot_status = await async_get_task(
+        index.http_client, index._json_handler, response.task_uid
+    )
     assert snapshot_status.status == "succeeded"
     assert snapshot_status.task_type == "snapshotCreation"
 

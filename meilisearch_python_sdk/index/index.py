@@ -280,7 +280,12 @@ class Index(BaseIndex):
             >>>     index.delete_if_exists()
         """
         response = self.delete()
-        status = wait_for_task(self.http_client, response.task_uid, timeout_in_ms=100000)
+        status = wait_for_task(
+            self.http_client,
+            response.task_uid,
+            timeout_in_ms=100000,
+            json_handler=self._json_handler,
+        )
         if status.status == "succeeded":
             return True
 
@@ -311,6 +316,7 @@ class Index(BaseIndex):
             self.http_client,
             self._http_requests.parse_json(response)["taskUid"],
             timeout_in_ms=100000,
+            json_handler=self._json_handler,
         )
         index_response = self._http_requests.get(self._base_url_with_uid)
         self.primary_key = self._http_requests.parse_json(index_response)["primaryKey"]
@@ -423,7 +429,10 @@ class Index(BaseIndex):
         http_request = HttpRequests(http_client, handler)
         response = http_request.post(url, payload)
         wait_for_task(
-            http_client, http_request.parse_json(response)["taskUid"], timeout_in_ms=timeout_in_ms
+            http_client,
+            http_request.parse_json(response)["taskUid"],
+            timeout_in_ms=timeout_in_ms,
+            json_handler=handler,
         )
         index_response = http_request.get(f"{url}/{uid}")
         index_dict = http_request.parse_json(index_response)
@@ -441,7 +450,12 @@ class Index(BaseIndex):
         if settings:
             settings_task = index.update_settings(settings)
             if wait:
-                wait_for_task(http_client, settings_task.task_uid, timeout_in_ms=timeout_in_ms)
+                wait_for_task(
+                    http_client,
+                    settings_task.task_uid,
+                    timeout_in_ms=timeout_in_ms,
+                    json_handler=handler,
+                )
 
         return index
 

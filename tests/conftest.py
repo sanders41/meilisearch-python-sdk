@@ -208,7 +208,9 @@ async def async_index_with_documents(async_empty_index, small_movies):
     async def index_maker(documents=small_movies):
         index = await async_empty_index()
         response = await index.add_documents(documents)
-        await async_wait_for_task(index.http_client, response.task_uid)
+        await async_wait_for_task(
+            index.http_client, response.task_uid, json_handler=index._json_handler
+        )
         return index
 
     return index_maker
@@ -219,7 +221,7 @@ def index_with_documents(empty_index, small_movies):
     def index_maker(documents=small_movies):
         index = empty_index()
         response = index.add_documents(documents)
-        wait_for_task(index.http_client, response.task_uid)
+        wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
         return index
 
     return index_maker
@@ -236,10 +238,14 @@ async def async_index_with_documents_and_vectors(async_empty_index, small_movies
         task = await index.update_embedders(
             Embedders(embedders={"default": UserProvidedEmbedder(dimensions=2)})
         )
-        await async_wait_for_task(index.http_client, task.task_uid)
+        await async_wait_for_task(
+            index.http_client, task.task_uid, json_handler=index._json_handler
+        )
 
         response = await index.add_documents(documents)
-        await async_wait_for_task(index.http_client, response.task_uid)
+        await async_wait_for_task(
+            index.http_client, response.task_uid, json_handler=index._json_handler
+        )
         return index
 
     return index_maker
@@ -256,9 +262,9 @@ def index_with_documents_and_vectors(empty_index, small_movies):
         task = index.update_embedders(
             Embedders(embedders={"default": UserProvidedEmbedder(dimensions=2)})
         )
-        wait_for_task(index.http_client, task.task_uid)
+        wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
         response = index.add_documents(documents)
-        wait_for_task(index.http_client, response.task_uid)
+        wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
         return index
 
     return index_maker

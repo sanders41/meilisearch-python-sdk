@@ -81,13 +81,13 @@ def sortable_attributes():
 def test_delete_index(client, indexes_sample):
     _, index_uid, index_uid2 = indexes_sample
     response = client.index(uid=index_uid).delete()
-    wait_for_task(client, response.task_uid)
+    wait_for_task(client, response.task_uid, json_handler=client.json_handler)
 
     with pytest.raises(MeilisearchApiError):
         client.get_index(uid=index_uid)
 
     response = client.index(uid=index_uid2).delete()
-    wait_for_task(client, response.task_uid)
+    wait_for_task(client, response.task_uid, json_handler=client.json_handler)
 
     with pytest.raises(MeilisearchApiError):
         client.get_index(uid=index_uid2)
@@ -105,7 +105,7 @@ def test_update_index(client, indexes_sample):
 def test_get_stats(empty_index, small_movies):
     index = empty_index()
     update = index.add_documents(small_movies)
-    wait_for_task(index.http_client, update.task_uid)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
     response = index.get_stats()
 
     assert response.number_of_documents == 30
@@ -140,7 +140,7 @@ def test_get_settings_default(
 def test_update_settings(compress, empty_index, new_settings):
     index = empty_index()
     response = index.update_settings(new_settings, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_settings()
     assert response.ranking_rules == new_settings.ranking_rules
@@ -169,7 +169,7 @@ def test_update_settings(compress, empty_index, new_settings):
 def test_update_settings_localized(compress, empty_index, new_settings_localized):
     index = empty_index()
     response = index.update_settings(new_settings_localized, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_settings()
     assert response.ranking_rules == new_settings_localized.ranking_rules
@@ -197,7 +197,7 @@ def test_update_settings_localized(compress, empty_index, new_settings_localized
 def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     index = empty_index()
     response = index.update_settings(new_settings)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_settings()
     assert response.ranking_rules == new_settings.ranking_rules
@@ -211,7 +211,7 @@ def test_reset_settings(empty_index, new_settings, default_ranking_rules):
     assert response.pagination == new_settings.pagination
     assert response.proximity_precision == new_settings.proximity_precision
     response = index.reset_settings()
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_settings()
     assert response.ranking_rules == default_ranking_rules
@@ -238,7 +238,7 @@ def test_get_ranking_rules_default(empty_index, default_ranking_rules):
 def test_update_ranking_rules(compress, empty_index, new_ranking_rules):
     index = empty_index()
     response = index.update_ranking_rules(new_ranking_rules, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_ranking_rules()
     assert response == new_ranking_rules
 
@@ -246,11 +246,11 @@ def test_update_ranking_rules(compress, empty_index, new_ranking_rules):
 def test_reset_ranking_rules(empty_index, new_ranking_rules, default_ranking_rules):
     index = empty_index()
     response = index.update_ranking_rules(new_ranking_rules)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_ranking_rules()
     assert response == new_ranking_rules
     response = index.reset_ranking_rules()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_ranking_rules()
     assert response == default_ranking_rules
 
@@ -265,7 +265,7 @@ def test_get_distinct_attribute(empty_index, default_distinct_attribute):
 def test_update_distinct_attribute(compress, empty_index, new_distinct_attribute):
     index = empty_index()
     response = index.update_distinct_attribute(new_distinct_attribute, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_distinct_attribute()
     assert response == new_distinct_attribute
 
@@ -273,12 +273,12 @@ def test_update_distinct_attribute(compress, empty_index, new_distinct_attribute
 def test_reset_distinct_attribute(empty_index, new_distinct_attribute, default_distinct_attribute):
     index = empty_index()
     response = index.update_distinct_attribute(new_distinct_attribute)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_distinct_attribute()
     assert response == new_distinct_attribute
     response = index.reset_distinct_attribute()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_distinct_attribute()
     assert response == default_distinct_attribute
 
@@ -288,7 +288,7 @@ def test_get_searchable_attributes(empty_index, small_movies):
     response = index.get_searchable_attributes()
     assert response == ["*"]
     response = index.add_documents(small_movies, primary_key="id")
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     get_attributes = index.get_searchable_attributes()
     assert get_attributes == ["*"]
 
@@ -297,7 +297,7 @@ def test_get_searchable_attributes(empty_index, small_movies):
 def test_update_searchable_attributes(compress, empty_index, new_searchable_attributes):
     index = empty_index()
     response = index.update_searchable_attributes(new_searchable_attributes, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_searchable_attributes()
     assert response == new_searchable_attributes
 
@@ -305,12 +305,12 @@ def test_update_searchable_attributes(compress, empty_index, new_searchable_attr
 def test_reset_searchable_attributes(empty_index, new_searchable_attributes):
     index = empty_index()
     response = index.update_searchable_attributes(new_searchable_attributes)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_searchable_attributes()
     assert response == new_searchable_attributes
     response = index.reset_searchable_attributes()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_searchable_attributes()
     assert response == ["*"]
 
@@ -320,7 +320,7 @@ def test_get_displayed_attributes(empty_index, small_movies):
     response = index.get_displayed_attributes()
     assert response == ["*"]
     response = index.add_documents(small_movies)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     get_attributes = index.get_displayed_attributes()
     assert get_attributes == ["*"]
 
@@ -329,7 +329,7 @@ def test_get_displayed_attributes(empty_index, small_movies):
 def test_update_displayed_attributes(compress, empty_index, displayed_attributes):
     index = empty_index()
     response = index.update_displayed_attributes(displayed_attributes, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_displayed_attributes()
     assert response == displayed_attributes
 
@@ -337,12 +337,12 @@ def test_update_displayed_attributes(compress, empty_index, displayed_attributes
 def test_reset_displayed_attributes(empty_index, displayed_attributes):
     index = empty_index()
     response = index.update_displayed_attributes(displayed_attributes)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_displayed_attributes()
     assert response == displayed_attributes
     response = index.reset_displayed_attributes()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_displayed_attributes()
     assert response == ["*"]
 
@@ -358,7 +358,7 @@ def test_update_pagination(compress, empty_index):
     pagination = Pagination(max_total_hits=17)
     index = empty_index()
     response = index.update_pagination(pagination, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_pagination()
     assert pagination.model_dump() == pagination.model_dump()
 
@@ -366,9 +366,9 @@ def test_update_pagination(compress, empty_index):
 def test_reset_pagination(empty_index, default_pagination):
     index = empty_index()
     response = index.update_pagination(Pagination(max_total_hits=17))
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.reset_pagination()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_pagination()
     assert response.model_dump() == default_pagination.model_dump()
 
@@ -384,7 +384,7 @@ def test_update_separator_tokens(compress, empty_index):
     index = empty_index()
     expected = ["/", "|"]
     response = index.update_separator_tokens(expected, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_separator_tokens()
     assert response == expected
 
@@ -393,12 +393,12 @@ def test_reset_separator_tokens(empty_index):
     index = empty_index()
     expected = ["/", "|"]
     response = index.update_separator_tokens(expected)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_separator_tokens()
     assert response == expected
     response = index.reset_separator_tokens()
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_separator_tokens()
     assert response == []
@@ -415,7 +415,7 @@ def test_update_non_separator_tokens(compress, empty_index):
     index = empty_index()
     expected = ["#", "@"]
     response = index.update_non_separator_tokens(expected, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_non_separator_tokens()
     assert response == expected
 
@@ -424,12 +424,12 @@ def test_reset_non_separator_tokens(empty_index):
     index = empty_index()
     expected = ["#", "@"]
     response = index.update_non_separator_tokens(expected)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_non_separator_tokens()
     assert response == expected
     response = index.reset_non_separator_tokens()
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_non_separator_tokens()
     assert response == []
@@ -446,7 +446,7 @@ def test_update_search_cutoff_ms(compress, empty_index):
     index = empty_index()
     expected = 100
     response = index.update_search_cutoff_ms(expected, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_search_cutoff_ms()
     assert response == expected
 
@@ -455,12 +455,12 @@ def test_reset_search_cutoff_ms(empty_index):
     index = empty_index()
     expected = 100
     response = index.update_search_cutoff_ms(expected)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_search_cutoff_ms()
     assert response == expected
     response = index.reset_search_cutoff_ms()
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_search_cutoff_ms()
     assert response is None
@@ -477,7 +477,7 @@ def test_update_word_dictionary(compress, empty_index):
     index = empty_index()
     expected = ["S.O", "S.O.S"]
     response = index.update_word_dictionary(expected, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_word_dictionary()
     assert response == expected
 
@@ -486,12 +486,12 @@ def test_reset_word_dictionary(empty_index):
     index = empty_index()
     expected = ["S.O", "S.O.S"]
     response = index.update_word_dictionary(expected)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_word_dictionary()
     assert response == expected
     response = index.reset_word_dictionary()
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_word_dictionary()
     assert response == []
@@ -507,7 +507,7 @@ def test_get_stop_words_default(empty_index):
 def test_update_stop_words(compress, empty_index, new_stop_words):
     index = empty_index()
     response = index.update_stop_words(new_stop_words, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_stop_words()
     assert response == new_stop_words
@@ -516,12 +516,12 @@ def test_update_stop_words(compress, empty_index, new_stop_words):
 def test_reset_stop_words(empty_index, new_stop_words):
     index = empty_index()
     response = index.update_stop_words(new_stop_words)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_stop_words()
     assert response == new_stop_words
     response = index.reset_stop_words()
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_stop_words()
     assert response is None
@@ -537,7 +537,7 @@ def test_get_synonyms_default(empty_index):
 def test_update_synonyms(compress, empty_index, new_synonyms):
     index = empty_index()
     response = index.update_synonyms(new_synonyms, compress=compress)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_synonyms()
     assert response == new_synonyms
@@ -546,12 +546,12 @@ def test_update_synonyms(compress, empty_index, new_synonyms):
 def test_reset_synonyms(empty_index, new_synonyms):
     index = empty_index()
     response = index.update_synonyms(new_synonyms)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_synonyms()
     assert response == new_synonyms
     response = index.reset_synonyms()
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_synonyms()
     assert response is None
@@ -582,7 +582,7 @@ def test_get_filterable_attributes(empty_index):
 def test_update_filterable_attributes(compress, empty_index, filterable_attributes):
     index = empty_index()
     response = index.update_filterable_attributes(filterable_attributes, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_filterable_attributes()
     assert response == filterable_attributes
 
@@ -604,12 +604,12 @@ def test_update_filterable_attributes(compress, empty_index, filterable_attribut
 def test_reset_filterable_attributes(empty_index, filterable_attributes):
     index = empty_index()
     response = index.update_filterable_attributes(filterable_attributes)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_filterable_attributes()
     assert sorted(response) == filterable_attributes
     response = index.reset_filterable_attributes()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_filterable_attributes()
     assert response is None
 
@@ -624,7 +624,7 @@ def test_get_sortable_attributes(empty_index):
 def test_update_sortable_attributes(compress, empty_index, sortable_attributes):
     index = empty_index()
     response = index.update_sortable_attributes(sortable_attributes, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_sortable_attributes()
     assert sorted(response) == sortable_attributes
 
@@ -632,12 +632,12 @@ def test_update_sortable_attributes(compress, empty_index, sortable_attributes):
 def test_reset_sortable_attributes(empty_index, sortable_attributes):
     index = empty_index()
     response = index.update_sortable_attributes(sortable_attributes)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_sortable_attributes()
     assert response == sortable_attributes
     response = index.reset_sortable_attributes()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_sortable_attributes()
     assert response == []
 
@@ -659,7 +659,7 @@ def test_update_typo_tolerance(compress, empty_index):
     )
     index = empty_index()
     response = index.update_typo_tolerance(typo_tolerance, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_typo_tolerance()
     assert response.model_dump() == typo_tolerance.model_dump()
 
@@ -667,9 +667,9 @@ def test_update_typo_tolerance(compress, empty_index):
 def test_reset_typo_tolerance(empty_index):
     index = empty_index()
     response = index.update_typo_tolerance(TypoTolerance(enabled=False))
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.reset_typo_tolerance()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_typo_tolerance()
     assert response.enabled is True
 
@@ -685,7 +685,7 @@ def test_update_faceting(compress, empty_index):
     faceting = Faceting(max_values_per_facet=17)
     index = empty_index()
     response = index.update_faceting(faceting, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_faceting()
     expected = faceting.model_dump()
     expected["sort_facet_values_by"] = {"*": "alpha"}
@@ -702,7 +702,7 @@ def test_get_proximity_precision(empty_index):
 def test_update_proximity_precision(compress, empty_index):
     index = empty_index()
     response = index.update_proximity_precision(ProximityPrecision.BY_ATTRIBUTE, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_proximity_precision()
     assert response == ProximityPrecision.BY_ATTRIBUTE
 
@@ -710,12 +710,12 @@ def test_update_proximity_precision(compress, empty_index):
 def test_reset_proximity_precision(empty_index):
     index = empty_index()
     response = index.update_proximity_precision(ProximityPrecision.BY_WORD)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_proximity_precision()
     assert response == ProximityPrecision.BY_WORD
     response = index.reset_proximity_precision()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_proximity_precision()
     assert response is ProximityPrecision.BY_WORD
 
@@ -744,7 +744,7 @@ def test_update_embedders(empty_index):
     )
     index = empty_index()
     response = index.update_embedders(embedders)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
     assert response.embedders["test2"].source == "openAi"
@@ -767,14 +767,14 @@ def test_reset_embedders(empty_index):
     )
     index = empty_index()
     response = index.update_embedders(embedders)
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
     response = index.get_embedders()
     assert response.embedders["default"].source == "userProvided"
     assert response.embedders["test2"].source == "openAi"
     assert response.embedders["test4"].source == "rest"
     response = index.reset_embedders()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_embedders()
     assert response is None
 
@@ -808,7 +808,7 @@ def test_update_faceting_sort_facet_values(
     )
     index = empty_index()
     response = index.update_faceting(faceting, compress=compress)
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_faceting()
     assert response.model_dump() == expected
 
@@ -824,9 +824,9 @@ def test_update_faceting_sort_facet_values_invalid_sort_type():
 def test_reset_faceting(empty_index, default_faceting):
     index = empty_index()
     response = index.update_faceting(Faceting(max_values_per_facet=17))
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.reset_faceting()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_faceting()
     assert response.model_dump() == default_faceting.model_dump()
 
@@ -921,7 +921,7 @@ def test_update_localized_attributes(compress, empty_index):
         ],
         compress=compress,
     )
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_localized_attributes()
     assert response == [
         LocalizedAttributes(locales=["eng", "spa"], attribute_patterns=["*"]),
@@ -937,7 +937,7 @@ def test_reset_localized_attributes(empty_index):
             LocalizedAttributes(locales=["ita"], attribute_patterns=["*_it"]),
         ]
     )
-    update = wait_for_task(index.http_client, response.task_uid)
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
 
     response = index.get_localized_attributes()
@@ -947,7 +947,7 @@ def test_reset_localized_attributes(empty_index):
     ]
 
     response = index.reset_localized_attributes()
-    wait_for_task(index.http_client, response.task_uid)
+    wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     response = index.get_localized_attributes()
     assert response is None
 
@@ -961,7 +961,7 @@ def test_get_facet_search_opt_out(empty_index):
 def test_update_facet_search_opt_out(empty_index):
     index = empty_index()
     task = index.update_facet_search(False)
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = index.get_settings()
 
     assert result.facet_search is False
@@ -970,13 +970,13 @@ def test_update_facet_search_opt_out(empty_index):
 def test_reset_facet_search_opt_out(empty_index):
     index = empty_index()
     task = index.update_facet_search(False)
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = index.get_settings()
 
     assert result.facet_search is False
 
     task = index.reset_facet_search()
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = index.get_settings()
 
     assert result.facet_search is True
@@ -991,7 +991,7 @@ def test_get_prefix_search_opt_out(empty_index):
 def test_update_prefix_search_opt_out(empty_index):
     index = empty_index()
     task = index.update_prefix_search("disabled")
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = index.get_settings()
 
     assert result.prefix_search == "disabled"
@@ -1000,13 +1000,13 @@ def test_update_prefix_search_opt_out(empty_index):
 def test_reset_prefix_search_opt_out(empty_index):
     index = empty_index()
     task = index.update_prefix_search("disabled")
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = index.get_settings()
 
     assert result.prefix_search == "disabled"
 
     task = index.reset_prefix_search()
-    wait_for_task(index.http_client, task.task_uid)
+    wait_for_task(index.http_client, task.task_uid, json_handler=index._json_handler)
     result = index.get_settings()
 
     assert result.prefix_search == "indexingTime"

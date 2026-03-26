@@ -342,7 +342,10 @@ class AsyncIndex(BaseIndex):
         """
         response = await self.delete()
         status = await async_wait_for_task(
-            self.http_client, response.task_uid, timeout_in_ms=100000
+            self.http_client,
+            response.task_uid,
+            timeout_in_ms=100000,
+            json_handler=self._json_handler,
         )
         if status.status == "succeeded":
             return True
@@ -374,6 +377,7 @@ class AsyncIndex(BaseIndex):
             self.http_client,
             self._http_requests.parse_json(response)["taskUid"],
             timeout_in_ms=100000,
+            json_handler=self._json_handler,
         )
         index_response = await self._http_requests.get(f"{self._base_url_with_uid}")
         self.primary_key = self._http_requests.parse_json(index_response)["primaryKey"]
@@ -489,6 +493,7 @@ class AsyncIndex(BaseIndex):
             http_client,
             http_request.parse_json(response)["taskUid"],
             timeout_in_ms=timeout_in_ms,
+            json_handler=handler,
         )
 
         index_response = await http_request.get(f"{url}/{uid}")
@@ -508,7 +513,10 @@ class AsyncIndex(BaseIndex):
             settings_task = await index.update_settings(settings)
             if wait:
                 await async_wait_for_task(
-                    http_client, settings_task.task_uid, timeout_in_ms=timeout_in_ms
+                    http_client,
+                    settings_task.task_uid,
+                    timeout_in_ms=timeout_in_ms,
+                    json_handler=handler,
                 )
 
         return index
