@@ -47,7 +47,7 @@ dev = [
   "pytest-xdist==3.8.0",
   "prek>=0.2.27",
   "ruff==0.15.9",
-  "types-aiofiles==25.1.0.20251011",
+  "types-aiofiles==25.1.0.20260408",
   "typing-extensions==4.15.0",
 ]
 
