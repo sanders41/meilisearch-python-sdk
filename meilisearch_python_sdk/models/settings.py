@@ -94,7 +94,7 @@ class RestEmbedder(CamelBase):
     distribution: Distribution | None = None
     headers: JsonDict | None = None
     request: JsonDict
-    response: JsonDict
+    response: JsonDict | list
     binary_quantized: bool | None = None
     indexing_fragments: JsonDict | None = None
     search_fragment: JsonDict | None = None
