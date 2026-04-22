@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Literal, Any
+from typing import Any, Literal
 
 from camel_converter.pydantic_base import CamelBase
 from pydantic import field_validator, model_validator
