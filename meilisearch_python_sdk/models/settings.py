@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Literal
+from typing import Literal, Any
 
 from camel_converter.pydantic_base import CamelBase
 from pydantic import field_validator, model_validator
@@ -94,7 +94,7 @@ class RestEmbedder(CamelBase):
     distribution: Distribution | None = None
     headers: JsonDict | None = None
     request: JsonDict
-    response: JsonDict | list
+    response: JsonDict | list[Any]
     binary_quantized: bool | None = None
     indexing_fragments: JsonDict | None = None
     search_fragment: JsonDict | None = None
