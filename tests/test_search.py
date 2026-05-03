@@ -159,6 +159,17 @@ def test_custom_search_params_with_facets(index_with_documents):
     assert response.facet_distribution["genre"]["fantasy"] == 1
 
 
+def test_custom_search_params_with_facet_stats(index_with_documents):
+    index = index_with_documents()
+    update = index.update_filterable_attributes(["release_date"])
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
+    response = index.search("", facets=["release_date"])
+    assert response.facet_stats is not None
+    assert "release_date" in response.facet_stats
+    assert "min" in response.facet_stats["release_date"]
+    assert "max" in response.facet_stats["release_date"]
+
+
 def test_custom_search_params_with_facet_filters(index_with_documents):
     index = index_with_documents()
     update = index.update_filterable_attributes(["genre"])
