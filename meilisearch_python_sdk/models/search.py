@@ -89,6 +89,7 @@ class SearchResults(CamelBase, Generic[T]):
     processing_time_ms: int
     query: str
     facet_distribution: JsonDict | None = None
+    facet_stats: JsonDict | None = None
     total_pages: int | None = None
     total_hits: int | None = None
     page: int | None = None
@@ -109,6 +110,7 @@ class SearchResultsFederated(CamelBase, Generic[T]):
     estimated_total_hits: int | None = None
     processing_time_ms: int
     facet_distribution: JsonDict | None = None
+    facet_stats: JsonDict | None = None
     total_pages: int | None = None
     total_hits: int | None = None
     page: int | None = None
