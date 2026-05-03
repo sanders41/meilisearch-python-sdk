@@ -157,6 +157,7 @@ async def test_custom_search_params_with_facets(async_index_with_documents):
     assert response.facet_distribution["genre"]["cartoon"] == 1
     assert response.facet_distribution["genre"]["action"] == 3
     assert response.facet_distribution["genre"]["fantasy"] == 1
+    assert response.facet_stats is not None
 
 
 async def test_custom_search_params_with_facet_filters(async_index_with_documents):
@@ -166,6 +167,7 @@ async def test_custom_search_params_with_facet_filters(async_index_with_document
     response = await index.search("world", filter=[["genre = action"]])
     assert len(response.hits) == 3
     assert response.facet_distribution is None
+    assert response.facet_stats is None
 
 
 async def test_custom_search_params_with_multiple_facet_filters(async_index_with_documents):
@@ -177,6 +179,7 @@ async def test_custom_search_params_with_multiple_facet_filters(async_index_with
     )
     assert len(response.hits) == 3
     assert response.facet_distribution is None
+    assert response.facet_stats is None
 
 
 async def test_custom_search_facet_filters_with_space(async_client):
@@ -262,6 +265,7 @@ async def test_custom_search_params_with_many_params(async_index_with_documents)
     )
     assert len(response.hits) == 3
     assert response.facet_distribution is None
+    assert response.facet_stats is None
     assert "title" in response.hits[0]
     assert "poster" in response.hits[0]
     assert "overview" not in response.hits[0]
@@ -472,6 +476,7 @@ async def test_multi_search_federated_merge_facets(
     assert "_federation" in response.hits[0]
     assert response.facets_by_index is None
     assert response.facet_distribution is not None
+    assert response.facet_stats is not None
 
 
 async def test_multi_search_locales(async_client, async_index_with_documents, async_empty_index):

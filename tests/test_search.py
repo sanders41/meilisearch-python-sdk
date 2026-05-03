@@ -157,6 +157,7 @@ def test_custom_search_params_with_facets(index_with_documents):
     assert response.facet_distribution["genre"]["cartoon"] == 1
     assert response.facet_distribution["genre"]["action"] == 3
     assert response.facet_distribution["genre"]["fantasy"] == 1
+    assert response.facet_stats is not None
 
 
 def test_custom_search_params_with_facet_filters(index_with_documents):
@@ -166,6 +167,7 @@ def test_custom_search_params_with_facet_filters(index_with_documents):
     response = index.search("world", filter=[["genre = action"]])
     assert len(response.hits) == 3
     assert response.facet_distribution is None
+    assert response.facet_stats is None
 
 
 def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
@@ -177,6 +179,7 @@ def test_custom_search_params_with_multiple_facet_filters(index_with_documents):
     )
     assert len(response.hits) == 3
     assert response.facet_distribution is None
+    assert response.facet_stats is None
 
 
 def test_custom_search_facet_filters_with_space(client):
@@ -262,6 +265,7 @@ def test_custom_search_params_with_many_params(index_with_documents):
     )
     assert len(response.hits) == 3
     assert response.facet_distribution is None
+    assert response.facet_stats is None
     assert "title" in response.hits[0]
     assert "poster" in response.hits[0]
     assert "overview" not in response.hits[0]
@@ -445,6 +449,7 @@ def test_multi_search_federated_merge_facets(
     assert "_federation" in response.hits[0]
     assert response.facets_by_index is None
     assert response.facet_distribution is not None
+    assert response.facet_stats is not None
 
 
 def test_multi_search_locales(client, index_with_documents, empty_index):
