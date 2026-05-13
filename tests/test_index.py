@@ -1,5 +1,5 @@
 import pytest
-from httpx import Response
+from httpx2 import Response
 
 from meilisearch_python_sdk._http_requests import HttpRequests
 from meilisearch_python_sdk._task import wait_for_task

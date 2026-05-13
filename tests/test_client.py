@@ -8,8 +8,8 @@ from uuid import uuid4
 import jwt
 import pytest
 from camel_converter.pydantic_base import CamelBase
-from httpx import Client as HttpxClient
-from httpx import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
+from httpx2 import Client as HttpxClient
+from httpx2 import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk.errors import (

@@ -4,7 +4,7 @@ import gzip
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
-from httpx import (
+from httpx2 import (
     AsyncClient,
     Client,
     ConnectError,

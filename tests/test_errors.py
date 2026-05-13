@@ -1,7 +1,7 @@
 import pytest
-from httpx import AsyncClient as HttpxAsyncClient
-from httpx import Client as HttpxClient
-from httpx import HTTPStatusError, Request, Response
+from httpx2 import AsyncClient as HttpxAsyncClient
+from httpx2 import Client as HttpxClient
+from httpx2 import HTTPStatusError, Request, Response
 
 from meilisearch_python_sdk.errors import (
     MeilisearchApiError,

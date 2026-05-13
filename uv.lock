@@ -448,31 +448,31 @@ wheels = [
 ]
 
 [[package]]
-name = "httpcore"
-version = "1.0.9"
+name = "httpcore2"
+version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
     { name = "h11" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/06/94/82699a10bca87a5556c9c59b5963f2d039dbd239f25bc2a63907a05a14cb/httpcore-1.0.9.tar.gz", hash = "sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8", size = 85484, upload-time = "2025-04-24T22:06:22.219Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/18/e51f5729684acaaab4d1cfca0777ac0f86440c65d2814992442ed5ef02e1/httpcore2-2.0.0.tar.gz", hash = "sha256:403692e0a0e8ea6de90993cdea815b2454d2ff5426e61d2a244846c12506af76", size = 63864, upload-time = "2026-05-12T17:59:22.073Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl", hash = "sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55", size = 78784, upload-time = "2025-04-24T22:06:20.566Z" },
+    { url = "https://files.pythonhosted.org/packages/ae/67/784fd58a5b4dbe8b2aee0cafc6959cb8b53c1b7e9d6e4281f8a4c6935c10/httpcore2-2.0.0-py3-none-any.whl", hash = "sha256:4bd78675c48edafd522c5224a18e3a5f6e71dbe95a73497177d432072a7b6b43", size = 79673, upload-time = "2026-05-12T17:59:18.996Z" },
 ]
 
 [[package]]
-name = "httpx"
-version = "0.28.1"
+name = "httpx2"
+version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "certifi" },
-    { name = "httpcore" },
+    { name = "httpcore2" },
     { name = "idna" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc", size = 141406, upload-time = "2024-12-06T15:37:23.222Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/70/95/868b3df4aa6f9cecb42aaf82a55a5a2c8ef40df76d709b812e1553d6a928/httpx2-2.0.0.tar.gz", hash = "sha256:f354249d2a9edce26e08fd2ad2276e98317b5763f673bb0d90f3ce9382cc2aed", size = 79506, upload-time = "2026-05-12T17:59:23.174Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517, upload-time = "2024-12-06T15:37:21.509Z" },
+    { url = "https://files.pythonhosted.org/packages/e9/25/66215a750faeb79b698286c0d0b94894482cfae10371ae4968ef6e165a28/httpx2-2.0.0-py3-none-any.whl", hash = "sha256:dfb5ae245f3985681296a000453f1e5fffee322eb531feabcdaf1557ad978b6a", size = 73424, upload-time = "2026-05-12T17:59:20.403Z" },
 ]
 
 [package.optional-dependencies]
@@ -704,7 +704,7 @@ source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
     { name = "camel-converter", extra = ["pydantic"] },
-    { name = "httpx", extra = ["http2"] },
+    { name = "httpx2", extra = ["http2"] },
     { name = "pydantic" },
     { name = "pyjwt" },
 ]
@@ -737,7 +737,7 @@ dev = [
 requires-dist = [
     { name = "aiofiles", specifier = ">=0.7" },
     { name = "camel-converter", extras = ["pydantic"], specifier = ">=1.0.0" },
-    { name = "httpx", extras = ["http2"], specifier = ">=0.17" },
+    { name = "httpx2", extras = ["http2"], specifier = ">=2.0.0" },
     { name = "orjson", marker = "extra == 'all'" },
     { name = "orjson", marker = "extra == 'orjson'", specifier = ">=3.10.6" },
     { name = "pydantic", specifier = ">=2.0.0" },
