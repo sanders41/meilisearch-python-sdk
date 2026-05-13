@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from camel_converter import dict_to_camel
-from httpx import Client as HttpxClient
+from httpx2 import Client as HttpxClient
 
 from meilisearch_python_sdk import _task
 from meilisearch_python_sdk._batch import get_batch as _get_batch

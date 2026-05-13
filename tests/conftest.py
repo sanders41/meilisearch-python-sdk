@@ -13,7 +13,7 @@ try:
 except ImportError:
     truststore = None
 
-from httpx import AsyncClient as HttpxAsyncClient
+from httpx2 import AsyncClient as HttpxAsyncClient
 
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task

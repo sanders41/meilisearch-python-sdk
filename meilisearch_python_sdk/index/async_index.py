@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import aiofiles
 from camel_converter import to_snake
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests
 from meilisearch_python_sdk._task import async_wait_for_task

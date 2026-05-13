@@ -10,8 +10,8 @@ from meilisearch_python_sdk.errors import BatchNotFoundError, MeilisearchApiErro
 from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
 
 if TYPE_CHECKING:
-    from httpx import AsyncClient as HttpxAsyncClient  # pragma: no cover
-    from httpx import Client as HttpxClient  # pragma: no cover
+    from httpx2 import AsyncClient as HttpxAsyncClient  # pragma: no cover
+    from httpx2 import Client as HttpxClient  # pragma: no cover
 
     from meilisearch_python_sdk._client import (  # pragma: no cover
         AsyncClient,

@@ -1,4 +1,4 @@
-from httpx import Response
+from httpx2 import Response
 
 
 class BatchNotFoundError(Exception):

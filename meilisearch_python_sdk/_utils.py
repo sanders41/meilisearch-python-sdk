@@ -4,8 +4,8 @@ import sys
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
-from httpx import AsyncClient as HttpxAsyncClient
-from httpx import Client as HttpxClient
+from httpx2 import AsyncClient as HttpxAsyncClient
+from httpx2 import Client as HttpxClient
 
 if TYPE_CHECKING:
     from meilisearch_python_sdk._client import AsyncClient, Client  # pragma: no cover

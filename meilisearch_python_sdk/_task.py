@@ -6,8 +6,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 
-from httpx import AsyncClient as HttpxAsyncClient
-from httpx import Client as HttpxClient
+from httpx2 import AsyncClient as HttpxAsyncClient
+from httpx2 import Client as HttpxClient
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
 from meilisearch_python_sdk._utils import get_async_client, get_client

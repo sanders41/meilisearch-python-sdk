@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from camel_converter import to_snake
-from httpx import Client
+from httpx2 import Client
 
 from meilisearch_python_sdk._http_requests import HttpRequests
 from meilisearch_python_sdk._task import wait_for_task
