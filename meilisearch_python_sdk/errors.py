@@ -74,3 +74,51 @@ class PayloadTooLarge(Exception):
     """Error when the payload is larger than the allowed payload size."""
 
     pass
+
+
+class InvalidTokenError(Exception):
+    """Base exception when ``decode()`` fails on a token"""
+
+    pass
+
+
+class DecodeError(InvalidTokenError):
+    """Raised when a token cannot be decoded because it failed validation"""
+
+    pass
+
+
+class InvalidIssuedAtError(InvalidTokenError):
+    """Raised when a token's ``iat`` claim is non-numeric"""
+
+    pass
+
+
+class InvalidSignatureError(DecodeError):
+    """Raised when a token's signature doesn't match the one provided as part of the token."""
+
+    pass
+
+
+class ImmatureSignatureError(InvalidTokenError):
+    """Raised when a token's ``nbf`` or ``iat`` claims represent a time in the future"""
+
+    pass
+
+
+class ExpiredSignatureError(InvalidTokenError):
+    """Raised when a token's ``exp`` claim indicates it has expired"""
+
+    pass
+
+
+class InvalidSubjectError(InvalidTokenError):
+    """Raised when a token's ``sub`` claim is not a string"""
+
+    pass
+
+
+class InvalidJTIError(InvalidTokenError):
+    """Raised when a token's ``jti`` claim is not a string"""
+
+    pass
