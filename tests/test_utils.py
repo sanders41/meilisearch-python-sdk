@@ -13,12 +13,13 @@ from meilisearch_python_sdk.errors import (
     ImmatureSignatureError,
     InvalidIssuedAtError,
     InvalidJTIError,
+    InvalidSignatureError,
     InvalidSubjectError,
 )
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 
 
-def make_raw_token(payload_bytes, key, json_handler):
+def raw_token(payload_bytes, key, json_handler):
     """Build a signed token with arbitrary raw payload bytes (for testing invalid payloads)."""
     header_b64 = (
         base64.urlsafe_b64encode(json_handler.dump_bytes({"alg": "HS256", "typ": "JWT"}))
@@ -32,20 +33,22 @@ def make_raw_token(payload_bytes, key, json_handler):
         .rstrip(b"=")
         .decode()
     )
+
     return f"{message}.{sig}"
 
 
+@pytest.fixture
 def utc_timestamp():
     return timegm(datetime.now(tz=timezone.utc).utctimetuple())
 
 
-def payload():
-    return {"iss": "jeff", "exp": utc_timestamp() + 15, "claim": "insanity"}
+@pytest.fixture
+def payload(utc_timestamp):
+    return {"iss": "jeff", "exp": utc_timestamp + 15, "claim": "insanity"}
 
 
 @pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
-def test_encode_decode(json_handler):
-    utc_timestamp = timegm(datetime.now(tz=timezone.utc).utctimetuple())
+def test_encode_decode(json_handler, utc_timestamp):
     payload = {"iss": "jeff", "exp": utc_timestamp + 15, "claim": "insanity"}
 
     secret = "secret"
@@ -148,7 +151,7 @@ def test_encode_decode_with_valid_jti_claim(json_handler):
 
 @pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
 def test_decode_invalid_payload_string(json_handler):
-    example_jwt = make_raw_token(b"hello world", "secret", json_handler)
+    example_jwt = raw_token(b"hello world", "secret", json_handler)
     with pytest.raises(DecodeError) as exc:
         decode_jwt(token=example_jwt, key="secret", json_handler=json_handler)
     assert "Invalid payload string" in str(exc.value)
@@ -156,9 +159,10 @@ def test_decode_invalid_payload_string(json_handler):
 
 @pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
 def test_decode_with_non_mapping_payload(json_handler):
-    example_jwt = make_raw_token(b"1", "secret", json_handler)
+    example_jwt = raw_token(b"1", "secret", json_handler)
     with pytest.raises(DecodeError) as context:
         decode_jwt(token=example_jwt, key="secret", json_handler=json_handler)
+
     assert str(context.value) == "Invalid payload string: must be a json object"
 
 
@@ -167,7 +171,19 @@ def test_decode_raises_exception_if_exp_is_not_int(json_handler):
     token = encode_jwt(payload={"exp": "not-an-int"}, key="secret", json_handler=json_handler)
     with pytest.raises(DecodeError) as exc:
         decode_jwt(token=token, key="secret", json_handler=json_handler)
+
     assert "exp" in str(exc.value)
+
+
+@pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
+def test_decode_invalid_signature_error(json_handler, payload):
+    right_secret = "foo"
+    bad_secret = "bar"
+    jws_message = encode_jwt(payload=payload, key=right_secret, json_handler=json_handler)
+    with pytest.raises(InvalidSignatureError) as excinfo:
+        decode_jwt(token=jws_message, key=bad_secret, json_handler=json_handler)
+
+    assert "Signature verification failed" == str(excinfo.value)
 
 
 @pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
@@ -178,12 +194,12 @@ def test_decode_raises_exception_if_iat_is_not_int(json_handler):
 
 
 @pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
-def test_decode_raises_exception_if_iat_is_greater_than_now(json_handler):
+def test_decode_raises_exception_if_iat_is_greater_than_now(json_handler, utc_timestamp):
     p = {
         "iss": "jeff",
-        "exp": utc_timestamp() + 15,
+        "exp": utc_timestamp + 15,
         "claim": "insanity",
-        "iat": utc_timestamp() + 10,
+        "iat": utc_timestamp + 10,
     }
     secret = "secret"
     jwt_message = encode_jwt(payload=p, key=secret, json_handler=json_handler)
@@ -197,6 +213,7 @@ def test_decode_works_if_iat_is_str_of_a_number(json_handler):
     secret = "secret"
     jwt_message = encode_jwt(payload=p, key=secret, json_handler=json_handler)
     data = decode_jwt(token=jwt_message, key=secret, json_handler=json_handler)
+
     assert data["iat"] == "1638202770"
 
 
@@ -208,8 +225,8 @@ def test_decode_raises_exception_if_nbf_is_not_int(json_handler):
 
 
 @pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
-def test_decode_with_expiration(json_handler):
-    p = {"exp": utc_timestamp() - 1}
+def test_decode_with_expiration(json_handler, utc_timestamp):
+    p = {"exp": utc_timestamp - 1}
     secret = "secret"
     jwt_message = encode_jwt(payload=p, key=secret, json_handler=json_handler)
     with pytest.raises(ExpiredSignatureError):
@@ -217,8 +234,8 @@ def test_decode_with_expiration(json_handler):
 
 
 @pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
-def test_decode_with_notbefore(json_handler):
-    p = {"nbf": utc_timestamp() + 10}
+def test_decode_with_notbefore(json_handler, utc_timestamp):
+    p = {"nbf": utc_timestamp + 10}
     secret = "secret"
     jwt_message = encode_jwt(payload=p, key=secret, json_handler=json_handler)
     with pytest.raises(ImmatureSignatureError):
