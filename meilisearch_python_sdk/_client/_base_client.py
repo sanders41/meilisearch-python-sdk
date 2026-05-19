@@ -3,8 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-import jwt
-
+from meilisearch_python_sdk._utils import encode_jwt
 from meilisearch_python_sdk.errors import InvalidRestriction
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.client import (
@@ -101,4 +100,4 @@ class BaseClient:
 
             payload["exp"] = int(datetime.timestamp(expires_at))
 
-        return jwt.encode(payload, api_key.key, algorithm="HS256")
+        return encode_jwt(payload=payload, key=api_key.key, json_handler=self.json_handler)

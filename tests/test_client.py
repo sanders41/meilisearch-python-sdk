@@ -5,13 +5,13 @@ from time import sleep
 from urllib.parse import quote_plus
 from uuid import uuid4
 
-import jwt
 import pytest
 from camel_converter.pydantic_base import CamelBase
 from httpx2 import Client as HttpxClient
 from httpx2 import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
 
 from meilisearch_python_sdk import Client
+from meilisearch_python_sdk._utils import decode_jwt
 from meilisearch_python_sdk.errors import (
     BatchNotFoundError,
     InvalidRestriction,
@@ -20,6 +20,7 @@ from meilisearch_python_sdk.errors import (
     MeilisearchTaskFailedError,
     MeilisearchTimeoutError,
 )
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.client import KeyCreate, KeyUpdate, Network
 from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.version import Version
@@ -169,24 +170,29 @@ def test_create_keys_with_wildcarded_actions(client, test_key_info):
     assert key.actions == ["documents.*"]
 
 
+@pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
 @pytest.mark.no_parallel
-def test_generate_tenant_token_custom_key(client, test_key):
+def test_generate_tenant_token_custom_key(json_handler, client, test_key):
     search_rules = {"test": "value"}
     expected = {"searchRules": search_rules, "apiKeyUid": test_key.uid}
     token = client.generate_tenant_token(search_rules, api_key=test_key)
-    assert expected == jwt.decode(jwt=token, key=test_key.key, algorithms=["HS256"])
+    assert expected == decode_jwt(token=token, key=test_key.key, json_handler=json_handler)
 
 
+@pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
 @pytest.mark.no_parallel
-def test_generate_tenant_token_default_key(client, default_search_key):
+def test_generate_tenant_token_default_key(json_handler, client, default_search_key):
     search_rules = {"test": "value"}
     expected = {"searchRules": search_rules, "apiKeyUid": default_search_key.uid}
     token = client.generate_tenant_token(search_rules, api_key=default_search_key)
-    assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
+    assert expected == decode_jwt(
+        token=token, key=default_search_key.key, json_handler=json_handler
+    )
 
 
+@pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
 @pytest.mark.no_parallel
-def test_generate_tenant_token_default_key_expires(client, default_search_key):
+def test_generate_tenant_token_default_key_expires(json_handler, client, default_search_key):
     search_rules: JsonDict = {"test": "value"}
     expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
     expected: JsonDict = {"searchRules": search_rules}
@@ -195,7 +201,9 @@ def test_generate_tenant_token_default_key_expires(client, default_search_key):
     token = client.generate_tenant_token(
         search_rules, api_key=default_search_key, expires_at=expires_at
     )
-    assert expected == jwt.decode(jwt=token, key=default_search_key.key, algorithms=["HS256"])
+    assert expected == decode_jwt(
+        token=token, key=default_search_key.key, json_handler=json_handler
+    )
 
 
 @pytest.mark.no_parallel
