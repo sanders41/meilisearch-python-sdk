@@ -81,10 +81,10 @@
   docker compose -f docker-compose.https.yml down
 
 @build-docs:
-  uv run mkdocs build --strict
+  uv run zensical build --strict
 
 @serve-docs:
-  uv run mkdocs serve
+  uv run zensical serve
 
 @install:
   uv sync --frozen --all-extras

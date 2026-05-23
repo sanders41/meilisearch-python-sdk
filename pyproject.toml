@@ -36,8 +36,6 @@ all = ["orjson"]
 
 [dependency-groups]
 dev = [
-  "mkdocs==1.6.1",
-  "mkdocs-material==9.7.6",
   "mkdocstrings[python]==1.0.4",
   "mypy[faster-cache]==2.1.0",
   "pytest==9.0.3",
@@ -48,6 +46,7 @@ dev = [
   "ruff==0.15.14",
   "types-aiofiles==25.1.0.20260518",
   "typing-extensions==4.15.0",
+  "zensical>=0.0.43",
 ]
 
 [tool.hatch.version]

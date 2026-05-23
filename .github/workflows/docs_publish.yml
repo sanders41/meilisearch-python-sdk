@@ -6,9 +6,13 @@ on:
   workflow_dispatch:
 env:
   PYTHON_VERSION: "3.13"
+permissions:
+  pages: write
+  id-token: write
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: github-pages
     steps:
       - uses: actions/checkout@v6
       - name: Install uv
@@ -21,5 +25,13 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Dependencies
         run: uv sync --frozen --all-extras
-      - name: Deploy Docs
-        run: uv run mkdocs gh-deploy --force
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+      - name: Build Docs
+        run: uv run zensical build --strict
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
