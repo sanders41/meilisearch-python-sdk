@@ -30,7 +30,7 @@ jobs:
       - name: Build Docs
         run: uv run zensical build --strict
       - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./site
       - name: Deploy to GitHub Pages
