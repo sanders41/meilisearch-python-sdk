@@ -363,12 +363,12 @@ def test_get_all_stats_show_internal_database_sizes(size_format, client, indexes
 @pytest.mark.no_parallel
 def test_get_all_stats_size_format_only(client, indexes_sample):
     _, index_uid, index_uid2 = indexes_sample
-    response = client.get_all_stats(show_internal_database_sizes=True, size_format="human")
+    response = client.get_all_stats(size_format="human")
 
     assert index_uid in response.indexes
-    assert response.indexes[index_uid].internal_database_sizes is not None
+    assert response.indexes[index_uid].internal_database_sizes is None
     assert index_uid2 in response.indexes
-    assert response.indexes[index_uid2].internal_database_sizes is not None
+    assert response.indexes[index_uid2].internal_database_sizes is None
 
 
 @pytest.mark.usefixtures("indexes_sample")
