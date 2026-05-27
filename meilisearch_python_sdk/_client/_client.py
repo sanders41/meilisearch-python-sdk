@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from camel_converter import dict_to_camel
 from httpx2 import Client as HttpxClient
@@ -505,8 +505,21 @@ class Client(BaseClient):
             hits_type=hits_type,
         )
 
-    def get_all_stats(self) -> ClientStats:
+    def get_all_stats(
+        self,
+        *,
+        show_internal_database_sizes: bool = False,
+        size_format: Literal["human", "raw"] | None = None,
+    ) -> ClientStats:
         """Get stats for all indexes.
+
+        Args:
+            show_internal_database_sizes: Include internal database size inforamation in results.
+                Default = False.
+            size_format: When present and set to human, then all database sizes in responses of the
+                stat routes will be returned as a string containing an appropriate unit (MiB, GiB,
+                etc). When missing or set to raw, then the current behavior of expressing the size
+                in bytes as a number is retained. Default = None
 
         Returns:
             Information about database size and all indexes.
@@ -520,7 +533,16 @@ class Client(BaseClient):
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     stats = client.get_all_stats()
         """
-        response = self._http_requests.get("stats")
+        url = "stats"
+
+        if show_internal_database_sizes:
+            url = f"{url}?showInternalDatabaseSizes=true"
+            if size_format:
+                url = f"{url}&sizeFormat={size_format}"
+        elif not show_internal_database_sizes and size_format:
+            url = f"{url}?sizeFormat={size_format}"
+
+        response = self._http_requests.get(url)
 
         return ClientStats(**self._http_requests.parse_json(response))
 

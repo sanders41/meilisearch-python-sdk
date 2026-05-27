@@ -117,6 +117,28 @@ async def test_get_stats(async_empty_index, small_movies):
     response = await index.get_stats()
 
     assert response.number_of_documents == 30
+    assert response.internal_database_sizes is None
+
+
+@pytest.mark.parametrize("size_format", (None, "raw", "human"))
+async def test_get_stats_show_internal_database_sizes(size_format, async_empty_index, small_movies):
+    index = await async_empty_index()
+    update = await index.add_documents(small_movies)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
+    response = await index.get_stats(show_internal_database_sizes=True, size_format=size_format)
+
+    assert response.number_of_documents == 30
+    assert response.internal_database_sizes is not None
+
+
+async def test_get_stats_size_format_only(async_empty_index, small_movies):
+    index = await async_empty_index()
+    update = await index.add_documents(small_movies)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
+    response = await index.get_stats(size_format="human")
+
+    assert response.number_of_documents == 30
+    assert response.internal_database_sizes is None
 
 
 async def test_get_settings_default(

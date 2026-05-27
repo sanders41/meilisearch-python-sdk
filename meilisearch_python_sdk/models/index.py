@@ -4,6 +4,8 @@ from datetime import datetime
 
 from camel_converter.pydantic_base import CamelBase
 
+from meilisearch_python_sdk.types import JsonDict
+
 
 class IndexBase(CamelBase):
     uid: str
@@ -21,6 +23,7 @@ class IndexStats(CamelBase):
     number_of_embeddings: int | None = None
     is_indexing: bool
     field_distribution: dict[str, int]
+    internal_database_sizes: JsonDict | None = None
 
 
 class FieldsFilter(CamelBase):

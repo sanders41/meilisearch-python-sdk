@@ -109,6 +109,28 @@ def test_get_stats(empty_index, small_movies):
     response = index.get_stats()
 
     assert response.number_of_documents == 30
+    assert response.internal_database_sizes is None
+
+
+@pytest.mark.parametrize("size_format", (None, "raw", "human"))
+def test_get_stats_show_internal_database_sizes(size_format, empty_index, small_movies):
+    index = empty_index()
+    update = index.add_documents(small_movies)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
+    response = index.get_stats(show_internal_database_sizes=True, size_format=size_format)
+
+    assert response.number_of_documents == 30
+    assert response.internal_database_sizes is not None
+
+
+def test_get_stats_size_format_only(empty_index, small_movies):
+    index = empty_index()
+    update = index.add_documents(small_movies)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
+    response = index.get_stats(size_format="human")
+
+    assert response.number_of_documents == 30
+    assert response.internal_database_sizes is None
 
 
 def test_get_settings_default(
