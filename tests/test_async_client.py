@@ -343,12 +343,42 @@ async def test_get_or_create_index_api_error(async_client, monkeypatch):
         await async_client.get_or_create_index("test")
 
 
+@pytest.mark.no_parallel
 async def test_get_all_stats(async_client, async_indexes_sample):
     _, index_uid, index_uid2 = async_indexes_sample
     response = await async_client.get_all_stats()
 
     assert index_uid in response.indexes
+    assert response.indexes[index_uid].internal_database_sizes is None
     assert index_uid2 in response.indexes
+    assert response.indexes[index_uid2].internal_database_sizes is None
+
+
+@pytest.mark.parametrize("size_format", (None, "raw", "human"))
+@pytest.mark.no_parallel
+async def test_get_all_stats_show_internal_database_sizes(
+    size_format, async_client, async_indexes_sample
+):
+    _, index_uid, index_uid2 = async_indexes_sample
+    response = await async_client.get_all_stats(
+        show_internal_database_sizes=True, size_format=size_format
+    )
+
+    assert index_uid in response.indexes
+    assert response.indexes[index_uid].internal_database_sizes is not None
+    assert index_uid2 in response.indexes
+    assert response.indexes[index_uid2].internal_database_sizes is not None
+
+
+@pytest.mark.no_parallel
+async def test_get_all_stats_size_format_only(async_client, async_indexes_sample):
+    _, index_uid, index_uid2 = async_indexes_sample
+    response = await async_client.get_all_stats(size_format="human")
+
+    assert index_uid in response.indexes
+    assert response.indexes[index_uid].internal_database_sizes is None
+    assert index_uid2 in response.indexes
+    assert response.indexes[index_uid2].internal_database_sizes is None
 
 
 async def test_get_raw_index(async_client, async_indexes_sample):

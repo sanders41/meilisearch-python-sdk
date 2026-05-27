@@ -521,8 +521,21 @@ class AsyncIndex(BaseIndex):
 
         return index
 
-    async def get_stats(self) -> IndexStats:
+    async def get_stats(
+        self,
+        *,
+        show_internal_database_sizes: bool = False,
+        size_format: Literal["human", "raw"] | None = None,
+    ) -> IndexStats:
         """Get stats of the index.
+
+        Args:
+            show_internal_database_sizes: Include internal database size inforamation in results.
+                Default = False.
+            size_format: When present and set to human, then all database sizes in responses of the
+                stat routes will be returned as a string containing an appropriate unit (MiB, GiB,
+                etc). When missing or set to raw, then the current behavior of expressing the size
+                in bytes as a number is retained. Default = None
 
         Returns:
             Stats of the index.
@@ -537,7 +550,15 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     stats = await index.get_stats()
         """
-        response = await self._http_requests.get(self._stats_url)
+        url = self._stats_url
+        if show_internal_database_sizes:
+            url = f"{url}?showInternalDatabaseSizes=true"
+            if size_format:
+                url = f"{url}&sizeFormat={size_format}"
+        elif not show_internal_database_sizes and size_format:
+            url = f"{url}?sizeFormat={size_format}"
+
+        response = await self._http_requests.get(url)
 
         return IndexStats(**self._http_requests.parse_json(response))
 
