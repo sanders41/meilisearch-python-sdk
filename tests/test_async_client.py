@@ -378,9 +378,9 @@ async def test_get_all_stats_size_format_only(async_client, async_indexes_sample
     )
 
     assert index_uid in response.indexes
-    assert response.indexes[index_uid].internal_database_sizes is None
+    assert response.indexes[index_uid].internal_database_sizes is not None
     assert index_uid2 in response.indexes
-    assert response.indexes[index_uid2].internal_database_sizes is None
+    assert response.indexes[index_uid2].internal_database_sizes is not None
 
 
 async def test_get_raw_index(async_client, async_indexes_sample):

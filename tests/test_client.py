@@ -366,9 +366,9 @@ def test_get_all_stats_size_format_only(client, indexes_sample):
     response = client.get_all_stats(show_internal_database_sizes=True, size_format="human")
 
     assert index_uid in response.indexes
-    assert response.indexes[index_uid].internal_database_sizes is None
+    assert response.indexes[index_uid].internal_database_sizes is not None
     assert index_uid2 in response.indexes
-    assert response.indexes[index_uid2].internal_database_sizes is None
+    assert response.indexes[index_uid2].internal_database_sizes is not None
 
 
 @pytest.mark.usefixtures("indexes_sample")
