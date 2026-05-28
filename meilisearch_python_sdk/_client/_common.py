@@ -25,6 +25,9 @@ def build_multi_search_payload(
     for query in queries:
         q = query.model_dump(by_alias=True)
 
+        if query.federation_options is None:
+            del q["federationOptions"]
+
         if query.retrieve_vectors is None:
             del q["retrieveVectors"]
 
