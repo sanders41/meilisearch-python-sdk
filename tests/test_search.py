@@ -12,6 +12,7 @@ from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchError
 from meilisearch_python_sdk.models.search import (
     Federation,
     FederationMerged,
+    FederationOptions,
     Hybrid,
     MergeFacets,
     SearchParams,
@@ -425,6 +426,30 @@ async def test_multi_search_federated_with_distinct(client, index_with_documents
             SearchParams(index_uid=index2.uid, query=""),
         ],
         federation=Federation(distinct="title"),
+    )
+
+    assert response.hits[0]["id"] == "166428"
+    assert "_formatted" not in response.hits[0]
+    assert "_federation" in response.hits[0]
+
+
+def test_multi_search_with_federation_options(client, index_with_documents, empty_index):
+    index1 = index_with_documents()
+    index2 = empty_index()
+    response = client.multi_search(
+        [
+            SearchParams(
+                index_uid=index1.uid,
+                query="How to Train Your Dragon",
+                federation_options=FederationOptions(weight=0.9),
+            ),
+            SearchParams(
+                index_uid=index2.uid,
+                query="",
+                federation_options=FederationOptions(weight=0.1),
+            ),
+        ],
+        federation=Federation(),
     )
 
     assert response.hits[0]["id"] == "166428"

@@ -42,9 +42,14 @@ class FederationMerged(Federation):
     merge_facets: MergeFacets | None
 
 
+class FederationOptions(CamelBase):
+    weight: float
+
+
 class SearchParams(CamelBase):
     index_uid: str
     query: str | None = Field(None, alias="q")
+    federation_options: FederationOptions | None = None
     offset: int = 0
     limit: int = 20
     filter: Filter | None = None
