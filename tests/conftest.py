@@ -11,7 +11,7 @@ import pytest
 try:
     import truststore as truststore
 except ImportError:
-    truststore = None
+    truststore = None  # type: ignore
 
 from httpx2 import AsyncClient as HttpxAsyncClient
 
