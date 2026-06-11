@@ -207,6 +207,7 @@ class HttpRequests:
         return self._send_request(self.http_client.delete, path, body)
 
 
+@lru_cache(maxsize=4)
 def build_headers(content_type: str, compress: bool) -> dict[str, str]:
     headers = {"user-agent": user_agent(), "Content-Type": content_type}
 
