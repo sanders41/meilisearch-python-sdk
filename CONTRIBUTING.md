@@ -76,10 +76,10 @@ git checkout main
 git pull upstream main --ff-only
 ```
 
-### Code Standards and tests (ruff, mypy, pytest, and prek)
+### Code Standards and tests (ruff, pyrefly, pytest, and prek)
 
 meilisearch-python-sdk uses [ruff](https://github.com/charliermarsh/ruff), and
-[mypy](https://mypy.readthedocs.io/en/stable/) to ensure consistent code formatting.
+[pyrefly](https://pyrefly.org/) to ensure consistent code formatting.
 
 You can run linting on your code at any time with:
 
@@ -90,8 +90,8 @@ uv run ruff format meilisearch_python_sdk tests
 # Run ruff linting
 uv run ruff check .
 
-# Run mypy
-uv run mypy meilisearch_python_sdk
+# Run pyrefly
+uv run pyrefly
 ```
 
 It is also suggested that you setup [prek](https://github.com/j178/prek) in order to run linting
