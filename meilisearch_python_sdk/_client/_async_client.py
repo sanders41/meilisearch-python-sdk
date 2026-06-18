@@ -103,7 +103,7 @@ class AsyncClient(BaseClient):
     async def __aexit__(
         self,
         et: type[BaseException] | None,
-        ev: type[BaseException] | None,
+        ev: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
         await self.aclose()
