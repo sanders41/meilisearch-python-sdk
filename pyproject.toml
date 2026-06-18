@@ -69,12 +69,15 @@ markers = ["no_parallel"]
 exclude_lines = ["if __name__ == .__main__.:", "if TYPE_CHECKING:", "pragma: no cover"]
 
 [tool.pyrefly]
-preset = "legacy"
 ignore-missing-imports = [
     "aiocache.*",
     "truststore.*",
 ]
 project-excludes = ["examples/**"]
+
+[[tool.pyrefly.sub-config]]
+matches = "tests/**"
+check-unannotated-defs = false
 
 [tool.ruff]
 line-length = 100
