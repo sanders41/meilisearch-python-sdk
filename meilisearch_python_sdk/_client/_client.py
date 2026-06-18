@@ -105,7 +105,7 @@ class Client(BaseClient):
     def __exit__(
         self,
         et: type[BaseException] | None,
-        ev: type[BaseException] | None,
+        ev: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
         self.close()

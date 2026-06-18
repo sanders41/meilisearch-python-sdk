@@ -37,7 +37,6 @@ all = ["orjson"]
 [dependency-groups]
 dev = [
   "mkdocstrings[python]==1.0.4",
-  "mypy[faster-cache]==2.1.0",
   "pytest==9.1.0",
   "pytest-cov==7.1.0",
   "pytest-asyncio==1.4.0",
@@ -47,6 +46,7 @@ dev = [
   "types-aiofiles==25.1.0.20260518",
   "typing-extensions==4.15.0",
   "zensical==0.0.45",
+  "pyrefly>=1.1.0",
 ]
 
 [tool.hatch.version]
@@ -68,18 +68,13 @@ markers = ["no_parallel"]
 [tool.coverage.report]
 exclude_lines = ["if __name__ == .__main__.:", "if TYPE_CHECKING:", "pragma: no cover"]
 
-[tool.mypy]
-check_untyped_defs = true
-disallow_untyped_defs = true
-plugins = ["pydantic.mypy"]
-
-[[tool.mypy.overrides]]
-module = ["tests.*", "examples/tests.*"]
-disallow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = ["aiocache.*", "truststore.*"]
-ignore_missing_imports = true
+[tool.pyrefly]
+preset = "legacy"
+ignore-missing-imports = [
+    "aiocache.*",
+    "truststore.*",
+]
+project-excludes = ["examples/**"]
 
 [tool.ruff]
 line-length = 100

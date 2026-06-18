@@ -2,15 +2,15 @@
   just --list
 
 @lint:
-  echo mypy
-  just --justfile {{justfile()}} mypy
+  echo pyrefly
+  just --justfile {{justfile()}} pyrefly
   echo ruff
   just --justfile {{justfile()}} ruff
   echo ruff-format
   just --justfile {{justfile()}} ruff-format
 
-@mypy:
-  uv run mypy meilisearch_python_sdk tests
+@pyrefly:
+  uv run pyrefly check
 
 @ruff:
   uv run ruff check .

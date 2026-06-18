@@ -56,12 +56,12 @@ class OrjsonHandler(_JsonHandler):
 
     @staticmethod
     def dumps(obj: Any) -> str:  # noqa: ANN401
-        return orjson.dumps(obj).decode("utf-8")
+        return orjson.dumps(obj).decode("utf-8")  # pyrefly: ignore[missing-attribute]
 
     @staticmethod
     def dump_bytes(obj: Any) -> bytes:  # noqa: ANN401
-        return orjson.dumps(obj)
+        return orjson.dumps(obj)  # pyrefly: ignore[missing-attribute]
 
     @staticmethod
     def loads(json_string: str | bytes | bytearray) -> Any:  # noqa: ANN401
-        return orjson.loads(json_string)
+        return orjson.loads(json_string)  # pyrefly: ignore[missing-attribute]
