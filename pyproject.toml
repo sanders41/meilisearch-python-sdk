@@ -37,7 +37,7 @@ all = ["orjson"]
 [dependency-groups]
 dev = [
   "mkdocstrings[python]==1.0.4",
-  "pytest==9.1.0",
+  "pytest==9.1.1",
   "pytest-cov==7.1.0",
   "pytest-asyncio==1.4.0",
   "pytest-xdist==3.8.0",
