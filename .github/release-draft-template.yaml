@@ -1,28 +1,22 @@
 name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
-exclude-labels:
-  - "dependencies"
-  - "skip-changelog"
-version-resolver:
-  major:
-    labels:
-      - "breaking-change"
-  minor:
-    labels:
-      - "enhancement"
-      - "feature"
-  default: patch
 categories:
+  - type: "pre-exclude"
+    when:
+      labels:
+        - "dependencies"
+        - "skip-changelog"
   - title: "⚠️ Breaking changes"
-    labels:
-      - "breaking-change"
+    semver-increment: "major"
+    when:
+      label: "breaking-change"
   - title: "Features"
-    labels:
-      - "feature"
-      - "enhancement"
+    semver-increment: "minor"
+    when:
+      label: "enhancement"
   - title: "Bug Fixes"
-    labels:
-      - "bug"
+    when:
+      label: "bug"
 change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 template: |
   ## Changes
