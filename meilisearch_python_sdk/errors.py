@@ -1,3 +1,5 @@
+import json
+
 from httpx2 import Response
 
 
@@ -35,8 +37,13 @@ class MeilisearchApiError(MeilisearchError):
         self.message = ""
         self.link = ""
         self.error_type = ""
+        error_json = None
         if response.content:
-            error_json = response.json()
+            try:
+                error_json = response.json()
+            except json.JSONDecodeError:
+                error_json = None
+        if isinstance(error_json, dict):
             self.message = f"Error message: {error_json.get('message') or ''}"
             self.code = f"{error_json.get('code') or ''}"
             self.error_type = f"{error_json.get('type') or ''}"
