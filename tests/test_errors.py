@@ -19,6 +19,26 @@ def test_meilisearch_api_error():
     assert expected in str(got)
 
 
+def test_meilisearch_api_error_invalid_json():
+    expected = "test"
+    response = Response(
+        status_code=500, text="not json", headers={"content-type": "application/json"}
+    )
+    got = MeilisearchApiError(expected, response)
+
+    assert expected in str(got)
+
+
+def test_meilisearch_api_error_json_not_a_dict():
+    expected = "test"
+    response = Response(
+        status_code=500, text="[1, 2, 3]", headers={"content-type": "application/json"}
+    )
+    got = MeilisearchApiError(expected, response)
+
+    assert expected in str(got)
+
+
 def test_meilisearch_communication_error():
     expected = "test"
     got = MeilisearchCommunicationError(expected)
