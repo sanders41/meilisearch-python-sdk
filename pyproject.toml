@@ -45,7 +45,7 @@ dev = [
   "ruff==0.15.20",
   "types-aiofiles==25.1.0.20260518",
   "typing-extensions==4.16.0",
-  "zensical==0.0.46",
+  "zensical==0.0.47",
   "pyrefly>=1.1.0",
 ]
 
