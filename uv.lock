@@ -478,7 +478,7 @@ provides-extras = ["all", "orjson"]
 dev = [
     { name = "mkdocstrings", extras = ["python"], specifier = "==1.0.4" },
     { name = "prek", specifier = "==0.4.8" },
-    { name = "pyrefly", specifier = ">=1.1.0" },
+    { name = "pyrefly", specifier = "==1.1.1" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-asyncio", specifier = "==1.4.0" },
     { name = "pytest-cov", specifier = "==7.1.0" },
