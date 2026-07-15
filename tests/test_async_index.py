@@ -11,6 +11,7 @@ from meilisearch_python_sdk.models.settings import (
     Filter,
     FilterableAttributeFeatures,
     FilterableAttributes,
+    ForeignKey,
     LocalizedAttributes,
     MinWordSizeForTypos,
     OpenAiEmbedder,
@@ -1171,6 +1172,48 @@ async def test_reset_prefix_search_opt_out(async_empty_index):
     result = await index.get_settings()
 
     assert result.prefix_search == "indexingTime"
+
+
+async def test_get_foreign_keys(async_empty_index):
+    index = await async_empty_index()
+    response = await index.get_foreign_keys()
+    assert response == []
+
+
+async def test_update_foreign_keys(async_empty_index, async_client):
+    foreign_keys = [
+        ForeignKey(foreign_index_uid="actors", field_name="actors"),
+        ForeignKey(foreign_index_uid="title", field_name="title"),
+    ]
+    index = await async_empty_index()
+    response = await index.get_foreign_keys()
+    assert response == []
+
+    task = await index.update_foreign_keys(foreign_keys)
+    await async_wait_for_task(async_client, task.task_uid, json_handler=async_client.json_handler)
+
+    response = await index.get_foreign_keys()
+    assert response == foreign_keys
+
+
+async def test_reset_foreign_keys(async_empty_index, async_client):
+    foreign_keys = [
+        ForeignKey(foreign_index_uid="actors", field_name="actors"),
+        ForeignKey(foreign_index_uid="title", field_name="title"),
+    ]
+    index = await async_empty_index()
+    task = await index.update_foreign_keys(foreign_keys)
+    await async_wait_for_task(async_client, task.task_uid, json_handler=async_client.json_handler)
+
+    response = await index.get_foreign_keys()
+    assert response == foreign_keys
+
+    task = await index.reset_foreign_keys()
+    await async_wait_for_task(async_client, task.task_uid, json_handler=async_client.json_handler)
+
+    response = await index.get_foreign_keys()
+
+    assert response == []
 
 
 async def test_compact(async_client, async_index_with_documents):

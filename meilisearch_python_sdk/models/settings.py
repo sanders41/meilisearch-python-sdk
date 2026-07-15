@@ -163,6 +163,11 @@ class FilterableAttributes(CamelBase):
     features: FilterableAttributeFeatures
 
 
+class ForeignKey(CamelBase):
+    foreign_index_uid: str
+    field_name: str
+
+
 class MeilisearchSettings(CamelBase):
     synonyms: JsonDict | None = None
     stop_words: list[str] | None = None
@@ -195,3 +200,4 @@ class MeilisearchSettings(CamelBase):
     localized_attributes: list[LocalizedAttributes] | None = None
     facet_search: bool | None = None
     prefix_search: Literal["disabled", "indexingTime", "searchTime"] | None = None
+    foreign_keys: list[ForeignKey] | None = None
