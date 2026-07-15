@@ -33,6 +33,7 @@ from meilisearch_python_sdk.models.index import Field, FieldResults, FieldsFilte
 from meilisearch_python_sdk.models.search import (
     FacetSearchResults,
     Hybrid,
+    Personalize,
     SearchResults,
     SimilarSearchResults,
 )
@@ -532,6 +533,7 @@ class Index(BaseIndex):
         retrieve_vectors: bool | None = None,
         media: JsonMapping | None = None,
         show_performance_details: bool = False,
+        personalize: Personalize | None = None,
     ) -> SearchResults:
         """Search the index.
 
@@ -602,6 +604,7 @@ class Index(BaseIndex):
                 without a major version bump so use with caution.
             show_performance_details: When set to true, the search response contains a performance
                 trace. Default False.
+            personalize: Personalize the search results.
 
         Returns:
             Results of the search
@@ -648,6 +651,7 @@ class Index(BaseIndex):
             retrieve_vectors=retrieve_vectors,
             media=media,
             show_performance_details=show_performance_details,
+            personalize=personalize,
         )
 
         if self._pre_search_plugins:
@@ -677,6 +681,7 @@ class Index(BaseIndex):
                 show_ranking_score_details=show_ranking_score_details,
                 vector=vector,
                 hybrid=hybrid,
+                personalize=personalize,
             )
 
         response = self._http_requests.post(f"{self._base_url_with_uid}/search", body=body)
@@ -717,6 +722,7 @@ class Index(BaseIndex):
         vector: list[float] | None = None,
         locales: list[str] | None = None,
         retrieve_vectors: bool | None = None,
+        personalize: Personalize | None = None,
         exhaustive_facet_count: bool | None = None,
     ) -> FacetSearchResults:
         """Search the index.
@@ -774,6 +780,7 @@ class Index(BaseIndex):
             exhaustive_facet_count: forcing the facet search to compute the facet counts the same
                 way as the paginated search. This parameter can only be used with Milisearch >=
                 v1.14.0. Defaults to None.
+            personalize: Personalize the search results.
 
         Returns:
             Results of the search
@@ -822,6 +829,7 @@ class Index(BaseIndex):
             vector=vector,
             locales=locales,
             retrieve_vectors=retrieve_vectors,
+            personalize=personalize,
             exhaustive_facet_count=exhaustive_facet_count,
         )
 
@@ -851,6 +859,7 @@ class Index(BaseIndex):
                 show_ranking_score_details=show_ranking_score_details,
                 ranking_score_threshold=ranking_score_threshold,
                 vector=vector,
+                personalize=personalize,
                 exhaustive_facet_count=exhaustive_facet_count,
             )
 

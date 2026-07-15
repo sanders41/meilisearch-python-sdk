@@ -46,6 +46,10 @@ class FederationOptions(CamelBase):
     weight: float
 
 
+class Personalize(CamelBase):
+    user_context: str
+
+
 class SearchParams(CamelBase):
     index_uid: str
     query: str | None = Field(None, alias="q")
@@ -76,6 +80,7 @@ class SearchParams(CamelBase):
     retrieve_vectors: bool | None = None
     media: JsonMapping | None = None
     show_performance_details: bool | None = None
+    personalize: Personalize | None = None
 
     @field_validator("ranking_score_threshold", mode="before")  # type: ignore[attr-defined]
     @classmethod

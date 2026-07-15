@@ -41,6 +41,9 @@ def build_multi_search_payload(
         if query.show_performance_details is None:
             del q["showPerformanceDetails"]
 
+        if query.personalize is None:
+            del q["personalize"]
+
         processed_queries.append(q)
 
     if federation:

@@ -11,7 +11,7 @@ from pydantic import TypeAdapter
 
 from meilisearch_python_sdk.errors import MeilisearchError
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
-from meilisearch_python_sdk.models.search import Hybrid
+from meilisearch_python_sdk.models.search import Hybrid, Personalize
 from meilisearch_python_sdk.models.settings import (
     CompositeEmbedder,
     Embedders,
@@ -153,6 +153,7 @@ def process_search_parameters(
     exhaustive_facet_count: bool | None = None,
     media: JsonMapping | None = None,
     show_performance_details: bool = False,
+    personalize: Personalize | None = None,
 ) -> JsonDict:
     if attributes_to_retrieve is None:
         attributes_to_retrieve = ["*"]
@@ -212,6 +213,11 @@ def process_search_parameters(
 
     if show_performance_details:
         body["showPerformanceDetails"] = True
+
+    # no cover becuse personlized search requires an api key and any mocked test here would be
+    # pointless
+    if personalize is not None:  # pragma: no cover
+        body["personalize"] = personalize.model_dump(by_alias=True)
 
     return body
 
