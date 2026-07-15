@@ -44,6 +44,7 @@ from meilisearch_python_sdk.models.settings import (
     Faceting,
     FilterableAttributeFeatures,
     FilterableAttributes,
+    ForeignKey,
     LocalizedAttributes,
     MeilisearchSettings,
     Pagination,
@@ -4662,6 +4663,81 @@ class AsyncIndex(BaseIndex):
             >>>     await index.reset_prefix_search()
         """
         response = await self._http_requests.delete(f"{self._settings_url}/prefix-search")
+
+        return TaskInfo(**self._http_requests.parse_json(response))
+
+    async def get_foreign_keys(self) -> list[ForeignKey]:
+        """Get foreign keys for the index.
+
+        Returns:
+            A list of the foreign keys
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = await client.index("movies")
+            >>>     foreign_keys = await index.get_foreign_keys()
+        """
+        response = await self._http_requests.get(f"{self._settings_url}/foreign-keys")
+        foreign_keys = self._http_requests.parse_json(response)
+
+        return [ForeignKey(**foreign_key) for foreign_key in foreign_keys]
+
+    async def update_foreign_keys(
+        self,
+        foreign_keys: Sequence[ForeignKey],
+        *,
+        compress: bool = False,
+    ) -> TaskInfo:
+        """Update setting for foreign key.
+
+        Args:
+            foreign_keys: List of foreign keys.
+            compress: If set to True the data will be sent in gzip format. Defaults to False.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_python_sdk import AsyncClient
+            >>> from meilisearch_python_sdk.models.settings import ForeignKey
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = await client.index("movies")
+            >>>     await index.update_foreign_keys([ForeignKey(foreign_index_uid="title", field_name="title")])
+        """
+        response = await self._http_requests.put(
+            f"{self._settings_url}/foreign-keys",
+            [foreign_key.model_dump(by_alias=True) for foreign_key in foreign_keys],
+            compress=compress,
+        )
+
+        return TaskInfo(**self._http_requests.parse_json(response))
+
+    async def reset_foreign_keys(self) -> TaskInfo:
+        """Reset the foreign keys setting.
+
+        Returns:
+            The details of the task status.
+
+        Raises:
+            MeilisearchCommunicationError: If there was an error communicating with the server.
+            MeilisearchApiError: If the Meilisearch API returned an error.
+
+        Examples:
+            >>> from meilisearch_async_client import AsyncClient
+            >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
+            >>>     index = await client.index("movies")
+            >>>     await index.reset_foreign_keys()
+        """
+        response = await self._http_requests.delete(f"{self._settings_url}/foreign-keys")
 
         return TaskInfo(**self._http_requests.parse_json(response))
 

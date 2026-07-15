@@ -297,6 +297,15 @@ async def enable_network(base_url, ssl_verify):
     yield
 
 
+@pytest.fixture(scope="session", autouse=True)
+async def enable_foreign_keys(base_url, ssl_verify):
+    async with HttpxAsyncClient(
+        base_url=base_url, headers={"Authorization": f"Bearer {MASTER_KEY}"}, verify=ssl_verify
+    ) as client:
+        await client.patch("/experimental-features", json={"foreignKeys": True})
+    yield
+
+
 @pytest.fixture
 async def create_tasks(async_empty_index, small_movies):
     """Ensures there are some tasks present for testing."""

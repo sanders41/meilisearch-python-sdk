@@ -12,6 +12,7 @@ from meilisearch_python_sdk.models.settings import (
     Filter,
     FilterableAttributeFeatures,
     FilterableAttributes,
+    ForeignKey,
     LocalizedAttributes,
     MinWordSizeForTypos,
     OpenAiEmbedder,
@@ -1046,6 +1047,48 @@ def test_process_search_parameters_no_media():
     result = process_search_parameters()
 
     assert "media" not in result.keys()
+
+
+def test_get_foreign_keys(empty_index):
+    index = empty_index()
+    response = index.get_foreign_keys()
+    assert response == []
+
+
+def test_update_foreign_keys(empty_index, client):
+    foreign_keys = [
+        ForeignKey(foreign_index_uid="actors", field_name="actors"),
+        ForeignKey(foreign_index_uid="title", field_name="title"),
+    ]
+    index = empty_index()
+    response = index.get_foreign_keys()
+    assert response == []
+
+    task = index.update_foreign_keys(foreign_keys)
+    wait_for_task(client, task.task_uid, json_handler=client.json_handler)
+
+    response = index.get_foreign_keys()
+    assert response == foreign_keys
+
+
+def test_reset_foreign_keys(empty_index, client):
+    foreign_keys = [
+        ForeignKey(foreign_index_uid="actors", field_name="actors"),
+        ForeignKey(foreign_index_uid="title", field_name="title"),
+    ]
+    index = empty_index()
+    task = index.update_foreign_keys(foreign_keys)
+    wait_for_task(client, task.task_uid, json_handler=client.json_handler)
+
+    response = index.get_foreign_keys()
+    assert response == foreign_keys
+
+    task = index.reset_foreign_keys()
+    wait_for_task(client, task.task_uid, json_handler=client.json_handler)
+
+    response = index.get_foreign_keys()
+
+    assert response == []
 
 
 def test_compact(client, index_with_documents):
