@@ -1,5 +1,4 @@
 [update]
-cooldown_days = 3
 exclude_tags = ["*-{alpha,beta,dev,rc}*", "*.{alpha,beta,dev,rc}*"]
 
 [[repos]]
