@@ -121,6 +121,10 @@ ignore=[
   "tests/**" = ["ANN"]
   "examples/tests/**" = ["ANN"]
 
+[tool.uv]
+exclude-newer = "3 days"
+
+
 [tool.rumdl]
 line-length = 100
 
