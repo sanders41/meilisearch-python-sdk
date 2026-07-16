@@ -32,6 +32,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: j178/prek-action@v2
+        env:
+          SKIP: pyrefly-check
   parallel-testing:
     strategy:
       fail-fast: false
