@@ -2,15 +2,20 @@
 exclude_tags = ["*-{alpha,beta,dev,rc}*", "*.{alpha,beta,dev,rc}*"]
 
 [[repos]]
-repo = "https://github.com/pre-commit/pre-commit-hooks"
-rev = "v6.0.0"
+repo = "builtin"
 hooks = [
   { id = "check-added-large-files" },
   { id = "check-toml" },
   { id = "check-yaml" },
-  { id = "debug-statements" },
   { id = "end-of-file-fixer" },
-  { id = "trailing-whitespace" }
+  { id = "trailing-whitespace" },
+]
+
+[[repos]]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+rev = "v6.0.0"
+hooks = [
+  { id = "debug-statements" },
 ]
 
 [[repos]]
