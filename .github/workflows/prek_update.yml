@@ -31,3 +31,6 @@ jobs:
           delete-branch: true
           title: "Bump prek hooks"
           body: "Automated update of prek hooks via `prek autoupdate`."
+          labels: |
+            dependencies
+            skip-changelog
