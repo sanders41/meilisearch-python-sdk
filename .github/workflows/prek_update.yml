@@ -1,0 +1,33 @@
+name: Prek Auto Update
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: 3.14
+      - name: Run Update
+        run: uv run prek autoupdate
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.PREK_UPDATE_TOKEN }}
+          commit-message: "Bump prek hooks"
+          branch: prek-autoupdate
+          delete-branch: true
+          title: "Bump prek hooks"
+          body: "Automated update of prek hooks via `prek autoupdate`."
