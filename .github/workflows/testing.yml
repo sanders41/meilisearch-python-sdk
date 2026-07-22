@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: j178/prek-action@v2
         env:
-          SKIP: no-commit-to-branch,pyrefly-check
+          PREK_SKIP: no-commit-to-branch,pyrefly-check
   parallel-testing:
     strategy:
       fail-fast: false
