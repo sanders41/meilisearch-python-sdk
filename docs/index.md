@@ -13,3 +13,18 @@ If the code base you are working with uses asyncio, for example if you are using
 The functionality of the two clients is the same, the difference being the `AsyncClient` provides
 async methods and uses the `AsyncIndex`, which also provides async methods, while the `Client`
 provides blocking methods and uses the `Index`, which also provides blocking methods.
+
+## Instillation
+
+Using a virtual environment is recommended for installing this package. Once the virtual
+environment is created and activated, install the package with:
+
+```sh
+pip install meilisearch-python-sdk
+```
+
+Installing with the orjson extra will make JSON serilization/deserilization faster.
+
+```sh
+pip install meilisearch-python-sdk[orjson]
+```
