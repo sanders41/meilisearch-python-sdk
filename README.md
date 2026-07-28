@@ -24,6 +24,12 @@ environment is created and activated, install the package with:
 pip install meilisearch-python-sdk
 ```
 
+Installing with the orjson extra will make JSON serilization/deserilization faster.
+
+```sh
+pip install meilisearch-python-sdk[orjson]
+```
+
 ## Run Meilisearch
 
 There are several ways to
