@@ -11,6 +11,11 @@ from meilisearch_python_sdk.models.client import (
 )
 from meilisearch_python_sdk.types import JsonDict
 
+try:
+    import orjson
+except ImportError:  # pragma: no cover
+    orjson = None  # type: ignore
+
 if TYPE_CHECKING:
     from meilisearch_python_sdk.types import JsonMapping
 
@@ -22,7 +27,13 @@ class BaseClient:
         custom_headers: dict[str, str] | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | None = None,
     ) -> None:
-        self.json_handler = json_handler if json_handler else BuiltinHandler()
+        if json_handler is not None:
+            self.json_handler = json_handler
+        elif orjson is not None:
+            self.json_handler = OrjsonHandler()
+        else:
+            self.json_handler = BuiltinHandler()
+
         self._headers: dict[str, str] | None = None
         if api_key:
             self._headers = {"Authorization": f"Bearer {api_key}"}

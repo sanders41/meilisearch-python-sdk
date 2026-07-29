@@ -18,7 +18,7 @@ from httpx2 import AsyncClient as HttpxAsyncClient
 from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
 from meilisearch_python_sdk.errors import MeilisearchApiError
-from meilisearch_python_sdk.json_handler import OrjsonHandler
+from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
@@ -59,7 +59,9 @@ def ssl_verify(http2_enabled):
 
 @pytest.fixture(scope="session")
 async def async_client(base_url, ssl_verify):
-    async with AsyncClient(base_url, MASTER_KEY, verify=ssl_verify) as client:
+    async with AsyncClient(
+        base_url, MASTER_KEY, json_handler=BuiltinHandler(), verify=ssl_verify
+    ) as client:
         yield client
 
 
@@ -79,7 +81,7 @@ async def async_client_with_plugins(base_url, ssl_verify):
 
 @pytest.fixture(scope="session")
 def client(base_url, ssl_verify):
-    with Client(base_url, MASTER_KEY, verify=ssl_verify) as client:
+    with Client(base_url, MASTER_KEY, json_handler=BuiltinHandler(), verify=ssl_verify) as client:
         yield client
 
 
