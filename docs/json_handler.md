@@ -44,6 +44,9 @@ with Client("http://127.0.0.1:7700", json_handler=BuiltinHandler(serializer=Cust
 
 ## orjson
 
+Note that if orjson is installed and no `json_handler` is secified, orjson is used as the handler
+by default.
+
 ### Example
 
 ```py

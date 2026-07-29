@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 from urllib.parse import quote_plus
 from uuid import uuid4
 
@@ -71,6 +72,23 @@ async def wait_for_dump_creation(
         time_delta = datetime.now() - start_time
         elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
     raise TimeoutError
+
+
+@pytest.mark.parametrize(
+    "json_handler, expected",
+    ((None, OrjsonHandler), (BuiltinHandler(), BuiltinHandler), (OrjsonHandler(), OrjsonHandler)),
+)
+def test_json_handler(json_handler, expected):
+    client = AsyncClient("http://localhost", "someKey", json_handler=json_handler)
+
+    assert isinstance(client.json_handler, expected)
+
+
+def test_default_json_handler_no_orjson():
+    with patch("meilisearch_python_sdk._client._base_client.orjson", None):
+        client = AsyncClient("http://localhost", "someKey")
+
+    assert isinstance(client.json_handler, BuiltinHandler)
 
 
 @pytest.mark.parametrize(

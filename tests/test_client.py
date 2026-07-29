@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from time import sleep
+from unittest.mock import patch
 from urllib.parse import quote_plus
 from uuid import uuid4
 
@@ -66,6 +67,23 @@ def wait_for_dump_creation(client, dump_uid, timeout_in_ms=10000.0, interval_in_
         time_delta = datetime.now() - start_time
         elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
     raise TimeoutError
+
+
+@pytest.mark.parametrize(
+    "json_handler, expected",
+    ((None, OrjsonHandler), (BuiltinHandler(), BuiltinHandler), (OrjsonHandler(), OrjsonHandler)),
+)
+def test_json_handler(json_handler, expected):
+    client = Client("http://localhost", "someKey", json_handler=json_handler)
+
+    assert isinstance(client.json_handler, expected)
+
+
+def test_default_json_handler_no_orjson():
+    with patch("meilisearch_python_sdk._client._base_client.orjson", None):
+        client = Client("http://localhost", "someKey")
+
+    assert isinstance(client.json_handler, BuiltinHandler)
 
 
 @pytest.mark.parametrize(

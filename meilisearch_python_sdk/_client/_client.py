@@ -88,7 +88,7 @@ class Client(BaseClient):
             json_handler: The module to use for json operations. The options are BuiltinHandler
                 (uses the json module from the standard library), or OrjsonHandler (uses orjson).
                 Note that in order use orjson the corresponding extra needs to be included.
-                Default: BuiltinHandler.
+                Default: OrjsonHandler if orjson is installed or BuiltinHandler if not.
             http2: If set to True, the client will use HTTP/2. Defaults to False.
         """
         super().__init__(api_key, custom_headers, json_handler)
