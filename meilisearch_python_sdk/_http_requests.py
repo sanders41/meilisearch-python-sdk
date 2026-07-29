@@ -53,7 +53,7 @@ class AsyncHttpRequests:
                 response = await http_method(path)
             elif content_type == "application/json" and not compress:
                 response = await http_method(
-                    path, content=self.json_handler.dumps(body), headers=headers
+                    path, content=self.json_handler.dump_bytes(body), headers=headers
                 )
             else:
                 if compress:
@@ -141,7 +141,9 @@ class HttpRequests:
             if body is None:
                 response = http_method(path)
             elif content_type == "application/json" and not compress:
-                response = http_method(path, content=self.json_handler.dumps(body), headers=headers)
+                response = http_method(
+                    path, content=self.json_handler.dump_bytes(body), headers=headers
+                )
             else:
                 if compress:
                     if content_type == "application/json":
