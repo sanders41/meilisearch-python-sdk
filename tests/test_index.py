@@ -111,6 +111,8 @@ def test_get_stats(empty_index, small_movies):
 
     assert response.number_of_documents == 30
     assert response.internal_database_sizes is None
+    assert response.index_size is not None
+    assert response.used_index_size is not None
 
 
 @pytest.mark.parametrize("size_format", (None, "raw", "human"))
