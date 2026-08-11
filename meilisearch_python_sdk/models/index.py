@@ -24,6 +24,8 @@ class IndexStats(CamelBase):
     is_indexing: bool
     field_distribution: dict[str, int]
     internal_database_sizes: JsonDict | None = None
+    index_size: int | str | None = None
+    used_index_size: int | str | None = None
 
 
 class FieldsFilter(CamelBase):
