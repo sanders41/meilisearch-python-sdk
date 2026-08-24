@@ -64,3 +64,7 @@ with Client("http://127.0.0.1:7700", json_handler=OrjsonHandler()) as client:
     index = client.index("movies", primary_key="id")
     index.add_documents(documents)
 ```
+
+## JSON Handler API
+
+::: meilisearch_python_sdk.json_handler
