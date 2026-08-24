@@ -35,12 +35,31 @@ nav:
       - AsyncIndex: async_index_api.md
       - Index: index_api.md
       - Decorators: decorators_api.md
+      - Errors: errors_api.md
+  - Models:
+      - Search: models_search.md
+      - Settings: models_settings.md
+      - Index: models_index.md
+      - Tasks: models_task.md
+      - Client: models_client.md
   - Plugins: plugins.md
   - JSON Handler: json_handler.md
   - Pydantic: pydantic.md
 
 plugins:
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_if_no_docstring: true
+            show_bases: true
+            show_signature_annotations: true
+            separate_signature: true
+            docstring_section_style: list
+            members_order: source
+            show_root_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
   - search
 
 extra_javascript:
