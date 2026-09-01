@@ -897,7 +897,7 @@ class Client(BaseClient):
         *,
         uids: list[int] | None = None,
         batch_uids: list[int] | None = None,
-        index_uids: list[int] | None = None,
+        index_uids: list[str] | None = None,
         statuses: list[str] | None = None,
         types: list[str] | None = None,
         limit: int = 20,
@@ -929,7 +929,7 @@ class Client(BaseClient):
         self,
         *,
         uids: list[int] | None = None,
-        index_uids: list[int] | None = None,
+        index_uids: list[str] | None = None,
         statuses: list[str] | None = None,
         types: list[str] | None = None,
         before_enqueued_at: datetime | None = None,
@@ -983,7 +983,7 @@ class Client(BaseClient):
         self,
         *,
         uids: list[int] | None = None,
-        index_uids: list[int] | None = None,
+        index_uids: list[str] | None = None,
         statuses: list[str] | None = None,
         types: list[str] | None = None,
         before_enqueued_at: datetime | None = None,
@@ -1060,6 +1060,18 @@ class Client(BaseClient):
         index_ids: list[str] | None = None,
         types: str | list[str] | None = None,
         reverse: bool | None = None,
+        uids: list[int] | None = None,
+        batch_uids: list[int] | None = None,
+        canceled_by: list[int] | None = None,
+        statuses: str | list[str] | None = None,
+        before_enqueued_at: datetime | None = None,
+        after_enqueued_at: datetime | None = None,
+        before_started_at: datetime | None = None,
+        after_started_at: datetime | None = None,
+        before_finished_at: datetime | None = None,
+        after_finished_at: datetime | None = None,
+        limit: int | None = None,
+        from_: int | None = None,
     ) -> TaskStatus:
         """Get multiple tasks.
 
@@ -1068,6 +1080,24 @@ class Client(BaseClient):
                 tasks only for the specified indexes, if not all tasks will be returned. Default = None
             types: Specify specific task types to retrieve. Default = None
             reverse: If True the tasks will be returned in reverse order. Default = None
+            uids: A list of task UIDs to retrieve. Default = None
+            batch_uids: A list of batch UIDs for which to get the tasks. Default = None
+            canceled_by: A list of task UIDs that canceled the tasks to retrieve. Default = None
+            statuses: Specify specific task statuses to retrieve. Default = None
+            before_enqueued_at: Get tasks that were enqueued before the specified date time.
+                Default = None
+            after_enqueued_at: Get tasks that were enqueued after the specified date time.
+                Default = None
+            before_started_at: Get tasks that were started before the specified date time.
+                Default = None
+            after_started_at: Get tasks that were started after the specified date time.
+                Default = None
+            before_finished_at: Get tasks that were finished before the specified date time.
+                Default = None
+            after_finished_at: Get tasks that were finished after the specified date time.
+                Default = None
+            limit: The maximum number of tasks to return. Default = None
+            from_: The task UID from which to start returning tasks. Default = None
 
         Returns:
             Task statuses.
@@ -1089,6 +1119,18 @@ class Client(BaseClient):
             index_ids=index_ids,
             types=types,
             reverse=reverse,
+            uids=uids,
+            batch_uids=batch_uids,
+            canceled_by=canceled_by,
+            statuses=statuses,
+            before_enqueued_at=before_enqueued_at,
+            after_enqueued_at=after_enqueued_at,
+            before_started_at=before_started_at,
+            after_started_at=after_started_at,
+            before_finished_at=before_finished_at,
+            after_finished_at=after_finished_at,
+            limit=limit,
+            from_=from_,
         )
 
     def wait_for_task(

@@ -24,7 +24,7 @@ async def async_cancel_tasks(
     *,
     json_handler: JsonHandler,
     uids: list[int] | None = None,
-    index_uids: list[int] | None = None,
+    index_uids: list[str] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
@@ -63,14 +63,14 @@ async def async_cancel_tasks(
         >>>     await cancel_tasks(client, uids=[1, 2])
     """
     parameters = _process_params(
-        uids,
-        index_uids,
-        statuses,
-        types,
-        before_enqueued_at,
-        after_enqueued_at,
-        before_started_at,
-        after_finished_at,
+        uids=uids,
+        index_uids=index_uids,
+        statuses=statuses,
+        types=types,
+        before_enqueued_at=before_enqueued_at,
+        after_enqueued_at=after_enqueued_at,
+        before_started_at=before_started_at,
+        after_finished_at=after_finished_at,
     )
 
     if not parameters:
@@ -90,7 +90,7 @@ async def async_delete_tasks(
     *,
     json_handler: JsonHandler,
     uids: list[int] | None = None,
-    index_uids: list[int] | None = None,
+    index_uids: list[str] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
@@ -99,14 +99,14 @@ async def async_delete_tasks(
     after_finished_at: datetime | None = None,
 ) -> TaskInfo:
     parameters = _process_params(
-        uids,
-        index_uids,
-        statuses,
-        types,
-        before_enqueued_at,
-        after_enqueued_at,
-        before_started_at,
-        after_finished_at,
+        uids=uids,
+        index_uids=index_uids,
+        statuses=statuses,
+        types=types,
+        before_enqueued_at=before_enqueued_at,
+        after_enqueued_at=after_enqueued_at,
+        before_started_at=before_started_at,
+        after_finished_at=after_finished_at,
     )
 
     if not parameters:
@@ -140,17 +140,37 @@ async def async_get_tasks(
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
     reverse: bool | None = None,
+    uids: list[int] | None = None,
+    batch_uids: list[int] | None = None,
+    canceled_by: list[int] | None = None,
+    statuses: str | list[str] | None = None,
+    before_enqueued_at: datetime | None = None,
+    after_enqueued_at: datetime | None = None,
+    before_started_at: datetime | None = None,
+    after_started_at: datetime | None = None,
+    before_finished_at: datetime | None = None,
+    after_finished_at: datetime | None = None,
+    limit: int | None = None,
+    from_: int | None = None,
 ) -> TaskStatus:
-    url = f"tasks?indexUids={','.join(index_ids)}" if index_ids else "tasks"
-    if types:
-        formatted_types = ",".join(types) if isinstance(types, list) else types
-        url = f"{url}&types={formatted_types}" if "?" in url else f"{url}?types={formatted_types}"
-    if reverse:
-        url = (
-            f"{url}&reverse={str(reverse).lower()}"
-            if "?" in url
-            else f"{url}?reverse={str(reverse).lower()}"
-        )
+    parameters = _process_params(
+        uids=uids,
+        index_uids=index_ids,
+        statuses=statuses,
+        types=types,
+        before_enqueued_at=before_enqueued_at,
+        after_enqueued_at=after_enqueued_at,
+        before_started_at=before_started_at,
+        after_finished_at=after_finished_at,
+        batch_uids=batch_uids,
+        canceled_by=canceled_by,
+        after_started_at=after_started_at,
+        before_finished_at=before_finished_at,
+        limit=limit,
+        from_=from_,
+        reverse=reverse,
+    )
+    url = f"tasks?{urlencode(parameters)}" if parameters else "tasks"
     client_ = get_async_client(client)
     http_requests = AsyncHttpRequests(client_, json_handler)
     response = await http_requests.get(url)
@@ -203,7 +223,7 @@ def cancel_tasks(
     *,
     json_handler: JsonHandler,
     uids: list[int] | None = None,
-    index_uids: list[int] | None = None,
+    index_uids: list[str] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
@@ -212,14 +232,14 @@ def cancel_tasks(
     after_finished_at: datetime | None = None,
 ) -> TaskInfo:
     parameters = _process_params(
-        uids,
-        index_uids,
-        statuses,
-        types,
-        before_enqueued_at,
-        after_enqueued_at,
-        before_started_at,
-        after_finished_at,
+        uids=uids,
+        index_uids=index_uids,
+        statuses=statuses,
+        types=types,
+        before_enqueued_at=before_enqueued_at,
+        after_enqueued_at=after_enqueued_at,
+        before_started_at=before_started_at,
+        after_finished_at=after_finished_at,
     )
 
     if not parameters:
@@ -239,7 +259,7 @@ def delete_tasks(
     *,
     json_handler: JsonHandler,
     uids: list[int] | None = None,
-    index_uids: list[int] | None = None,
+    index_uids: list[str] | None = None,
     statuses: list[str] | None = None,
     types: list[str] | None = None,
     before_enqueued_at: datetime | None = None,
@@ -248,14 +268,14 @@ def delete_tasks(
     after_finished_at: datetime | None = None,
 ) -> TaskInfo:
     parameters = _process_params(
-        uids,
-        index_uids,
-        statuses,
-        types,
-        before_enqueued_at,
-        after_enqueued_at,
-        before_started_at,
-        after_finished_at,
+        uids=uids,
+        index_uids=index_uids,
+        statuses=statuses,
+        types=types,
+        before_enqueued_at=before_enqueued_at,
+        after_enqueued_at=after_enqueued_at,
+        before_started_at=before_started_at,
+        after_finished_at=after_finished_at,
     )
 
     if not parameters:
@@ -285,17 +305,37 @@ def get_tasks(
     index_ids: list[str] | None = None,
     types: str | list[str] | None = None,
     reverse: bool | None = None,
+    uids: list[int] | None = None,
+    batch_uids: list[int] | None = None,
+    canceled_by: list[int] | None = None,
+    statuses: str | list[str] | None = None,
+    before_enqueued_at: datetime | None = None,
+    after_enqueued_at: datetime | None = None,
+    before_started_at: datetime | None = None,
+    after_started_at: datetime | None = None,
+    before_finished_at: datetime | None = None,
+    after_finished_at: datetime | None = None,
+    limit: int | None = None,
+    from_: int | None = None,
 ) -> TaskStatus:
-    url = f"tasks?indexUids={','.join(index_ids)}" if index_ids else "tasks"
-    if types:
-        formatted_types = ",".join(types) if isinstance(types, list) else types
-        url = f"{url}&types={formatted_types}" if "?" in url else f"{url}?types={formatted_types}"
-    if reverse:
-        url = (
-            f"{url}&reverse={str(reverse).lower()}"
-            if "?" in url
-            else f"{url}?reverse={str(reverse).lower()}"
-        )
+    parameters = _process_params(
+        uids=uids,
+        index_uids=index_ids,
+        statuses=statuses,
+        types=types,
+        before_enqueued_at=before_enqueued_at,
+        after_enqueued_at=after_enqueued_at,
+        before_started_at=before_started_at,
+        after_finished_at=after_finished_at,
+        batch_uids=batch_uids,
+        canceled_by=canceled_by,
+        after_started_at=after_started_at,
+        before_finished_at=before_finished_at,
+        limit=limit,
+        from_=from_,
+        reverse=reverse,
+    )
+    url = f"tasks?{urlencode(parameters)}" if parameters else "tasks"
     client_ = get_client(client)
     http_requests = HttpRequests(client_, json_handler)
     response = http_requests.get(url)
@@ -343,32 +383,60 @@ def wait_for_task(
             time.sleep(interval_in_ms / 1000)
 
 
+def _join_values(values: str | list[str] | list[int]) -> str:
+    if isinstance(values, str):
+        return values
+
+    return ",".join([str(x) for x in values])
+
+
 def _process_params(
     uids: list[int] | None = None,
-    index_uids: list[int] | None = None,
-    statuses: list[str] | None = None,
-    types: list[str] | None = None,
+    index_uids: list[str] | None = None,
+    statuses: str | list[str] | None = None,
+    types: str | list[str] | None = None,
     before_enqueued_at: datetime | None = None,
     after_enqueued_at: datetime | None = None,
     before_started_at: datetime | None = None,
     after_finished_at: datetime | None = None,
+    batch_uids: list[int] | None = None,
+    canceled_by: list[int] | None = None,
+    after_started_at: datetime | None = None,
+    before_finished_at: datetime | None = None,
+    limit: int | None = None,
+    from_: int | None = None,
+    reverse: bool | None = None,
 ) -> dict[str, str]:
     parameters = {}
     if uids:
-        parameters["uids"] = ",".join([str(x) for x in uids])
+        parameters["uids"] = _join_values(uids)
+    if batch_uids:
+        parameters["batchUids"] = _join_values(batch_uids)
     if index_uids:
-        parameters["indexUids"] = ",".join([str(x) for x in index_uids])
+        parameters["indexUids"] = _join_values(index_uids)
+    if canceled_by:
+        parameters["canceledBy"] = _join_values(canceled_by)
     if statuses:
-        parameters["statuses"] = ",".join(statuses)
+        parameters["statuses"] = _join_values(statuses)
     if types:
-        parameters["types"] = ",".join(types)
+        parameters["types"] = _join_values(types)
     if before_enqueued_at:
         parameters["beforeEnqueuedAt"] = f"{before_enqueued_at.isoformat()}Z"
     if after_enqueued_at:
         parameters["afterEnqueuedAt"] = f"{after_enqueued_at.isoformat()}Z"
     if before_started_at:
         parameters["beforeStartedAt"] = f"{before_started_at.isoformat()}Z"
+    if after_started_at:
+        parameters["afterStartedAt"] = f"{after_started_at.isoformat()}Z"
+    if before_finished_at:
+        parameters["beforeFinishedAt"] = f"{before_finished_at.isoformat()}Z"
     if after_finished_at:
         parameters["afterFinishedAt"] = f"{after_finished_at.isoformat()}Z"
+    if limit is not None:
+        parameters["limit"] = str(limit)
+    if from_ is not None:
+        parameters["from"] = str(from_)
+    if reverse is not None:
+        parameters["reverse"] = str(reverse).lower()
 
     return parameters
