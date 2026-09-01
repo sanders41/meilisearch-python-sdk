@@ -214,11 +214,11 @@ toml = [
 
 [[package]]
 name = "deepmerge"
-version = "3.0"
+version = "3.0.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b7/6c/9f4577a36d5f463a3a3f8322bd65d33e1a1a6b6ba1d692a5ebc3cba19015/deepmerge-3.0.tar.gz", hash = "sha256:14ed69f063de64b7743985c732ccff5d6c34ff4560946e7fbfd99086b853b9ce", size = 22279, upload-time = "2026-08-17T05:50:53.161Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/38/6e/5cb3548b4d3112fea529375e55e6f3cdc52b8054e3a66f203b1f888ba885/deepmerge-3.0.1.tar.gz", hash = "sha256:35b39a4cb92cf328d6eca61cbbf65f68a37c2ceb3085f0f853cbb2e52a59fc23", size = 22328, upload-time = "2026-09-01T14:09:44.383Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/d7/7f19bedd30b90b72865aeec3a29127bed6dee6c9ef0324bb5b4d424bb0e3/deepmerge-3.0-py3-none-any.whl", hash = "sha256:c8541c3e186dc88d19a5513ad3a0b2d0b22beaa780969fc0c13b995a64265365", size = 14855, upload-time = "2026-08-17T05:50:52.218Z" },
+    { url = "https://files.pythonhosted.org/packages/20/91/600003aaad107e27553fbc9cbfc57e96fa37e0223d2ef9d7d3a0e8d8d070/deepmerge-3.0.1-py3-none-any.whl", hash = "sha256:35c96f6a68fcf90719a5b31d9f8042ecef6c00fb56836660d33455d0f5cfda65", size = 14909, upload-time = "2026-09-01T14:09:43.364Z" },
 ]
 
 [[package]]
@@ -615,7 +615,7 @@ python = [
 
 [[package]]
 name = "mkdocstrings-python"
-version = "2.0.7"
+version = "2.0.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "griffelib" },
@@ -623,9 +623,9 @@ dependencies = [
     { name = "mkdocstrings" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/90/5d/1be1c7a49d8fa13dc80f66a85f53333d52cf5206911412006ffdff8fb9a0/mkdocstrings_python-2.0.7.tar.gz", hash = "sha256:8c49faf66d243072d7590a1b5dea028d9d7425fac191f54f096123a4a9c1a783", size = 201598, upload-time = "2026-08-17T16:56:18.239Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/65/0db919b7c91bf033b42d04f15ff16a56f4edd6afb26e84d448359660ece3/mkdocstrings_python-2.0.8.tar.gz", hash = "sha256:34545b54681cf0b212aab95394d37b0f5326a93b102f6ad1df3d965c79384c9d", size = 201771, upload-time = "2026-08-31T20:16:06.698Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/6d/77546d8c26f038fce314a507106954f76270f6c182488bcf9ac9721175df/mkdocstrings_python-2.0.7-py3-none-any.whl", hash = "sha256:1fce5fbfe4ffa6e8136a35351cdc97c3bf55219c7efbd3f92a82260f93235d60", size = 105387, upload-time = "2026-08-17T16:56:16.813Z" },
+    { url = "https://files.pythonhosted.org/packages/0b/b7/a5a854d4e44853f26decc0c5e0d68df052399f3da344a313da4178f00816/mkdocstrings_python-2.0.8-py3-none-any.whl", hash = "sha256:e555d9ef53b0febdeae4dd603144d4f86ec90fef672276645ea3bb61232c3d24", size = 105443, upload-time = "2026-08-31T20:16:05.25Z" },
 ]
 
 [[package]]
@@ -720,11 +720,11 @@ wheels = [
 
 [[package]]
 name = "platformdirs"
-version = "4.11.5"
+version = "4.11.7"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ea/06/cf1564dcc2e2261c8c8c6c05628dc8b418943bdae2a4e58640ceb2f770fa/platformdirs-4.11.5.tar.gz", hash = "sha256:e8b31f4f8bcbbedef91a6b57a706255e4f148d2a4e01648382a0a47342539173", size = 34823, upload-time = "2026-08-27T21:36:37.46Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/b7/802a56eca9f2fac455b8bab5375a2647b0f0e14a2cd63ef077de3c4a7658/platformdirs-4.11.7.tar.gz", hash = "sha256:4f41487eeeeeb07f3a6625e61d9bc0ae6809f92d3386dbd74392fbb76108104d", size = 35127, upload-time = "2026-09-01T13:35:10.502Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c7/12/6f3fcd5067a9cbf4f8664b32957973498da8b083455203c8d9cab83a725c/platformdirs-4.11.5-py3-none-any.whl", hash = "sha256:89f8d42695853b89c7170bd49bc3dc593f98a71e695ede88e06a3b247bc4563b", size = 23900, upload-time = "2026-08-27T21:36:36.227Z" },
+    { url = "https://files.pythonhosted.org/packages/27/6e/80993e10a0482f630cef528635789233224f36b1ffd11592aa15d13ff9ce/platformdirs-4.11.7-py3-none-any.whl", hash = "sha256:8a02cb259042c79d1cd0450facc2fe6dc9d303ae7901afbe33bf8ea0b188cef6", size = 23938, upload-time = "2026-09-01T13:35:09.02Z" },
 ]
 
 [[package]]
