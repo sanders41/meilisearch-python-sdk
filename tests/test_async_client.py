@@ -974,6 +974,90 @@ async def test_get_tasks_for_index_reverse(async_client, async_empty_index, smal
     assert next(iter(uid)) == index.uid
 
 
+@pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
+async def test_get_tasks_canceled_by(async_client):
+    task = await async_client.cancel_tasks(statuses=["enqueued", "processing"])
+    await async_client.wait_for_task(task.task_uid)
+    all_tasks = await async_client.get_tasks(limit=1000)
+    expected = [x.uid for x in all_tasks.results if x.canceled_by == task.task_uid]
+
+    result = await async_client.get_tasks(canceled_by=[task.task_uid])
+
+    assert sorted(x.uid for x in result.results) == sorted(expected)
+
+
+@pytest.mark.no_parallel
+async def test_get_tasks_limit_zero(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+
+    result = await async_client.get_tasks(limit=0)
+
+    assert result.limit == 0
+    assert result.results == []
+
+
+@pytest.mark.no_parallel
+async def test_get_tasks_pagination(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+
+    limited = await async_client.get_tasks(limit=2)
+
+    assert len(limited.results) <= 2
+    assert limited.limit == 2
+
+    paged = await async_client.get_tasks(limit=1, from_=limited.results[0].uid)
+
+    assert len(paged.results) == 1
+    assert paged.results[0].uid == limited.results[0].uid
+
+
+@pytest.mark.no_parallel
+async def test_get_tasks_filters(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    response = await index.add_documents(small_movies)
+    task = await async_client.wait_for_task(response.task_uid)
+
+    by_uid = await async_client.get_tasks(uids=[task.uid])
+
+    assert [x.uid for x in by_uid.results] == [task.uid]
+
+    by_status = await async_client.get_tasks(uids=[task.uid], statuses=["succeeded"])
+
+    assert [x.uid for x in by_status.results] == [task.uid]
+
+    by_batch = await async_client.get_tasks(batch_uids=[task.batch_uid])
+
+    assert task.uid in [x.uid for x in by_batch.results]
+
+    excluded = await async_client.get_tasks(uids=[task.uid], statuses=["failed"])
+
+    assert excluded.results == []
+
+
+@pytest.mark.no_parallel
+async def test_get_tasks_date_filters(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    response = await index.add_documents(small_movies)
+    task = await async_client.wait_for_task(response.task_uid)
+    future = datetime(2100, 1, 1)
+    past = datetime(2000, 1, 1)
+
+    before_hit = await async_client.get_tasks(uids=[task.uid], before_finished_at=future)
+    before_miss = await async_client.get_tasks(uids=[task.uid], before_finished_at=past)
+    after_hit = await async_client.get_tasks(uids=[task.uid], after_started_at=past)
+    after_miss = await async_client.get_tasks(uids=[task.uid], after_started_at=future)
+
+    assert [x.uid for x in before_hit.results] == [task.uid]
+    assert before_miss.results == []
+    assert [x.uid for x in after_hit.results] == [task.uid]
+    assert after_miss.results == []
+
+
 @pytest.mark.no_parallel
 async def test_get_task(async_client, async_empty_index, small_movies):
     index = await async_empty_index()

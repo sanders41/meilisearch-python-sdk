@@ -958,6 +958,86 @@ def test_get_tasks_for_index_reverse(client, empty_index, small_movies):
     assert next(iter(uid)) == index.uid
 
 
+@pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
+def test_get_tasks_canceled_by(client):
+    task = client.cancel_tasks(statuses=["enqueued", "processing"])
+    client.wait_for_task(task.task_uid)
+    expected = [
+        x.uid for x in client.get_tasks(limit=1000).results if x.canceled_by == task.task_uid
+    ]
+
+    result = client.get_tasks(canceled_by=[task.task_uid])
+
+    assert sorted(x.uid for x in result.results) == sorted(expected)
+
+
+def test_get_tasks_limit_zero(client, empty_index, small_movies):
+    index = empty_index()
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+
+    result = client.get_tasks(limit=0)
+
+    assert result.limit == 0
+    assert result.results == []
+
+
+def test_get_tasks_pagination(client, empty_index, small_movies):
+    index = empty_index()
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+
+    limited = client.get_tasks(limit=2)
+
+    assert len(limited.results) <= 2
+    assert limited.limit == 2
+
+    paged = client.get_tasks(limit=1, from_=limited.results[0].uid)
+
+    assert len(paged.results) == 1
+    assert paged.results[0].uid == limited.results[0].uid
+
+
+def test_get_tasks_filters(client, empty_index, small_movies):
+    index = empty_index()
+    response = index.add_documents(small_movies)
+    task = client.wait_for_task(response.task_uid)
+
+    by_uid = client.get_tasks(uids=[task.uid])
+
+    assert [x.uid for x in by_uid.results] == [task.uid]
+
+    by_status = client.get_tasks(uids=[task.uid], statuses=["succeeded"])
+
+    assert [x.uid for x in by_status.results] == [task.uid]
+
+    by_batch = client.get_tasks(batch_uids=[task.batch_uid])
+
+    assert task.uid in [x.uid for x in by_batch.results]
+
+    excluded = client.get_tasks(uids=[task.uid], statuses=["failed"])
+
+    assert excluded.results == []
+
+
+def test_get_tasks_date_filters(client, empty_index, small_movies):
+    index = empty_index()
+    response = index.add_documents(small_movies)
+    task = client.wait_for_task(response.task_uid)
+    future = datetime(2100, 1, 1)
+    past = datetime(2000, 1, 1)
+
+    assert task.uid in [
+        x.uid for x in client.get_tasks(uids=[task.uid], before_finished_at=future).results
+    ]
+    assert client.get_tasks(uids=[task.uid], before_finished_at=past).results == []
+    assert task.uid in [
+        x.uid for x in client.get_tasks(uids=[task.uid], after_started_at=past).results
+    ]
+    assert client.get_tasks(uids=[task.uid], after_started_at=future).results == []
+
+
 def test_get_task(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)
