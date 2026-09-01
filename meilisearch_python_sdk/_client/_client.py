@@ -1174,7 +1174,7 @@ class Client(BaseClient):
         """
         payload = build_transfer_documents_payload(url, api_key, payload_size, indexes)
 
-        response = self._http_requests.post(url, body=payload)
+        response = self._http_requests.post("export", body=payload)
 
         return TaskInfo(**self._http_requests.parse_json(response))
 
