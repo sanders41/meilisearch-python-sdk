@@ -974,6 +974,19 @@ async def test_get_tasks_for_index_reverse(async_client, async_empty_index, smal
     assert next(iter(uid)) == index.uid
 
 
+@pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
+async def test_get_tasks_canceled_by(async_client):
+    task = await async_client.cancel_tasks(statuses=["enqueued", "processing"])
+    await async_client.wait_for_task(task.task_uid)
+    all_tasks = await async_client.get_tasks(limit=1000)
+    expected = [x.uid for x in all_tasks.results if x.canceled_by == task.task_uid]
+
+    result = await async_client.get_tasks(canceled_by=[task.task_uid])
+
+    assert sorted(x.uid for x in result.results) == sorted(expected)
+
+
 @pytest.mark.no_parallel
 async def test_get_tasks_limit_zero(async_client, async_empty_index, small_movies):
     index = await async_empty_index()

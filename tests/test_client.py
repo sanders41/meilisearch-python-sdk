@@ -958,6 +958,20 @@ def test_get_tasks_for_index_reverse(client, empty_index, small_movies):
     assert next(iter(uid)) == index.uid
 
 
+@pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
+def test_get_tasks_canceled_by(client):
+    task = client.cancel_tasks(statuses=["enqueued", "processing"])
+    client.wait_for_task(task.task_uid)
+    expected = [
+        x.uid for x in client.get_tasks(limit=1000).results if x.canceled_by == task.task_uid
+    ]
+
+    result = client.get_tasks(canceled_by=[task.task_uid])
+
+    assert sorted(x.uid for x in result.results) == sorted(expected)
+
+
 def test_get_tasks_limit_zero(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)
