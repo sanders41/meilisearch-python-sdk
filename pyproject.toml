@@ -56,6 +56,7 @@ path = "meilisearch_python_sdk/_version.py"
 repository = "https://github.com/sanders41/meilisearch-python-sdk"
 homepage = "https://github.com/sanders41/meilisearch-python-sdk"
 documentation = "https://meilisearch-python-sdk.paulsanders.dev"
+funding = "https://github.com/sponsors/sanders41"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
