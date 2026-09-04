@@ -46,7 +46,7 @@ dev = [
   "ruff==0.16.5",
   "types-aiofiles==25.1.0.20260518",
   "typing-extensions==4.16.0",
-  "zensical==0.0.58",
+  "zensical==0.0.59",
 ]
 
 [tool.hatch.version]
