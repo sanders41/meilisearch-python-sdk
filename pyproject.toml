@@ -6,14 +6,13 @@ build-backend = "hatchling.build"
 name = "meilisearch-python-sdk"
 description = "A Python client providing both async and sync support for the Meilisearch API"
 authors = [ { name = "Paul Sanders", email = "paul@paulsanders.dev" } ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 readme = "README.md"
 keywords = ["meilisearch", "async", "python", "client", "sdk"]
 classifiers=[
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -45,7 +44,6 @@ dev = [
   "prek==0.5.5",
   "ruff==0.16.10",
   "types-aiofiles==25.1.0.20260518",
-  "typing-extensions==4.16.0",
   "zensical==0.0.67",
 ]
 

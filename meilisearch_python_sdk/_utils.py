@@ -5,7 +5,7 @@ import hashlib
 import hmac
 import sys
 from calendar import timegm
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
@@ -97,7 +97,7 @@ def decode_jwt(
     if not isinstance(payload, dict):
         raise DecodeError("Invalid payload string: must be a json object")
 
-    now = datetime.now(tz=timezone.utc).timestamp()
+    now = datetime.now(tz=UTC).timestamp()
 
     if "iat" in payload:
         try:

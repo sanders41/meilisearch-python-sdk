@@ -5,7 +5,7 @@ from csv import DictReader
 from datetime import datetime
 from functools import cached_property, partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Self
 
 import aiofiles
 from camel_converter import to_snake
@@ -63,15 +63,9 @@ from meilisearch_python_sdk.plugins import (
 from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:
-    import sys
     from collections.abc import Sequence
 
     from meilisearch_python_sdk.types import Filter, JsonMapping
-
-    if sys.version_info >= (3, 11):
-        from typing import Self
-    else:
-        from typing_extensions import Self
 
 
 class AsyncIndex(BaseIndex):

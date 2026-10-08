@@ -2,7 +2,7 @@ import base64
 import hashlib
 import hmac
 from calendar import timegm
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -39,7 +39,7 @@ def raw_token(payload_bytes, key, json_handler):
 
 @pytest.fixture
 def utc_timestamp():
-    return timegm(datetime.now(tz=timezone.utc).utctimetuple())
+    return timegm(datetime.now(tz=UTC).utctimetuple())
 
 
 @pytest.fixture
@@ -112,7 +112,7 @@ def test_encode_with_typo(json_handler):
 @pytest.mark.parametrize("json_handler", (BuiltinHandler(), OrjsonHandler()))
 def test_encode_datetime(json_handler):
     secret = "secret"
-    current_datetime = datetime.now(tz=timezone.utc)
+    current_datetime = datetime.now(tz=UTC)
     payload = {
         "exp": current_datetime,
         "iat": current_datetime,
