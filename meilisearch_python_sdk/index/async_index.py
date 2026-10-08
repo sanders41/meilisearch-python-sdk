@@ -13,7 +13,6 @@ from httpx2 import AsyncClient
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests
 from meilisearch_python_sdk._task import async_wait_for_task
-from meilisearch_python_sdk._utils import use_task_groups
 from meilisearch_python_sdk.errors import InvalidDocumentError
 from meilisearch_python_sdk.index._common import (
     BaseIndex,
@@ -742,52 +741,6 @@ class AsyncIndex(BaseIndex):
             )
 
         if self._concurrent_search_plugins:
-            if not use_task_groups():
-                concurrent_tasks: Any = []
-                for plugin in self._concurrent_search_plugins:
-                    if plugin_has_method(plugin, "run_plugin"):
-                        concurrent_tasks.append(
-                            plugin.run_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                query=query,
-                                offset=offset,
-                                limit=limit,
-                                filter=filter,
-                                facets=facets,
-                                attributes_to_retrieve=attributes_to_retrieve,
-                                attributes_to_crop=attributes_to_crop,
-                                crop_length=crop_length,
-                                attributes_to_highlight=attributes_to_highlight,
-                                sort=sort,
-                                show_matches_position=show_matches_position,
-                                highlight_pre_tag=highlight_pre_tag,
-                                highlight_post_tag=highlight_post_tag,
-                                crop_marker=crop_marker,
-                                matching_strategy=matching_strategy,
-                                hits_per_page=hits_per_page,
-                                page=page,
-                                attributes_to_search_on=attributes_to_search_on,
-                                distinct=distinct,
-                                show_ranking_score=show_ranking_score,
-                                show_ranking_score_details=show_ranking_score_details,
-                                vector=vector,
-                                personalize=personalize,
-                            )
-                        )
-
-                concurrent_tasks.append(self._http_requests.post(search_url, body=body))
-
-                responses = await asyncio.gather(*concurrent_tasks)
-                result = SearchResults[self.hits_type](**responses[-1].json())  # type: ignore[name-defined]
-                if self._post_search_plugins:
-                    post = await _run_plugins(
-                        self._post_search_plugins, AsyncEvent.POST, search_results=result
-                    )
-                    if post.get("search_result"):
-                        result = post["search_result"]
-
-                return result
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 for plugin in self._concurrent_search_plugins:
                     if plugin_has_method(plugin, "run_plugin"):
@@ -1017,52 +970,6 @@ class AsyncIndex(BaseIndex):
             )
 
         if self._concurrent_facet_search_plugins:
-            if not use_task_groups():
-                tasks: Any = []
-                for plugin in self._concurrent_facet_search_plugins:
-                    if plugin_has_method(plugin, "run_plugin"):
-                        tasks.append(
-                            plugin.run_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                query=query,
-                                offset=offset,
-                                limit=limit,
-                                filter=filter,
-                                facets=facets,
-                                attributes_to_retrieve=attributes_to_retrieve,
-                                attributes_to_crop=attributes_to_crop,
-                                crop_length=crop_length,
-                                attributes_to_highlight=attributes_to_highlight,
-                                sort=sort,
-                                show_matches_position=show_matches_position,
-                                highlight_pre_tag=highlight_pre_tag,
-                                highlight_post_tag=highlight_post_tag,
-                                crop_marker=crop_marker,
-                                matching_strategy=matching_strategy,
-                                hits_per_page=hits_per_page,
-                                page=page,
-                                attributes_to_search_on=attributes_to_search_on,
-                                show_ranking_score=show_ranking_score,
-                                show_ranking_score_details=show_ranking_score_details,
-                                ranking_score_threshold=ranking_score_threshold,
-                                vector=vector,
-                                exhaustive_facet_count=exhaustive_facet_count,
-                                personalize=personalize,
-                            )
-                        )
-
-                tasks.append(self._http_requests.post(search_url, body=body))
-                responses = await asyncio.gather(*tasks)
-                result = FacetSearchResults(**responses[-1].json())
-                if self._post_facet_search_plugins:
-                    post = await _run_plugins(
-                        self._post_facet_search_plugins, AsyncEvent.POST, result=result
-                    )
-                    if isinstance(post["generic_result"], FacetSearchResults):
-                        result = post["generic_result"]
-
-                return result
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 for plugin in self._concurrent_facet_search_plugins:
                     if plugin_has_method(plugin, "run_plugin"):
@@ -1362,42 +1269,6 @@ class AsyncIndex(BaseIndex):
                 documents = pre["document_result"]
 
         if self._concurrent_add_documents_plugins:
-            if not use_task_groups():
-                tasks: Any = []
-                for plugin in self._concurrent_add_documents_plugins:
-                    if plugin_has_method(plugin, "run_plugin"):
-                        tasks.append(
-                            plugin.run_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                documents=documents,
-                                primary_key=primary_key,
-                            )
-                        )
-                    if plugin_has_method(plugin, "run_document_plugin"):
-                        tasks.append(
-                            plugin.run_document_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                documents=documents,
-                                primary_key=primary_key,
-                            )
-                        )
-
-                tasks.append(self._http_requests.post(url, documents, compress=compress))
-
-                responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
-                if self._post_add_documents_plugins:
-                    post = await _run_plugins(
-                        self._post_add_documents_plugins,
-                        AsyncEvent.POST,
-                        result=result,
-                        documents=documents,
-                        primary_key=primary_key,
-                    )
-                    if isinstance(post["generic_result"], TaskInfo):
-                        result = post["generic_result"]
-                return result
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 for plugin in self._concurrent_add_documents_plugins:
                     if plugin_has_method(plugin, "run_plugin"):
@@ -1502,25 +1373,12 @@ class AsyncIndex(BaseIndex):
                         batch_data, primary_key, custom_metadata=custom_metadata, compress=compress
                     )
 
-            if not use_task_groups():
-                batches = [add_batch_with_limit(data) for data in batch(documents, batch_size)]
-                return await asyncio.gather(*batches)
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 tasks = [
                     tg.create_task(add_batch_with_limit(x)) for x in batch(documents, batch_size)
                 ]
 
             return [x.result() for x in tasks]
-
-        if not use_task_groups():
-            batches = [
-                self.add_documents(
-                    x, primary_key, custom_metadata=custom_metadata, compress=compress
-                )
-                for x in batch(documents, batch_size)
-            ]
-            return await asyncio.gather(*batches)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
@@ -1616,29 +1474,6 @@ class AsyncIndex(BaseIndex):
                         compress=compress,
                     )
 
-            if not use_task_groups():
-                add_documents = []
-                for path in directory.iterdir():
-                    if path.suffix == f".{document_type}":
-                        documents = await _async_load_documents_from_file(
-                            path, csv_delimiter, json_handler=self._json_handler
-                        )
-                        add_documents.append(add_docs_with_limit(documents))
-
-                raise_on_no_documents(add_documents, document_type, directory_path)
-
-                if len(add_documents) > 1:
-                    # Send the first document on its own before starting the gather. Otherwise Meilisearch
-                    # returns an error because it thinks all entries are trying to create the same index.
-                    first_response = [await add_documents.pop(0)]
-
-                    responses = await asyncio.gather(*add_documents)
-                    responses = [*first_response, *responses]
-                else:
-                    responses = [await add_documents[0]]
-
-                return responses
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 tasks = []
                 all_results = []
@@ -1653,36 +1488,6 @@ class AsyncIndex(BaseIndex):
                             tasks.append(tg.create_task(add_docs_with_limit(documents)))
 
             return [*all_results, *[x.result() for x in tasks]]
-
-        if not use_task_groups():
-            add_documents = []
-            for path in directory.iterdir():
-                if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(
-                        path, csv_delimiter, json_handler=self._json_handler
-                    )
-                    add_documents.append(
-                        self.add_documents(
-                            documents,
-                            primary_key,
-                            custom_metadata=custom_metadata,
-                            compress=compress,
-                        )
-                    )
-
-            raise_on_no_documents(add_documents, document_type, directory_path)
-
-            if len(add_documents) > 1:
-                # Send the first document on its own before starting the gather. Otherwise Meilisearch
-                # returns an error because it thinks all entries are trying to create the same index.
-                first_response = [await add_documents.pop()]
-
-                responses = await asyncio.gather(*add_documents)
-                responses = [*first_response, *responses]
-            else:
-                responses = [await add_documents[0]]
-
-            return responses
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = []
@@ -2103,43 +1908,6 @@ class AsyncIndex(BaseIndex):
                 documents = pre["document_result"]
 
         if self._concurrent_update_documents_plugins:
-            if not use_task_groups():
-                tasks: Any = []
-                for plugin in self._concurrent_update_documents_plugins:
-                    if plugin_has_method(plugin, "run_plugin"):
-                        tasks.append(
-                            plugin.run_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                documents=documents,
-                                primary_key=primary_key,
-                            )
-                        )
-                    if plugin_has_method(plugin, "run_document_plugin"):
-                        tasks.append(
-                            plugin.run_document_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                documents=documents,
-                                primary_key=primary_key,
-                            )
-                        )
-
-                tasks.append(self._http_requests.put(url, documents, compress=compress))
-
-                responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
-                if self._post_update_documents_plugins:
-                    post = await _run_plugins(
-                        self._post_update_documents_plugins,
-                        AsyncEvent.POST,
-                        result=result,
-                        documents=documents,
-                        primary_key=primary_key,
-                    )
-                    if isinstance(post["generic_result"], TaskInfo):
-                        result = post["generic_result"]
-
-                return result
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 for plugin in self._concurrent_update_documents_plugins:
                     if plugin_has_method(plugin, "run_plugin"):
@@ -2253,28 +2021,11 @@ class AsyncIndex(BaseIndex):
                         compress=compress,
                     )
 
-            if not use_task_groups():
-                batches = [update_batch_with_limit(x) for x in batch(documents, batch_size)]
-                return await asyncio.gather(*batches)
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 tasks = [
                     tg.create_task(update_batch_with_limit(x)) for x in batch(documents, batch_size)
                 ]
             return [x.result() for x in tasks]
-
-        if not use_task_groups():
-            batches = [
-                self.update_documents(
-                    x,
-                    primary_key,
-                    custom_metadata=custom_metadata,
-                    skip_creation=skip_creation,
-                    compress=compress,
-                )
-                for x in batch(documents, batch_size)
-            ]
-            return await asyncio.gather(*batches)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = [
@@ -2362,36 +2113,6 @@ class AsyncIndex(BaseIndex):
                 compress=compress,
             )
             return [response]
-
-        if not use_task_groups():
-            update_documents = []
-            for path in directory.iterdir():
-                if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(
-                        path, csv_delimiter, json_handler=self._json_handler
-                    )
-                    update_documents.append(
-                        self.update_documents(
-                            documents,
-                            primary_key,
-                            custom_metadata=custom_metadata,
-                            skip_creation=skip_creation,
-                            compress=compress,
-                        )
-                    )
-
-            raise_on_no_documents(update_documents, document_type, directory_path)
-
-            if len(update_documents) > 1:
-                # Send the first document on its own before starting the gather. Otherwise Meilisearch
-                # returns an error because it thinks all entries are trying to create the same index.
-                first_response = [await update_documents.pop()]
-                responses = await asyncio.gather(*update_documents)
-                responses = [*first_response, *responses]
-            else:
-                responses = [await update_documents[0]]
-
-            return responses
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tasks = []
@@ -2507,40 +2228,6 @@ class AsyncIndex(BaseIndex):
                 skip_creation=skip_creation,
                 concurrency_limit=concurrency_limit,
             )
-
-        if not use_task_groups():
-            responses: list[TaskInfo] = []
-
-            update_documents = []
-            for path in directory.iterdir():
-                if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(
-                        path, csv_delimiter, json_handler=self._json_handler
-                    )
-                    update_documents.append(
-                        self.update_documents_in_batches(
-                            documents,
-                            batch_size=batch_size,
-                            primary_key=primary_key,
-                            custom_metadata=custom_metadata,
-                            compress=compress,
-                            skip_creation=skip_creation,
-                            concurrency_limit=concurrency_limit,
-                        )
-                    )
-
-            raise_on_no_documents(update_documents, document_type, directory_path)
-
-            if len(update_documents) > 1:
-                # Send the first document on its own before starting the gather. Otherwise Meilisearch
-                # returns an error because it thinks all entries are trying to create the same index.
-                first_response = await update_documents.pop()
-                responses_gather = await asyncio.gather(*update_documents)
-                responses = [*first_response, *[x for y in responses_gather for x in y]]
-            else:
-                responses = await update_documents[0]
-
-            return responses
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             results = []
@@ -2789,25 +2476,6 @@ class AsyncIndex(BaseIndex):
             )
 
         if self._concurrent_delete_document_plugins:
-            if not use_task_groups():
-                tasks: Any = []
-                for plugin in self._concurrent_delete_document_plugins:
-                    tasks.append(
-                        plugin.run_plugin(event=AsyncEvent.CONCURRENT, document_id=document_id)
-                    )
-
-                tasks.append(self._http_requests.delete(url))
-
-                responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
-                if self._post_delete_document_plugins:
-                    post = await _run_plugins(
-                        self._post_delete_document_plugins, AsyncEvent.POST, result=result
-                    )
-                    if isinstance(post.get("generic_result"), TaskInfo):
-                        result = post["generic_result"]
-                return result
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 for plugin in self._concurrent_delete_document_plugins:
                     tg.create_task(
@@ -2868,23 +2536,6 @@ class AsyncIndex(BaseIndex):
             await _run_plugins(self._pre_delete_documents_plugins, AsyncEvent.PRE, ids=ids)
 
         if self._concurrent_delete_documents_plugins:
-            if not use_task_groups():
-                tasks: Any = []
-                for plugin in self._concurrent_delete_documents_plugins:
-                    tasks.append(plugin.run_plugin(event=AsyncEvent.CONCURRENT, ids=ids))
-
-                tasks.append(self._http_requests.post(url, ids))
-
-                responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
-                if self._post_delete_documents_plugins:
-                    post = await _run_plugins(
-                        self._post_delete_documents_plugins, AsyncEvent.POST, result=result
-                    )
-                    if isinstance(post.get("generic_result"), TaskInfo):
-                        result = post["generic_result"]
-                return result
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 for plugin in self._concurrent_delete_documents_plugins:
                     tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT, ids=ids))
@@ -2945,25 +2596,6 @@ class AsyncIndex(BaseIndex):
             )
 
         if self._concurrent_delete_documents_by_filter_plugins:
-            if not use_task_groups():
-                tasks: Any = []
-                for plugin in self._concurrent_delete_documents_by_filter_plugins:
-                    tasks.append(plugin.run_plugin(event=AsyncEvent.CONCURRENT, filter=filter))
-
-                tasks.append(self._http_requests.post(url, body={"filter": filter}))
-
-                responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
-                if self._post_delete_documents_by_filter_plugins:
-                    post = await _run_plugins(
-                        self._post_delete_documents_by_filter_plugins,
-                        AsyncEvent.POST,
-                        result=result,
-                    )
-                    if isinstance(post["generic_result"], TaskInfo):
-                        result = post["generic_result"]
-                return result
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 for plugin in self._concurrent_delete_documents_by_filter_plugins:
                     tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT, filter=filter))
@@ -3038,21 +2670,10 @@ class AsyncIndex(BaseIndex):
                         filter_value, custom_metadata=custom_metadata
                     )
 
-            if not use_task_groups():
-                tasks = [delete_with_limit(filter) for filter in filters]
-                return await asyncio.gather(*tasks)
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 tg_tasks = [tg.create_task(delete_with_limit(filter)) for filter in filters]
 
             return [x.result() for x in tg_tasks]
-
-        if not use_task_groups():
-            tasks = [
-                self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
-                for filter in filters
-            ]
-            return await asyncio.gather(*tasks)
 
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             tg_tasks = [
@@ -3092,23 +2713,6 @@ class AsyncIndex(BaseIndex):
             await _run_plugins(self._pre_delete_all_documents_plugins, AsyncEvent.PRE)
 
         if self._concurrent_delete_all_documents_plugins:
-            if not use_task_groups():
-                tasks: Any = []
-                for plugin in self._concurrent_delete_all_documents_plugins:
-                    tasks.append(plugin.run_plugin(event=AsyncEvent.CONCURRENT))
-
-                tasks.append(self._http_requests.delete(url))
-
-                responses = await asyncio.gather(*tasks)
-                result = TaskInfo(**responses[-1].json())
-                if self._post_delete_all_documents_plugins:
-                    post = await _run_plugins(
-                        self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
-                    )
-                    if isinstance(post.get("generic_result"), TaskInfo):
-                        result = post["generic_result"]
-                return result
-
             async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
                 for plugin in self._concurrent_delete_all_documents_plugins:
                     tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT))
@@ -4794,45 +4398,11 @@ async def _run_plugins(
     event: AsyncEvent,
     **kwargs: Any,  # noqa: ANN401
 ) -> dict[str, Any]:
-    generic_plugins = []
-    document_plugins = []
-    search_plugins = []
     results: dict[str, Any] = {
         "generic_result": None,
         "document_result": None,
         "search_result": None,
     }
-    if not use_task_groups():
-        for plugin in plugins:
-            if plugin_has_method(plugin, "run_plugin"):
-                generic_plugins.append(plugin.run_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-            if plugin_has_method(plugin, "run_document_plugin"):
-                document_plugins.append(plugin.run_document_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-            if plugin_has_method(plugin, "run_post_search_plugin"):
-                search_plugins.append(plugin.run_post_search_plugin(event=event, **kwargs))  # type: ignore[union-attr]
-        if generic_plugins:
-            generic_results = await asyncio.gather(*generic_plugins)
-            for result in reversed(generic_results):
-                if result is not None:
-                    results["generic_result"] = result
-                    break
-
-        if document_plugins:
-            document_results = await asyncio.gather(*document_plugins)
-            for result in reversed(document_results):
-                if result is not None:
-                    results["document_result"] = result
-                    break
-
-        if search_plugins:
-            search_results = await asyncio.gather(*search_plugins)
-            for result in reversed(search_results):
-                if result is not None:
-                    results["search_result"] = result
-                    break
-
-        return results
-
     async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
         generic_tasks = []
         document_tasks = []

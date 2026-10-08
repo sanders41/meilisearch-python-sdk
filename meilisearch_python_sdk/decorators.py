@@ -6,7 +6,6 @@ from functools import wraps
 from typing import Any, NamedTuple
 
 from meilisearch_python_sdk import AsyncClient, Client
-from meilisearch_python_sdk._utils import use_task_groups
 from meilisearch_python_sdk.types import JsonMapping
 
 
@@ -210,11 +209,6 @@ async def _async_add_documents(
     )
 
     if wait_for_task:
-        if not use_task_groups():
-            waits = [async_client.wait_for_task(x.task_uid) for x in tasks]
-            await asyncio.gather(*waits)
-            return
-
         async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
             [tg.create_task(async_client.wait_for_task(x.task_uid)) for x in tasks]
 
