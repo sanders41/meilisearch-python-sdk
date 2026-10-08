@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal
 
 from camel_converter.pydantic_base import CamelBase
@@ -138,7 +138,7 @@ class Embedders(CamelBase):
     ]
 
 
-class ProximityPrecision(str, Enum):
+class ProximityPrecision(StrEnum):
     BY_WORD = "byWord"
     BY_ATTRIBUTE = "byAttribute"
 

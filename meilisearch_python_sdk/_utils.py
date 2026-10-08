@@ -3,10 +3,8 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
-import sys
 from calendar import timegm
-from datetime import datetime, timezone
-from functools import lru_cache
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from httpx2 import AsyncClient as HttpxAsyncClient
@@ -44,11 +42,6 @@ def get_client(
         return client
 
     return client.http_client
-
-
-@lru_cache(maxsize=1)
-def use_task_groups() -> bool:
-    return True if sys.version_info >= (3, 11) else False
 
 
 def _jwt_b64encode(data: bytes) -> str:
@@ -97,7 +90,7 @@ def decode_jwt(
     if not isinstance(payload, dict):
         raise DecodeError("Invalid payload string: must be a json object")
 
-    now = datetime.now(tz=timezone.utc).timestamp()
+    now = datetime.now(tz=UTC).timestamp()
 
     if "iat" in payload:
         try:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from meilisearch_python_sdk._utils import encode_jwt
@@ -106,7 +106,7 @@ class BaseClient:
 
         payload["apiKeyUid"] = api_key.uid
         if expires_at:
-            if expires_at <= datetime.now(tz=timezone.utc):
+            if expires_at <= datetime.now(tz=UTC):
                 raise ValueError("expires_at must be a time in the future")
 
             payload["exp"] = int(datetime.timestamp(expires_at))

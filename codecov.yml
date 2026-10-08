@@ -1,6 +1,0 @@
-codecov:
-  notify:
-    after_n_builds: 15
-
-comment:
-  after_n_builds: 15

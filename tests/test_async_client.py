@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 from urllib.parse import quote_plus
 from uuid import uuid4
@@ -219,7 +219,7 @@ async def test_generate_tenant_token_default_key_expires(
     json_handler, async_client, default_search_key
 ):
     search_rules: JsonDict = {"test": "value"}
-    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
+    expires_at = datetime.now(tz=UTC) + timedelta(days=1)
     expected: JsonDict = {"searchRules": search_rules}
     expected["apiKeyUid"] = default_search_key.uid
     expected["exp"] = int(datetime.timestamp(expires_at))
@@ -234,7 +234,7 @@ async def test_generate_tenant_token_default_key_expires(
 @pytest.mark.no_parallel
 async def test_generate_tenant_token_default_key_expires_past(async_client, default_search_key):
     search_rules: JsonDict = {"test": "value"}
-    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=-1)
+    expires_at = datetime.now(tz=UTC) + timedelta(days=-1)
     with pytest.raises(ValueError):
         async_client.generate_tenant_token(
             search_rules, api_key=default_search_key, expires_at=expires_at
@@ -456,7 +456,7 @@ async def test_health(async_client):
 
 
 async def test_create_key(test_key_info, async_client):
-    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=2)
+    expires_at = datetime.now(tz=UTC) + timedelta(days=2)
     test_key_info.expires_at = expires_at
     key = await async_client.create_key(test_key_info)
 

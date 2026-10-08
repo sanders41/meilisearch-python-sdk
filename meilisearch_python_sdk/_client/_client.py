@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Self
 
 from camel_converter import dict_to_camel
 from httpx2 import Client as HttpxClient
@@ -46,17 +46,11 @@ from meilisearch_python_sdk.plugins import IndexPlugins
 from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:
-    import sys
     from ssl import SSLContext
     from types import TracebackType
 
     from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
     from meilisearch_python_sdk.types import JsonMapping
-
-    if sys.version_info >= (3, 11):
-        from typing import Self
-    else:
-        from typing_extensions import Self
 
 
 class Client(BaseClient):

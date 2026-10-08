@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from camel_converter.pydantic_base import CamelBase
@@ -325,7 +325,7 @@ def test_search_with_tenant_token(
 def test_search_with_tenant_token_and_expire_date(
     client, index_with_documents, base_url, default_search_key, ssl_verify
 ):
-    expires_at = datetime.now(tz=timezone.utc) + timedelta(days=1)
+    expires_at = datetime.now(tz=UTC) + timedelta(days=1)
     token = client.generate_tenant_token(
         search_rules=["*"], api_key=default_search_key, expires_at=expires_at
     )
