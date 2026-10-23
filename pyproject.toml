@@ -45,7 +45,7 @@ dev = [
   "prek==0.5.7",
   "ruff==0.17.2",
   "types-aiofiles==25.1.0.20260518",
-  "zensical==0.0.71",
+  "zensical==0.0.72",
 ]
 
 [tool.hatch.version]
