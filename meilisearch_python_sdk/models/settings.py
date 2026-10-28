@@ -33,8 +33,8 @@ class Faceting(CamelBase):
             return None
 
         for _, value in v.items():
-            if value not in ("alpha", "count"):
-                raise ValueError('facet_order must be either "alpha" or "count"')
+            if value not in ("alpha", "count", "sampledCount"):
+                raise ValueError('facet_order must be either "alpha", "count", "sampledCount"')
 
         return v
 
