@@ -1622,7 +1622,7 @@ def test_add_documents_custom_serializer(compress, empty_index):
         {"id": uuid4(), "title": "Test 2", "when": datetime.now()},
     ]
     index = empty_index()
-    index._json_handler = BuiltinHandler(serializer=CustomEncoder)
+    index._json_handler.serializer = CustomEncoder
     response = index.add_documents(documents, compress=compress)
     update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
     assert update.status == "succeeded"
