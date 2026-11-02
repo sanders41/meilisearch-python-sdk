@@ -788,6 +788,16 @@ def test_delete_tasks(client):
 
 @pytest.mark.usefixtures("create_tasks")
 @pytest.mark.no_parallel
+def test_delete_tasks_empty_uids_deletes_nothing(client):
+    task = client.delete_tasks(uids=[])
+    completed_task = client.wait_for_task(task.task_uid)
+
+    assert completed_task.details is not None
+    assert completed_task.details["deletedTasks"] == 0
+
+
+@pytest.mark.usefixtures("create_tasks")
+@pytest.mark.no_parallel
 def test_delete_tasks_index_uids(client):
     task = client.delete_tasks(index_uids=["1"])
     client.wait_for_task(task.task_uid)
