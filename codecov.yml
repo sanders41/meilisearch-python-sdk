@@ -1,5 +1,5 @@
 codecov:
   notify:
-    after_n_builds: 4
+    after_n_builds: 7
   comment:
-    after_n_builds: 4
+    after_n_builds: 7
