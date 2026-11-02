@@ -1265,7 +1265,7 @@ class AsyncIndex(BaseIndex):
                 documents=documents,
                 primary_key=primary_key,
             )
-            if pre.get("document_result"):
+            if pre.get("document_result") is not None:
                 documents = pre["document_result"]
 
         if self._concurrent_add_documents_plugins:
@@ -1904,7 +1904,7 @@ class AsyncIndex(BaseIndex):
                 documents=documents,
                 primary_key=primary_key,
             )
-            if pre.get("document_result"):
+            if pre.get("document_result") is not None:
                 documents = pre["document_result"]
 
         if self._concurrent_update_documents_plugins:

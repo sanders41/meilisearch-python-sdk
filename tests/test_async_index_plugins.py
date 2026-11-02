@@ -130,6 +130,22 @@ class PrePlugin:
         print(f"Pre plugin ran {kwargs}")  # noqa: T201
 
 
+class EmptyDocumentPlugin:
+    CONCURRENT_EVENT = False
+    POST_EVENT = False
+    PRE_EVENT = True
+
+    async def run_document_plugin(
+        self,
+        event: AsyncEvent,
+        *,
+        documents: Sequence[JsonMapping],
+        primary_key: str | None,
+        **kwargs: Any,
+    ) -> Sequence[JsonMapping] | None:
+        return []
+
+
 @pytest.mark.parametrize(
     "plugins, expected",
     (
@@ -530,3 +546,27 @@ async def test_update_documents_task_info(plugins, async_client, small_movies):
     doc["title"] = "test"
     task = await index.update_documents([doc])
     assert task.task_uid == 1
+
+
+async def test_add_documents_pre_plugin_empty_result(async_client, small_movies):
+    plugins = AsyncIndexPlugins(add_documents_plugins=(EmptyDocumentPlugin(),))
+    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+    task = await index.add_documents(small_movies)
+    await async_client.wait_for_task(task.task_uid)
+    documents = await index.get_documents()
+
+    assert documents.results == []
+
+
+async def test_update_documents_pre_plugin_empty_result(async_client, small_movies):
+    plugins = AsyncIndexPlugins(update_documents_plugins=(EmptyDocumentPlugin(),))
+    index = await async_client.create_index(str(uuid4()), plugins=plugins)
+    task = await index.add_documents(small_movies)
+    await async_client.wait_for_task(task.task_uid)
+    doc = deepcopy(small_movies[0])
+    doc["title"] = "Test"
+    task = await index.update_documents([doc])
+    await async_client.wait_for_task(task.task_uid)
+    result = await index.get_document(doc["id"])
+
+    assert result["title"] == small_movies[0]["title"]

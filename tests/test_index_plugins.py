@@ -111,6 +111,42 @@ class TaskInfoPlugin:
         )
 
 
+class PostDocumentPlugin:
+    POST_EVENT = True
+    PRE_EVENT = False
+
+    def __init__(self) -> None:
+        self.documents: Sequence[JsonMapping] | None = None
+        self.primary_key: str | None = None
+
+    def run_document_plugin(
+        self,
+        event: Event,
+        *,
+        documents: Sequence[JsonMapping],
+        primary_key: str | None,
+        **kwargs: Any,
+    ) -> Sequence[JsonMapping] | None:
+        self.documents = documents
+        self.primary_key = primary_key
+        return None
+
+
+class EmptyDocumentPlugin:
+    POST_EVENT = False
+    PRE_EVENT = True
+
+    def run_document_plugin(
+        self,
+        event: Event,
+        *,
+        documents: Sequence[JsonMapping],
+        primary_key: str | None,
+        **kwargs: Any,
+    ) -> Sequence[JsonMapping] | None:
+        return []
+
+
 @pytest.mark.parametrize(
     "plugins, expected",
     (
@@ -477,3 +513,47 @@ def test_update_documents_task_info(client, small_movies):
     doc["title"] = "test"
     task = index.update_documents([doc])
     assert task.task_uid == 1
+
+
+def test_add_documents_post_document_plugin(client, small_movies):
+    plugin = PostDocumentPlugin()
+    plugins = IndexPlugins(add_documents_plugins=(plugin,))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    task = index.add_documents(small_movies, primary_key="id")
+    client.wait_for_task(task.task_uid)
+
+    assert plugin.documents == small_movies
+    assert plugin.primary_key == "id"
+
+
+def test_update_documents_post_document_plugin(client, small_movies):
+    plugin = PostDocumentPlugin()
+    plugins = IndexPlugins(update_documents_plugins=(plugin,))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    task = index.update_documents(small_movies, primary_key="id")
+    client.wait_for_task(task.task_uid)
+
+    assert plugin.documents == small_movies
+    assert plugin.primary_key == "id"
+
+
+def test_add_documents_pre_plugin_empty_result(client, small_movies):
+    plugins = IndexPlugins(add_documents_plugins=(EmptyDocumentPlugin(),))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    task = index.add_documents(small_movies)
+    client.wait_for_task(task.task_uid)
+
+    assert index.get_documents().results == []
+
+
+def test_update_documents_pre_plugin_empty_result(client, small_movies):
+    plugins = IndexPlugins(update_documents_plugins=(EmptyDocumentPlugin(),))
+    index = client.create_index(str(uuid4()), plugins=plugins)
+    task = index.add_documents(small_movies)
+    client.wait_for_task(task.task_uid)
+    doc = deepcopy(small_movies[0])
+    doc["title"] = "Test"
+    task = index.update_documents([doc])
+    client.wait_for_task(task.task_uid)
+
+    assert index.get_document(doc["id"])["title"] == small_movies[0]["title"]
