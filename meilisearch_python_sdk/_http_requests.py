@@ -22,9 +22,10 @@ from meilisearch_python_sdk.errors import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
     from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
+    from meilisearch_python_sdk.types import JsonMapping
 
 
 class AsyncHttpRequests:
@@ -51,25 +52,12 @@ class AsyncHttpRequests:
         try:
             if body is None:
                 response = await http_method(path)
-            elif content_type == "application/json" and not compress:
-                response = await http_method(
-                    path, content=self.json_handler.dump_bytes(body), headers=headers
-                )
             else:
-                if compress:
-                    if content_type == "application/json":
-                        body = gzip.compress(self.json_handler.dump_bytes(body))
-                    else:
-                        if isinstance(body, bytes):
-                            data = body
-                        elif isinstance(body, bytearray):
-                            data = bytes(body)
-                        else:
-                            data = body.encode("utf-8")
-
-                        body = gzip.compress(data)
-
-                response = await http_method(path, content=body, headers=headers)
+                response = await http_method(
+                    path,
+                    content=_encode_body(self.json_handler, body, content_type, compress),
+                    headers=headers,
+                )
             response.raise_for_status()
             return response
 
@@ -140,25 +128,12 @@ class HttpRequests:
         try:
             if body is None:
                 response = http_method(path)
-            elif content_type == "application/json" and not compress:
-                response = http_method(
-                    path, content=self.json_handler.dump_bytes(body), headers=headers
-                )
             else:
-                if compress:
-                    if content_type == "application/json":
-                        body = gzip.compress(self.json_handler.dump_bytes(body))
-                    else:
-                        if isinstance(body, bytes):
-                            data = body
-                        elif isinstance(body, bytearray):
-                            data = bytes(body)
-                        else:
-                            data = body.encode("utf-8")
-
-                        body = gzip.compress(data)
-
-                response = http_method(path, content=body, headers=headers)
+                response = http_method(
+                    path,
+                    content=_encode_body(self.json_handler, body, content_type, compress),
+                    headers=headers,
+                )
 
             response.raise_for_status()
             return response
@@ -222,3 +197,21 @@ def build_headers(content_type: str, compress: bool) -> dict[str, str]:
 @lru_cache(maxsize=1)
 def user_agent() -> str:
     return f"Meilisearch Python SDK (v{VERSION})"
+
+
+def _encode_body(
+    json_handler: BuiltinHandler | OrjsonHandler,
+    body: JsonMapping | Sequence[JsonMapping] | Sequence[str] | str | bytes | bytearray | bool,
+    content_type: str,
+    compress: bool,
+) -> bytes:
+    if content_type == "application/json":
+        data = json_handler.dump_bytes(body)
+    elif isinstance(body, str):
+        data = body.encode("utf-8")
+    elif isinstance(body, bytes | bytearray):
+        data = bytes(body)
+    else:
+        raise TypeError(f"Unsupported body type for {content_type}: {type(body).__name__}")
+
+    return gzip.compress(data) if compress else data
