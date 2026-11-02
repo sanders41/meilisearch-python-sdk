@@ -206,7 +206,7 @@ def process_search_parameters(
         body["retrieveVectors"] = retrieve_vectors
 
     if exhaustive_facet_count is not None:
-        body["exhaustivefacetCount"] = exhaustive_facet_count
+        body["exhaustiveFacetCount"] = exhaustive_facet_count
 
     if media is not None:
         body["media"] = media
