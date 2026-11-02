@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from meilisearch_python_sdk._utils import decode_jwt, encode_jwt
+from meilisearch_python_sdk._utils import encode_jwt
 from meilisearch_python_sdk.errors import (
     DecodeError,
     ExpiredSignatureError,
@@ -17,6 +17,7 @@ from meilisearch_python_sdk.errors import (
     InvalidSubjectError,
 )
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
+from tests.conftest import decode_jwt
 
 
 def raw_token(payload_bytes, key, json_handler):
