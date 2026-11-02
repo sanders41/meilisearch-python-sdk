@@ -9,7 +9,14 @@ from uuid import uuid4
 import pytest
 from camel_converter.pydantic_base import CamelBase
 from httpx2 import Client as HttpxClient
-from httpx2 import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
+from httpx2 import (
+    ConnectError,
+    ConnectTimeout,
+    ReadTimeout,
+    RemoteProtocolError,
+    Request,
+    Response,
+)
 
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk.errors import (
@@ -582,6 +589,15 @@ def test_remote_protocol_error(client, monkeypatch):
 def test_connection_timeout(client, monkeypatch):
     def mock_error(*args, **kwargs):
         raise ConnectTimeout("error")
+
+    monkeypatch.setattr(HttpxClient, "post", mock_error)
+    with pytest.raises(MeilisearchCommunicationError):
+        client.create_index("some_index")
+
+
+def test_read_timeout(client, monkeypatch):
+    def mock_error(*args, **kwargs):
+        raise ReadTimeout("error")
 
     monkeypatch.setattr(HttpxClient, "post", mock_error)
     with pytest.raises(MeilisearchCommunicationError):

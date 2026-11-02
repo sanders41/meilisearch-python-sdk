@@ -7,11 +7,9 @@ from typing import TYPE_CHECKING, Any
 from httpx2 import (
     AsyncClient,
     Client,
-    ConnectError,
-    ConnectTimeout,
     HTTPError,
-    RemoteProtocolError,
     Response,
+    TransportError,
 )
 
 from meilisearch_python_sdk._version import VERSION
@@ -61,7 +59,7 @@ class AsyncHttpRequests:
             response.raise_for_status()
             return response
 
-        except (ConnectError, ConnectTimeout, RemoteProtocolError) as err:
+        except TransportError as err:
             raise MeilisearchCommunicationError(str(err)) from err
         except HTTPError as err:
             if "response" in locals():
@@ -138,7 +136,7 @@ class HttpRequests:
             response.raise_for_status()
             return response
 
-        except (ConnectError, ConnectTimeout, RemoteProtocolError) as err:
+        except TransportError as err:
             raise MeilisearchCommunicationError(str(err)) from err
         except HTTPError as err:
             if "response" in locals():
