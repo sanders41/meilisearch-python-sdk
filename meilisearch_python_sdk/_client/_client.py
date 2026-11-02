@@ -780,10 +780,12 @@ class Client(BaseClient):
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     index = client.get_raw_index("movies")
         """
-        response = self.http_client.get(f"indexes/{uid}")
-
-        if response.status_code == 404:
-            return None
+        try:
+            response = self._http_requests.get(f"indexes/{uid}")
+        except MeilisearchApiError as e:
+            if e.status_code == 404:
+                return None
+            raise
 
         return IndexInfo(**self._http_requests.parse_json(response))
 

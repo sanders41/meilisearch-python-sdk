@@ -413,6 +413,12 @@ async def test_get_raw_index_none(async_client):
     assert response is None
 
 
+async def test_get_raw_index_bad_key(base_url, ssl_verify):
+    async with AsyncClient(base_url, "bad", verify=ssl_verify) as client:
+        with pytest.raises(MeilisearchApiError):
+            await client.get_raw_index("test")
+
+
 @pytest.mark.no_parallel
 async def test_get_raw_indexes(async_client, async_indexes_sample):
     _, index_uid, index_uid2 = async_indexes_sample
