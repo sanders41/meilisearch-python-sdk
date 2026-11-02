@@ -170,17 +170,17 @@ def add_documents(
                 )
                 return result
 
-            decorator_client = Client(
+            with Client(
                 url=connection_info.url, api_key=connection_info.api_key, verify=verify
-            )
-            _add_documents(
-                decorator_client,
-                index_name,
-                result,
-                batch_size,
-                primary_key,
-                wait_for_task,
-            )
+            ) as client:
+                _add_documents(
+                    client,
+                    index_name,
+                    result,
+                    batch_size,
+                    primary_key,
+                    wait_for_task,
+                )
 
             return result
 
