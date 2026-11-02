@@ -405,6 +405,12 @@ def test_get_raw_index_none(client):
     assert response is None
 
 
+def test_get_raw_index_bad_key(base_url, ssl_verify):
+    with Client(base_url, "bad", verify=ssl_verify) as client:
+        with pytest.raises(MeilisearchApiError):
+            client.get_raw_index("test")
+
+
 @pytest.mark.no_parallel
 def test_get_raw_indexes(client, indexes_sample):
     _, index_uid, index_uid2 = indexes_sample
