@@ -190,10 +190,10 @@ async def async_wait_for_task(
     client_ = get_async_client(client)
     http_requests = AsyncHttpRequests(client_, json_handler)
     url = f"tasks/{task_id}"
-    start_time = datetime.now()
+    start_time = time.monotonic()
     elapsed_time = 0.0
 
-    if timeout_in_ms:
+    if timeout_in_ms is not None:
         while elapsed_time < timeout_in_ms:
             response = await http_requests.get(url)
             status = TaskResult(**json_handler.loads(response.content))
@@ -202,8 +202,7 @@ async def async_wait_for_task(
                     raise MeilisearchTaskFailedError(f"Task {task_id} failed")
                 return status
             await asyncio.sleep(interval_in_ms / 1000)
-            time_delta = datetime.now() - start_time
-            elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
+            elapsed_time = (time.monotonic() - start_time) * 1000
         raise MeilisearchTimeoutError(
             f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
         )
@@ -355,10 +354,10 @@ def wait_for_task(
     client_ = get_client(client)
     http_requests = HttpRequests(client_, json_handler=json_handler)
     url = f"tasks/{task_id}"
-    start_time = datetime.now()
+    start_time = time.monotonic()
     elapsed_time = 0.0
 
-    if timeout_in_ms:
+    if timeout_in_ms is not None:
         while elapsed_time < timeout_in_ms:
             response = http_requests.get(url)
             status = TaskResult(**json_handler.loads(response.content))
@@ -367,8 +366,7 @@ def wait_for_task(
                     raise MeilisearchTaskFailedError(f"Task {task_id} failed")
                 return status
             time.sleep(interval_in_ms / 1000)
-            time_delta = datetime.now() - start_time
-            elapsed_time = time_delta.seconds * 1000 + time_delta.microseconds / 1000
+            elapsed_time = (time.monotonic() - start_time) * 1000
         raise MeilisearchTimeoutError(
             f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
         )
