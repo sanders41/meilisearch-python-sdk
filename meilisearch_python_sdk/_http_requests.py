@@ -201,7 +201,7 @@ def user_agent() -> str:
 
 def _encode_body(
     json_handler: BuiltinHandler | OrjsonHandler,
-    body: JsonMapping | Sequence[JsonMapping] | Sequence[str] | str | bool,
+    body: JsonMapping | Sequence[JsonMapping] | Sequence[str] | str | bytes | bytearray | bool,
     content_type: str,
     compress: bool,
 ) -> bytes:
@@ -209,6 +209,8 @@ def _encode_body(
         data = json_handler.dump_bytes(body)
     elif isinstance(body, str):
         data = body.encode("utf-8")
+    elif isinstance(body, bytes | bytearray):
+        data = bytes(body)
     else:
         raise TypeError(f"Unsupported body type for {content_type}: {type(body).__name__}")
 
