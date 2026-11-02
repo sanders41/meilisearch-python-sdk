@@ -11,13 +11,11 @@ except ImportError:  # pragma: no cover
 
 
 class _JsonHandler(ABC):
-    @staticmethod
     @abstractmethod
-    def dumps(obj: Any) -> str: ...  # noqa: ANN401
+    def dumps(self, obj: Any) -> str: ...  # noqa: ANN401
 
-    @staticmethod
     @abstractmethod
-    def dump_bytes(obj: Any) -> bytes: ...  # noqa: ANN401
+    def dump_bytes(self, obj: Any) -> bytes: ...  # noqa: ANN401
 
     @staticmethod
     @abstractmethod
@@ -25,8 +23,6 @@ class _JsonHandler(ABC):
 
 
 class BuiltinHandler(_JsonHandler):
-    serializer: type[json.JSONEncoder] | None = None
-
     def __init__(self, serializer: type[json.JSONEncoder] | None = None) -> None:
         """Uses the json module from the Python standard library.
 
@@ -34,15 +30,13 @@ class BuiltinHandler(_JsonHandler):
             serializer: A custom JSONEncode to handle serializing fields that the build in
                 json.dumps cannot handle, for example UUID and datetime. Defaults to None.
         """
-        BuiltinHandler.serializer = serializer
+        self.serializer = serializer
 
-    @staticmethod
-    def dumps(obj: Any) -> str:  # noqa: ANN401
-        return json.dumps(obj, cls=BuiltinHandler.serializer)
+    def dumps(self, obj: Any) -> str:  # noqa: ANN401
+        return json.dumps(obj, cls=self.serializer)
 
-    @staticmethod
-    def dump_bytes(obj: Any) -> bytes:  # noqa: ANN401
-        return json.dumps(obj, cls=BuiltinHandler.serializer).encode("utf-8")
+    def dump_bytes(self, obj: Any) -> bytes:  # noqa: ANN401
+        return json.dumps(obj, cls=self.serializer).encode("utf-8")
 
     @staticmethod
     def loads(json_string: str | bytes | bytearray) -> Any:  # noqa: ANN401
