@@ -1178,6 +1178,16 @@ def test_get_batches_with_params(client, empty_index, small_movies):
     assert len(result.results) > 0
 
 
+def test_get_batches_naive_date_filter(client, empty_index, small_movies):
+    index = empty_index()
+    response = index.add_documents(small_movies)
+    client.wait_for_task(response.task_uid)
+    before = datetime.now(tz=UTC).replace(tzinfo=None) - timedelta(hours=1)
+
+    result = client.get_batches(after_enqueued_at=before)
+    assert len(result.results) > 0
+
+
 def test_get_batch(client, empty_index, small_movies):
     # Add documents to create batches
     index = empty_index()

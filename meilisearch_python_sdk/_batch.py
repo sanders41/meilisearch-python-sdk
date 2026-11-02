@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_sdk._utils import get_async_client, get_client
+from meilisearch_python_sdk._utils import get_async_client, get_client, process_params
 from meilisearch_python_sdk.errors import BatchNotFoundError, MeilisearchApiError
 from meilisearch_python_sdk.models.batch import BatchResult, BatchStatus
 
@@ -54,7 +54,7 @@ async def async_get_batches(
 ) -> BatchStatus:
     client_ = get_async_client(client)
     http_requests = AsyncHttpRequests(client_, json_handler)
-    params = _build_parameters(
+    params = process_params(
         uids=uids,
         batch_uids=batch_uids,
         index_uids=index_uids,
@@ -107,7 +107,7 @@ def get_batches(
 ) -> BatchStatus:
     client_ = get_client(client)
     http_requests = HttpRequests(client_, json_handler)
-    params = _build_parameters(
+    params = process_params(
         uids=uids,
         batch_uids=batch_uids,
         index_uids=index_uids,
@@ -125,57 +125,3 @@ def get_batches(
     response = http_requests.get(f"batches?{urlencode(params)}")
 
     return BatchStatus(**json_handler.loads(response.content))
-
-
-def _build_parameters(
-    *,
-    uids: list[int] | None = None,
-    batch_uids: list[int] | None = None,
-    index_uids: list[str] | None = None,
-    statuses: list[str] | None = None,
-    types: list[str] | None = None,
-    limit: int = 20,
-    from_: str | None = None,
-    reverse: bool = False,
-    before_enqueued_at: datetime | None = None,
-    after_enqueued_at: datetime | None = None,
-    before_started_at: datetime | None = None,
-    after_finished_at: datetime | None = None,
-) -> dict[str, str]:
-    params = {}
-
-    if uids:
-        params["uids"] = ",".join([str(uid) for uid in uids])
-
-    if batch_uids:  # pragma: no cover
-        params["batchUids"] = ",".join([str(uid) for uid in batch_uids])
-
-    if index_uids:  # pragma: no cover
-        params["indexUids"] = ",".join([str(uid) for uid in index_uids])
-
-    if statuses:  # pragma: no cover
-        params["statuses"] = ",".join(statuses)
-
-    if types:  # pragma: no cover
-        params["types"] = ",".join(types)
-
-    params["limit"] = str(limit)
-
-    if from_:  # pragma: no cover
-        params["from"] = from_
-
-    params["reverse"] = "true" if reverse else "false"
-
-    if before_enqueued_at:  # pragma: no cover
-        params["beforeEnqueuedAt"] = before_enqueued_at.isoformat()
-
-    if after_enqueued_at:  # pragma: no cover
-        params["afterEnqueuedAt"] = after_enqueued_at.isoformat()
-
-    if before_started_at:  # pragma: no cover
-        params["beforeStartedAt"] = before_started_at.isoformat()
-
-    if after_finished_at:  # pragma: no cover
-        params["afterFinishedAt"] = after_finished_at.isoformat()
-
-    return params
