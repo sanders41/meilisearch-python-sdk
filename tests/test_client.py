@@ -1038,6 +1038,23 @@ def test_get_tasks_date_filters(client, empty_index, small_movies):
     assert client.get_tasks(uids=[task.uid], after_started_at=future).results == []
 
 
+def test_get_tasks_date_filters_timezone_aware(client, empty_index, small_movies):
+    index = empty_index()
+    response = index.add_documents(small_movies)
+    task = client.wait_for_task(response.task_uid)
+    before = task.enqueued_at - timedelta(seconds=1)
+    after = task.finished_at + timedelta(seconds=1)
+
+    assert before.tzinfo is not None
+    assert task.uid in [
+        x.uid for x in client.get_tasks(uids=[task.uid], after_enqueued_at=before).results
+    ]
+    assert task.uid in [
+        x.uid for x in client.get_tasks(uids=[task.uid], before_finished_at=after).results
+    ]
+    assert client.get_tasks(uids=[task.uid], after_enqueued_at=after).results == []
+
+
 def test_get_task(client, empty_index, small_movies):
     index = empty_index()
     response = index.add_documents(small_movies)
