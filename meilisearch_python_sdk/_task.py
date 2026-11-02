@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 
@@ -10,7 +10,7 @@ from httpx2 import AsyncClient as HttpxAsyncClient
 from httpx2 import Client as HttpxClient
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests, HttpRequests
-from meilisearch_python_sdk._utils import get_async_client, get_client
+from meilisearch_python_sdk._utils import get_async_client, get_client, process_params
 from meilisearch_python_sdk.errors import MeilisearchTaskFailedError, MeilisearchTimeoutError
 from meilisearch_python_sdk.models.task import TaskInfo, TaskResult, TaskStatus
 
@@ -62,7 +62,7 @@ async def async_cancel_tasks(
         >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
         >>>     await cancel_tasks(client, uids=[1, 2])
     """
-    parameters = _process_params(
+    parameters = process_params(
         uids=uids,
         index_uids=index_uids,
         statuses=statuses,
@@ -98,7 +98,7 @@ async def async_delete_tasks(
     before_started_at: datetime | None = None,
     after_finished_at: datetime | None = None,
 ) -> TaskInfo:
-    parameters = _process_params(
+    parameters = process_params(
         uids=uids,
         index_uids=index_uids,
         statuses=statuses,
@@ -153,7 +153,7 @@ async def async_get_tasks(
     limit: int | None = None,
     from_: int | None = None,
 ) -> TaskStatus:
-    parameters = _process_params(
+    parameters = process_params(
         uids=uids,
         index_uids=index_ids,
         statuses=statuses,
@@ -230,7 +230,7 @@ def cancel_tasks(
     before_started_at: datetime | None = None,
     after_finished_at: datetime | None = None,
 ) -> TaskInfo:
-    parameters = _process_params(
+    parameters = process_params(
         uids=uids,
         index_uids=index_uids,
         statuses=statuses,
@@ -266,7 +266,7 @@ def delete_tasks(
     before_started_at: datetime | None = None,
     after_finished_at: datetime | None = None,
 ) -> TaskInfo:
-    parameters = _process_params(
+    parameters = process_params(
         uids=uids,
         index_uids=index_uids,
         statuses=statuses,
@@ -317,7 +317,7 @@ def get_tasks(
     limit: int | None = None,
     from_: int | None = None,
 ) -> TaskStatus:
-    parameters = _process_params(
+    parameters = process_params(
         uids=uids,
         index_uids=index_ids,
         statuses=statuses,
@@ -379,69 +379,3 @@ def wait_for_task(
                     raise MeilisearchTaskFailedError(f"Task {task_id} failed")
                 return status
             time.sleep(interval_in_ms / 1000)
-
-
-def _format_datetime(value: datetime) -> str:
-    if value.tzinfo is None:
-        return f"{value.isoformat()}Z"
-
-    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
-
-
-def _join_values(values: str | list[str] | list[int]) -> str:
-    if isinstance(values, str):
-        return values
-
-    return ",".join([str(x) for x in values])
-
-
-def _process_params(
-    uids: list[int] | None = None,
-    index_uids: list[str] | None = None,
-    statuses: str | list[str] | None = None,
-    types: str | list[str] | None = None,
-    before_enqueued_at: datetime | None = None,
-    after_enqueued_at: datetime | None = None,
-    before_started_at: datetime | None = None,
-    after_finished_at: datetime | None = None,
-    batch_uids: list[int] | None = None,
-    canceled_by: list[int] | None = None,
-    after_started_at: datetime | None = None,
-    before_finished_at: datetime | None = None,
-    limit: int | None = None,
-    from_: int | None = None,
-    reverse: bool | None = None,
-) -> dict[str, str]:
-    parameters = {}
-    if uids:
-        parameters["uids"] = _join_values(uids)
-    if batch_uids:
-        parameters["batchUids"] = _join_values(batch_uids)
-    if index_uids:
-        parameters["indexUids"] = _join_values(index_uids)
-    if canceled_by:
-        parameters["canceledBy"] = _join_values(canceled_by)
-    if statuses:
-        parameters["statuses"] = _join_values(statuses)
-    if types:
-        parameters["types"] = _join_values(types)
-    if before_enqueued_at:
-        parameters["beforeEnqueuedAt"] = _format_datetime(before_enqueued_at)
-    if after_enqueued_at:
-        parameters["afterEnqueuedAt"] = _format_datetime(after_enqueued_at)
-    if before_started_at:
-        parameters["beforeStartedAt"] = _format_datetime(before_started_at)
-    if after_started_at:
-        parameters["afterStartedAt"] = _format_datetime(after_started_at)
-    if before_finished_at:
-        parameters["beforeFinishedAt"] = _format_datetime(before_finished_at)
-    if after_finished_at:
-        parameters["afterFinishedAt"] = _format_datetime(after_finished_at)
-    if limit is not None:
-        parameters["limit"] = str(limit)
-    if from_ is not None:
-        parameters["from"] = str(from_)
-    if reverse is not None:
-        parameters["reverse"] = str(reverse).lower()
-
-    return parameters

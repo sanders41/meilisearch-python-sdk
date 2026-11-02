@@ -1212,6 +1212,16 @@ async def test_get_batches_with_params(async_client, async_empty_index, small_mo
     assert len(result.results) > 0
 
 
+async def test_get_batches_naive_date_filter(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    response = await index.add_documents(small_movies)
+    await async_client.wait_for_task(response.task_uid)
+    before = datetime.now(tz=UTC).replace(tzinfo=None) - timedelta(hours=1)
+
+    result = await async_client.get_batches(after_enqueued_at=before)
+    assert len(result.results) > 0
+
+
 async def test_get_batch(async_client, async_empty_index, small_movies):
     # Add documents to create batches
     index = await async_empty_index()
