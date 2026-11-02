@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator, MutableMapping, Sequence
+from csv import DictReader
 from datetime import datetime
 from itertools import chain, islice
 from pathlib import Path
@@ -9,7 +10,7 @@ from urllib.parse import urlencode
 
 from pydantic import TypeAdapter
 
-from meilisearch_python_sdk.errors import MeilisearchError
+from meilisearch_python_sdk.errors import InvalidDocumentError, MeilisearchError
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.search import Hybrid, Personalize
 from meilisearch_python_sdk.models.settings import (
@@ -348,3 +349,43 @@ def validate_file_type(file_path: Path) -> None:
 def validate_ranking_score_threshold(ranking_score_threshold: float) -> None:
     if not 0.0 <= ranking_score_threshold <= 1.0:
         raise MeilisearchError("ranking_score_threshold must be between 0.0 and 1.0")
+
+
+def _load_documents_from_file(
+    file_path: Path | str,
+    csv_delimiter: str | None = None,
+    *,
+    json_handler: BuiltinHandler | OrjsonHandler,
+) -> list[dict[Any, Any]]:
+    if isinstance(file_path, str):
+        file_path = Path(file_path)
+
+    validate_file_type(file_path)
+
+    if file_path.suffix == ".csv":
+        if (
+            csv_delimiter
+            and len(csv_delimiter) != 1
+            or csv_delimiter
+            and not csv_delimiter.isascii()
+        ):
+            raise ValueError("csv_delimiter must be a single ascii character")
+        with open(file_path) as f:
+            if csv_delimiter:
+                documents = DictReader(f, delimiter=csv_delimiter)
+            else:
+                documents = DictReader(f)
+            return list(documents)
+
+    if file_path.suffix == ".ndjson":
+        with open(file_path) as f:
+            return [json_handler.loads(x) for x in f]
+
+    with open(file_path) as f:
+        data = f.read()
+        documents = json_handler.loads(data)
+
+        if not isinstance(documents, list):
+            raise InvalidDocumentError("Meilisearch requires documents to be in a list")
+
+        return documents
