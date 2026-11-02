@@ -1,4 +1,5 @@
 import json
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -11,3 +12,25 @@ def test_dumps(json_handler):
 
     assert isinstance(result, str)
     assert json.loads(result) == {"id": 1, "title": "Shazam!"}
+
+
+def test_serializer_not_shared():
+    doc_id = uuid4()
+
+    class UUIDEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, UUID):
+                return str(o)
+            return super().default(o)
+
+    handler = BuiltinHandler(serializer=UUIDEncoder)
+    BuiltinHandler()
+
+    assert json.loads(
+        handler.dumps(
+            {
+                "id": doc_id,
+            }
+        )
+    ) == {"id": str(doc_id)}
+    assert json.loads(handler.dump_bytes({"id": doc_id})) == {"id": str(doc_id)}
