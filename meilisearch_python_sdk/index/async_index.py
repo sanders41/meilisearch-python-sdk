@@ -6,7 +6,6 @@ from functools import cached_property, partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Self
 
-import aiofiles
 from camel_converter import to_snake
 from httpx2 import AsyncClient
 
@@ -1788,8 +1787,7 @@ class AsyncIndex(BaseIndex):
         else:
             url = self._documents_url
 
-        async with aiofiles.open(upload_path) as f:
-            data = await f.read()
+        data = await asyncio.to_thread(upload_path.read_text, encoding="utf-8")
 
         response = await self._http_requests.post(
             url, body=data, content_type=content_type, compress=compress
@@ -2437,8 +2435,7 @@ class AsyncIndex(BaseIndex):
         else:
             url = self._documents_url
 
-        async with aiofiles.open(upload_path) as f:
-            data = await f.read()
+        data = await asyncio.to_thread(upload_path.read_text, encoding="utf-8")
 
         response = await self._http_requests.put(
             url, body=data, content_type=content_type, compress=compress
