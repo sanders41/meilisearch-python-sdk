@@ -209,7 +209,7 @@ async def _async_add_documents(
     )
 
     if wait_for_task:
-        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+        async with asyncio.TaskGroup() as tg:
             [
                 tg.create_task(async_client.wait_for_task(x.task_uid, timeout_in_ms=None))
                 for x in tasks
