@@ -3,6 +3,7 @@ import csv
 import json
 from datetime import datetime
 from math import ceil
+from pathlib import Path
 from uuid import UUID, uuid4
 
 import aiofiles
@@ -15,9 +16,10 @@ from meilisearch_python_sdk.errors import (
     MeilisearchError,
 )
 from meilisearch_python_sdk.index._common import combine_documents
-from meilisearch_python_sdk.index.async_index import _async_load_documents_from_file
+from meilisearch_python_sdk.index.async_index import AsyncIndex, _async_load_documents_from_file
 from meilisearch_python_sdk.json_handler import BuiltinHandler
 from meilisearch_python_sdk.models.settings import MeilisearchSettings
+from meilisearch_python_sdk.models.task import TaskInfo
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -75,6 +77,38 @@ def add_ndjson_file(file_path, num_movies=50, id_start=0):
     with open(file_path, "w") as f:
         for line in movies:
             f.write(f"{line}\n")
+
+
+original_iterdir = Path.iterdir
+
+
+def sorted_iterdir(self):
+    return iter(sorted(original_iterdir(self)))
+
+
+def build_directory_with_non_matching_first_entry(directory):
+    (directory / "a.txt").write_text("not a document")
+    add_json_file(directory / "b.json", 2, 0)
+    add_json_file(directory / "c.json", 2, 10)
+    add_json_file(directory / "d.json", 2, 20)
+
+
+def make_recording_send(events, returns_list=False):
+    async def fake_send(self, documents, *args, **kwargs):
+        call = len([x for x in events if x[0] == "start"])
+        events.append(("start", call))
+        await asyncio.sleep(0.01)
+        events.append(("end", call))
+        task = TaskInfo(
+            task_uid=call,
+            status="enqueued",
+            type="documentAdditionOrUpdate",
+            task_type="documentAdditionOrUpdate",
+            enqueued_at=datetime.now(),
+        )
+        return [task] if returns_list else task
+
+    return fake_send
 
 
 @pytest.fixture
@@ -293,8 +327,9 @@ async def test_add_documents_from_directory_ndjson(
 
 @pytest.mark.parametrize("combine_documents", (True, False))
 @pytest.mark.parametrize("compress", (True, False))
+@pytest.mark.parametrize("concurrency_limit", (None, 2))
 async def test_add_documents_from_directory_no_documents(
-    combine_documents, compress, async_client, tmp_path
+    combine_documents, compress, concurrency_limit, async_client, tmp_path
 ):
     async with aiofiles.open(tmp_path / "test.txt", "w") as f:
         await f.write("nothing")
@@ -302,8 +337,63 @@ async def test_add_documents_from_directory_no_documents(
     with pytest.raises(MeilisearchError):
         index = async_client.index(str(uuid4()))
         await index.add_documents_from_directory(
-            tmp_path, combine_documents=combine_documents, compress=compress
+            tmp_path,
+            combine_documents=combine_documents,
+            compress=compress,
+            concurrency_limit=concurrency_limit,
         )
+
+
+@pytest.mark.parametrize("concurrency_limit", (None, 2))
+async def test_add_documents_from_directory_sends_first_matching_file_alone(
+    concurrency_limit, async_client, tmp_path, monkeypatch
+):
+    build_directory_with_non_matching_first_entry(tmp_path)
+    events = []
+    monkeypatch.setattr(Path, "iterdir", sorted_iterdir)
+    monkeypatch.setattr(AsyncIndex, "add_documents", make_recording_send(events))
+    index = async_client.index(str(uuid4()))
+
+    responses = await index.add_documents_from_directory(
+        tmp_path, combine_documents=False, concurrency_limit=concurrency_limit
+    )
+
+    assert len(responses) == 3
+    assert events[:2] == [("start", 0), ("end", 0)]
+
+
+async def test_update_documents_from_directory_sends_first_matching_file_alone(
+    async_client, tmp_path, monkeypatch
+):
+    build_directory_with_non_matching_first_entry(tmp_path)
+    events = []
+    monkeypatch.setattr(Path, "iterdir", sorted_iterdir)
+    monkeypatch.setattr(AsyncIndex, "update_documents", make_recording_send(events))
+    index = async_client.index(str(uuid4()))
+
+    responses = await index.update_documents_from_directory(tmp_path, combine_documents=False)
+
+    assert len(responses) == 3
+    assert events[:2] == [("start", 0), ("end", 0)]
+
+
+async def test_update_documents_from_directory_in_batches_sends_first_matching_file_alone(
+    async_client, tmp_path, monkeypatch
+):
+    build_directory_with_non_matching_first_entry(tmp_path)
+    events = []
+    monkeypatch.setattr(Path, "iterdir", sorted_iterdir)
+    monkeypatch.setattr(
+        AsyncIndex, "update_documents_in_batches", make_recording_send(events, returns_list=True)
+    )
+    index = async_client.index(str(uuid4()))
+
+    responses = await index.update_documents_from_directory_in_batches(
+        tmp_path, combine_documents=False
+    )
+
+    assert len(responses) == 3
+    assert events[:2] == [("start", 0), ("end", 0)]
 
 
 @pytest.mark.parametrize("delimiter", [";;", "😀"])

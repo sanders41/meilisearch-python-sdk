@@ -741,7 +741,7 @@ class AsyncIndex(BaseIndex):
             )
 
         if self._concurrent_search_plugins:
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 for plugin in self._concurrent_search_plugins:
                     if plugin_has_method(plugin, "run_plugin"):
                         tg.create_task(
@@ -970,7 +970,7 @@ class AsyncIndex(BaseIndex):
             )
 
         if self._concurrent_facet_search_plugins:
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 for plugin in self._concurrent_facet_search_plugins:
                     if plugin_has_method(plugin, "run_plugin"):
                         tg.create_task(
@@ -1269,7 +1269,7 @@ class AsyncIndex(BaseIndex):
                 documents = pre["document_result"]
 
         if self._concurrent_add_documents_plugins:
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 for plugin in self._concurrent_add_documents_plugins:
                     if plugin_has_method(plugin, "run_plugin"):
                         tg.create_task(
@@ -1373,14 +1373,14 @@ class AsyncIndex(BaseIndex):
                         batch_data, primary_key, custom_metadata=custom_metadata, compress=compress
                     )
 
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 tasks = [
                     tg.create_task(add_batch_with_limit(x)) for x in batch(documents, batch_size)
                 ]
 
             return [x.result() for x in tasks]
 
-        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+        async with asyncio.TaskGroup() as tg:
             tasks = [
                 tg.create_task(
                     self.add_documents(
@@ -1474,49 +1474,52 @@ class AsyncIndex(BaseIndex):
                         compress=compress,
                     )
 
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            paths = [p for p in directory.iterdir() if p.suffix == f".{document_type}"]
+            async with asyncio.TaskGroup() as tg:
                 tasks = []
                 all_results = []
-                for i, path in enumerate(directory.iterdir()):
-                    if path.suffix == f".{document_type}":
-                        documents = await _async_load_documents_from_file(
-                            path, csv_delimiter, json_handler=self._json_handler
-                        )
-                        if i == 0:
-                            all_results = [await add_docs_with_limit(documents)]
-                        else:
-                            tasks.append(tg.create_task(add_docs_with_limit(documents)))
-
-            return [*all_results, *[x.result() for x in tasks]]
-
-        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
-            tasks = []
-            all_results = []
-            for i, path in enumerate(directory.iterdir()):
-                if path.suffix == f".{document_type}":
+                for i, path in enumerate(paths):
                     documents = await _async_load_documents_from_file(
                         path, csv_delimiter, json_handler=self._json_handler
                     )
                     if i == 0:
-                        all_results = [
-                            await self.add_documents(
+                        all_results = [await add_docs_with_limit(documents)]
+                    else:
+                        tasks.append(tg.create_task(add_docs_with_limit(documents)))
+
+            all_results = [*all_results, *[x.result() for x in tasks]]
+            raise_on_no_documents(all_results, document_type, directory_path)
+            return all_results
+
+        async with asyncio.TaskGroup() as tg:
+            tasks = []
+            all_results = []
+            for i, path in enumerate(
+                [p for p in directory.iterdir() if p.suffix == f".{document_type}"]
+            ):
+                documents = await _async_load_documents_from_file(
+                    path, csv_delimiter, json_handler=self._json_handler
+                )
+                if i == 0:
+                    all_results = [
+                        await self.add_documents(
+                            documents,
+                            primary_key=primary_key,
+                            custom_metadata=custom_metadata,
+                            compress=compress,
+                        )
+                    ]
+                else:
+                    tasks.append(
+                        tg.create_task(
+                            self.add_documents(
                                 documents,
-                                primary_key=primary_key,
+                                primary_key,
                                 custom_metadata=custom_metadata,
                                 compress=compress,
                             )
-                        ]
-                    else:
-                        tasks.append(
-                            tg.create_task(
-                                self.add_documents(
-                                    documents,
-                                    primary_key,
-                                    custom_metadata=custom_metadata,
-                                    compress=compress,
-                                )
-                            )
                         )
+                    )
 
         results = [x.result() for x in tasks]
         all_results = [*all_results, *results]
@@ -1908,7 +1911,7 @@ class AsyncIndex(BaseIndex):
                 documents = pre["document_result"]
 
         if self._concurrent_update_documents_plugins:
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 for plugin in self._concurrent_update_documents_plugins:
                     if plugin_has_method(plugin, "run_plugin"):
                         tg.create_task(
@@ -2021,13 +2024,13 @@ class AsyncIndex(BaseIndex):
                         compress=compress,
                     )
 
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 tasks = [
                     tg.create_task(update_batch_with_limit(x)) for x in batch(documents, batch_size)
                 ]
             return [x.result() for x in tasks]
 
-        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+        async with asyncio.TaskGroup() as tg:
             tasks = [
                 tg.create_task(
                     self.update_documents(
@@ -2114,36 +2117,37 @@ class AsyncIndex(BaseIndex):
             )
             return [response]
 
-        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+        async with asyncio.TaskGroup() as tg:
             tasks = []
             results = []
-            for i, path in enumerate(directory.iterdir()):
-                if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(
-                        path, csv_delimiter, json_handler=self._json_handler
-                    )
-                    if i == 0:
-                        results = [
-                            await self.update_documents(
+            for i, path in enumerate(
+                [p for p in directory.iterdir() if p.suffix == f".{document_type}"]
+            ):
+                documents = await _async_load_documents_from_file(
+                    path, csv_delimiter, json_handler=self._json_handler
+                )
+                if i == 0:
+                    results = [
+                        await self.update_documents(
+                            documents,
+                            primary_key,
+                            custom_metadata=custom_metadata,
+                            skip_creation=skip_creation,
+                            compress=compress,
+                        )
+                    ]
+                else:
+                    tasks.append(
+                        tg.create_task(
+                            self.update_documents(
                                 documents,
                                 primary_key,
                                 custom_metadata=custom_metadata,
                                 skip_creation=skip_creation,
                                 compress=compress,
                             )
-                        ]
-                    else:
-                        tasks.append(
-                            tg.create_task(
-                                self.update_documents(
-                                    documents,
-                                    primary_key,
-                                    custom_metadata=custom_metadata,
-                                    skip_creation=skip_creation,
-                                    compress=compress,
-                                )
-                            )
                         )
+                    )
 
         results = [*results, *[x.result() for x in tasks]]
         raise_on_no_documents(results, document_type, directory_path)
@@ -2229,38 +2233,39 @@ class AsyncIndex(BaseIndex):
                 concurrency_limit=concurrency_limit,
             )
 
-        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+        async with asyncio.TaskGroup() as tg:
             results = []
             tasks = []
-            for i, path in enumerate(directory.iterdir()):
-                if path.suffix == f".{document_type}":
-                    documents = await _async_load_documents_from_file(
-                        path, csv_delimiter, json_handler=self._json_handler
+            for i, path in enumerate(
+                [p for p in directory.iterdir() if p.suffix == f".{document_type}"]
+            ):
+                documents = await _async_load_documents_from_file(
+                    path, csv_delimiter, json_handler=self._json_handler
+                )
+                if i == 0:
+                    results = await self.update_documents_in_batches(
+                        documents,
+                        batch_size=batch_size,
+                        primary_key=primary_key,
+                        custom_metadata=custom_metadata,
+                        compress=compress,
+                        skip_creation=skip_creation,
+                        concurrency_limit=concurrency_limit,
                     )
-                    if i == 0:
-                        results = await self.update_documents_in_batches(
-                            documents,
-                            batch_size=batch_size,
-                            primary_key=primary_key,
-                            custom_metadata=custom_metadata,
-                            compress=compress,
-                            skip_creation=skip_creation,
-                            concurrency_limit=concurrency_limit,
-                        )
-                    else:
-                        tasks.append(
-                            tg.create_task(
-                                self.update_documents_in_batches(
-                                    documents,
-                                    batch_size=batch_size,
-                                    primary_key=primary_key,
-                                    custom_metadata=custom_metadata,
-                                    compress=compress,
-                                    skip_creation=skip_creation,
-                                    concurrency_limit=concurrency_limit,
-                                )
+                else:
+                    tasks.append(
+                        tg.create_task(
+                            self.update_documents_in_batches(
+                                documents,
+                                batch_size=batch_size,
+                                primary_key=primary_key,
+                                custom_metadata=custom_metadata,
+                                compress=compress,
+                                skip_creation=skip_creation,
+                                concurrency_limit=concurrency_limit,
                             )
                         )
+                    )
 
         results = [*results, *[x for y in tasks for x in y.result()]]
         raise_on_no_documents(results, document_type, directory_path)
@@ -2476,7 +2481,7 @@ class AsyncIndex(BaseIndex):
             )
 
         if self._concurrent_delete_document_plugins:
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 for plugin in self._concurrent_delete_document_plugins:
                     tg.create_task(
                         plugin.run_plugin(event=AsyncEvent.CONCURRENT, document_id=document_id)
@@ -2536,7 +2541,7 @@ class AsyncIndex(BaseIndex):
             await _run_plugins(self._pre_delete_documents_plugins, AsyncEvent.PRE, ids=ids)
 
         if self._concurrent_delete_documents_plugins:
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 for plugin in self._concurrent_delete_documents_plugins:
                     tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT, ids=ids))
 
@@ -2596,7 +2601,7 @@ class AsyncIndex(BaseIndex):
             )
 
         if self._concurrent_delete_documents_by_filter_plugins:
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 for plugin in self._concurrent_delete_documents_by_filter_plugins:
                     tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT, filter=filter))
 
@@ -2670,12 +2675,12 @@ class AsyncIndex(BaseIndex):
                         filter_value, custom_metadata=custom_metadata
                     )
 
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 tg_tasks = [tg.create_task(delete_with_limit(filter)) for filter in filters]
 
             return [x.result() for x in tg_tasks]
 
-        async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+        async with asyncio.TaskGroup() as tg:
             tg_tasks = [
                 tg.create_task(
                     self.delete_documents_by_filter(filter, custom_metadata=custom_metadata)
@@ -2713,7 +2718,7 @@ class AsyncIndex(BaseIndex):
             await _run_plugins(self._pre_delete_all_documents_plugins, AsyncEvent.PRE)
 
         if self._concurrent_delete_all_documents_plugins:
-            async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+            async with asyncio.TaskGroup() as tg:
                 for plugin in self._concurrent_delete_all_documents_plugins:
                     tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT))
 
@@ -4403,7 +4408,7 @@ async def _run_plugins(
         "document_result": None,
         "search_result": None,
     }
-    async with asyncio.TaskGroup() as tg:  # type: ignore[attr-defined]
+    async with asyncio.TaskGroup() as tg:
         generic_tasks = []
         document_tasks = []
         search_tasks = []
