@@ -252,7 +252,7 @@ def embedder_json_to_embedders_model(  # pragma: no cover
             embedders[k] = OllamaEmbedder(**v)
         elif v.get("source") == "rest":
             embedders[k] = RestEmbedder(**v)
-        elif v.get("source") == "composit":
+        elif v.get("source") == "composite":
             embedders[k] = CompositeEmbedder(**v)
         else:
             embedders[k] = UserProvidedEmbedder(**v)
@@ -297,7 +297,7 @@ def embedder_json_to_settings_model(  # pragma: no cover
             embedders[k] = OllamaEmbedder(**v)
         elif v.get("source") == "rest":
             embedders[k] = RestEmbedder(**v)
-        elif v.get("source") == "composit":
+        elif v.get("source") == "composite":
             embedders[k] = CompositeEmbedder(**v)
         else:
             embedders[k] = UserProvidedEmbedder(**v)
