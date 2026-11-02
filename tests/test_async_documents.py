@@ -1998,6 +1998,16 @@ async def test_async_load_documents_from_file_invalid_document(tmp_path):
         await _async_load_documents_from_file(file_path, json_handler=BuiltinHandler())
 
 
+async def test_async_load_documents_from_file_ndjson_blank_lines(tmp_path):
+    file_path = tmp_path / "test.ndjson"
+    file_path.write_text('{"id": 1}\n\n{"id": 2}\n   \n')
+
+    assert await _async_load_documents_from_file(file_path, json_handler=BuiltinHandler()) == [
+        {"id": 1},
+        {"id": 2},
+    ]
+
+
 def test_combine_documents():
     docs = [
         [{"id": 1, "name": "Test 1"}, {"id": 2, "name": "Test 2"}],

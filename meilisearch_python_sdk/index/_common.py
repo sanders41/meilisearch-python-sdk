@@ -379,7 +379,7 @@ def _load_documents_from_file(
 
     if file_path.suffix == ".ndjson":
         with open(file_path) as f:
-            return [json_handler.loads(x) for x in f]
+            return [json_handler.loads(x) for x in f if x.strip()]
 
     with open(file_path) as f:
         data = f.read()
