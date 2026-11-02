@@ -67,17 +67,17 @@ def process_params(
     reverse: bool | None = None,
 ) -> dict[str, str]:
     parameters = {}
-    if uids:
+    if uids is not None:
         parameters["uids"] = _join_values(uids)
-    if batch_uids:
+    if batch_uids is not None:
         parameters["batchUids"] = _join_values(batch_uids)
-    if index_uids:
+    if index_uids is not None:
         parameters["indexUids"] = _join_values(index_uids)
-    if canceled_by:
+    if canceled_by is not None:
         parameters["canceledBy"] = _join_values(canceled_by)
-    if statuses:
+    if statuses is not None:
         parameters["statuses"] = _join_values(statuses)
-    if types:
+    if types is not None:
         parameters["types"] = _join_values(types)
     if before_enqueued_at:
         parameters["beforeEnqueuedAt"] = _format_datetime(before_enqueued_at)
