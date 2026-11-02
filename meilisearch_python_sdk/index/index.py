@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from csv import DictReader
 from datetime import datetime
 from functools import cached_property
 from pathlib import Path
@@ -11,9 +10,9 @@ from httpx2 import Client
 
 from meilisearch_python_sdk._http_requests import HttpRequests
 from meilisearch_python_sdk._task import wait_for_task
-from meilisearch_python_sdk.errors import InvalidDocumentError
 from meilisearch_python_sdk.index._common import (
     BaseIndex,
+    _load_documents_from_file,
     batch,
     build_encoded_url,
     embedder_json_to_embedders_model,
@@ -23,7 +22,6 @@ from meilisearch_python_sdk.index._common import (
     prepare_raw_file_upload,
     process_search_parameters,
     raise_on_no_documents,
-    validate_file_type,
     validate_ranking_score_threshold,
 )
 from meilisearch_python_sdk.index._common import combine_documents as combine_documents_
@@ -3891,43 +3889,3 @@ def _run_plugins(
                 break
 
     return results
-
-
-def _load_documents_from_file(
-    file_path: Path | str,
-    csv_delimiter: str | None = None,
-    *,
-    json_handler: BuiltinHandler | OrjsonHandler,
-) -> list[dict[Any, Any]]:
-    if isinstance(file_path, str):
-        file_path = Path(file_path)
-
-    validate_file_type(file_path)
-
-    if file_path.suffix == ".csv":
-        if (
-            csv_delimiter
-            and len(csv_delimiter) != 1
-            or csv_delimiter
-            and not csv_delimiter.isascii()
-        ):
-            raise ValueError("csv_delimiter must be a single ascii character")
-        with open(file_path) as f:
-            if csv_delimiter:
-                documents = DictReader(f, delimiter=csv_delimiter)
-            else:
-                documents = DictReader(f)
-            return list(documents)
-
-    if file_path.suffix == ".ndjson":
-        with open(file_path) as f:
-            return [json_handler.loads(x) for x in f]
-
-    with open(file_path) as f:
-        data = f.read()
-        documents = json_handler.loads(data)
-
-        if not isinstance(documents, list):
-            raise InvalidDocumentError("Meilisearch requires documents to be in a list")
-
-        return documents
