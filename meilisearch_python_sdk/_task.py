@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 
@@ -383,6 +383,13 @@ def wait_for_task(
             time.sleep(interval_in_ms / 1000)
 
 
+def _format_datetime(value: datetime) -> str:
+    if value.tzinfo is None:
+        return f"{value.isoformat()}Z"
+
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
 def _join_values(values: str | list[str] | list[int]) -> str:
     if isinstance(values, str):
         return values
@@ -421,17 +428,17 @@ def _process_params(
     if types:
         parameters["types"] = _join_values(types)
     if before_enqueued_at:
-        parameters["beforeEnqueuedAt"] = f"{before_enqueued_at.isoformat()}Z"
+        parameters["beforeEnqueuedAt"] = _format_datetime(before_enqueued_at)
     if after_enqueued_at:
-        parameters["afterEnqueuedAt"] = f"{after_enqueued_at.isoformat()}Z"
+        parameters["afterEnqueuedAt"] = _format_datetime(after_enqueued_at)
     if before_started_at:
-        parameters["beforeStartedAt"] = f"{before_started_at.isoformat()}Z"
+        parameters["beforeStartedAt"] = _format_datetime(before_started_at)
     if after_started_at:
-        parameters["afterStartedAt"] = f"{after_started_at.isoformat()}Z"
+        parameters["afterStartedAt"] = _format_datetime(after_started_at)
     if before_finished_at:
-        parameters["beforeFinishedAt"] = f"{before_finished_at.isoformat()}Z"
+        parameters["beforeFinishedAt"] = _format_datetime(before_finished_at)
     if after_finished_at:
-        parameters["afterFinishedAt"] = f"{after_finished_at.isoformat()}Z"
+        parameters["afterFinishedAt"] = _format_datetime(after_finished_at)
     if limit is not None:
         parameters["limit"] = str(limit)
     if from_ is not None:

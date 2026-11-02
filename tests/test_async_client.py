@@ -1059,6 +1059,25 @@ async def test_get_tasks_date_filters(async_client, async_empty_index, small_mov
 
 
 @pytest.mark.no_parallel
+async def test_get_tasks_date_filters_timezone_aware(async_client, async_empty_index, small_movies):
+    index = await async_empty_index()
+    response = await index.add_documents(small_movies)
+    task = await async_client.wait_for_task(response.task_uid)
+    before = task.enqueued_at - timedelta(seconds=1)
+    after = task.finished_at + timedelta(seconds=1)
+
+    assert before.tzinfo is not None
+
+    after_hit = await async_client.get_tasks(uids=[task.uid], after_enqueued_at=before)
+    before_hit = await async_client.get_tasks(uids=[task.uid], before_finished_at=after)
+    after_miss = await async_client.get_tasks(uids=[task.uid], after_enqueued_at=after)
+
+    assert [x.uid for x in after_hit.results] == [task.uid]
+    assert [x.uid for x in before_hit.results] == [task.uid]
+    assert after_miss.results == []
+
+
+@pytest.mark.no_parallel
 async def test_get_task(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
     response = await index.add_documents(small_movies)
