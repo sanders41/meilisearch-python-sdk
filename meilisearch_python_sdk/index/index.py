@@ -1100,13 +1100,19 @@ class Index(BaseIndex):
                 documents=documents,
                 primary_key=primary_key,
             )
-            if pre.get("document_result"):
+            if pre.get("document_result") is not None:
                 documents = pre["document_result"]
 
         response = self._http_requests.post(url, documents, compress=compress)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_add_documents_plugins:
-            post = _run_plugins(self._post_add_documents_plugins, Event.POST, result=result)
+            post = _run_plugins(
+                self._post_add_documents_plugins,
+                Event.POST,
+                result=result,
+                documents=documents,
+                primary_key=primary_key,
+            )
             if isinstance(post.get("generic_result"), TaskInfo):
                 result = post["generic_result"]
 
@@ -1592,13 +1598,19 @@ class Index(BaseIndex):
                 documents=documents,
                 primary_key=primary_key,
             )
-            if pre.get("document_result"):
+            if pre.get("document_result") is not None:
                 documents = pre["document_result"]
 
         response = self._http_requests.put(url, documents, compress=compress)
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_update_documents_plugins:
-            post = _run_plugins(self._post_update_documents_plugins, Event.POST, result=result)
+            post = _run_plugins(
+                self._post_update_documents_plugins,
+                Event.POST,
+                result=result,
+                documents=documents,
+                primary_key=primary_key,
+            )
             if isinstance(post.get("generic_result"), TaskInfo):
                 result = post["generic_result"]
 
