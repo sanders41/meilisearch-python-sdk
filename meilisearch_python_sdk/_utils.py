@@ -10,15 +10,6 @@ from typing import TYPE_CHECKING
 from httpx2 import AsyncClient as HttpxAsyncClient
 from httpx2 import Client as HttpxClient
 
-from meilisearch_python_sdk.errors import (
-    DecodeError,
-    ExpiredSignatureError,
-    ImmatureSignatureError,
-    InvalidIssuedAtError,
-    InvalidJTIError,
-    InvalidSignatureError,
-    InvalidSubjectError,
-)
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 
 if TYPE_CHECKING:
@@ -134,61 +125,3 @@ def encode_jwt(*, payload: JsonDict, key: str, json_handler: BuiltinHandler | Or
     sig = _jwt_b64encode(hmac.new(key.encode(), message.encode(), hashlib.sha256).digest())
 
     return f"{message}.{sig}"
-
-
-def decode_jwt(
-    *, token: str, key: str, json_handler: BuiltinHandler | OrjsonHandler, leeway: float = 0
-) -> JsonDict:
-    header_b64, payload_b64, sig_b64 = token.split(".")
-    message = f"{header_b64}.{payload_b64}"
-    expected = _jwt_b64encode(hmac.new(key.encode(), message.encode(), hashlib.sha256).digest())
-
-    if not hmac.compare_digest(sig_b64, expected):
-        raise InvalidSignatureError("Signature verification failed")
-
-    padding = "=" * (4 - len(payload_b64) % 4)
-
-    try:
-        payload = json_handler.loads(base64.urlsafe_b64decode(payload_b64 + padding))
-    except Exception as e:
-        raise DecodeError(f"Invalid payload string: {e}") from e
-
-    if not isinstance(payload, dict):
-        raise DecodeError("Invalid payload string: must be a json object")
-
-    now = datetime.now(tz=UTC).timestamp()
-
-    if "iat" in payload:
-        try:
-            iat = int(payload["iat"])
-        except (ValueError, TypeError):
-            raise InvalidIssuedAtError("Issued At claim (iat) must be an integer.") from None
-
-        if iat > (now + leeway):
-            raise ImmatureSignatureError("The token is not yet valid (iat)")
-
-    if "nbf" in payload:
-        try:
-            nbf = int(payload["nbf"])
-        except (ValueError, TypeError):
-            raise DecodeError("Not Before claim (nbf) must be an integer.") from None
-
-        if nbf > (now + leeway):
-            raise ImmatureSignatureError("The token is not yet valid (nbf)")
-
-    if "exp" in payload:
-        try:
-            exp = int(payload["exp"])
-        except (ValueError, TypeError):
-            raise DecodeError("Expiration Time claim (exp) must be an integer.") from None
-
-        if exp <= (now - leeway):
-            raise ExpiredSignatureError("Signature has expired")
-
-    if "sub" in payload and not isinstance(payload["sub"], str):
-        raise InvalidSubjectError("Subject must be a string")
-
-    if "jti" in payload and not isinstance(payload["jti"], str):
-        raise InvalidJTIError("JWT ID must be a string")
-
-    return payload

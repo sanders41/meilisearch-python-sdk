@@ -15,7 +15,6 @@ from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk._task import (
     async_get_task,
 )
-from meilisearch_python_sdk._utils import decode_jwt
 from meilisearch_python_sdk.errors import (
     BatchNotFoundError,
     InvalidRestriction,
@@ -30,6 +29,7 @@ from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.version import Version
 from meilisearch_python_sdk.models.webhook import WebhookCreate, WebhookUpdate
 from meilisearch_python_sdk.types import JsonDict
+from tests.conftest import decode_jwt
 
 
 @pytest.fixture

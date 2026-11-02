@@ -12,7 +12,6 @@ from httpx2 import Client as HttpxClient
 from httpx2 import ConnectError, ConnectTimeout, RemoteProtocolError, Request, Response
 
 from meilisearch_python_sdk import Client
-from meilisearch_python_sdk._utils import decode_jwt
 from meilisearch_python_sdk.errors import (
     BatchNotFoundError,
     InvalidRestriction,
@@ -27,6 +26,7 @@ from meilisearch_python_sdk.models.index import IndexInfo
 from meilisearch_python_sdk.models.version import Version
 from meilisearch_python_sdk.models.webhook import WebhookCreate, WebhookUpdate
 from meilisearch_python_sdk.types import JsonDict
+from tests.conftest import decode_jwt
 
 
 @pytest.fixture
