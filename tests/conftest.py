@@ -23,13 +23,6 @@ from meilisearch_python_sdk import AsyncClient, Client
 from meilisearch_python_sdk._task import async_wait_for_task, wait_for_task
 from meilisearch_python_sdk._utils import _jwt_b64encode
 from meilisearch_python_sdk.errors import (
-    DecodeError,
-    ExpiredSignatureError,
-    ImmatureSignatureError,
-    InvalidIssuedAtError,
-    InvalidJTIError,
-    InvalidSignatureError,
-    InvalidSubjectError,
     MeilisearchApiError,
 )
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
@@ -50,6 +43,54 @@ MASTER_KEY = "masterKey"
 
 ROOT_PATH = Path().absolute()
 SMALL_MOVIES_PATH = ROOT_PATH / "datasets" / "small_movies.json"
+
+
+class InvalidTokenError(Exception):
+    """Base exception when ``decode()`` fails on a token"""
+
+    pass
+
+
+class DecodeError(InvalidTokenError):
+    """Raised when a token cannot be decoded because it failed validation"""
+
+    pass
+
+
+class InvalidIssuedAtError(InvalidTokenError):
+    """Raised when a token's ``iat`` claim is non-numeric"""
+
+    pass
+
+
+class InvalidSignatureError(DecodeError):
+    """Raised when a token's signature doesn't match the one provided as part of the token."""
+
+    pass
+
+
+class ImmatureSignatureError(InvalidTokenError):
+    """Raised when a token's ``nbf`` or ``iat`` claims represent a time in the future"""
+
+    pass
+
+
+class ExpiredSignatureError(InvalidTokenError):
+    """Raised when a token's ``exp`` claim indicates it has expired"""
+
+    pass
+
+
+class InvalidSubjectError(InvalidTokenError):
+    """Raised when a token's ``sub`` claim is not a string"""
+
+    pass
+
+
+class InvalidJTIError(InvalidTokenError):
+    """Raised when a token's ``jti`` claim is not a string"""
+
+    pass
 
 
 def decode_jwt(
