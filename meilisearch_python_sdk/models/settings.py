@@ -49,7 +49,7 @@ class Distribution(CamelBase):
 
 
 class OpenAiEmbedder(CamelBase):
-    source: str = "openAi"
+    source: Literal["openAi"] = "openAi"
     url: str | None = None
     model: str | None = None
     dimensions: int | None = None
@@ -61,7 +61,7 @@ class OpenAiEmbedder(CamelBase):
 
 
 class HuggingFaceEmbedder(CamelBase):
-    source: str = "huggingFace"
+    source: Literal["huggingFace"] = "huggingFace"
     model: str | None = None
     revision: str | None = None
     document_template: str | None = None
@@ -73,7 +73,7 @@ class HuggingFaceEmbedder(CamelBase):
 
 
 class OllamaEmbedder(CamelBase):
-    source: str = "ollama"
+    source: Literal["ollama"] = "ollama"
     url: str | None = None
     api_key: str | None = None
     model: str
@@ -85,7 +85,7 @@ class OllamaEmbedder(CamelBase):
 
 
 class RestEmbedder(CamelBase):
-    source: str = "rest"
+    source: Literal["rest"] = "rest"
     url: str
     api_key: str | None = None
     dimensions: int
@@ -108,7 +108,7 @@ class RestEmbedder(CamelBase):
 
 
 class UserProvidedEmbedder(CamelBase):
-    source: str = "userProvided"
+    source: Literal["userProvided"] = "userProvided"
     dimensions: int
     distribution: Distribution | None = None
     document_template: str | None = None
@@ -117,7 +117,7 @@ class UserProvidedEmbedder(CamelBase):
 
 
 class CompositeEmbedder(CamelBase):
-    source: str = "composite"
+    source: Literal["composite"] = "composite"
     search_embedder: (
         OpenAiEmbedder | HuggingFaceEmbedder | OllamaEmbedder | RestEmbedder | UserProvidedEmbedder
     )
