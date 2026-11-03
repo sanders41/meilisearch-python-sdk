@@ -24,7 +24,6 @@ from meilisearch_python_sdk._task import (
 )
 from meilisearch_python_sdk.errors import (
     BatchNotFoundError,
-    InvalidRestriction,
     MeilisearchApiError,
     MeilisearchCommunicationError,
     MeilisearchTaskFailedError,
@@ -246,16 +245,6 @@ async def test_generate_tenant_token_default_key_expires_past(async_client, defa
         async_client.generate_tenant_token(
             search_rules, api_key=default_search_key, expires_at=expires_at
         )
-
-
-@pytest.mark.no_parallel
-async def test_generate_tenant_token_invalid_restriction(test_key_info, async_client):
-    test_key_info.indexes = ["good"]
-    key = await async_client.create_key(test_key_info)
-    payload = {"indexes": ["bad"]}
-
-    with pytest.raises(InvalidRestriction):
-        async_client.generate_tenant_token(payload, api_key=key)
 
 
 @pytest.mark.no_parallel

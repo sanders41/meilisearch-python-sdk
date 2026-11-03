@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from meilisearch_python_sdk._utils import encode_jwt
-from meilisearch_python_sdk.errors import InvalidRestriction
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.client import (
     Key,
@@ -55,9 +54,7 @@ class BaseClient:
 
         Args:
             search_rules: Contains restrictions to use for the token. The default rules used for
-                the API key used for signing can be used by setting searchRules to ["*"]. If "indexes"
-                is included it must be equal to or more restrictive than the key used to generate the
-                token.
+                the API key used for signing can be used by setting searchRules to ["*"].
             api_key: The API key to use to generate the token.
             expires_at: The timepoint at which the token should expire. If value is provided it
                 should be a UTC time in the future. Default = None.
@@ -66,8 +63,6 @@ class BaseClient:
             A JWT token
 
         Raises:
-            InvalidRestriction: If the restrictions are less strict than the permissions allowed
-                in the API key.
             KeyNotFoundError: If no API search key is found.
 
         Examples:
@@ -95,13 +90,6 @@ class BaseClient:
             >>>         search_rules = ["*"], api_key=api_key, expires_at=expires_at
             >>>     )
         """
-        if isinstance(search_rules, dict) and search_rules.get("indexes"):
-            for index in search_rules["indexes"]:
-                if api_key.indexes != ["*"] and index not in api_key.indexes:
-                    raise InvalidRestriction(
-                        "Invalid index. The token cannot be less restrictive than the API key"
-                    )
-
         payload: JsonDict = {"searchRules": search_rules}
 
         payload["apiKeyUid"] = api_key.uid
