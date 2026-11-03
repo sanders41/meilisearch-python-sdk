@@ -1248,6 +1248,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.add_documents_in_batches(documents)
         """
+        if batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
+
         if concurrency_limit:
             semaphore = asyncio.Semaphore(concurrency_limit)
 
@@ -1862,6 +1865,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_documents_in_batches(documents)
         """
+        if batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
+
         if concurrency_limit:
             semaphore = asyncio.Semaphore(concurrency_limit)
 
@@ -2058,6 +2064,9 @@ class AsyncIndex(BaseIndex):
             >>>     index = client.index("movies")
             >>>     await index.update_documents_from_directory_in_batches(directory_path)
         """
+        if batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
+
         directory = Path(directory_path) if isinstance(directory_path, str) else directory_path
 
         if combine_documents:

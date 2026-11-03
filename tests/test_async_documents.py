@@ -2102,3 +2102,24 @@ async def test_edit_documents_by_function_with_custom_metadata(async_index_with_
     response = await index.get_document("287947")
 
     assert response["title"] == "Shazam!"
+
+
+@pytest.mark.parametrize("batch_size", (0, -1))
+@pytest.mark.parametrize("method", ("add_documents_in_batches", "update_documents_in_batches"))
+async def test_documents_in_batches_invalid_batch_size(
+    method, batch_size, async_client, small_movies
+):
+    index = async_client.index(str(uuid4()))
+    with pytest.raises(ValueError):
+        await getattr(index, method)(small_movies, batch_size=batch_size)
+
+
+@pytest.mark.parametrize("batch_size", (0, -1))
+async def test_update_documents_from_directory_in_batches_invalid_batch_size(
+    batch_size, async_client, tmp_path
+):
+    index = async_client.index(str(uuid4()))
+    with pytest.raises(ValueError):
+        await index.update_documents_from_directory_in_batches(
+            tmp_path, batch_size=batch_size, combine_documents=False
+        )
