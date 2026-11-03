@@ -999,10 +999,10 @@ class AsyncIndex(BaseIndex):
             "rankingScoreThreshold": ranking_score_threshold,
         }
 
-        if offset:
+        if offset is not None:
             payload["offset"] = offset
 
-        if limit:
+        if limit is not None:
             payload["limit"] = limit
 
         response = await self._http_requests.post(

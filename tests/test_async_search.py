@@ -747,6 +747,12 @@ async def test_similar_search(limit, offset, async_index_with_documents_and_vect
     assert len(response.hits) >= 1
 
 
+async def test_similar_search_limit_zero(async_index_with_documents_and_vectors):
+    index = await async_index_with_documents_and_vectors()
+    response = await index.search_similar_documents("287947", limit=0)
+    assert response.hits == []
+
+
 async def test_search_locales(async_index_with_documents):
     index = await async_index_with_documents()
     response = await index.search("How to Train Your Dragon", locales=["eng"])

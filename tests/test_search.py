@@ -723,6 +723,12 @@ def test_similar_search(limit, offset, index_with_documents_and_vectors):
     assert len(response.hits) >= 1
 
 
+def test_similar_search_limit_zero(index_with_documents_and_vectors):
+    index = index_with_documents_and_vectors()
+    response = index.search_similar_documents("287947", limit=0)
+    assert response.hits == []
+
+
 def test_search_locales(index_with_documents):
     index = index_with_documents()
     response = index.search("How to Train Your Dragon", locales=["eng"])
