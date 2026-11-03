@@ -196,7 +196,7 @@ async def async_wait_for_task(
     while timeout_in_ms is None or elapsed_time < timeout_in_ms:
         response = await http_requests.get(url)
         status = TaskResult(**json_handler.loads(response.content))
-        if status.status in ("succeeded", "failed"):
+        if status.status in ("succeeded", "failed", "canceled"):
             if raise_for_status and status.status == "failed":
                 raise MeilisearchTaskFailedError(f"Task {task_id} failed")
             return status
@@ -350,7 +350,7 @@ def wait_for_task(
     while timeout_in_ms is None or elapsed_time < timeout_in_ms:
         response = http_requests.get(url)
         status = TaskResult(**json_handler.loads(response.content))
-        if status.status in ("succeeded", "failed"):
+        if status.status in ("succeeded", "failed", "canceled"):
             if raise_for_status and status.status == "failed":
                 raise MeilisearchTaskFailedError(f"Task {task_id} failed")
             return status
