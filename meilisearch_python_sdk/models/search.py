@@ -39,7 +39,7 @@ class Federation(CamelBase):
 
 
 class FederationMerged(Federation):
-    merge_facets: MergeFacets | None
+    merge_facets: MergeFacets | None = None
 
 
 class FederationOptions(CamelBase):
