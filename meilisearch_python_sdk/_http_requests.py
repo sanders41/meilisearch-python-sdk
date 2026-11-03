@@ -49,7 +49,7 @@ class AsyncHttpRequests:
 
         try:
             if body is None:
-                response = await http_method(path)
+                response = await http_method(path, headers={"user-agent": user_agent()})
             else:
                 response = await http_method(
                     path,
@@ -125,7 +125,7 @@ class HttpRequests:
         headers = build_headers(content_type, compress)
         try:
             if body is None:
-                response = http_method(path)
+                response = http_method(path, headers={"user-agent": user_agent()})
             else:
                 response = http_method(
                     path,
