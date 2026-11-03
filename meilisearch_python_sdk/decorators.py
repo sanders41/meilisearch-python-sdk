@@ -31,8 +31,6 @@ def async_add_documents(
 ) -> Callable:
     """Decorator that takes the returned documents from a function and asynchronously adds them to Meilisearch.
 
-    It is required that either an async_client or url is provided.
-
     Args:
         index_name: The name of the index to which the documents should be added.
         connection_info: Either an AsyncClient instance ConnectionInfo with information on how to
@@ -52,7 +50,6 @@ def async_add_documents(
         MeilisearchCommunicationError: If there was an error communicating with the server.
         MeilisearchApiError: If the Meilisearch API returned an error.
         MeilisearchTaskFailedError: If wait_for_task is True and the task failed.
-        ValueError: If neither an async_client nor an url is provided.
 
     Examples:
         >>> from meilisearch_python_sdk import AsyncClient
@@ -114,8 +111,6 @@ def add_documents(
 ) -> Callable:
     """Decorator that takes the returned documents from a function and adds them to Meilisearch.
 
-    It is required that either an client or url is provided.
-
     Args:
         index_name: The name of the index to which the documents should be added.
         connection_info: Either an Client instance ConnectionInfo with information on how to
@@ -135,7 +130,6 @@ def add_documents(
         MeilisearchCommunicationError: If there was an error communicating with the server.
         MeilisearchApiError: If the Meilisearch API returned an error.
         MeilisearchTaskFailedError: If wait_for_task is True and the task failed.
-        ValueError: If neither an async_client nor an url is provided.
 
     Examples:
         >>> from meilisearch_python_sdk import Client
