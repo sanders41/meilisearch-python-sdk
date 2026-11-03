@@ -57,7 +57,9 @@ class BaseClient:
                 the API key used for signing can be used by setting searchRules to ["*"].
             api_key: The API key to use to generate the token.
             expires_at: The timepoint at which the token should expire. If value is provided it
-                should be a UTC time in the future. Default = None.
+                must be a timezone-aware datetime in the future, for example
+                `datetime.now(tz=timezone.utc) + timedelta(days=1)`. Naive datetimes are not
+                accepted and raise a TypeError. Default = None.
 
         Returns:
             A JWT token
