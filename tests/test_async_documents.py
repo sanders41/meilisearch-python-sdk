@@ -541,6 +541,22 @@ async def test_add_documents_from_file(
     assert update.status == "succeeded"
 
 
+async def test_add_documents_from_file_csv_delimiter(
+    async_client, small_movies_csv_path_semicolon_delimiter, small_movies
+):
+    index = async_client.index(str(uuid4()))
+    response = await index.add_documents_from_file(
+        small_movies_csv_path_semicolon_delimiter, "id", csv_delimiter=";"
+    )
+
+    update = await async_wait_for_task(
+        index.http_client, response.task_uid, json_handler=index._json_handler
+    )
+    assert update.status == "succeeded"
+    stats = await index.get_stats()
+    assert stats.number_of_documents == len(small_movies)
+
+
 async def test_add_documents_from_file_orjson_handler(
     async_client_orjson_handler,
     small_movies_path,

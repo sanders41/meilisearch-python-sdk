@@ -370,6 +370,19 @@ def test_add_documents_from_file(
     assert update.status == "succeeded"
 
 
+def test_add_documents_from_file_csv_delimiter(
+    client, small_movies_csv_path_semicolon_delimiter, small_movies
+):
+    index = client.index(str(uuid4()))
+    response = index.add_documents_from_file(
+        small_movies_csv_path_semicolon_delimiter, "id", csv_delimiter=";"
+    )
+
+    update = wait_for_task(index.http_client, response.task_uid, json_handler=index._json_handler)
+    assert update.status == "succeeded"
+    assert index.get_stats().number_of_documents == len(small_movies)
+
+
 def test_add_documents_from_file_orjson_handler(
     client_orjson_handler,
     small_movies_path,
