@@ -570,3 +570,38 @@ async def test_update_documents_pre_plugin_empty_result(async_client, small_movi
     result = await index.get_document(doc["id"])
 
     assert result["title"] == small_movies[0]["title"]
+
+
+class KwargsPlugin:
+    CONCURRENT_EVENT = False
+    POST_EVENT = False
+    PRE_EVENT = True
+
+    def __init__(self) -> None:
+        self.kwargs: dict[str, Any] = {}
+
+    async def run_plugin(self, event: AsyncEvent, **kwargs: Any) -> None:
+        self.kwargs = kwargs
+
+
+async def test_search_plugin_kwargs(async_client):
+    plugin = KwargsPlugin()
+    index = await async_client.create_index(
+        str(uuid4()), plugins=AsyncIndexPlugins(search_plugins=(plugin,))
+    )
+    await index.search("test", locales=["eng"], show_performance_details=True)
+    assert plugin.kwargs["locales"] == ["eng"]
+    assert plugin.kwargs["show_performance_details"] is True
+
+
+async def test_facet_search_plugin_kwargs(async_client):
+    plugin = KwargsPlugin()
+    index = await async_client.create_index(
+        str(uuid4()), plugins=AsyncIndexPlugins(facet_search_plugins=(plugin,))
+    )
+    update = await index.update_filterable_attributes(["genre"])
+    await async_client.wait_for_task(update.task_uid)
+    await index.facet_search("test", facet_name="genre", facet_query="cartoon", locales=["eng"])
+    assert plugin.kwargs["facet_name"] == "genre"
+    assert plugin.kwargs["facet_query"] == "cartoon"
+    assert plugin.kwargs["locales"] == ["eng"]

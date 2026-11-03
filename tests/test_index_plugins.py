@@ -557,3 +557,33 @@ def test_update_documents_pre_plugin_empty_result(client, small_movies):
     client.wait_for_task(task.task_uid)
 
     assert index.get_document(doc["id"])["title"] == small_movies[0]["title"]
+
+
+class KwargsPlugin:
+    CONCURRENT_EVENT = False
+    POST_EVENT = False
+    PRE_EVENT = True
+
+    def __init__(self) -> None:
+        self.kwargs: dict[str, Any] = {}
+
+    def run_plugin(self, event: Event, **kwargs: Any) -> None:
+        self.kwargs = kwargs
+
+
+def test_search_plugin_kwargs(client):
+    plugin = KwargsPlugin()
+    index = client.create_index(str(uuid4()), plugins=IndexPlugins(search_plugins=(plugin,)))
+    index.search("test", locales=["eng"], show_performance_details=True)
+    assert plugin.kwargs["locales"] == ["eng"]
+    assert plugin.kwargs["show_performance_details"] is True
+
+
+def test_facet_search_plugin_kwargs(client):
+    plugin = KwargsPlugin()
+    index = client.create_index(str(uuid4()), plugins=IndexPlugins(facet_search_plugins=(plugin,)))
+    client.wait_for_task(index.update_filterable_attributes(["genre"]).task_uid)
+    index.facet_search("test", facet_name="genre", facet_query="cartoon", locales=["eng"])
+    assert plugin.kwargs["facet_name"] == "genre"
+    assert plugin.kwargs["facet_query"] == "cartoon"
+    assert plugin.kwargs["locales"] == ["eng"]
