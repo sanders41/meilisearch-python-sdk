@@ -7,6 +7,7 @@ from meilisearch_python_sdk.decorators import (
     add_documents,
     async_add_documents,
 )
+from meilisearch_python_sdk.errors import MeilisearchTaskFailedError
 
 
 @pytest.mark.parametrize("batch_size, primary_key", ((None, None), (10, "alternate")))
@@ -134,3 +135,34 @@ async def test_async_add_documents_with_connection_info(
 
     # order will be random since documents were added async so sort them first.
     assert sorted(result.results, key=lambda x: x["id"]) == documents
+
+
+@pytest.mark.parametrize("batch_size", (None, 10))
+def test_add_documents_wait_for_task_failed(batch_size, client, ssl_verify):
+    @add_documents(
+        index_name=str(uuid4()),
+        connection_info=client,
+        batch_size=batch_size,
+        wait_for_task=True,
+        verify=ssl_verify,
+    )
+    def tester():
+        return [{"title": "no primary key"}]
+
+    with pytest.raises(MeilisearchTaskFailedError):
+        tester()
+
+
+@pytest.mark.parametrize("batch_size", (None, 10))
+async def test_async_add_documents_wait_for_task_failed(batch_size, async_client):
+    @async_add_documents(
+        index_name=str(uuid4()),
+        connection_info=async_client,
+        batch_size=batch_size,
+        wait_for_task=True,
+    )
+    async def tester():
+        return [{"title": "no primary key"}]
+
+    with pytest.raises(MeilisearchTaskFailedError):
+        await tester()
