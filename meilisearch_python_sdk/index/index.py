@@ -3842,7 +3842,7 @@ class Index(BaseIndex):
             f"{self._base_url_with_uid}/fields",
             body={"offset": offset, "limit": limit, "filter": filter_value},
         )
-        response_json = response.json()
+        response_json = self._http_requests.parse_json(response)
         fields = [Field(**field) for field in response_json["results"]]
 
         return FieldResults(
