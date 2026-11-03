@@ -739,6 +739,11 @@ class AsyncIndex(BaseIndex):
             show_ranking_score_details=show_ranking_score_details,
             vector=vector,
             hybrid=hybrid,
+            ranking_score_threshold=ranking_score_threshold,
+            locales=locales,
+            retrieve_vectors=retrieve_vectors,
+            media=media,
+            show_performance_details=show_performance_details,
             personalize=personalize,
         )
         if self._pre_search_plugins:
@@ -925,6 +930,10 @@ class AsyncIndex(BaseIndex):
             ranking_score_threshold=ranking_score_threshold,
             vector=vector,
             exhaustive_facet_count=exhaustive_facet_count,
+            facet_name=facet_name,
+            facet_query=facet_query,
+            locales=locales,
+            retrieve_vectors=retrieve_vectors,
             personalize=personalize,
         )
         if self._pre_facet_search_plugins:

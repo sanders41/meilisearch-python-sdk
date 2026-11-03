@@ -679,6 +679,11 @@ class Index(BaseIndex):
                 show_ranking_score_details=show_ranking_score_details,
                 vector=vector,
                 hybrid=hybrid,
+                ranking_score_threshold=ranking_score_threshold,
+                locales=locales,
+                retrieve_vectors=retrieve_vectors,
+                media=media,
+                show_performance_details=show_performance_details,
                 personalize=personalize,
             )
 
@@ -857,6 +862,10 @@ class Index(BaseIndex):
                 show_ranking_score_details=show_ranking_score_details,
                 ranking_score_threshold=ranking_score_threshold,
                 vector=vector,
+                facet_name=facet_name,
+                facet_query=facet_query,
+                locales=locales,
+                retrieve_vectors=retrieve_vectors,
                 personalize=personalize,
                 exhaustive_facet_count=exhaustive_facet_count,
             )
