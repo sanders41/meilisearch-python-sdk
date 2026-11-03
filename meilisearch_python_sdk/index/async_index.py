@@ -3078,11 +3078,10 @@ class AsyncIndex(BaseIndex):
             >>>     filterable_attributes = await index.get_filterable_attributes()
         """
         response = await self._http_requests.get(f"{self._settings_url}/filterable-attributes")
-
-        if not self._http_requests.parse_json(response):
-            return None
-
         response_json = self._http_requests.parse_json(response)
+
+        if not response_json:
+            return None
 
         filterable_attributes: list[str | FilterableAttributes] = []
         for r in response_json:
