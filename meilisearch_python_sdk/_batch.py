@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 async def async_get_batch(
     client: HttpxAsyncClient | AsyncClient, json_handler: JsonHandler, batch_uid: int
-) -> BatchResult | None:
+) -> BatchResult:
     client_ = get_async_client(client)
     http_requests = AsyncHttpRequests(client_, json_handler)
     try:
@@ -75,7 +75,7 @@ async def async_get_batches(
 
 def get_batch(
     client: HttpxClient | Client, json_handler: JsonHandler, batch_uid: int
-) -> BatchResult | None:
+) -> BatchResult:
     client_ = get_client(client)
     http_requests = HttpRequests(client_, json_handler)
     try:

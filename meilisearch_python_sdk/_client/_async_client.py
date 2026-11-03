@@ -883,7 +883,7 @@ class AsyncClient(BaseClient):
 
         return TaskInfo(**self._http_requests.parse_json(response))
 
-    async def get_batch(self, batch_uid: int) -> BatchResult | None:
+    async def get_batch(self, batch_uid: int) -> BatchResult:
         return await async_get_batch(self, self.json_handler, batch_uid)
 
     async def get_batches(
