@@ -1524,6 +1524,7 @@ class AsyncIndex(BaseIndex):
         primary_key: str | None = None,
         *,
         custom_metadata: str | None = None,
+        csv_delimiter: str | None = None,
         compress: bool = False,
     ) -> TaskInfo:
         """Add documents to the index from a json file.
@@ -1533,6 +1534,8 @@ class AsyncIndex(BaseIndex):
             primary_key: The primary key of the documents. This will be ignored if already set.
                 Defaults to None.
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
+            csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
+                can only be used if the file is a csv file. Defaults to comma.
             compress: If set to True the data will be sent in gzip format. Defaults to False.
 
         Returns:
@@ -1553,7 +1556,7 @@ class AsyncIndex(BaseIndex):
             >>>     await index.add_documents_from_file(file_path)
         """
         documents = await _async_load_documents_from_file(
-            file_path, json_handler=self._json_handler
+            file_path, csv_delimiter, json_handler=self._json_handler
         )
 
         return await self.add_documents(
