@@ -215,7 +215,7 @@ def process_search_parameters(
     if show_performance_details:
         body["showPerformanceDetails"] = True
 
-    # no cover becuse personlized search requires an api key and any mocked test here would be
+    # no cover because personalized search requires an api key and any mocked test here would be
     # pointless
     if personalize is not None:  # pragma: no cover
         body["personalize"] = personalize.model_dump(by_alias=True)
@@ -227,7 +227,7 @@ def build_encoded_url(base_url: str, params: JsonMapping) -> str:
     return f"{base_url}?{urlencode(params)}"
 
 
-# Not coverted because it times out. It isn't an issue with the code here.
+# Not covered because it times out. It isn't an issue with the code here.
 # https://github.com/meilisearch/meilisearch/issues/4585
 def embedder_json_to_embedders_model(  # pragma: no cover
     embedder_json: JsonDict | None,
@@ -261,7 +261,7 @@ def embedder_json_to_embedders_model(  # pragma: no cover
     return Embedders(embedders=embedders)
 
 
-# Not coverted because it times out. It isn't an issue with the code here.
+# Not covered because it times out. It isn't an issue with the code here.
 # https://github.com/meilisearch/meilisearch/issues/4585
 def embedder_json_to_settings_model(  # pragma: no cover
     embedder_json: JsonDict | None,
