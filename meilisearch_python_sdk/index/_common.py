@@ -15,6 +15,7 @@ from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.search import Hybrid, Personalize
 from meilisearch_python_sdk.models.settings import (
     CompositeEmbedder,
+    Embedder,
     Embedders,
     HuggingFaceEmbedder,
     OllamaEmbedder,
@@ -243,30 +244,11 @@ def embedder_json_to_embedders_model(  # pragma: no cover
 # https://github.com/meilisearch/meilisearch/issues/4585
 def embedder_json_to_settings_model(  # pragma: no cover
     embedder_json: JsonDict | None,
-) -> (
-    dict[
-        str,
-        OpenAiEmbedder
-        | HuggingFaceEmbedder
-        | OllamaEmbedder
-        | RestEmbedder
-        | UserProvidedEmbedder
-        | CompositeEmbedder,
-    ]
-    | None
-):
+) -> dict[str, Embedder] | None:
     if not embedder_json:  # pragma: no cover
         return None
 
-    embedders: dict[
-        str,
-        OpenAiEmbedder
-        | HuggingFaceEmbedder
-        | OllamaEmbedder
-        | RestEmbedder
-        | UserProvidedEmbedder
-        | CompositeEmbedder,
-    ] = {}
+    embedders: dict[str, Embedder] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
             embedders[k] = OpenAiEmbedder(**v)
