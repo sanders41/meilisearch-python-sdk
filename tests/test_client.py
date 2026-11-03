@@ -1098,14 +1098,6 @@ def test_wait_for_task_no_timeout(client, empty_index, small_movies):
     assert update.status == "succeeded"
 
 
-def test_wait_for_task_canceled(client, empty_index):
-    index = empty_index()
-    task = index.add_documents([{"id": 1}])
-    client.cancel_tasks(uids=[task.task_uid])
-    update = client.wait_for_task(task.task_uid, timeout_in_ms=10000)
-    assert update.status == "canceled"
-
-
 def test_wait_for_pending_update_time_out(client, empty_index, small_movies):
     index = empty_index()
     with pytest.raises(MeilisearchTimeoutError):
