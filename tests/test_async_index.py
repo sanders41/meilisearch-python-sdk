@@ -3,7 +3,7 @@ from httpx2 import Response
 
 from meilisearch_python_sdk._http_requests import AsyncHttpRequests
 from meilisearch_python_sdk._task import async_wait_for_task
-from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchTaskFailedError
 from meilisearch_python_sdk.models.index import FieldsFilter
 from meilisearch_python_sdk.models.settings import (
     Embedders,
@@ -109,6 +109,15 @@ async def test_update_index(async_client, async_indexes_sample):
 
     assert index.primary_key == "objectID"
     assert await index.get_primary_key() == "objectID"
+
+
+async def test_update_index_with_documents_raises(async_empty_index, small_movies):
+    index = await async_empty_index()
+    update = await index.add_documents(small_movies)
+    await async_wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
+
+    with pytest.raises(MeilisearchTaskFailedError):
+        await index.update(primary_key="title")
 
 
 async def test_get_stats(async_empty_index, small_movies):

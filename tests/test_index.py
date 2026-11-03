@@ -3,7 +3,7 @@ from httpx2 import Response
 
 from meilisearch_python_sdk._http_requests import HttpRequests
 from meilisearch_python_sdk._task import wait_for_task
-from meilisearch_python_sdk.errors import MeilisearchApiError
+from meilisearch_python_sdk.errors import MeilisearchApiError, MeilisearchTaskFailedError
 from meilisearch_python_sdk.index._common import process_search_parameters
 from meilisearch_python_sdk.models.index import FieldsFilter
 from meilisearch_python_sdk.models.settings import (
@@ -101,6 +101,15 @@ def test_update_index(client, indexes_sample):
 
     assert index.primary_key == "objectID"
     assert index.get_primary_key() == "objectID"
+
+
+def test_update_index_with_documents_raises(empty_index, small_movies):
+    index = empty_index()
+    update = index.add_documents(small_movies)
+    wait_for_task(index.http_client, update.task_uid, json_handler=index._json_handler)
+
+    with pytest.raises(MeilisearchTaskFailedError):
+        index.update(primary_key="title")
 
 
 def test_get_stats(empty_index, small_movies):

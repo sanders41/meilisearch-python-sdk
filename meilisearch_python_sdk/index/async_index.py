@@ -347,6 +347,9 @@ class AsyncIndex(BaseIndex):
     async def update(self, primary_key: str) -> Self:
         """Update the index primary key.
 
+        The primary key can only be changed when the index contains no documents. If the index
+        already has documents the update task fails and a MeilisearchTaskFailedError is raised.
+
         Args:
             primary_key: The primary key of the documents.
 
@@ -356,6 +359,8 @@ class AsyncIndex(BaseIndex):
         Raises:
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
+            MeilisearchTaskFailedError: If the update task fails, for example because the index
+                already contains documents.
 
         Examples:
             >>> from meilisearch_python_sdk import AsyncClient
@@ -370,6 +375,7 @@ class AsyncIndex(BaseIndex):
             self._http_requests.parse_json(response)["taskUid"],
             timeout_in_ms=100000,
             json_handler=self._json_handler,
+            raise_for_status=True,
         )
         index_response = await self._http_requests.get(f"{self._base_url_with_uid}")
         self.primary_key = self._http_requests.parse_json(index_response)["primaryKey"]
