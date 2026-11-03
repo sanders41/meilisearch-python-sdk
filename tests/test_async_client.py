@@ -1113,6 +1113,14 @@ async def test_wait_for_task_no_timeout(async_client, async_empty_index, small_m
     assert update.status == "succeeded"
 
 
+async def test_wait_for_task_canceled(async_client, async_empty_index):
+    index = await async_empty_index()
+    task = await index.add_documents([{"id": 1}])
+    await async_client.cancel_tasks(uids=[task.task_uid])
+    update = await async_client.wait_for_task(task.task_uid, timeout_in_ms=10000)
+    assert update.status == "canceled"
+
+
 @pytest.mark.no_parallel
 async def test_wait_for_pending_update_time_out(async_client, async_empty_index, small_movies):
     index = await async_empty_index()
