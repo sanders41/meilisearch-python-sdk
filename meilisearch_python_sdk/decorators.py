@@ -51,6 +51,7 @@ def async_add_documents(
     Raises:
         MeilisearchCommunicationError: If there was an error communicating with the server.
         MeilisearchApiError: If the Meilisearch API returned an error.
+        MeilisearchTaskFailedError: If wait_for_task is True and the task failed.
         ValueError: If neither an async_client nor an url is provided.
 
     Examples:
@@ -133,6 +134,7 @@ def add_documents(
     Raises:
         MeilisearchCommunicationError: If there was an error communicating with the server.
         MeilisearchApiError: If the Meilisearch API returned an error.
+        MeilisearchTaskFailedError: If wait_for_task is True and the task failed.
         ValueError: If neither an async_client nor an url is provided.
 
     Examples:
@@ -201,7 +203,9 @@ async def _async_add_documents(
     if not batch_size:
         task = await index.add_documents(documents, primary_key)
         if wait_for_task:
-            await async_client.wait_for_task(task.task_uid, timeout_in_ms=None)
+            await async_client.wait_for_task(
+                task.task_uid, timeout_in_ms=None, raise_for_status=True
+            )
         return
 
     tasks = await index.add_documents_in_batches(
@@ -209,11 +213,12 @@ async def _async_add_documents(
     )
 
     if wait_for_task:
-        async with asyncio.TaskGroup() as tg:
-            [
-                tg.create_task(async_client.wait_for_task(x.task_uid, timeout_in_ms=None))
+        await asyncio.gather(
+            *[
+                async_client.wait_for_task(x.task_uid, timeout_in_ms=None, raise_for_status=True)
                 for x in tasks
             ]
+        )
 
 
 def _add_documents(
@@ -228,7 +233,7 @@ def _add_documents(
     if not batch_size:
         task = index.add_documents(documents, primary_key)
         if wait_for_task:
-            client.wait_for_task(task.task_uid, timeout_in_ms=None)
+            client.wait_for_task(task.task_uid, timeout_in_ms=None, raise_for_status=True)
         return
 
     tasks = index.add_documents_in_batches(
@@ -237,4 +242,4 @@ def _add_documents(
 
     if wait_for_task:
         for task in tasks:
-            client.wait_for_task(task.task_uid, timeout_in_ms=None)
+            client.wait_for_task(task.task_uid, timeout_in_ms=None, raise_for_status=True)
