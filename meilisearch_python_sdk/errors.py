@@ -13,10 +13,6 @@ class InvalidDocumentError(Exception):
     pass
 
 
-class InvalidRestriction(Exception):
-    pass
-
-
 class MeilisearchError(Exception):
     """Generic class for Meilisearch error handling."""
 

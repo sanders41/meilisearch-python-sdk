@@ -21,7 +21,6 @@ from httpx2 import (
 from meilisearch_python_sdk import Client
 from meilisearch_python_sdk.errors import (
     BatchNotFoundError,
-    InvalidRestriction,
     MeilisearchApiError,
     MeilisearchCommunicationError,
     MeilisearchTaskFailedError,
@@ -239,16 +238,6 @@ def test_generate_tenant_token_default_key_expires_past(client, default_search_k
         client.generate_tenant_token(
             search_rules, api_key=default_search_key, expires_at=expires_at
         )
-
-
-@pytest.mark.no_parallel
-def test_generate_tenant_token_invalid_restriction(test_key_info, client):
-    test_key_info.indexes = ["good"]
-    key = client.create_key(test_key_info)
-    payload = {"indexes": ["bad"]}
-
-    with pytest.raises(InvalidRestriction):
-        client.generate_tenant_token(payload, api_key=key)
 
 
 @pytest.mark.no_parallel
