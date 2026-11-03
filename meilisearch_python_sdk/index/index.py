@@ -2752,8 +2752,9 @@ class Index(BaseIndex):
             >>>     filterable_attributes = index.get_filterable_attributes()
         """
         response = self._http_requests.get(f"{self._settings_url}/filterable-attributes")
+        response_json = self._http_requests.parse_json(response)
 
-        if not self._http_requests.parse_json(response):
+        if not response_json:
             return None
 
         response_json = self._http_requests.parse_json(response)
