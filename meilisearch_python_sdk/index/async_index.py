@@ -368,7 +368,7 @@ class AsyncIndex(BaseIndex):
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
-            >>>     updated_index = await index.update()
+            >>>     updated_index = await index.update(primary_key="id")
         """
         payload = {"primaryKey": primary_key}
         response = await self._http_requests.patch(self._base_url_with_uid, payload)
