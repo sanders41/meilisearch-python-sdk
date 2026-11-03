@@ -15,6 +15,7 @@ from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
 from meilisearch_python_sdk.models.search import Hybrid, Personalize
 from meilisearch_python_sdk.models.settings import (
     CompositeEmbedder,
+    Embedder,
     Embedders,
     HuggingFaceEmbedder,
     OllamaEmbedder,
@@ -235,63 +236,19 @@ def build_encoded_url(base_url: str, params: JsonMapping) -> str:
 def embedder_json_to_embedders_model(  # pragma: no cover
     embedder_json: JsonDict | None,
 ) -> Embedders | None:
-    if not embedder_json:  # pragma: no cover
-        return None
-
-    embedders: dict[
-        str,
-        OpenAiEmbedder
-        | HuggingFaceEmbedder
-        | OllamaEmbedder
-        | RestEmbedder
-        | UserProvidedEmbedder
-        | CompositeEmbedder,
-    ] = {}
-    for k, v in embedder_json.items():
-        if v.get("source") == "openAi":
-            embedders[k] = OpenAiEmbedder(**v)
-        elif v.get("source") == "huggingFace":
-            embedders[k] = HuggingFaceEmbedder(**v)
-        elif v.get("source") == "ollama":
-            embedders[k] = OllamaEmbedder(**v)
-        elif v.get("source") == "rest":
-            embedders[k] = RestEmbedder(**v)
-        elif v.get("source") == "composite":
-            embedders[k] = CompositeEmbedder(**v)
-        else:
-            embedders[k] = UserProvidedEmbedder(**v)
-
-    return Embedders(embedders=embedders)
+    embedders = embedder_json_to_settings_model(embedder_json)
+    return Embedders(embedders=embedders) if embedders else None
 
 
 # Not covered because it times out. It isn't an issue with the code here.
 # https://github.com/meilisearch/meilisearch/issues/4585
 def embedder_json_to_settings_model(  # pragma: no cover
     embedder_json: JsonDict | None,
-) -> (
-    dict[
-        str,
-        OpenAiEmbedder
-        | HuggingFaceEmbedder
-        | OllamaEmbedder
-        | RestEmbedder
-        | UserProvidedEmbedder
-        | CompositeEmbedder,
-    ]
-    | None
-):
+) -> dict[str, Embedder] | None:
     if not embedder_json:  # pragma: no cover
         return None
 
-    embedders: dict[
-        str,
-        OpenAiEmbedder
-        | HuggingFaceEmbedder
-        | OllamaEmbedder
-        | RestEmbedder
-        | UserProvidedEmbedder
-        | CompositeEmbedder,
-    ] = {}
+    embedders: dict[str, Embedder] = {}
     for k, v in embedder_json.items():
         if v.get("source") == "openAi":
             embedders[k] = OpenAiEmbedder(**v)

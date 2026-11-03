@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 from camel_converter.pydantic_base import CamelBase
 from pydantic import field_validator, model_validator
@@ -126,16 +126,18 @@ class CompositeEmbedder(CamelBase):
     )
 
 
+Embedder: TypeAlias = (
+    OpenAiEmbedder
+    | HuggingFaceEmbedder
+    | OllamaEmbedder
+    | RestEmbedder
+    | UserProvidedEmbedder
+    | CompositeEmbedder
+)
+
+
 class Embedders(CamelBase):
-    embedders: dict[
-        str,
-        OpenAiEmbedder
-        | HuggingFaceEmbedder
-        | OllamaEmbedder
-        | RestEmbedder
-        | UserProvidedEmbedder
-        | CompositeEmbedder,
-    ]
+    embedders: dict[str, Embedder]
 
 
 class ProximityPrecision(StrEnum):
@@ -185,18 +187,7 @@ class MeilisearchSettings(CamelBase):
     non_separator_tokens: list[str] | None = None
     search_cutoff_ms: int | None = None
     dictionary: list[str] | None = None
-    embedders: (
-        dict[
-            str,
-            OpenAiEmbedder
-            | HuggingFaceEmbedder
-            | OllamaEmbedder
-            | RestEmbedder
-            | UserProvidedEmbedder
-            | CompositeEmbedder,
-        ]
-        | None
-    ) = None  # Optional[Embedders] = None
+    embedders: dict[str, Embedder] | None = None  # Optional[Embedders] = None
     localized_attributes: list[LocalizedAttributes] | None = None
     facet_search: bool | None = None
     prefix_search: Literal["disabled", "indexingTime", "searchTime"] | None = None
