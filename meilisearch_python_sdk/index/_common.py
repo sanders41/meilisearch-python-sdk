@@ -85,7 +85,10 @@ class BaseIndex:
 
 def batch(
     documents: Sequence[MutableMapping], batch_size: int
-) -> Generator[Sequence[MutableMapping], None, None]:
+) -> Generator[list[MutableMapping], None, None]:
+    if batch_size < 1:
+        raise ValueError("batch_size must be at least 1")
+
     iterator = iter(documents)
     while True:
         batch_slice = list(islice(iterator, batch_size))

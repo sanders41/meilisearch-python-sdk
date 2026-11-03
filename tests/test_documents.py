@@ -137,6 +137,13 @@ def test_add_documents_in_batches(
     assert index.get_primary_key() == expected_primary_key
 
 
+@pytest.mark.parametrize("batch_size", (0, -1))
+def test_add_documents_in_batches_invalid_batch_size(batch_size, empty_index, small_movies):
+    index = empty_index()
+    with pytest.raises(ValueError):
+        index.add_documents_in_batches(small_movies, batch_size=batch_size)
+
+
 @pytest.mark.parametrize("path_type", ("path", "str"))
 @pytest.mark.parametrize("combine_documents", (True, False))
 @pytest.mark.parametrize(
