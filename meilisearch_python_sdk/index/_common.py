@@ -370,7 +370,7 @@ def _load_documents_from_file(
             and not csv_delimiter.isascii()
         ):
             raise ValueError("csv_delimiter must be a single ascii character")
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8", newline="") as f:
             if csv_delimiter:
                 documents = DictReader(f, delimiter=csv_delimiter)
             else:
@@ -378,10 +378,10 @@ def _load_documents_from_file(
             return list(documents)
 
     if file_path.suffix == ".ndjson":
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             return [json_handler.loads(x) for x in f if x.strip()]
 
-    with open(file_path) as f:
+    with open(file_path, encoding="utf-8") as f:
         data = f.read()
         documents = json_handler.loads(data)
 

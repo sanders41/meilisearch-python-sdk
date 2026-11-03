@@ -1484,7 +1484,7 @@ class Index(BaseIndex):
         else:
             url = self._documents_url
 
-        with open(upload_path) as f:
+        with open(upload_path, encoding="utf-8") as f:
             data = f.read()
 
         response = self._http_requests.post(
@@ -2021,7 +2021,7 @@ class Index(BaseIndex):
         else:
             url = self._documents_url
 
-        with open(upload_path) as f:
+        with open(upload_path, encoding="utf-8") as f:
             data = f.read()
 
         response = self._http_requests.put(
