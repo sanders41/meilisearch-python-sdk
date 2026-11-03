@@ -6,7 +6,7 @@ from Meilisearch into Python objects wherever possible, and in the process uses 
 JSON into more Pythonic snake_case_names.
 
 In some instances it is not possible to return the data as an object because the structure will be
-dependant on your particular dataset and can't be known ahead of time. In these instances you can
+dependent on your particular dataset and can't be known ahead of time. In these instances you can
 either work with the data in the dictionary that is returned, or because you will know the structure
 you can generate your own Pydantic models.
 

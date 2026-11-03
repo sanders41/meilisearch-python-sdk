@@ -530,7 +530,7 @@ class AsyncIndex(BaseIndex):
         """Get stats of the index.
 
         Args:
-            show_internal_database_sizes: Include internal database size inforamation in results.
+            show_internal_database_sizes: Include internal database size information in results.
                 Default = False.
             size_format: When present and set to human, then all database sizes in responses of the
                 stat routes will be returned as a string containing an appropriate unit (MiB, GiB,
@@ -653,7 +653,7 @@ class AsyncIndex(BaseIndex):
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
             locales: Specifies the languages for the search. This parameter can only be used with
-                Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
+                Meilisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
             retrieve_vectors: Return document vector data with search result.
             media: The content of media is used as if it were a document to generate request
                 fragments from the searchFragments parameter. Defaults to None. This parameter can
@@ -842,11 +842,11 @@ class AsyncIndex(BaseIndex):
                 updated causing breaking changes in this library without a major version bump so use
                 with caution.
             locales: Specifies the languages for the search. This parameter can only be used with
-                Milisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
+                Meilisearch >= v1.10.0. Defaults to None letting the Meilisearch pick.
             retrieve_vectors: Return document vector data with search result.
             personalize: Personalize the search results.
             exhaustive_facet_count: forcing the facet search to compute the facet counts the same
-                way as the paginated search. This parameter can only be used with Milisearch >=
+                way as the paginated search. This parameter can only be used with Meilisearch >=
                 v1.14.0. Defaults to None.
 
         Returns:
@@ -1297,7 +1297,7 @@ class AsyncIndex(BaseIndex):
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row
-                containing the field names, and ever for should have a title.
+                containing the field names, and every column should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
@@ -1311,7 +1311,7 @@ class AsyncIndex(BaseIndex):
             The details of the task status.
 
         Raises:
-            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
+            InvalidDocumentError: If the document is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -1434,7 +1434,7 @@ class AsyncIndex(BaseIndex):
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
-                the field names, and ever for should have a title.
+                the field names, and every column should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
@@ -1448,7 +1448,7 @@ class AsyncIndex(BaseIndex):
             List of update ids to track the action.
 
         Raises:
-            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
+            InvalidDocumentError: If the document is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -1539,7 +1539,7 @@ class AsyncIndex(BaseIndex):
             The details of the task status.
 
         Raises:
-            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
+            InvalidDocumentError: If the document is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -1571,7 +1571,7 @@ class AsyncIndex(BaseIndex):
         compress: bool = False,
         concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
-        """Adds documents form a json file in batches to reduce RAM usage with indexing.
+        """Adds documents from a json file in batches to reduce RAM usage with indexing.
 
         Args:
             file_path: Path to the json file.
@@ -1591,7 +1591,7 @@ class AsyncIndex(BaseIndex):
             List of update ids to track the action.
 
         Raises:
-            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
+            InvalidDocumentError: If the document is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -1914,7 +1914,7 @@ class AsyncIndex(BaseIndex):
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
-                the field names, and ever for should have a title.
+                the field names, and every column should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
@@ -1927,7 +1927,7 @@ class AsyncIndex(BaseIndex):
             The details of the task status.
 
         Raises:
-            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
+            InvalidDocumentError: If the document is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -2026,7 +2026,7 @@ class AsyncIndex(BaseIndex):
             custom_metadata: An arbitrary string accessible via the task. Defaults to None.
             document_type: The type of document being added. Accepted types are json, csv, and
                 ndjson. For csv files the first row of the document should be a header row containing
-                the field names, and ever for should have a title.
+                the field names, and every column should have a title.
             csv_delimiter: A single ASCII character to specify the delimiter for csv files. This
                 can only be used if the file is a csv file. Defaults to comma.
             combine_documents: If set to True this will combine the documents from all the files
@@ -2042,7 +2042,7 @@ class AsyncIndex(BaseIndex):
             List of update ids to track the action.
 
         Raises:
-            InvalidDocumentError: If the docucment is not a valid format for Meilisearch.
+            InvalidDocumentError: If the document is not a valid format for Meilisearch.
             MeilisearchError: If the file path is not valid
             MeilisearchCommunicationError: If there was an error communicating with the server.
             MeilisearchApiError: If the Meilisearch API returned an error.
@@ -2180,7 +2180,7 @@ class AsyncIndex(BaseIndex):
         skip_creation: bool = False,
         concurrency_limit: int | None = None,
     ) -> list[TaskInfo]:
-        """Updates documents form a json file in batches to reduce RAM usage with indexing.
+        """Updates documents from a json file in batches to reduce RAM usage with indexing.
 
         Args:
             file_path: Path to the json file.
@@ -2508,7 +2508,7 @@ class AsyncIndex(BaseIndex):
             >>> from meilisearch_python_sdk import AsyncClient
             >>> async with AsyncClient("http://localhost.com", "masterKey") as client:
             >>>     index = client.index("movies")
-            >>>     await index.delete_all_document()
+            >>>     await index.delete_all_documents()
         """
         if custom_metadata:
             url = build_encoded_url(self._documents_url, {"customMetadata": custom_metadata})
@@ -2551,7 +2551,7 @@ class AsyncIndex(BaseIndex):
         settings = MeilisearchSettings(**response_json)
 
         if response_json.get("embedders"):
-            # Not coverted because it times out. It isn't an issue with the code here.
+            # Not covered because it times out. It isn't an issue with the code here.
             # https://github.com/meilisearch/meilisearch/issues/4585
             settings.embedders = embedder_json_to_settings_model(  # pragma: no cover
                 response_json["embedders"]

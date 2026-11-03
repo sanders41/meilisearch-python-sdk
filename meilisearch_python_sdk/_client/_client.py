@@ -508,7 +508,7 @@ class Client(BaseClient):
         """Get stats for all indexes.
 
         Args:
-            show_internal_database_sizes: Include internal database size inforamation in results.
+            show_internal_database_sizes: Include internal database size information in results.
                 Default = False.
             size_format: When present and set to human, then all database sizes in responses of the
                 stat routes will be returned as a string containing an appropriate unit (MiB, GiB,

@@ -94,10 +94,10 @@ select=[
   "ANN",  # Type annotations
   "ASYNC",  # flake8-async
   "RUF022",  # Unsorted __all__
-  "RUF023",  # Unforted __slots__
+  "RUF023",  # Unsorted __slots__
 ]
 ignore=[
-  # Recommened ignores by ruff when using formatter
+  # Recommended ignores by ruff when using formatter
   "E501",
   "W191",
   "E111",
