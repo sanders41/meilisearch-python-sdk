@@ -2287,11 +2287,7 @@ class Index(BaseIndex):
             >>>     index = client.index("movies")
             >>>     index.update_settings(new_settings)
         """
-        body_dict = {
-            k: v
-            for k, v in body.model_dump(by_alias=True, exclude_none=True).items()
-            if v is not None
-        }
+        body_dict = {k: v for k, v in body.model_dump(by_alias=True, exclude_none=True).items()}
         response = self._http_requests.patch(self._settings_url, body_dict, compress=compress)
 
         return TaskInfo(**self._http_requests.parse_json(response))
