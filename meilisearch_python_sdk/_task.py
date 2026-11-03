@@ -193,28 +193,18 @@ async def async_wait_for_task(
     start_time = time.monotonic()
     elapsed_time = 0.0
 
-    if timeout_in_ms is not None:
-        while elapsed_time < timeout_in_ms:
-            response = await http_requests.get(url)
-            status = TaskResult(**json_handler.loads(response.content))
-            if status.status in ("succeeded", "failed"):
-                if raise_for_status and status.status == "failed":
-                    raise MeilisearchTaskFailedError(f"Task {task_id} failed")
-                return status
-            await asyncio.sleep(interval_in_ms / 1000)
-            elapsed_time = (time.monotonic() - start_time) * 1000
-        raise MeilisearchTimeoutError(
-            f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
-        )
-    else:
-        while True:
-            response = await http_requests.get(url)
-            status = TaskResult(**json_handler.loads(response.content))
-            if status.status in ("succeeded", "failed"):
-                if raise_for_status and status.status == "failed":
-                    raise MeilisearchTaskFailedError(f"Task {task_id} failed")
-                return status
-            await asyncio.sleep(interval_in_ms / 1000)
+    while timeout_in_ms is None or elapsed_time < timeout_in_ms:
+        response = await http_requests.get(url)
+        status = TaskResult(**json_handler.loads(response.content))
+        if status.status in ("succeeded", "failed"):
+            if raise_for_status and status.status == "failed":
+                raise MeilisearchTaskFailedError(f"Task {task_id} failed")
+            return status
+        await asyncio.sleep(interval_in_ms / 1000)
+        elapsed_time = (time.monotonic() - start_time) * 1000
+    raise MeilisearchTimeoutError(
+        f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
+    )
 
 
 def cancel_tasks(
@@ -357,25 +347,15 @@ def wait_for_task(
     start_time = time.monotonic()
     elapsed_time = 0.0
 
-    if timeout_in_ms is not None:
-        while elapsed_time < timeout_in_ms:
-            response = http_requests.get(url)
-            status = TaskResult(**json_handler.loads(response.content))
-            if status.status in ("succeeded", "failed"):
-                if raise_for_status and status.status == "failed":
-                    raise MeilisearchTaskFailedError(f"Task {task_id} failed")
-                return status
-            time.sleep(interval_in_ms / 1000)
-            elapsed_time = (time.monotonic() - start_time) * 1000
-        raise MeilisearchTimeoutError(
-            f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
-        )
-    else:
-        while True:
-            response = http_requests.get(url)
-            status = TaskResult(**json_handler.loads(response.content))
-            if status.status in ("succeeded", "failed"):
-                if raise_for_status and status.status == "failed":
-                    raise MeilisearchTaskFailedError(f"Task {task_id} failed")
-                return status
-            time.sleep(interval_in_ms / 1000)
+    while timeout_in_ms is None or elapsed_time < timeout_in_ms:
+        response = http_requests.get(url)
+        status = TaskResult(**json_handler.loads(response.content))
+        if status.status in ("succeeded", "failed"):
+            if raise_for_status and status.status == "failed":
+                raise MeilisearchTaskFailedError(f"Task {task_id} failed")
+            return status
+        time.sleep(interval_in_ms / 1000)
+        elapsed_time = (time.monotonic() - start_time) * 1000
+    raise MeilisearchTimeoutError(
+        f"timeout of {timeout_in_ms}ms has exceeded on process {task_id} when waiting for pending update to resolve."
+    )
