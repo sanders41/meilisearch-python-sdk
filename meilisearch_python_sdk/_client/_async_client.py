@@ -60,7 +60,7 @@ class AsyncClient(BaseClient):
         url: str,
         api_key: str | None = None,
         *,
-        timeout: int | None = None,
+        timeout: int | None = 5,
         verify: bool | SSLContext = True,
         custom_headers: dict[str, str] | None = None,
         json_handler: BuiltinHandler | OrjsonHandler | None = None,
@@ -72,7 +72,7 @@ class AsyncClient(BaseClient):
             url: The url to the Meilisearch API (ex: http://localhost:7700)
             api_key: The optional API key for Meilisearch. Defaults to None.
             timeout: The amount of time in seconds that the client will wait for a response before
-                timing out. Defaults to None.
+                timing out. Defaults to 5.
             verify: SSL certificates (a.k.a CA bundle) used to
                 verify the identity of requested hosts. Either `True` (default CA bundle),
                 a path to an SSL certificate file, or `False` (disable verification)
