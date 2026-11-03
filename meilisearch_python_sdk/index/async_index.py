@@ -59,7 +59,9 @@ from meilisearch_python_sdk.plugins import (
 from meilisearch_python_sdk.types import JsonDict
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Coroutine, Sequence
+
+    from httpx2 import Response
 
     from meilisearch_python_sdk.types import Filter, JsonMapping
 
@@ -713,83 +715,40 @@ class AsyncIndex(BaseIndex):
         )
         search_url = f"{self._base_url_with_uid}/search"
 
+        plugin_kwargs = dict(
+            query=query,
+            offset=offset,
+            limit=limit,
+            filter=filter,
+            facets=facets,
+            attributes_to_retrieve=attributes_to_retrieve,
+            attributes_to_crop=attributes_to_crop,
+            crop_length=crop_length,
+            attributes_to_highlight=attributes_to_highlight,
+            sort=sort,
+            show_matches_position=show_matches_position,
+            highlight_pre_tag=highlight_pre_tag,
+            highlight_post_tag=highlight_post_tag,
+            crop_marker=crop_marker,
+            matching_strategy=matching_strategy,
+            hits_per_page=hits_per_page,
+            page=page,
+            attributes_to_search_on=attributes_to_search_on,
+            distinct=distinct,
+            show_ranking_score=show_ranking_score,
+            show_ranking_score_details=show_ranking_score_details,
+            vector=vector,
+            hybrid=hybrid,
+            personalize=personalize,
+        )
         if self._pre_search_plugins:
-            await _run_plugins(
-                self._pre_search_plugins,
-                AsyncEvent.PRE,
-                query=query,
-                offset=offset,
-                limit=limit,
-                filter=filter,
-                facets=facets,
-                attributes_to_retrieve=attributes_to_retrieve,
-                attributes_to_crop=attributes_to_crop,
-                crop_length=crop_length,
-                attributes_to_highlight=attributes_to_highlight,
-                sort=sort,
-                show_matches_position=show_matches_position,
-                highlight_pre_tag=highlight_pre_tag,
-                highlight_post_tag=highlight_post_tag,
-                crop_marker=crop_marker,
-                matching_strategy=matching_strategy,
-                hits_per_page=hits_per_page,
-                page=page,
-                attributes_to_search_on=attributes_to_search_on,
-                distinct=distinct,
-                show_ranking_score=show_ranking_score,
-                show_ranking_score_details=show_ranking_score_details,
-                vector=vector,
-                hybrid=hybrid,
-                personalize=personalize,
-            )
+            await _run_plugins(self._pre_search_plugins, AsyncEvent.PRE, **plugin_kwargs)
 
-        if self._concurrent_search_plugins:
-            async with asyncio.TaskGroup() as tg:
-                for plugin in self._concurrent_search_plugins:
-                    if plugin_has_method(plugin, "run_plugin"):
-                        tg.create_task(
-                            plugin.run_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                query=query,
-                                offset=offset,
-                                limit=limit,
-                                filter=filter,
-                                facets=facets,
-                                attributes_to_retrieve=attributes_to_retrieve,
-                                attributes_to_crop=attributes_to_crop,
-                                crop_length=crop_length,
-                                attributes_to_highlight=attributes_to_highlight,
-                                sort=sort,
-                                show_matches_position=show_matches_position,
-                                highlight_pre_tag=highlight_pre_tag,
-                                highlight_post_tag=highlight_post_tag,
-                                crop_marker=crop_marker,
-                                matching_strategy=matching_strategy,
-                                hits_per_page=hits_per_page,
-                                page=page,
-                                attributes_to_search_on=attributes_to_search_on,
-                                distinct=distinct,
-                                show_ranking_score=show_ranking_score,
-                                show_ranking_score_details=show_ranking_score_details,
-                                vector=vector,
-                                personalize=personalize,
-                            )
-                        )
-
-                response_coroutine = tg.create_task(self._http_requests.post(search_url, body=body))
-
-            response = await response_coroutine
-            result = SearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
-            if self._post_search_plugins:
-                post = await _run_plugins(
-                    self._post_search_plugins, AsyncEvent.POST, search_results=result
-                )
-                if post.get("search_result"):
-                    result = post["search_result"]
-
-            return result
-
-        response = await self._http_requests.post(search_url, body=body)
+        response = await _send_with_concurrent_plugins(
+            self._http_requests.post(search_url, body=body),
+            self._concurrent_search_plugins,
+            **plugin_kwargs,
+        )
         result = SearchResults[self.hits_type](**self._http_requests.parse_json(response))  # type: ignore[name-defined]
 
         if self._post_search_plugins:
@@ -942,84 +901,40 @@ class AsyncIndex(BaseIndex):
         )
         search_url = f"{self._base_url_with_uid}/facet-search"
 
+        plugin_kwargs = dict(
+            query=query,
+            offset=offset,
+            limit=limit,
+            filter=filter,
+            facets=facets,
+            attributes_to_retrieve=attributes_to_retrieve,
+            attributes_to_crop=attributes_to_crop,
+            crop_length=crop_length,
+            attributes_to_highlight=attributes_to_highlight,
+            sort=sort,
+            show_matches_position=show_matches_position,
+            highlight_pre_tag=highlight_pre_tag,
+            highlight_post_tag=highlight_post_tag,
+            crop_marker=crop_marker,
+            matching_strategy=matching_strategy,
+            hits_per_page=hits_per_page,
+            page=page,
+            attributes_to_search_on=attributes_to_search_on,
+            show_ranking_score=show_ranking_score,
+            show_ranking_score_details=show_ranking_score_details,
+            ranking_score_threshold=ranking_score_threshold,
+            vector=vector,
+            exhaustive_facet_count=exhaustive_facet_count,
+            personalize=personalize,
+        )
         if self._pre_facet_search_plugins:
-            await _run_plugins(
-                self._pre_facet_search_plugins,
-                AsyncEvent.PRE,
-                query=query,
-                offset=offset,
-                limit=limit,
-                filter=filter,
-                facets=facets,
-                attributes_to_retrieve=attributes_to_retrieve,
-                attributes_to_crop=attributes_to_crop,
-                crop_length=crop_length,
-                attributes_to_highlight=attributes_to_highlight,
-                sort=sort,
-                show_matches_position=show_matches_position,
-                highlight_pre_tag=highlight_pre_tag,
-                highlight_post_tag=highlight_post_tag,
-                crop_marker=crop_marker,
-                matching_strategy=matching_strategy,
-                hits_per_page=hits_per_page,
-                page=page,
-                attributes_to_search_on=attributes_to_search_on,
-                show_ranking_score=show_ranking_score,
-                show_ranking_score_details=show_ranking_score_details,
-                ranking_score_threshold=ranking_score_threshold,
-                vector=vector,
-                exhaustive_facet_count=exhaustive_facet_count,
-                personalize=personalize,
-            )
+            await _run_plugins(self._pre_facet_search_plugins, AsyncEvent.PRE, **plugin_kwargs)
 
-        if self._concurrent_facet_search_plugins:
-            async with asyncio.TaskGroup() as tg:
-                for plugin in self._concurrent_facet_search_plugins:
-                    if plugin_has_method(plugin, "run_plugin"):
-                        tg.create_task(
-                            plugin.run_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                query=query,
-                                offset=offset,
-                                limit=limit,
-                                filter=filter,
-                                facets=facets,
-                                attributes_to_retrieve=attributes_to_retrieve,
-                                attributes_to_crop=attributes_to_crop,
-                                crop_length=crop_length,
-                                attributes_to_highlight=attributes_to_highlight,
-                                sort=sort,
-                                show_matches_position=show_matches_position,
-                                highlight_pre_tag=highlight_pre_tag,
-                                highlight_post_tag=highlight_post_tag,
-                                crop_marker=crop_marker,
-                                matching_strategy=matching_strategy,
-                                hits_per_page=hits_per_page,
-                                page=page,
-                                attributes_to_search_on=attributes_to_search_on,
-                                show_ranking_score=show_ranking_score,
-                                show_ranking_score_details=show_ranking_score_details,
-                                ranking_score_threshold=ranking_score_threshold,
-                                vector=vector,
-                                exhaustive_facet_count=exhaustive_facet_count,
-                                personalize=personalize,
-                            )
-                        )
-
-                response_coroutine = tg.create_task(self._http_requests.post(search_url, body=body))
-
-            response = await response_coroutine
-            result = FacetSearchResults(**self._http_requests.parse_json(response))
-            if self._post_facet_search_plugins:
-                post = await _run_plugins(
-                    self._post_facet_search_plugins, AsyncEvent.POST, result=result
-                )
-                if isinstance(post["generic_result"], FacetSearchResults):
-                    result = post["generic_result"]
-
-            return result
-
-        response = await self._http_requests.post(search_url, body=body)
+        response = await _send_with_concurrent_plugins(
+            self._http_requests.post(search_url, body=body),
+            self._concurrent_facet_search_plugins,
+            **plugin_kwargs,
+        )
         result = FacetSearchResults(**self._http_requests.parse_json(response))
         if self._post_facet_search_plugins:
             post = await _run_plugins(
@@ -1271,46 +1186,12 @@ class AsyncIndex(BaseIndex):
             if pre.get("document_result") is not None:
                 documents = pre["document_result"]
 
-        if self._concurrent_add_documents_plugins:
-            async with asyncio.TaskGroup() as tg:
-                for plugin in self._concurrent_add_documents_plugins:
-                    if plugin_has_method(plugin, "run_plugin"):
-                        tg.create_task(
-                            plugin.run_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                documents=documents,
-                                primary_key=primary_key,
-                            )
-                        )
-                    if plugin_has_method(plugin, "run_document_plugin"):
-                        tg.create_task(
-                            plugin.run_document_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                documents=documents,
-                                primary_key=primary_key,
-                            )
-                        )
-
-                response_coroutine = tg.create_task(
-                    self._http_requests.post(url, documents, compress=compress)
-                )
-
-            response = await response_coroutine
-            result = TaskInfo(**self._http_requests.parse_json(response))
-            if self._post_add_documents_plugins:
-                post = await _run_plugins(
-                    self._post_add_documents_plugins,
-                    AsyncEvent.POST,
-                    result=result,
-                    documents=documents,
-                    primary_key=primary_key,
-                )
-                if isinstance(post["generic_result"], TaskInfo):
-                    result = post["generic_result"]
-
-            return result
-
-        response = await self._http_requests.post(url, documents, compress=compress)
+        response = await _send_with_concurrent_plugins(
+            self._http_requests.post(url, documents, compress=compress),
+            self._concurrent_add_documents_plugins,
+            documents=documents,
+            primary_key=primary_key,
+        )
 
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_add_documents_plugins:
@@ -1912,47 +1793,12 @@ class AsyncIndex(BaseIndex):
             if pre.get("document_result") is not None:
                 documents = pre["document_result"]
 
-        if self._concurrent_update_documents_plugins:
-            async with asyncio.TaskGroup() as tg:
-                for plugin in self._concurrent_update_documents_plugins:
-                    if plugin_has_method(plugin, "run_plugin"):
-                        tg.create_task(
-                            plugin.run_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                documents=documents,
-                                primary_key=primary_key,
-                            )
-                        )
-                    if plugin_has_method(plugin, "run_document_plugin"):
-                        tg.create_task(
-                            plugin.run_document_plugin(  # type: ignore[union-attr]
-                                event=AsyncEvent.CONCURRENT,
-                                documents=documents,
-                                primary_key=primary_key,
-                            )
-                        )
-
-                response_coroutine = tg.create_task(
-                    self._http_requests.put(url, documents, compress=compress)
-                )
-
-            response = await response_coroutine
-            result = TaskInfo(**self._http_requests.parse_json(response))
-            if self._post_update_documents_plugins:
-                post = await _run_plugins(
-                    self._post_update_documents_plugins,
-                    AsyncEvent.POST,
-                    result=result,
-                    documents=documents,
-                    primary_key=primary_key,
-                )
-
-                if isinstance(post["generic_result"], TaskInfo):
-                    result = post["generic_result"]
-
-            return result
-
-        response = await self._http_requests.put(url, documents, compress=compress)
+        response = await _send_with_concurrent_plugins(
+            self._http_requests.put(url, documents, compress=compress),
+            self._concurrent_update_documents_plugins,
+            documents=documents,
+            primary_key=primary_key,
+        )
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_update_documents_plugins:
             post = await _run_plugins(
@@ -2481,26 +2327,11 @@ class AsyncIndex(BaseIndex):
                 self._pre_delete_document_plugins, AsyncEvent.PRE, document_id=document_id
             )
 
-        if self._concurrent_delete_document_plugins:
-            async with asyncio.TaskGroup() as tg:
-                for plugin in self._concurrent_delete_document_plugins:
-                    tg.create_task(
-                        plugin.run_plugin(event=AsyncEvent.CONCURRENT, document_id=document_id)
-                    )
-
-                response_coroutine = tg.create_task(self._http_requests.delete(url))
-
-            response = await response_coroutine
-            result = TaskInfo(**self._http_requests.parse_json(response))
-            if self._post_delete_document_plugins:
-                post = await _run_plugins(
-                    self._post_delete_document_plugins, event=AsyncEvent.POST, result=result
-                )
-                if isinstance(post["generic_result"], TaskInfo):
-                    result = post["generic_result"]
-            return result
-
-        response = await self._http_requests.delete(url)
+        response = await _send_with_concurrent_plugins(
+            self._http_requests.delete(url),
+            self._concurrent_delete_document_plugins,
+            document_id=document_id,
+        )
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_document_plugins:
             post = await _run_plugins(
@@ -2541,24 +2372,9 @@ class AsyncIndex(BaseIndex):
         if self._pre_delete_documents_plugins:
             await _run_plugins(self._pre_delete_documents_plugins, AsyncEvent.PRE, ids=ids)
 
-        if self._concurrent_delete_documents_plugins:
-            async with asyncio.TaskGroup() as tg:
-                for plugin in self._concurrent_delete_documents_plugins:
-                    tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT, ids=ids))
-
-                response_coroutine = tg.create_task(self._http_requests.post(url, ids))
-
-            response = await response_coroutine
-            result = TaskInfo(**self._http_requests.parse_json(response))
-            if self._post_delete_documents_plugins:
-                post = await _run_plugins(
-                    self._post_delete_documents_plugins, AsyncEvent.POST, result=result
-                )
-                if isinstance(post["generic_result"], TaskInfo):
-                    result = post["generic_result"]
-            return result
-
-        response = await self._http_requests.post(url, ids)
+        response = await _send_with_concurrent_plugins(
+            self._http_requests.post(url, ids), self._concurrent_delete_documents_plugins, ids=ids
+        )
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_plugins:
             post = await _run_plugins(
@@ -2601,27 +2417,11 @@ class AsyncIndex(BaseIndex):
                 self._pre_delete_documents_by_filter_plugins, AsyncEvent.PRE, filter=filter
             )
 
-        if self._concurrent_delete_documents_by_filter_plugins:
-            async with asyncio.TaskGroup() as tg:
-                for plugin in self._concurrent_delete_documents_by_filter_plugins:
-                    tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT, filter=filter))
-
-                response_coroutine = tg.create_task(
-                    self._http_requests.post(url, body={"filter": filter})
-                )
-
-            response = await response_coroutine
-            result = TaskInfo(**self._http_requests.parse_json(response))
-            if self._post_delete_documents_by_filter_plugins:
-                post = await _run_plugins(
-                    self._post_delete_documents_by_filter_plugins, AsyncEvent.POST, result=result
-                )
-                if isinstance(post["generic_result"], TaskInfo):
-                    result = post["generic_result"]
-
-            return result
-
-        response = await self._http_requests.post(url, body={"filter": filter})
+        response = await _send_with_concurrent_plugins(
+            self._http_requests.post(url, body={"filter": filter}),
+            self._concurrent_delete_documents_by_filter_plugins,
+            filter=filter,
+        )
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_documents_by_filter_plugins:
             post = await _run_plugins(
@@ -2718,24 +2518,9 @@ class AsyncIndex(BaseIndex):
         if self._pre_delete_all_documents_plugins:
             await _run_plugins(self._pre_delete_all_documents_plugins, AsyncEvent.PRE)
 
-        if self._concurrent_delete_all_documents_plugins:
-            async with asyncio.TaskGroup() as tg:
-                for plugin in self._concurrent_delete_all_documents_plugins:
-                    tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT))
-
-                response_coroutine = tg.create_task(self._http_requests.delete(url))
-
-            response = await response_coroutine
-            result = TaskInfo(**self._http_requests.parse_json(response))
-            if self._post_delete_all_documents_plugins:
-                post = await _run_plugins(
-                    self._post_delete_all_documents_plugins, AsyncEvent.POST, result=result
-                )
-                if isinstance(post.get("generic_result"), TaskInfo):
-                    result = post["generic_result"]
-            return result
-
-        response = await self._http_requests.delete(url)
+        response = await _send_with_concurrent_plugins(
+            self._http_requests.delete(url), self._concurrent_delete_all_documents_plugins
+        )
         result = TaskInfo(**self._http_requests.parse_json(response))
         if self._post_delete_all_documents_plugins:
             post = await _run_plugins(
@@ -4444,6 +4229,25 @@ async def _run_plugins(
                 break
 
     return results
+
+
+async def _send_with_concurrent_plugins(
+    request: Coroutine[Any, Any, Response],
+    plugins: Sequence[AsyncPlugin | AsyncDocumentPlugin | AsyncPostSearchPlugin] | None,
+    **kwargs: Any,  # noqa: ANN401
+) -> Response:
+    if not plugins:
+        return await request
+
+    async with asyncio.TaskGroup() as tg:
+        for plugin in plugins:
+            if plugin_has_method(plugin, "run_plugin"):
+                tg.create_task(plugin.run_plugin(event=AsyncEvent.CONCURRENT, **kwargs))  # type: ignore[union-attr]
+            if plugin_has_method(plugin, "run_document_plugin"):
+                tg.create_task(plugin.run_document_plugin(event=AsyncEvent.CONCURRENT, **kwargs))  # type: ignore[union-attr]
+        response = tg.create_task(request)
+
+    return response.result()
 
 
 async def _async_load_documents_from_file(
