@@ -21,7 +21,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/facebook/pyrefly-pre-commit"
-rev = "1.4.0"
+rev = "1.4.1"
 hooks = [
   {
     id = "pyrefly-check",
@@ -34,7 +34,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.17.3"
+rev = "v0.17.4"
 hooks = [
   {
     id = "ruff-check",
