@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import gzip
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
@@ -51,11 +52,13 @@ class AsyncHttpRequests:
             if body is None:
                 response = await http_method(path, headers={"user-agent": user_agent()})
             else:
-                response = await http_method(
-                    path,
-                    content=_encode_body(self.json_handler, body, content_type, compress),
-                    headers=headers,
-                )
+                if compress:
+                    content = await asyncio.to_thread(
+                        _encode_body, self.json_handler, body, content_type, compress
+                    )
+                else:
+                    content = _encode_body(self.json_handler, body, content_type, compress)
+                response = await http_method(path, content=content, headers=headers)
             response.raise_for_status()
             return response
 
