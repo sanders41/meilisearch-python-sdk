@@ -10,14 +10,19 @@ from httpx2 import Client
 
 from meilisearch_python_sdk._http_requests import HttpRequests
 from meilisearch_python_sdk._task import wait_for_task
+from meilisearch_python_sdk._utils import build_stats_url
 from meilisearch_python_sdk.index._common import (
     BaseIndex,
     _load_documents_from_file,
     batch,
+    build_documents_url,
+    build_embedders_payload,
     build_encoded_url,
+    build_filterable_attributes_payload,
     embedder_json_to_embedders_model,
-    embedder_json_to_settings_model,
     filter_plugins,
+    parse_filterable_attributes,
+    parse_settings,
     plugin_has_method,
     prepare_raw_file_upload,
     process_search_parameters,
@@ -38,7 +43,6 @@ from meilisearch_python_sdk.models.search import (
 from meilisearch_python_sdk.models.settings import (
     Embedders,
     Faceting,
-    FilterableAttributeFeatures,
     FilterableAttributes,
     ForeignKey,
     LocalizedAttributes,
@@ -488,13 +492,7 @@ class Index(BaseIndex):
             >>>     index = client.index("movies")
             >>>     stats = index.get_stats()
         """
-        url = self._stats_url
-        if show_internal_database_sizes:
-            url = f"{url}?showInternalDatabaseSizes=true"
-            if size_format:
-                url = f"{url}&sizeFormat={size_format}"
-        elif not show_internal_database_sizes and size_format:
-            url = f"{url}?sizeFormat={size_format}"
+        url = build_stats_url(self._stats_url, show_internal_database_sizes, size_format)
 
         response = self._http_requests.get(url)
 
@@ -1094,17 +1092,9 @@ class Index(BaseIndex):
             >>>     index = client.index("movies")
             >>>     index.add_documents(documents)
         """
-        params = {}
-
-        if primary_key:
-            params["primaryKey"] = primary_key
-        if custom_metadata:
-            params["customMetadata"] = custom_metadata
-
-        if params:
-            url = build_encoded_url(self._documents_url, params)
-        else:
-            url = self._documents_url
+        url = build_documents_url(
+            self._documents_url, primary_key=primary_key, custom_metadata=custom_metadata
+        )
 
         if self._pre_add_documents_plugins:
             pre = _run_plugins(
@@ -1484,19 +1474,12 @@ class Index(BaseIndex):
             >>>     index.add_documents_from_raw_file(file_path)
         """
         upload_path, content_type = prepare_raw_file_upload(file_path, csv_delimiter)
-        parameters = {}
-
-        if primary_key:
-            parameters["primaryKey"] = primary_key
-        if csv_delimiter:
-            parameters["csvDelimiter"] = csv_delimiter
-        if custom_metadata:
-            parameters["customMetadata"] = custom_metadata
-
-        if parameters:
-            url = build_encoded_url(self._documents_url, parameters)
-        else:
-            url = self._documents_url
+        url = build_documents_url(
+            self._documents_url,
+            primary_key=primary_key,
+            csv_delimiter=csv_delimiter,
+            custom_metadata=custom_metadata,
+        )
 
         with open(upload_path, encoding="utf-8") as f:
             data = f.read()
@@ -1595,19 +1578,12 @@ class Index(BaseIndex):
             >>>     index = client.index("movies")
             >>>     index.update_documents(documents)
         """
-        params = {}
-
-        if primary_key:
-            params["primaryKey"] = primary_key
-        if custom_metadata:
-            params["customMetadata"] = custom_metadata
-        if skip_creation:
-            params["skipCreation"] = "true"
-
-        if params:
-            url = build_encoded_url(self._documents_url, params)
-        else:
-            url = self._documents_url
+        url = build_documents_url(
+            self._documents_url,
+            primary_key=primary_key,
+            custom_metadata=custom_metadata,
+            skip_creation=skip_creation,
+        )
 
         if self._pre_update_documents_plugins:
             pre = _run_plugins(
@@ -2019,21 +1995,13 @@ class Index(BaseIndex):
             >>>     index.update_documents_from_raw_file(file_path)
         """
         upload_path, content_type = prepare_raw_file_upload(file_path, csv_delimiter)
-        parameters = {}
-
-        if primary_key:
-            parameters["primaryKey"] = primary_key
-        if csv_delimiter:
-            parameters["csvDelimiter"] = csv_delimiter
-        if custom_metadata:
-            parameters["customMetadata"] = custom_metadata
-        if skip_creation:
-            parameters["skipCreation"] = "true"
-
-        if parameters:
-            url = build_encoded_url(self._documents_url, parameters)
-        else:
-            url = self._documents_url
+        url = build_documents_url(
+            self._documents_url,
+            primary_key=primary_key,
+            csv_delimiter=csv_delimiter,
+            custom_metadata=custom_metadata,
+            skip_creation=skip_creation,
+        )
 
         with open(upload_path, encoding="utf-8") as f:
             data = f.read()
@@ -2244,17 +2212,7 @@ class Index(BaseIndex):
             >>>     settings = index.get_settings()
         """
         response = self._http_requests.get(self._settings_url)
-        response_json = self._http_requests.parse_json(response)
-        settings = MeilisearchSettings(**response_json)
-
-        if response_json.get("embedders"):
-            # Not covered because it times out. It isn't an issue with the code here.
-            # https://github.com/meilisearch/meilisearch/issues/4585
-            settings.embedders = embedder_json_to_settings_model(  # pragma: no cover
-                response_json["embedders"]
-            )
-
-        return settings
+        return parse_settings(self._http_requests.parse_json(response))
 
     def update_settings(self, body: MeilisearchSettings, *, compress: bool = False) -> TaskInfo:
         """Update settings of the index.
@@ -2757,26 +2715,7 @@ class Index(BaseIndex):
             >>>     filterable_attributes = index.get_filterable_attributes()
         """
         response = self._http_requests.get(f"{self._settings_url}/filterable-attributes")
-        response_json = self._http_requests.parse_json(response)
-
-        if not response_json:
-            return None
-
-        response_json = self._http_requests.parse_json(response)
-
-        filterable_attributes: list[str | FilterableAttributes] = []
-        for r in response_json:
-            if isinstance(r, str):
-                filterable_attributes.append(r)
-            else:
-                filterable_attributes.append(
-                    FilterableAttributes(
-                        attribute_patterns=r["attributePatterns"],
-                        features=FilterableAttributeFeatures(**r["features"]),
-                    )
-                )
-
-        return filterable_attributes
+        return parse_filterable_attributes(self._http_requests.parse_json(response))
 
     def update_filterable_attributes(
         self, body: list[str | FilterableAttributes], *, compress: bool = False
@@ -2800,13 +2739,7 @@ class Index(BaseIndex):
             >>>     index = client.index("movies")
             >>>     index.update_filterable_attributes(["genre", "director"])
         """
-        payload: list[str | JsonDict] = []
-
-        for b in body:
-            if isinstance(b, FilterableAttributes):
-                payload.append(b.model_dump(by_alias=True))
-            else:
-                payload.append(b)
+        payload = build_filterable_attributes_payload(body)
 
         response = self._http_requests.put(
             f"{self._settings_url}/filterable-attributes", payload, compress=compress
@@ -3492,13 +3425,7 @@ class Index(BaseIndex):
             >>>         Embedders(embedders={dimensions=512)})
             >>>     )
         """
-        payload = {}
-        for key, embedder in embedders.embedders.items():
-            payload[key] = {
-                k: v
-                for k, v in embedder.model_dump(by_alias=True, exclude_none=True).items()
-                if v is not None
-            }
+        payload = build_embedders_payload(embedders)
 
         response = self._http_requests.patch(
             f"{self._settings_url}/embedders", payload, compress=compress
