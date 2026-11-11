@@ -1671,7 +1671,7 @@ class AsyncIndex(BaseIndex):
             custom_metadata=custom_metadata,
         )
 
-        data = await asyncio.to_thread(upload_path.read_text, encoding="utf-8")
+        data = await asyncio.to_thread(upload_path.read_bytes)
 
         response = await self._http_requests.post(
             url, body=data, content_type=content_type, compress=compress
@@ -2276,7 +2276,7 @@ class AsyncIndex(BaseIndex):
             skip_creation=skip_creation,
         )
 
-        data = await asyncio.to_thread(upload_path.read_text, encoding="utf-8")
+        data = await asyncio.to_thread(upload_path.read_bytes)
 
         response = await self._http_requests.put(
             url, body=data, content_type=content_type, compress=compress

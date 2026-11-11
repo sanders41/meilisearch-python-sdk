@@ -1481,8 +1481,7 @@ class Index(BaseIndex):
             custom_metadata=custom_metadata,
         )
 
-        with open(upload_path, encoding="utf-8") as f:
-            data = f.read()
+        data = upload_path.read_bytes()
 
         response = self._http_requests.post(
             url, body=data, content_type=content_type, compress=compress
@@ -2003,8 +2002,7 @@ class Index(BaseIndex):
             skip_creation=skip_creation,
         )
 
-        with open(upload_path, encoding="utf-8") as f:
-            data = f.read()
+        data = upload_path.read_bytes()
 
         response = self._http_requests.put(
             url, body=data, content_type=content_type, compress=compress
