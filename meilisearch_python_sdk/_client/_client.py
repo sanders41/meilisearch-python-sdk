@@ -18,6 +18,7 @@ from meilisearch_python_sdk._client._common import (
     build_update_key_payload,
 )
 from meilisearch_python_sdk._http_requests import HttpRequests
+from meilisearch_python_sdk._utils import build_stats_url
 from meilisearch_python_sdk.errors import MeilisearchApiError
 from meilisearch_python_sdk.index import Index
 from meilisearch_python_sdk.json_handler import BuiltinHandler, OrjsonHandler
@@ -527,14 +528,7 @@ class Client(BaseClient):
             >>> with Client("http://localhost.com", "masterKey") as client:
             >>>     stats = client.get_all_stats()
         """
-        url = "stats"
-
-        if show_internal_database_sizes:
-            url = f"{url}?showInternalDatabaseSizes=true"
-            if size_format:
-                url = f"{url}&sizeFormat={size_format}"
-        elif not show_internal_database_sizes and size_format:
-            url = f"{url}?sizeFormat={size_format}"
+        url = build_stats_url("stats", show_internal_database_sizes, size_format)
 
         response = self._http_requests.get(url)
 

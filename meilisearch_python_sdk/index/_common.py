@@ -17,7 +17,10 @@ from meilisearch_python_sdk.models.settings import (
     CompositeEmbedder,
     Embedder,
     Embedders,
+    FilterableAttributeFeatures,
+    FilterableAttributes,
     HuggingFaceEmbedder,
+    MeilisearchSettings,
     OllamaEmbedder,
     OpenAiEmbedder,
     RestEmbedder,
@@ -229,6 +232,73 @@ def process_search_parameters(
 
 def build_encoded_url(base_url: str, params: JsonMapping) -> str:
     return f"{base_url}?{urlencode(params)}"
+
+
+def build_documents_url(
+    base_url: str,
+    *,
+    primary_key: str | None = None,
+    csv_delimiter: str | None = None,
+    custom_metadata: str | None = None,
+    skip_creation: bool = False,
+) -> str:
+    params: JsonDict = {}
+    if primary_key:
+        params["primaryKey"] = primary_key
+    if csv_delimiter:
+        params["csvDelimiter"] = csv_delimiter
+    if custom_metadata:
+        params["customMetadata"] = custom_metadata
+    if skip_creation:
+        params["skipCreation"] = "true"
+
+    return build_encoded_url(base_url, params) if params else base_url
+
+
+def build_filterable_attributes_payload(
+    body: list[str | FilterableAttributes],
+) -> list[str | JsonDict]:
+    return [b.model_dump(by_alias=True) if isinstance(b, FilterableAttributes) else b for b in body]
+
+
+def parse_filterable_attributes(
+    response_json: list[str | JsonDict] | None,
+) -> list[str | FilterableAttributes] | None:
+    if not response_json:
+        return None
+
+    return [
+        r
+        if isinstance(r, str)
+        else FilterableAttributes(
+            attribute_patterns=r["attributePatterns"],
+            features=FilterableAttributeFeatures(**r["features"]),
+        )
+        for r in response_json
+    ]
+
+
+def build_embedders_payload(embedders: Embedders) -> JsonDict:
+    return {
+        key: {
+            k: v
+            for k, v in embedder.model_dump(by_alias=True, exclude_none=True).items()
+            if v is not None
+        }
+        for key, embedder in embedders.embedders.items()
+    }
+
+
+def parse_settings(response_json: JsonDict) -> MeilisearchSettings:
+    settings = MeilisearchSettings(**response_json)
+    if response_json.get("embedders"):
+        # Not covered because it times out. It isn't an issue with the code here.
+        # https://github.com/meilisearch/meilisearch/issues/4585
+        settings.embedders = embedder_json_to_settings_model(  # pragma: no cover
+            response_json["embedders"]
+        )
+
+    return settings
 
 
 # Not covered because it times out. It isn't an issue with the code here.

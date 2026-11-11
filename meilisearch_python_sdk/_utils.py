@@ -35,6 +35,20 @@ def get_client(
     return client.http_client
 
 
+def build_stats_url(
+    base_url: str, show_internal_database_sizes: bool, size_format: str | None
+) -> str:
+    if show_internal_database_sizes:
+        url = f"{base_url}?showInternalDatabaseSizes=true"
+        if size_format:
+            url = f"{url}&sizeFormat={size_format}"
+        return url
+    if size_format:
+        return f"{base_url}?sizeFormat={size_format}"
+
+    return base_url
+
+
 def _format_datetime(value: datetime) -> str:
     if value.tzinfo is None:
         return f"{value.isoformat()}Z"
