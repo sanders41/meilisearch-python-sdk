@@ -411,11 +411,9 @@ def _load_documents_from_file(
         with open(file_path, encoding="utf-8") as f:
             return [json_handler.loads(x) for x in f if x.strip()]
 
-    with open(file_path, encoding="utf-8") as f:
-        data = f.read()
-        documents = json_handler.loads(data)
+    documents = json_handler.loads(file_path.read_bytes())
 
-        if not isinstance(documents, list):
-            raise InvalidDocumentError("Meilisearch requires documents to be in a list")
+    if not isinstance(documents, list):
+        raise InvalidDocumentError("Meilisearch requires documents to be in a list")
 
-        return documents
+    return documents
