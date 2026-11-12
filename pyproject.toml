@@ -42,7 +42,7 @@ dev = [
   "pytest-asyncio==1.5.0",
   "pytest-xdist==3.8.0",
   "prek==0.5.10",
-  "ruff==0.17.4",
+  "ruff==0.17.5",
   "zensical==0.1.1",
 ]
 
