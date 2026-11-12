@@ -31,11 +31,11 @@ wheels = [
 
 [[package]]
 name = "camel-converter"
-version = "6.0.0"
+version = "6.0.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/17/9e/f730007f9786ea64f319d6dbb2979853e1e7fa0e044074f401523157366f/camel_converter-6.0.0.tar.gz", hash = "sha256:46cd2c5608f81442ce36853a21c14c2b08313806cfb00dba4353e3b944575d20", size = 51163, upload-time = "2026-10-10T02:08:14.684Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/85/33/7e4d6164eb40a3257ded85bf0a2f97fb7f4ba6fdebea8af8089b5d9d7cad/camel_converter-6.0.1.tar.gz", hash = "sha256:91ee28e70b3e5728ade14642d126f03d2d20a592f6ffb96ed4f75aab3a9dce0e", size = 47213, upload-time = "2026-11-11T00:59:15.249Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/71/53efdd418759d57de014c2e3929022ecafd0c88176cff6b30a8518d219dc/camel_converter-6.0.0-py3-none-any.whl", hash = "sha256:ca5e712b57dd3139ee12f6959e32dd37cfa32ea27f120c281f2aa3930d2dc853", size = 6909, upload-time = "2026-10-10T02:08:13.854Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/12/16c3614ea982d1fdf99cfa66ca910ffff84496af713ced2ce6495c2b2333/camel_converter-6.0.1-py3-none-any.whl", hash = "sha256:bcfbe1193d6b17cd16553cc985780e7d74a4b6f78e5b4e3ca4c7d7ce74a7926f", size = 7096, upload-time = "2026-11-11T00:59:14.385Z" },
 ]
 
 [package.optional-dependencies]
@@ -593,7 +593,7 @@ dependencies = [
     { name = "mkdocs" },
     { name = "mkdocs-autorefs" },
     { name = "pymdown-extensions", version = "12.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11.5'" },
-    { name = "pymdown-extensions", version = "13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11.5'" },
+    { name = "pymdown-extensions", version = "13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11.5'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/27/cc/e3ed8b16851f5d664dffcf8f55fc60d0d3f736a3edca21d1508105d1255a/mkdocstrings-1.0.8.tar.gz", hash = "sha256:b50fc326230906425c82ee9ec59b80e5db00892b2b593d4d0b841a0d4acf537b", size = 107444, upload-time = "2026-10-19T15:43:02.157Z" }
 wheels = [
@@ -908,7 +908,7 @@ wheels = [
 
 [[package]]
 name = "pymdown-extensions"
-version = "13.0"
+version = "13.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.12' and sys_platform == 'emscripten'",
@@ -918,9 +918,9 @@ dependencies = [
     { name = "markdown" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c6/ef/6496e7e9fb63427ace8636a481b3f8151e0dfaa6a76512e6b01f7c815a4b/pymdown_extensions-13.0.tar.gz", hash = "sha256:092524bea4fb3e62891204495de9e56b98603912df167ddd90d4f91bf2cd0414", size = 881230, upload-time = "2026-11-08T14:20:29.437Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/47/b0/c98e5189398dc14ad3fa7d8762bed345d9178a6a3a37e2f6bdfb7cce8f53/pymdown_extensions-13.1.tar.gz", hash = "sha256:e1ecec373677483b7324a47e5b4bf2e0c6614fe8dcdab1dcc6a05ecefd9b527d", size = 897600, upload-time = "2026-11-11T14:08:38.819Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f6/47/e96d2b3439b9fab6dc085747f25aee0cbae2bae16743e86ca60907bd0d59/pymdown_extensions-13.0-py3-none-any.whl", hash = "sha256:c68f6e69b14604fb55227735bd0c4c4d3d1d9299a2d1314352190c48aa0d1040", size = 280470, upload-time = "2026-11-08T14:20:27.756Z" },
+    { url = "https://files.pythonhosted.org/packages/09/ea/6efb2c6c3dd91156bad5e46c292164a9115a35a83cac285f0ed8e7d3a810/pymdown_extensions-13.1-py3-none-any.whl", hash = "sha256:093d1fab98168526d98fbb17aa5c9da68eef3664324f6b25ebbf78b2709babeb", size = 284594, upload-time = "2026-11-11T14:08:37.03Z" },
 ]
 
 [[package]]
@@ -1275,7 +1275,7 @@ dependencies = [
     { name = "pathspec" },
     { name = "pygments" },
     { name = "pymdown-extensions", version = "12.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11.5'" },
-    { name = "pymdown-extensions", version = "13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11.5'" },
+    { name = "pymdown-extensions", version = "13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11.5'" },
     { name = "pyyaml" },
     { name = "tomli" },
     { name = "zensical-ui" },
