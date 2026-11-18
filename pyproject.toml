@@ -43,7 +43,7 @@ dev = [
   "pytest-xdist==3.8.0",
   "prek==0.5.11",
   "ruff==0.17.5",
-  "zensical==0.1.1",
+  "zensical==0.1.2",
 ]
 
 [tool.hatch.version]
